@@ -1888,13 +1888,13 @@ EOF
       shell: $(environment) /root/bsdkit/bsdkit start_jail_nat 2>&1 | tee /tmp/bsdkit.log
 
     - name: "Run requested bsdkit function"
-      shell: $(environment) /root/bsdkit/bsdkit "$@" 2>&1 | tee /tmp/bsdkit.log
+      shell: $(environment) /root/bsdkit/bsdkit "$@" 2>&1 | tee -a /tmp/bsdkit.log
 
     - name: "Run start_jail ${BSD_DESTDIR}"
-      shell: $(environment) /root/bsdkit/bsdkit start_jail ${BSD_DESTDIR}
+      shell: $(environment) /root/bsdkit/bsdkit start_jail ${BSD_DESTDIR} 2>&1 | tee -a /tmp/bsdkit.log
 
     - name: "Run ansible_jail_playbook"
-      shell: $(environment) /root/bsdkit/bsdkit ansible_jail_playbook
+      shell: $(environment) /root/bsdkit/bsdkit ansible_jail_playbook 2>&1 | tee -a /tmp/bsdkit.log
 
 - hosts: install
   connection: ssh
