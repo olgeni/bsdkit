@@ -1,0 +1,34 @@
+COMMENT - Standard C-Kermit initialization file
+;
+; echo
+; echo The very long standard initialization file that was distributed
+; echo with C-Kermit 6, 7, and 8 is no longer recommended as "standard",
+; echo since its features were little used.  It is still available in
+; echo the C-Kermit distribution as ockermit.ini.
+; echo
+
+; set carrier-watch off
+; set clear-channel auto
+; set dial ignore-dialtone on
+; set editor vim
+; set flow-control rts/cts
+; set ftp progress-messages on
+; set ftp type binary
+; set ftp verbose-mode on
+; set modem error-correction on
+; set modem flow-control rts/cts
+; set modem speaker off
+; set modem hangup-method rs232-signal
+; set modem speaker off 
+; set modem type generic-high-speed
+; set modem volume low
+; set protocol kermit
+; set session-log text
+; set streaming off
+; set terminal apc on
+; set terminal autodownload on
+
+set carrier-watch off
+set exit warning off
+set reliable on
+set streaming on

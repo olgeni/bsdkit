@@ -1,0 +1,38 @@
+---
+- hosts: jail
+  user: root
+  gather_facts: no
+  tasks:
+    - shell: sysctl -n security.jail.jailed
+      register: jail_jailed
+
+    - shell: kenv smbios.system.product || true
+      register: system_product
+
+    - shell: kenv smbios.bios.vendor || true
+      register: bios_vendor
+
+    - lineinfile: >
+        dest=/etc/rc.conf
+        line="{{item}}_enable=\"YES\""
+        regexp="^{{item}}_enable"
+        insertafter=EOF
+      with_items:
+        - vboxguest
+        - vboxservice
+      when: system_product.stdout == "VirtualBox" and jail_jailed.stdout == "0"
+
+    - lineinfile: >
+        dest=/etc/rc.conf
+        line="{{item}}_enable=\"YES\""
+        regexp="^{{item}}_enable"
+        insertafter=EOF
+      with_items:
+        - vmware_guest_vmblock
+        - vmware_guest_vmhgfs
+        - vmware_guest_vmmemctl
+        - vmware_guest_vmxnet
+        - vmware_guestd
+      when: system_product.stdout == "VMware Virtual Platform" and jail_jailed.stdout == "0"
+
+# smbios.bios.vendor="BHYVE"

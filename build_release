@@ -1,0 +1,57 @@
+#!/bin/sh
+
+set -e -u
+
+SCRIPT_NAME=$(basename $0)
+
+error ()
+{
+    echo "${SCRIPT_NAME}: $@"
+    exit 1
+}
+
+if [ $(whoami) != "root" ]; then
+    error "must be executed as root."
+    exit 1
+fi
+
+JOBS="-j4"
+
+while getopts "j:" OPT; do
+    case $OPT in
+        j)
+            JOBS="-j${OPTARG}"
+            ;;
+        *)
+    esac
+done
+
+shift $((${OPTIND} - 1))
+
+_version=$1
+_arch=$2
+
+OS_SRCDIR=${BSDKIT_PATH}/src/${_version}/src
+OS_RELDIR=${BSDKIT_PATH}/src/${_version}/release-${_arch}
+OS_MAJOR=$(echo ${_version} | sed -e "s/\\..*//")
+
+# ===
+
+install -o root -g wheel -m 644 ansible/RELENG_${OS_MAJOR}.${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/KERNEL
+
+export MAKEOBJDIRPREFIX=${MAKEOBJDIRPREFIX:=/usr/obj}
+
+rm -r -f ${MAKEOBJDIRPREFIX}/*
+
+echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
+
+make -s -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" ${JOBS} buildworld buildkernel
+make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" release NOPORTS=yes
+
+rm -r -f ${OS_RELDIR}
+mkdir -p ${OS_RELDIR}
+
+make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" install DESTDIR=${OS_RELDIR}
+make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" clean
+
+echo ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"

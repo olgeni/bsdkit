@@ -1,0 +1,6 @@
+"\e[F": end-of-line
+"\e[8~": end-of-line
+"\e[3~": delete-char
+set convert-meta off
+set input-meta on
+set output-meta on
