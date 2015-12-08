@@ -1436,6 +1436,7 @@ install_setup_runtime ()
     _runtime="${_runtime} bcwipe"
     _runtime="${_runtime} buffer"
     _runtime="${_runtime} bvi"
+    _runtime="${_runtime} ca_root_nss"
     _runtime="${_runtime} cdialog"
     _runtime="${_runtime} clone"
     _runtime="${_runtime} cpdup"
