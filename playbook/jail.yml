@@ -171,11 +171,21 @@
 
     - pkgng: name={{item}} state=present
       with_items:
+        - ca_root_nss
         - rsync
         - sudo
         - tmux
         - vim
         - zsh
+
+    - stat: path=/usr/local/share/certs/ca-root-nss.crt
+      register: stat_ca_root_nss
+
+    - copy: >
+        src=/usr/local/share/certs/ca-root-nss.crt
+        dest=/etc/ssl/cert.pem
+        owner=root group=wheel mode=644
+      when: stat_ca_root_nss.stat.exists
 
     - command: pkg clean -a -y
       changed_when: false

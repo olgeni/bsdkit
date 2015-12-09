@@ -917,6 +917,10 @@ install_pkg ()
 	install -m 644 -o root -g wheel /etc/resolv.conf ${_destdir}/etc/resolv.conf
     fi
 
+    if [ -f /usr/local/share/certs/ca-root-nss.crt -a ! -e ${_destdir}/etc/ssl/cert.pem ]; then
+	install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/etc/ssl/cert.pem
+    fi
+
     local _use_files=no
 
     if ! valid_url ${_pkgpath}; then
