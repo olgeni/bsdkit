@@ -555,7 +555,7 @@ zfs_create_gpt_pool ()
     local _pool_partition=0
 
     for _device in ${_devices}; do
-        gpart destroy -F ${_device} || :
+        gpart destroy -F ${_device} >/dev/null 2>&1 || :
         gpart create -s gpt ${_device}
 
         local _partition=1
