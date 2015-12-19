@@ -873,6 +873,8 @@ UseDNS no
 PermitRootLogin yes
 EOF
 
+    mkdir -p ${_destdir}/etc/rc.conf.d
+
     return 0
 }
 
