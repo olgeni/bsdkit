@@ -535,6 +535,18 @@ zfs_create_pool ()
         ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${_mirror}
     fi
 
+    if has_swap; then
+        zfs create \
+            -o checksum=off        \
+            -o compression=off     \
+            -o dedup=off           \
+            -o sync=disabled       \
+            -o primarycache=none   \
+            -o org.freebsd:swap=on \
+            -V ${FS_SWAP_SIZE}M    \
+            ${ZFS_POOL}/swap
+    fi
+
     return 0
 }
 
