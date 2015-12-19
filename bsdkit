@@ -499,6 +499,50 @@ mbr_ufs_partition_small ()
     return 0
 }
 
+zfs_create_pool ()
+{
+    local _destdir="$1"
+
+    shift 1
+
+    local _devices
+
+    _devices="$@"
+
+    [ -d ${_destdir} ] || return 1
+
+    sysctl kern.geom.debugflags=0x10
+
+    for _device in ${_devices}; do
+        gpart destroy -F ${_device} || :
+
+        dd if=/boot/zfsboot of=/dev/${_device} count=1
+        dd if=/boot/zfsboot of=/dev/${_device} skip=1 seek=1024
+    done
+
+    sysctl kern.geom.debugflags=0x00
+
+    local _options="-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir}"
+
+    set ${_devices}
+
+    if [ $# -eq 1 ]; then
+        ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${_devices}
+    else
+        local _mirror="mirror "
+
+        local _device
+
+        for _device in ${_devices}; do
+            _mirror="${_mirror} ${_device}"
+        done
+
+        ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${_mirror}
+    fi
+
+    return 0
+}
+
 zfs_create_gpt_pool ()
 {
     local _destdir="$1"
@@ -1148,6 +1192,45 @@ install_gpt_ufs ()
     customize_base ${BSD_DESTDIR}
     install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
     install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+
+    return 0
+}
+
+install_zfs ()
+{
+    local - > /dev/null
+
+    set -e -u
+
+    valid_host || return 1
+
+    parse_options "$@"
+
+    shift ${PARSE_OPTIONS_SHIFT}
+
+    local _devices
+
+    _devices="$@"
+
+    [ -n "${_devices}" ] || return 1
+
+    mkdir -p ${BSD_DESTDIR}
+
+    kldload -n zfs
+
+    zfs_create_pool ${BSD_DESTDIR} ${_devices}
+    zfs_create_fs ${BSD_DESTDIR}
+    zfs set sync=disabled ${ZFS_POOL}
+    install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
+    install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${BSD_DESTDIR}/boot/zfs
+    swap_setup ${BSD_DESTDIR}
+    procfs_setup ${BSD_DESTDIR}
+    fsdescfs_setup ${BSD_DESTDIR}
+    format_fstab ${BSD_DESTDIR}
+    customize_base ${BSD_DESTDIR}
+    install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    zfs inherit sync ${ZFS_POOL}
 
     return 0
 }
