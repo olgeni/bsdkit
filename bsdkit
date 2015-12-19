@@ -564,10 +564,11 @@ zfs_create_gpt_pool ()
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_partition} ${_device}
         _partition=$(expr ${_partition} + 1)
 
-        gpart add -i ${_partition} -a 4k -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap${_device_index} ${_device}
-        _partition=$(expr ${_partition} + 1)
-
-        swapon /dev/gpt/swap${_device_index}
+        if has_swap; then
+            gpart add -i ${_partition} -a 4k -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap${_device_index} ${_device}
+            _partition=$(expr ${_partition} + 1)
+            swapon /dev/gpt/swap${_device_index}
+        fi
 
         gpart add -i ${_partition} -a 4k -t freebsd-zfs -l pool${_device_index} ${_device}
         gpart set -a bootme -i ${_partition} ${_device}
@@ -791,6 +792,13 @@ is_yes ()
         *)
             return 2
     esac
+}
+
+has_swap ()
+{
+    [ -z "${FS_SWAP_SIZE}" ] && return 1
+    [ "${FS_SWAP_SIZE}" = "0" ] && return 1
+    return 0
 }
 
 format_fstab ()
