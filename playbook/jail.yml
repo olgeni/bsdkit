@@ -49,6 +49,9 @@
         owner=root group=wheel mode=644
       when: stat_sys.stat.exists
 
+    - command: sysrc -n zfs_enable
+      register: sysrc_zfs_enable
+
     - copy: >
         src=../ansible/{{item}} dest=/etc/{{item}}
         owner=root group=wheel mode=644
@@ -59,6 +62,9 @@
         - periodic.conf
         - rc.conf
         - src.conf
+
+    - command: sysrc zfs_enable="{{sysrc_zfs_enable.stdout}}"
+      when: sysrc_zfs_enable|success
 
     - copy: >
         src=../ansible/{{item}} dest=/etc/{{item}}

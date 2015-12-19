@@ -673,7 +673,7 @@ zfs_create_fs ()
 
     rc_set ${_destdir}/boot/loader.conf.local zfs_load YES
     rc_set ${_destdir}/boot/loader.conf.local vfs.root.mountfrom zfs:${ZFS_POOL}/zfsroot
-    rc_set ${_destdir}/etc/rc.conf.local zfs_enable YES
+    rc_set ${_destdir}/etc/rc.conf zfs_enable YES
 
     link_home ${_destdir}
 
