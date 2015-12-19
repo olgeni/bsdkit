@@ -258,11 +258,6 @@ valid_class ()
     esac
 }
 
-disable_swap ()
-{
-    swapinfo | awk '$1 ~ /^\/dev/ { print $1 }' | xargs -n1 swapoff
-}
-
 gmirror_reset ()
 {
     local _mirror _consumer
