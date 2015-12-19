@@ -1919,6 +1919,16 @@ build_setup_img ()
     return ${_error}
 }
 
+run ()
+{
+    echo "Running: $@"
+
+    ${BSDKIT_DIR}/bsdkit start_jail_nat
+    ${BSDKIT_DIR}/bsdkit "$@"
+    ${BSDKIT_DIR}/bsdkit start_jail ${BSD_DESTDIR}
+    ${BSDKIT_DIR}/bsdkit ansible_jail_playbook
+}
+
 remote ()
 {
     local _remote_address=""
