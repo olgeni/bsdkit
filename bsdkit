@@ -700,8 +700,6 @@ zfs_create_fs ()
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/ports/distfiles
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/ports/packages
 
-    zfs set sync=disabled ${ZFS_POOL}/usr/obj
-
     zfs set compression=lz4 ${ZFS_POOL}/usr/src
     zfs set compression=lz4 ${ZFS_POOL}/usr/ports
     zfs set compression=off ${ZFS_POOL}/usr/ports/distfiles
