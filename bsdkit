@@ -748,7 +748,7 @@ swap_setup ()
 
     local _swap
 
-    for _swap in $(find /dev | grep -E "(gpt|label)/swap" | xargs echo); do
+    for _swap in $(find /dev | grep -E "(gpt|label)/swap" | rs 1 0); do
 	echo "${_swap} none swap sw 0 0" >> ${_destdir}/etc/fstab
     done
 
