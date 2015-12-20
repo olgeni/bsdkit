@@ -265,7 +265,7 @@ gmirror_reset ()
     local _mirrors="$(gmirror list | grep "Name:" | grep "mirror/" | awk '{ print $3 }' | sed -e "s@mirror/@@")"
 
     for _mirror in ${_mirrors}; do
-	gpart destroy -F ${_mirror} || :
+	gpart destroy -F ${_mirror} 2> /dev/null || :
 
         local _consumers="$(gmirror list ${_mirror} | grep "Name:" | grep -v "mirror/" | awk '{ print $3 }' | sort -r)"
 
@@ -311,7 +311,7 @@ gpt_ufs_partition_large ()
 
     [ -e "/dev/${_device}" ] || return 1;
 
-    gpart destroy -F ${_device} || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s gpt ${_device}
 
     gpart bootcode -b /boot/pmbr ${_device}
@@ -367,7 +367,7 @@ gpt_ufs_partition_small ()
 
     [ -e "/dev/${_device}" ] || return 1;
 
-    gpart destroy -F ${_device} || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s gpt ${_device}
 
     gpart bootcode -b /boot/pmbr ${_device}
@@ -405,7 +405,7 @@ mbr_ufs_partition_large ()
 
     # FIXME refactor
 
-    gpart destroy -F ${_device} || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
@@ -466,7 +466,7 @@ mbr_ufs_partition_small ()
 
     # FIXME refactor
 
-    gpart destroy -F ${_device} || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
@@ -509,7 +509,7 @@ zfs_create_pool ()
     sysctl -q kern.geom.debugflags=0x10
 
     for _device in ${_devices}; do
-        gpart destroy -F ${_device} >/dev/null 2>&1 || :
+        gpart destroy -F ${_device} 2> /dev/null || :
 
         dd if=/boot/zfsboot of=/dev/${_device} count=1
         dd if=/boot/zfsboot of=/dev/${_device} skip=1 seek=1024
@@ -567,7 +567,7 @@ zfs_create_gpt_pool ()
     local _pool_partition=0
 
     for _device in ${_devices}; do
-        gpart destroy -F ${_device} >/dev/null 2>&1 || :
+        gpart destroy -F ${_device} 2> /dev/null || :
         gpart create -s gpt ${_device}
 
         local _partition=1
@@ -628,7 +628,7 @@ zfs_create_mbr_pool ()
     for _device in ${_devices}; do
         # FIXME refactor
 
-        gpart destroy -F ${_device} || :
+        gpart destroy -F ${_device} 2> /dev/null || :
         gpart create -s mbr ${_device}
         gpart add -i 1 -t freebsd ${_device}
         gpart set -a active -i 1 ${_device}
@@ -881,7 +881,7 @@ install_release ()
                   continue
               fi
 
-              if which bar >/dev/null 2>&1; then
+              if which bar > /dev/null 2>&1; then
                   bar -t ${_relpath}/${_filename} | tar --unlink -xpJf - -C ${_destdir}
               else
                   tar --unlink -xpJf ${_relpath}/${_filename} -C ${_destdir}
@@ -1342,7 +1342,7 @@ install_jail ()
 
     local _jail_name=$(basename ${_destdir})
 
-    if ! echo ${_jail_name} | grep -v -E -e "^[0-9]|[-]|[.]" >/dev/null 2>&1; then
+    if ! echo ${_jail_name} | grep -v -E -e "^[0-9]|[-]|[.]" > /dev/null 2>&1; then
         echo "Invalid jail name: ${_jail_name}"
         return 1
     fi
@@ -1364,7 +1364,7 @@ install_jail ()
     local _zfs="NO"
 
     if [ -n "${_parent_fs}" ]; then
-        if ! zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" >/dev/null 2>&1; then
+        if ! zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" > /dev/null 2>&1; then
             ${ZFS_CREATE_CMD} "${_parent_fs}/${_jail_name}"
             _zfs="YES"
         fi
@@ -1421,7 +1421,7 @@ remove_jail ()
 
     local _jail_name=$(basename ${_destdir})
 
-    jls -j ${_jail_name} >/dev/null 2>&1 && return 1
+    jls -j ${_jail_name} > /dev/null 2>&1 && return 1
 
     local _dirname="$(dirname ${_destdir})"
     local _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
@@ -1436,17 +1436,17 @@ remove_jail ()
     done
 
     if [ -n "${_parent_fs}" ]; then
-        if zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" >/dev/null 2>&1; then
+        if zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" > /dev/null 2>&1; then
             _zfs="YES"
         fi
     fi
 
     if [ "${_zfs}" = "YES" ]; then
-        zfs destroy "${_parent_fs}/${_jail_name}@raw" > /dev/null 2>&1 || :
-        zfs destroy "${_parent_fs}/${_jail_name}@base" > /dev/null 2>&1 || :
+        zfs destroy "${_parent_fs}/${_jail_name}@raw" 2> /dev/null || :
+        zfs destroy "${_parent_fs}/${_jail_name}@base" 2> /dev/null || :
         zfs destroy "${_parent_fs}/${_jail_name}"
     else
-        rm -r -f ${_destdir} 2>/dev/null || :
+        rm -r -f ${_destdir} 2> /dev/null || :
         chflags -R noschg ${_destdir}
         rm -r -f ${_destdir}
     fi
@@ -1874,7 +1874,7 @@ build_setup_img ()
 
     _img_md=$(mdconfig -a -t vnode -f ${_img})
 
-    gpart destroy -F ${_img_md} 2>/dev/null || :
+    gpart destroy -F ${_img_md} 2> /dev/null || :
 
     local _iso_path=$(mktemp -d /tmp/XXXXXX)
     local _img_path=$(mktemp -d /tmp/XXXXXX)
@@ -2155,7 +2155,7 @@ EOF
     chmod 600 ${_key}
 }
 
-if ! which ansible-playbook >/dev/null 2>&1; then
+if ! which ansible-playbook > /dev/null 2>&1; then
     echo "Required command missing: ansible-playbook"
     # EX_UNAVAILABLE
     exit 69
