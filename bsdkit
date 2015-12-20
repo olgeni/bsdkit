@@ -1235,7 +1235,6 @@ install_zfs ()
 
     zfs_create_pool ${BSD_DESTDIR} ${_devices}
     zfs_create_fs ${BSD_DESTDIR}
-    zfs set sync=disabled ${ZFS_POOL}
     install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${BSD_DESTDIR}/boot/zfs
     swap_setup ${BSD_DESTDIR}
@@ -1245,7 +1244,6 @@ install_zfs ()
     customize_base ${BSD_DESTDIR}
     install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
     install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    zfs inherit sync ${ZFS_POOL}
 
     return 0
 }
@@ -1274,7 +1272,6 @@ install_gpt_zfs ()
 
     zfs_create_gpt_pool ${BSD_DESTDIR} ${_devices}
     zfs_create_fs ${BSD_DESTDIR}
-    zfs set sync=disabled ${ZFS_POOL}
     install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${BSD_DESTDIR}/boot/zfs
     swap_setup ${BSD_DESTDIR}
@@ -1284,7 +1281,6 @@ install_gpt_zfs ()
     customize_base ${BSD_DESTDIR}
     install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
     install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    zfs inherit sync ${ZFS_POOL}
 
     return 0
 }
@@ -1313,7 +1309,6 @@ install_mbr_zfs ()
 
     zfs_create_mbr_pool ${BSD_DESTDIR} ${_devices}
     zfs_create_fs ${BSD_DESTDIR}
-    zfs set sync=disabled ${ZFS_POOL}
     install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${BSD_DESTDIR}/boot/zfs
     swap_setup ${BSD_DESTDIR}
@@ -1323,7 +1318,6 @@ install_mbr_zfs ()
     customize_base ${BSD_DESTDIR}
     install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
     install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    zfs inherit sync ${ZFS_POOL}
 
     return 0
 }
