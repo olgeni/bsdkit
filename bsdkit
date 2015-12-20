@@ -347,10 +347,10 @@ gpt_ufs_partition_large ()
 
     touch ${_destdir}/etc/fstab
 
-    echo "/dev/ufs/root / ufs rw 1 1" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/var /var ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/tmp /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/usr /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/root /    ufs rw 1 1" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/var  /var ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/tmp  /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/usr  /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -445,10 +445,10 @@ mbr_ufs_partition_large ()
 
     touch ${_destdir}/etc/fstab
 
-    echo "/dev/ufs/root / ufs rw 1 1" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/var /var ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/tmp /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/usr /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/root /    ufs rw 1 1" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/var  /var ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/tmp  /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/usr  /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
