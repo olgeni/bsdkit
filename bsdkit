@@ -1773,6 +1773,20 @@ fi
 
 kenv init_shell="/bin/sh"
 
+if kenv bsdkit_ifconfig >/dev/null 2>&1; then
+    bsdkit_ifconfig=$(kenv bsdkit_ifconfig)
+    set $(ifconfig -l ether)
+    _interface=$1
+    if [ -n "${_interface}" ]; then
+        echo "ifconfig_${_interface}=\"${bsdkit_ifconfig}\"" >> /baseroot/etc/rc.conf
+    fi
+fi
+
+if kenv bsdkit_defaultrouter >/dev/null 2>&1; then
+    bsdkit_defaultrouter=$(kenv bsdkit_defaultrouter)
+    echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >> /baseroot/etc/rc.conf
+fi
+
 exit 0
 EOF
 
