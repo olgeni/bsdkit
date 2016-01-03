@@ -1550,6 +1550,7 @@ install_setup_runtime ()
     _runtime="${_runtime} kermit"
     _runtime="${_runtime} lftp"
     _runtime="${_runtime} mbuffer"
+    _runtime="${_runtime} ncdu"
     _runtime="${_runtime} openvpn"
     _runtime="${_runtime} pefs-kmod"
     _runtime="${_runtime} pipemeter"
