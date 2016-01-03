@@ -2092,9 +2092,6 @@ ${_jail_name} {
 	exec.start = "/bin/sh /etc/rc";
 	exec.stop = "/bin/sh /etc/rc.shutdown";
 	exec.clean;
-
-	allow.raw_sockets;
-	allow.sysvipc;
 }
 EOF
 }
