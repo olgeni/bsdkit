@@ -1468,7 +1468,7 @@ ttyv3 "/usr/libexec/getty autologin" cons25 on          secure
 ttyu0 "/usr/libexec/getty autologin" vt100  onifconsole secure
 EOF
 
-    cat > ${_destdir}/etc/rc.conf << EOF
+    cat > ${_destdir}/etc/rc.conf.local << EOF
 background_dhclient="YES"
 background_fsck="NO"
 cleanvar_enable="NO"
@@ -1788,6 +1788,8 @@ fi
 
 exit 0
 EOF
+
+    install -m 644 -o root -g wheel ${_bsdkit}/ansible/rc.conf ${_destdir}/etc/rc.conf
 
     makefs -b 10% ${_staging}/memroot.ufs ${_mfsroot}
 
