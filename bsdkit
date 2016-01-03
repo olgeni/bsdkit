@@ -1759,12 +1759,10 @@ mount -t devfs devfs ${BASEROOT_MP}${DEV_MP}
 
 mount -t nullfs -o ro ${CDROM_MP} ${BASEROOT_MP}${CDROM_MP}
 
-mdmfs -s 8m md ${ETC_RDWR_MP}
-
-mount -t unionfs ${ETC_RDWR_MP} ${BASEROOT_MP}${ETC_MP}
-
+mdmfs -s 8m  md ${ETC_RDWR_MP}
 mdmfs -s 64m md ${ROOT_RDWR_MP}
 
+mount -t unionfs ${ETC_RDWR_MP}  ${BASEROOT_MP}${ETC_MP}
 mount -t unionfs ${ROOT_RDWR_MP} ${BASEROOT_MP}${ROOT_MP}
 
 if [ -d ${IMG_MP} ]; then
