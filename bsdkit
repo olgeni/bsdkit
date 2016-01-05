@@ -6,7 +6,7 @@ fi
 
 set -e -u
 
-error ()
+error()
 {
     echo "bsdkit: $@"
     exit 1
@@ -34,7 +34,7 @@ fi
 : ${IMG_FREE_SPACE_PERCENT:=50}
 : ${IMG_DATA_LABEL:=2e158b17-5e10-11e5-ac21-080027af0e2a}
 
-environment ()
+environment()
 {
     echo INSTALL_KERNEL=\"${INSTALL_KERNEL}\" \
          INSTALL_SRC=\"${INSTALL_SRC}\" \
@@ -74,7 +74,7 @@ ZPOOL_CACHE="/tmp/zpool.cache"
 
 BSDKIT_DIR=$(realpath $(dirname $0))
 
-parse_url ()
+parse_url()
 {
     local _url="$1"
 
@@ -84,7 +84,7 @@ parse_url ()
                        -e "s|%%PKGSET%%|${FREEBSD_URL_PKGSET}|g"
 }
 
-parse_options ()
+parse_options()
 {
     while getopts "u:U:h:v:a:p:" OPT; do
         case $OPT in
@@ -121,7 +121,7 @@ parse_options ()
     PARSE_OPTIONS_SHIFT=$((${OPTIND} - 1))
 }
 
-rc_set ()
+rc_set()
 {
     local _file="$1"
     local _key="$2"
@@ -138,7 +138,7 @@ ${_key}=\"${_value}\"
     fi
 }
 
-rc_delete ()
+rc_delete()
 {
     local _file="$1"
     local _key="$2"
@@ -146,7 +146,7 @@ rc_delete ()
     sed -i '' -e "/^${_key}=/d" ${_file}
 }
 
-rc_find ()
+rc_find()
 {
     local _file="$1"
     local _key="$2"
@@ -166,7 +166,7 @@ rc_find ()
     fi
 }
 
-valid_url ()
+valid_url()
 {
     local _url="$1"
 
@@ -185,7 +185,7 @@ valid_url ()
     esac
 }
 
-valid_host ()
+valid_host()
 {
     if [ $(mount -p | grep "/baseroot" | wc -l) -eq 0 ]; then
         echo "FATAL: valid_host failed" >&2
@@ -195,7 +195,7 @@ valid_host ()
     return 0
 }
 
-valid_relpath ()
+valid_relpath()
 {
     local _relpath="$1"
 
@@ -208,7 +208,7 @@ valid_relpath ()
     return 0
 }
 
-valid_pkgpath ()
+valid_pkgpath()
 {
     local _pkgpath="$1"
 
@@ -219,7 +219,7 @@ valid_pkgpath ()
     [ -f ${_pkgpath}/packagesite.txz ]
 }
 
-valid_staging ()
+valid_staging()
 {
     local _staging="$1"
 
@@ -228,21 +228,21 @@ valid_staging ()
     [ -f ${_staging}/memroot.ufs.gz ] || return 1
 }
 
-valid_destdir ()
+valid_destdir()
 {
     local _destdir="$1"
 
     [ -d ${_destdir} -a ${_destdir} != "/" -a -f "${_destdir}/bin/sh" ]
 }
 
-valid_bsdkit ()
+valid_bsdkit()
 {
     local _bsdkit="$1"
 
     [ -d ${_bsdkit} -a -f "${_bsdkit}/bsdkit" ]
 }
 
-valid_class ()
+valid_class()
 {
     local _class="$1"
 
@@ -258,7 +258,7 @@ valid_class ()
     esac
 }
 
-gmirror_reset ()
+gmirror_reset()
 {
     local _mirror _consumer
 
@@ -278,7 +278,7 @@ gmirror_reset ()
     return 0
 }
 
-gmirror_configure ()
+gmirror_configure()
 {
     local _mirror="$1"
 
@@ -301,7 +301,7 @@ gmirror_configure ()
     return 0
 }
 
-gpt_ufs_partition_large ()
+gpt_ufs_partition_large()
 {
     local _destdir="$1"
     local _device="$2"
@@ -357,7 +357,7 @@ gpt_ufs_partition_large ()
     return 0
 }
 
-gpt_ufs_partition_small ()
+gpt_ufs_partition_small()
 {
     local _destdir="$1"
     local _device="$2"
@@ -394,7 +394,7 @@ gpt_ufs_partition_small ()
     return 0
 }
 
-mbr_ufs_partition_large ()
+mbr_ufs_partition_large()
 {
     local _destdir="$1"
     local _device="$2"
@@ -455,7 +455,7 @@ mbr_ufs_partition_large ()
     return 0
 }
 
-mbr_ufs_partition_small ()
+mbr_ufs_partition_small()
 {
     local _destdir="$1"
     local _device="$2"
@@ -494,7 +494,7 @@ mbr_ufs_partition_small ()
     return 0
 }
 
-zfs_create_pool ()
+zfs_create_pool()
 {
     local _destdir="$1"
 
@@ -550,7 +550,7 @@ zfs_create_pool ()
     return 0
 }
 
-zfs_create_gpt_pool ()
+zfs_create_gpt_pool()
 {
     local _destdir="$1"
 
@@ -611,7 +611,7 @@ zfs_create_gpt_pool ()
     return 0
 }
 
-zfs_create_mbr_pool ()
+zfs_create_mbr_pool()
 {
     local _destdir="$1"
 
@@ -673,7 +673,7 @@ zfs_create_mbr_pool ()
     return 0
 }
 
-zfs_create_fs ()
+zfs_create_fs()
 {
     local _destdir="$1"
 
@@ -730,7 +730,7 @@ zfs_create_fs ()
     return 0
 }
 
-link_home ()
+link_home()
 {
     local _destdir="$1"
 
@@ -738,7 +738,7 @@ link_home ()
     ln -s -f usr/home ${_destdir}/home
 }
 
-swap_setup ()
+swap_setup()
 {
     local _destdir="$1"
 
@@ -753,7 +753,7 @@ swap_setup ()
     return 0
 }
 
-procfs_setup ()
+procfs_setup()
 {
     if ! is_yes "${PROCFS_ENABLE}"; then
         return 0
@@ -768,7 +768,7 @@ procfs_setup ()
     return 0
 }
 
-fsdescfs_setup ()
+fsdescfs_setup()
 {
     if ! is_yes "${FSDESCFS_ENABLE}"; then
         return 0
@@ -783,14 +783,14 @@ fsdescfs_setup ()
     return 0
 }
 
-read_manifest ()
+read_manifest()
 {
     local _relpath="$1"
 
     cat ${_relpath}/MANIFEST | awk 'BEGIN { FS = "[\t]" } { print $1 "\t" $4 }'
 }
 
-is_yes ()
+is_yes()
 {
     case $1 in
         [Yy][Ee][Ss])
@@ -804,14 +804,14 @@ is_yes ()
     esac
 }
 
-has_swap ()
+has_swap()
 {
     [ -z "${FS_SWAP_SIZE}" ] && return 1
     [ "${FS_SWAP_SIZE}" = "0" ] && return 1
     return 0
 }
 
-format_fstab ()
+format_fstab()
 {
     local _destdir="$1"
 
@@ -828,7 +828,7 @@ format_fstab ()
     rm ${_fstab}.0
 }
 
-install_release ()
+install_release()
 {
     local _relpath="$1"
     local _destdir="$2"
@@ -902,7 +902,7 @@ install_release ()
     return 0
 }
 
-customize_base ()
+customize_base()
 {
     local _destdir="$1"
 
@@ -935,7 +935,7 @@ EOF
     return 0
 }
 
-install_repo ()
+install_repo()
 {
     local _destdir="$1"
     local _pkgpath="$2"
@@ -964,7 +964,7 @@ EOF
     fi
 }
 
-install_pkg ()
+install_pkg()
 {
     local _destdir="$1"
     local _pkgpath="$2"
@@ -1015,7 +1015,7 @@ EOF
     return 0
 }
 
-start_jail_nat ()
+start_jail_nat()
 {
     local _pf_conf=$(mktemp /tmp/XXXXXX)
 
@@ -1037,7 +1037,7 @@ EOF
     rm ${_pf_conf}
 }
 
-start_jail ()
+start_jail()
 {
     local _destdir="$1"
 
@@ -1072,7 +1072,7 @@ EOF
     rm -f ${_sshd_config}
 }
 
-stop_jail ()
+stop_jail()
 {
     local _destdir="$1"
 
@@ -1089,12 +1089,12 @@ stop_jail ()
     rm ${_jail_conf}
 }
 
-jail_ssh ()
+jail_ssh()
 {
     ssh -p ${ANSIBLE_JAIL_SSH_PORT} -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${ANSIBLE_JAIL_ADDRESS}
 }
 
-install_mbr_ufs ()
+install_mbr_ufs()
 {
     local - > /dev/null
 
@@ -1129,7 +1129,7 @@ install_mbr_ufs ()
     return 0
 }
 
-install_mbr_ufs_gmirror ()
+install_mbr_ufs_gmirror()
 {
     local - > /dev/null
 
@@ -1174,7 +1174,7 @@ install_mbr_ufs_gmirror ()
     return 0
 }
 
-install_gpt_ufs ()
+install_gpt_ufs()
 {
     local - > /dev/null
 
@@ -1209,7 +1209,7 @@ install_gpt_ufs ()
     return 0
 }
 
-install_zfs ()
+install_zfs()
 {
     local - > /dev/null
 
@@ -1246,7 +1246,7 @@ install_zfs ()
     return 0
 }
 
-install_gpt_zfs ()
+install_gpt_zfs()
 {
     local - > /dev/null
 
@@ -1283,7 +1283,7 @@ install_gpt_zfs ()
     return 0
 }
 
-install_mbr_zfs ()
+install_mbr_zfs()
 {
     local - > /dev/null
 
@@ -1320,7 +1320,7 @@ install_mbr_zfs ()
     return 0
 }
 
-install_jail ()
+install_jail()
 {
     local - > /dev/null
 
@@ -1397,7 +1397,7 @@ install_jail ()
     return 0
 }
 
-remove_jail ()
+remove_jail()
 {
     local - > /dev/null
 
@@ -1444,7 +1444,7 @@ remove_jail ()
     fi
 }
 
-make_read_only ()
+make_read_only()
 {
     local _destdir="$1"
 
@@ -1514,7 +1514,7 @@ EOF
     return 0
 }
 
-install_setup_runtime ()
+install_setup_runtime()
 {
     local _destdir="$1"
     local _bsdkit="$2"
@@ -1615,7 +1615,7 @@ EOF
     return 0
 }
 
-build_setup_staging ()
+build_setup_staging()
 {
     # http://wiki.freebsd.org/AvgLiveCD
 
@@ -1817,7 +1817,7 @@ EOF
     return 0
 }
 
-build_setup_iso ()
+build_setup_iso()
 {
     local _iso="$1"
     local _staging="$2"
@@ -1857,7 +1857,7 @@ build_setup_iso ()
     return 0
 }
 
-build_setup_img ()
+build_setup_img()
 {
     local -
 
@@ -1941,7 +1941,7 @@ build_setup_img ()
     return ${_error}
 }
 
-run ()
+run()
 {
     echo "Running: $@"
 
@@ -1951,7 +1951,7 @@ run ()
     ${BSDKIT_DIR}/bsdkit ansible_jail_playbook
 }
 
-remote ()
+remote()
 {
     local _remote_address=""
     local _remote_port="22"
@@ -2035,7 +2035,7 @@ EOF
     rm -r ${_ansible_root}
 }
 
-ansible_jail_playbook ()
+ansible_jail_playbook()
 {
     [ -n "${ANSIBLE_JAIL_ADDRESS}" ] || return 1
     [ -n "${ANSIBLE_JAIL_SSH_PORT}" ] || return 1
@@ -2074,7 +2074,7 @@ EOF
     rm -r ${_ansible_root}
 }
 
-print_jail_conf ()
+print_jail_conf()
 {
     local _destdir="$1"
 
@@ -2098,7 +2098,7 @@ ${_jail_name} {
 EOF
 }
 
-write_jail_conf ()
+write_jail_conf()
 {
     local _jail_conf="$1"
     local _destdir="$2"
@@ -2122,7 +2122,7 @@ ${_jail_name} {
 EOF
 }
 
-write_bsdkit_key ()
+write_bsdkit_key()
 {
     local _key="$1"
 
