@@ -1774,8 +1774,6 @@ fi
 
 mdmfs -P -F ${CDROM_MP}${BASEROOT_IMG} -o ro md.uzip ${BASEROOT_MP}
 
-mdmfs -s 16m md ${BASEROOT_MP}${TMP_MP}
-
 mount -t devfs devfs ${BASEROOT_MP}${DEV_MP}
 
 mount -t nullfs -o ro ${CDROM_MP} ${BASEROOT_MP}${CDROM_MP}
