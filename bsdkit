@@ -651,11 +651,8 @@ zfs_create_mbr_pool()
 
         swapon /dev/${_device}s1b
 
-	dd if=/boot/zfsboot of=/tmp/zfsboot1 bs=512 count=1
-
-        gpart bootcode -p /tmp/zfsboot1 -i 1 ${_device}s1
-
-	dd if=/boot/zfsboot of=/dev/${_device}s1a bs=512 skip=1 seek=1024
+        dd if=/boot/zfsboot of=/dev/${_device}s1a count=1
+        dd if=/boot/zfsboot of=/dev/${_device}s1a skip=1 seek=1024
     done
 
     local _options="-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir}"
