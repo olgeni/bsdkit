@@ -409,8 +409,14 @@ mbr_ufs_partition_large()
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
+
+    gpart destroy -F ${_device}s1 2> /dev/null || :
     gpart create -s bsd ${_device}s1
+
     gpart bootcode -b /boot/mbr ${_device}
+    gpart bootcode -b /boot/boot ${_device}s1
+
+    # FIXME refactor (end)
 
     gpart add -i 1 -a 4k -s ${FS_ROOT_SIZE}M -t freebsd-ufs  ${_device}s1 # a
     gpart add -i 2 -a 4k -s ${FS_SWAP_SIZE}M -t freebsd-swap ${_device}s1 # b
@@ -418,8 +424,6 @@ mbr_ufs_partition_large()
     gpart add -i 4 -a 4k -s ${FS_TMP_SIZE}M  -t freebsd-ufs  ${_device}s1 # d
     gpart add -i 5 -a 4k -s ${FS_VAR_SIZE}M  -t freebsd-ufs  ${_device}s1 # e
     gpart add -i 6 -a 4k                     -t freebsd-ufs  ${_device}s1 # f
-
-    gpart bootcode -b /boot/boot ${_device}s1
 
     # FIXME use -j
 
@@ -470,12 +474,16 @@ mbr_ufs_partition_small()
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
+
+    gpart destroy -F ${_device}s1 2> /dev/null || :
     gpart create -s bsd ${_device}s1
+
     gpart bootcode -b /boot/mbr ${_device}
+    gpart bootcode -b /boot/boot ${_device}s1
+
+    # FIXME refactor (end)
 
     gpart add -i 1 -a 4k -t freebsd-ufs  ${_device}s1 # a
-
-    gpart bootcode -b /boot/boot ${_device}s1
 
     # FIXME use -j
 
