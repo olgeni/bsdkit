@@ -640,6 +640,7 @@ zfs_create_mbr_pool()
         gpart create -s mbr ${_device}
         gpart add -i 1 -t freebsd ${_device}
         gpart set -a active -i 1 ${_device}
+        gpart destroy -F ${_device}s1 2> /dev/null || :
         gpart create -s bsd ${_device}s1
         gpart bootcode -b /boot/mbr ${_device}
 
