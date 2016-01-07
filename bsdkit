@@ -63,8 +63,7 @@ environment()
 : ${FREEBSD_URL_ARCH:=amd64}
 : ${FREEBSD_URL_PKGSET:=nox11}
 
-: ${FREEBSD_REL_URL:=""}
-: ${FREEBSD_PKG_URL:="none"}
+# FREEBSD_REL_URL, FREEBSD_PKG_URL: initialized by parse_options
 
 : ${PARSE_OPTIONS_SHIFT:=0}
 
