@@ -1859,9 +1859,7 @@ build_setup_iso()
     ln -s -f $(realpath ${_staging}/*) ${_iso_path}
 
     if [ ${_relpath} != "none" ]; then
-        mkdir -p ${_iso_path}/$(basename ${_relpath})
-
-        ln -s -f $(realpath ${_relpath}/*) ${_iso_path}/$(basename ${_relpath})
+        ln -s -f $(realpath ${_relpath}) ${_iso_path}/$(basename ${_relpath})
     fi
 
     if [ ${_pkgpath} != "none" ]; then
