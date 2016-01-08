@@ -913,8 +913,6 @@ customize_base()
 
     chroot ${_destdir} chpass -p '$1$xDEGRcY5$Pey9l65xEoRL9A5s7ggsD/' root
 
-    chmod 700 ${_destdir}/root
-
     mkdir -p ${_destdir}/root/.ssh
 
     echo_bsdkit_pubkey > ${_destdir}/root/.ssh/authorized_keys
