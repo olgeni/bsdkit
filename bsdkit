@@ -410,7 +410,7 @@ mbr_ufs_partition_large()
     gpart set -a active -i 1 ${_device}
 
     gpart destroy -F ${_device}s1 2> /dev/null || :
-    gpart create -s bsd ${_device}s1
+    gpart create -s BSD ${_device}s1
 
     gpart bootcode -b /boot/mbr ${_device}
     gpart bootcode -b /boot/boot ${_device}s1
@@ -475,7 +475,7 @@ mbr_ufs_partition_small()
     gpart set -a active -i 1 ${_device}
 
     gpart destroy -F ${_device}s1 2> /dev/null || :
-    gpart create -s bsd ${_device}s1
+    gpart create -s BSD ${_device}s1
 
     gpart bootcode -b /boot/mbr ${_device}
     gpart bootcode -b /boot/boot ${_device}s1
@@ -640,7 +640,7 @@ zfs_create_mbr_pool()
         gpart add -i 1 -t freebsd ${_device}
         gpart set -a active -i 1 ${_device}
         gpart destroy -F ${_device}s1 2> /dev/null || :
-        gpart create -s bsd ${_device}s1
+        gpart create -s BSD ${_device}s1
         gpart bootcode -b /boot/mbr ${_device}
 
         local _autorootsize="$(expr $(diskinfo ${_device} | awk '{ print $3 }') / 1024 / 1024 - ${FS_SWAP_SIZE})"
