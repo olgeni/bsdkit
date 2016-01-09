@@ -600,19 +600,18 @@ zfs_create_gpt_pool()
 
     set ${_devices}
 
-    if [ $# -eq 1 ]; then
-        ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${_devices}p${_pool_partition}
-    else
-        local _mirror="mirror "
-
-        local _device
-
-        for _device in ${_devices}; do
-            _mirror="${_mirror} ${_device}p${_pool_partition}"
-        done
-
-        ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${_mirror}
-    fi
+    case $# in
+        1)
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}p${_pool_partition}
+            ;;
+        2)
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} mirror ${1}p${_pool_partition} ${2}p${_pool_partition}
+            ;;
+        3)
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1}p${_pool_partition} ${2}p${_pool_partition} ${3}p${_pool_partition}
+            ;;
+        *)
+    esac
 
     return 0
 }
