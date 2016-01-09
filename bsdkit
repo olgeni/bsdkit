@@ -1094,7 +1094,6 @@ reset_state()
 {
     jail -R '*'
     mount -p \
-        | column -t \
         | awk '{ print $2 }' \
         | grep /baseroot${BSD_DESTDIR} \
         | sort -r \
