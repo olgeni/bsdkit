@@ -25,6 +25,7 @@ error()
 : ${PGSQL_JAIL_GROUP:=700}
 : ${BSD_DESTDIR:=/mnt}
 : ${SSH_PUBLIC_KEY:=""}
+: ${ROOT_PASSWORD:='$1$xDEGRcY5$Pey9l65xEoRL9A5s7ggsD/'}
 
 if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
     SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
@@ -887,7 +888,7 @@ customize_base()
 
     valid_destdir ${_destdir} || return 1
 
-    chroot ${_destdir} chpass -p '$1$xDEGRcY5$Pey9l65xEoRL9A5s7ggsD/' root
+    chroot ${_destdir} chpass -p "${ROOT_PASSWORD}" root
 
     mkdir -p ${_destdir}/root/.ssh
 
