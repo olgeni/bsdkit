@@ -787,7 +787,7 @@ read_manifest()
 {
     local _relpath="$1"
 
-    cat ${_relpath}/MANIFEST | awk 'BEGIN { FS = "[\t]" } { print $1 "\t" $4 }'
+    cat ${_relpath}/MANIFEST | cut -f 1,4
 }
 
 is_yes()
@@ -1094,7 +1094,7 @@ reset_state()
 {
     jail -R '*'
     mount -p \
-        | awk '{ print $2 }' \
+        | cut -w -f 2 \
         | grep /baseroot${BSD_DESTDIR} \
         | sort -r \
         | xargs umount -f
@@ -1437,7 +1437,7 @@ remove_jail()
 
     local _devfs
 
-    mount -p -t devfs | awk '{ print $2 }' | while read _devfs; do
+    mount -p -t devfs | cut -w -f 2 | while read _devfs; do
         if [ "${_devfs}" = "${_destdir}/dev" ]; then
             umount -f ${_destdir}/dev
         fi
