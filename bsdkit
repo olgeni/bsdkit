@@ -580,20 +580,20 @@ zfs_create_gpt_pool()
 
         gpart add -i ${_partition} -a 4k -s 256K -t freebsd-boot -l boot${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_partition} ${_device}
-        _partition=$(expr ${_partition} + 1)
+        _partition=$((${_partition} + 1))
 
         if has_swap; then
             gpart add -i ${_partition} -a 4k -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap${_device_index} ${_device}
-            _partition=$(expr ${_partition} + 1)
+            _partition=$((${_partition} + 1))
             swapon /dev/gpt/swap${_device_index}
         fi
 
         gpart add -i ${_partition} -a 4k -t freebsd-zfs -l pool${_device_index} ${_device}
         gpart set -a bootme -i ${_partition} ${_device}
         _pool_partition=${_partition}
-        _partition=$(expr ${_partition} + 1)
+        _partition=$((${_partition} + 1))
 
-        _device_index=$(expr ${_device_index} + 1)
+        _device_index=$((${_device_index} + 1))
     done
 
     local _options="-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir}"
