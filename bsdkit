@@ -528,19 +528,18 @@ zfs_create_pool()
 
     set ${_devices}
 
-    if [ $# -eq 1 ]; then
-        ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${_devices}
-    else
-        local _mirror="mirror "
-
-        local _device
-
-        for _device in ${_devices}; do
-            _mirror="${_mirror} ${_device}"
-        done
-
-        ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${_mirror}
-    fi
+    case $# in
+        1)
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}
+            ;;
+        2)
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} mirror ${1} ${2}
+            ;;
+        3)
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1} ${2} ${3}
+            ;;
+        *)
+    esac
 
     if has_swap; then
         zfs create \
