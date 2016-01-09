@@ -257,26 +257,6 @@ valid_class()
     esac
 }
 
-gmirror_reset()
-{
-    local _mirror _consumer
-
-    local _mirrors="$(gmirror list | grep "Name:" | grep "mirror/" | awk '{ print $3 }' | sed -e "s@mirror/@@")"
-
-    for _mirror in ${_mirrors}; do
-	gpart destroy -F ${_mirror} 2> /dev/null || :
-
-        local _consumers="$(gmirror list ${_mirror} | grep "Name:" | grep -v "mirror/" | awk '{ print $3 }' | sort -r)"
-
-        for _consumer in ${_consumers}; do
-            gmirror deactivate ${_mirror} ${_consumer}
-            gmirror clear ${_consumer}
-        done
-    done
-
-    return 0
-}
-
 gmirror_configure()
 {
     local _mirror="$1"
