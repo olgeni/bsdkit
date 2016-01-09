@@ -14,13 +14,16 @@
     - set_fact: freebsd_release=10
       when: ansible_distribution_release[:3] == "10."
 
+    - set_fact: ssh_public_key="{{lookup('env','SSH_PUBLIC_KEY')}}"
+
     - stat: path=/boot/kernel/kernel
       register: stat_kernel
 
     - stat: path=/usr/src/sys
       register: stat_sys
 
-    - authorized_key: user=root key="{{ lookup('env', 'SSH_PUBLIC_KEY') }}"
+    - authorized_key: user=root key="{{ssh_public_key}}"
+      when: ssh_public_key != ""
 
     - file: >
         path=/usr/local/etc state=directory

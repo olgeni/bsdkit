@@ -26,8 +26,7 @@ error()
 : ${BSD_DESTDIR:=/mnt}
 : ${SSH_PUBLIC_KEY:=""}
 
-if [ -z "${SSH_PUBLIC_KEY}" ]; then
-    [ -e ~/.ssh/id_rsa.pub ] || error "public key not found (~/.ssh/id_rsa.pub)."
+if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
     SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 fi
 
