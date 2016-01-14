@@ -1522,6 +1522,7 @@ install_setup_runtime()
 
     local _runtime=""
 
+    _runtime="${_runtime} align"
     _runtime="${_runtime} ansible"
     _runtime="${_runtime} ataidle"
     _runtime="${_runtime} bar"
