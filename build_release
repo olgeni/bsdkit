@@ -15,16 +15,18 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
-JOBS="-j4"
+JOBS="$(sysctl -n hw.ncpu)"
 
 while getopts "j:" OPT; do
     case $OPT in
         j)
-            JOBS="-j${OPTARG}"
+            JOBS="${OPTARG}"
             ;;
         *)
     esac
 done
+
+JOBS_OPTION="-j${JOBS}"
 
 shift $((${OPTIND} - 1))
 
@@ -45,13 +47,13 @@ rm -r -f ${MAKEOBJDIRPREFIX}/*
 
 echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
-make -s -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" ${JOBS} buildworld buildkernel
-make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" release NOPORTS=yes
+make -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" ${JOBS_OPTION} buildworld buildkernel
+make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" release NOPORTS=yes
 
 rm -r -f ${OS_RELDIR}
 mkdir -p ${OS_RELDIR}
 
-make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" install DESTDIR=${OS_RELDIR}
-make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" clean
+make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" install DESTDIR=${OS_RELDIR}
+make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" clean
 
 echo ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
