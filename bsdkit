@@ -126,10 +126,10 @@ rc_set()
     local _key="$2"
     local _value="$3"
 
-    if grep -E "^${_key}|# *${_key}" ${_file} > /dev/null 2>&1; then
-        sed -i '' -e "/^${_key} *= */ c\\
+    if grep -E "^[[:space:]]*${_key}|#[[:space:]]*${_key}" ${_file} > /dev/null 2>&1; then
+        sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*/ c\\
 ${_key}=\"${_value}\"
-/^# ${_key}/ c\\
+/^[[:space:]]*#[[:space:]]*${_key}/ c\\
 ${_key}=\"${_value}\"
 " ${_file}
     else
@@ -142,7 +142,7 @@ rc_delete()
     local _file="$1"
     local _key="$2"
 
-    sed -i '' -e "/^${_key}=/d" ${_file}
+    sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=/d" ${_file}
 }
 
 rc_get()
@@ -152,9 +152,9 @@ rc_get()
 
     local _buffer
 
-    _buffer="$(grep "^${_key}=" ${_file})"
+    _buffer="$(grep -E "^[[:space:]]*${_key}[[:space:]]*=" ${_file})"
 
-    local _value=${_buffer##"${_key}="}
+    local _value=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
 
     local _value2=$(expr "${_value}" : "\"\(.*\)\"")
 
