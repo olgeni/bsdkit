@@ -4,7 +4,7 @@ set -e -u
 
 SCRIPT_NAME=$(basename $0)
 
-error ()
+error()
 {
     echo "${SCRIPT_NAME}: $@"
     exit 1
