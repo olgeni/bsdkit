@@ -18,7 +18,7 @@ fi
 JOBS="$(sysctl -n hw.ncpu)"
 
 while getopts "j:" OPT; do
-    case $OPT in
+    case ${OPT} in
         j)
             JOBS="${OPTARG}"
             ;;
