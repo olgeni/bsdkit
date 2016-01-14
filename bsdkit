@@ -145,7 +145,7 @@ rc_delete()
     sed -i '' -e "/^${_key}=/d" ${_file}
 }
 
-rc_find()
+rc_get()
 {
     local _file="$1"
     local _key="$2"
