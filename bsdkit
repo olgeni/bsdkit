@@ -48,7 +48,8 @@ environment()
          PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\" \
          PGSQL_JAIL_GROUP=\"${PGSQL_JAIL_GROUP}\" \
          DESTDIR=\"${DESTDIR}\" \
-         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
+         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\" \
+         ROOT_PASSWORD=\"${ROOT_PASSWORD}\"
 }
 
 : ${JAIL_ADDRESS:=127.0.0.2}
