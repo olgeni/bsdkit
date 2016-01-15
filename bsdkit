@@ -659,7 +659,7 @@ zfs_create_fs()
 
     [ -d ${_destdir} ] || return 1
 
-    ${ZFS_CREATE_CMD} -o mountpoint=/ -o setuid=on ${ZFS_POOL}/zfsroot
+    ${ZFS_CREATE_CMD} -o mountpoint=/ ${ZFS_POOL}/zfsroot
 
     zpool set bootfs=${ZFS_POOL}/zfsroot ${ZFS_POOL}
 
