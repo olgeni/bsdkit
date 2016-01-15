@@ -86,14 +86,8 @@ parse_url()
 
 parse_options()
 {
-    while getopts "u:U:h:v:a:z:" OPT; do
+    while getopts "h:v:a:z:" OPT; do
         case ${OPT} in
-            u)
-                FREEBSD_REL_URL_TEMPLATE=${OPTARG}
-                ;;
-            U)
-                FREEBSD_PKG_URL_TEMPLATE=${OPTARG}
-                ;;
             h)
                 FREEBSD_URL_HOST=${OPTARG}
                 ;;
