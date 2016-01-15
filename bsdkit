@@ -51,9 +51,9 @@ environment()
          SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
 }
 
-: ${ANSIBLE_JAIL_ADDRESS:=127.0.0.2}
-: ${ANSIBLE_JAIL_INTERFACE:=lo0}
-: ${ANSIBLE_JAIL_SSH_PORT:=2200}
+: ${JAIL_ADDRESS:=127.0.0.2}
+: ${JAIL_INTERFACE:=lo0}
+: ${JAIL_SSH_PORT:=2200}
 
 : ${FREEBSD_REL_URL_TEMPLATE:=%%HOST%%/release-%%VERSION%%-%%ARCH%%}
 : ${FREEBSD_PKG_URL_TEMPLATE:=%%HOST%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
@@ -1000,7 +1000,7 @@ start_jail_nat()
     local _interface=$(route get default | grep "interface:" | awk '{ print $2 }')
 
     cat > ${_pf_conf} << EOF
-nat from ${ANSIBLE_JAIL_ADDRESS} to any -> (${_interface})
+nat from ${JAIL_ADDRESS} to any -> (${_interface})
 
 pass in all
 pass out all
@@ -1026,7 +1026,7 @@ start_jail()
     cat >> ${_sshd_config} << EOF
 UseDNS no
 PermitRootLogin without-password
-Port ${ANSIBLE_JAIL_SSH_PORT}
+Port ${JAIL_SSH_PORT}
 EOF
 
     local _jail_name=$(basename ${_destdir})
@@ -1067,7 +1067,7 @@ stop_jail()
 
 jail_ssh()
 {
-    ssh -p ${ANSIBLE_JAIL_SSH_PORT} -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${ANSIBLE_JAIL_ADDRESS}
+    ssh -p ${JAIL_SSH_PORT} -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${JAIL_ADDRESS}
 }
 
 reset_state()
@@ -1341,8 +1341,8 @@ install_jail()
          path=/ \
          name=${_jail_name} \
          host.hostname=${_jail_name} \
-         ip4.addr=${ANSIBLE_JAIL_ADDRESS} \
-         interface=${ANSIBLE_JAIL_INTERFACE} \
+         ip4.addr=${JAIL_ADDRESS} \
+         interface=${JAIL_INTERFACE} \
          command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1
 
     [ $? -ne 0 ] && error "network unreachable (install_jail)"
@@ -2028,8 +2028,8 @@ EOF
 
 ansible_jail_playbook()
 {
-    [ -n "${ANSIBLE_JAIL_ADDRESS}" ] || return 1
-    [ -n "${ANSIBLE_JAIL_SSH_PORT}" ] || return 1
+    [ -n "${JAIL_ADDRESS}" ] || return 1
+    [ -n "${JAIL_SSH_PORT}" ] || return 1
 
     local _playbook=${BSDKIT_DIR}/playbook
 
@@ -2050,7 +2050,7 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-jail connection=ssh ansible_shell_type=csh ansible_ssh_host=${ANSIBLE_JAIL_ADDRESS} ansible_ssh_port=${ANSIBLE_JAIL_SSH_PORT} ansible_ssh_private_key_file=${_ansible_key}
+jail connection=ssh ansible_shell_type=csh ansible_ssh_host=${JAIL_ADDRESS} ansible_ssh_port=${JAIL_SSH_PORT} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
     cat > ${_ansible_yml} << EOF
@@ -2077,8 +2077,8 @@ print_jail_conf()
 ${_jail_name} {
 	path = "${_destdir%/}";
 	host.hostname = "${_jail_name}";
-	ip4.addr = ${ANSIBLE_JAIL_ADDRESS};
-	interface = "${ANSIBLE_JAIL_INTERFACE}";
+	ip4.addr = ${JAIL_ADDRESS};
+	interface = "${JAIL_INTERFACE}";
 	mount.devfs;
 	persist;
 
@@ -2102,8 +2102,8 @@ write_jail_conf()
 ${_jail_name} {
 	path = "${_destdir%/}";
 	host.hostname = "${_jail_name}";
-	ip4.addr = ${ANSIBLE_JAIL_ADDRESS};
-	interface = "${ANSIBLE_JAIL_INTERFACE}";
+	ip4.addr = ${JAIL_ADDRESS};
+	interface = "${JAIL_INTERFACE}";
 	mount.devfs;
 	persist;
 
