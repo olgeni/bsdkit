@@ -86,21 +86,24 @@ parse_url()
 
 parse_options()
 {
-    while getopts "r:v:a:z:" OPT; do
+    while getopts "r:v:a:z:j:p:i:" OPT; do
         case ${OPT} in
-            r)
-                FREEBSD_URL_HOST=${OPTARG}
-                ;;
-            v)
-                FREEBSD_URL_VERSION=${OPTARG}
-                ;;
-            a)
-                FREEBSD_URL_ARCH=${OPTARG}
-                ;;
-            z)
-                FREEBSD_URL_PKGSET=${OPTARG}
-                ;;
-            *)
+            r) FREEBSD_URL_HOST=${OPTARG}
+               ;;
+            v) FREEBSD_URL_VERSION=${OPTARG}
+               ;;
+            a) FREEBSD_URL_ARCH=${OPTARG}
+               ;;
+            z) FREEBSD_URL_PKGSET=${OPTARG}
+               ;;
+            j) JAIL_ADDRESS=${OPTARG}
+               ;;
+            p) JAIL_PORT=${OPTARG}
+               ;;
+            i) JAIL_INTERFACE=${OPTARG}
+               ;;
+            *) return 1
+               ;;
         esac
     done
 
