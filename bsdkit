@@ -23,7 +23,7 @@ error()
 : ${FS_TMP_SIZE:=512}
 : ${PGSQL_JAIL_USER:=700}
 : ${PGSQL_JAIL_GROUP:=700}
-: ${BSD_DESTDIR:=/mnt}
+: ${DESTDIR:=/mnt}
 : ${SSH_PUBLIC_KEY:=""}
 : ${ROOT_PASSWORD:='$1$xDEGRcY5$Pey9l65xEoRL9A5s7ggsD/'}
 
@@ -47,7 +47,7 @@ environment()
          FS_TMP_SIZE=\"${FS_TMP_SIZE}\" \
          PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\" \
          PGSQL_JAIL_GROUP=\"${PGSQL_JAIL_GROUP}\" \
-         BSD_DESTDIR=\"${BSD_DESTDIR}\" \
+         DESTDIR=\"${DESTDIR}\" \
          SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
 }
 
@@ -1075,7 +1075,7 @@ reset_state()
     jail -R '*'
     mount -p \
         | cut -w -f 2 \
-        | grep /baseroot${BSD_DESTDIR} \
+        | grep /baseroot${DESTDIR} \
         | sort -r \
         | xargs umount -f
     swapctl -l | grep "^/" | cut -f 1 -d' ' | xargs swapoff
@@ -1104,18 +1104,18 @@ install_mbr_ufs()
 
     valid_class ${_class} || return 1
 
-    mkdir -p ${BSD_DESTDIR}
+    mkdir -p ${DESTDIR}
 
     reset_state
-    mbr_ufs_partition_${_class} ${BSD_DESTDIR} ${_device}
-    install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
-    swap_setup ${BSD_DESTDIR}
-    procfs_setup ${BSD_DESTDIR}
-    fsdescfs_setup ${BSD_DESTDIR}
-    format_fstab ${BSD_DESTDIR}
-    customize_base ${BSD_DESTDIR}
-    install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    mbr_ufs_partition_${_class} ${DESTDIR} ${_device}
+    install_release ${FREEBSD_REL_URL} ${DESTDIR}
+    swap_setup ${DESTDIR}
+    procfs_setup ${DESTDIR}
+    fsdescfs_setup ${DESTDIR}
+    format_fstab ${DESTDIR}
+    customize_base ${DESTDIR}
+    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
+    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1149,19 +1149,19 @@ install_mbr_ufs_gmirror()
 
     kldload -n geom_mirror
 
-    mkdir -p ${BSD_DESTDIR}
+    mkdir -p ${DESTDIR}
 
     reset_state
     gmirror_configure ${_mirror} ${_devices}
-    mbr_ufs_partition_${_class} ${BSD_DESTDIR} mirror/${_mirror}
-    install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
-    swap_setup ${BSD_DESTDIR}
-    procfs_setup ${BSD_DESTDIR}
-    fsdescfs_setup ${BSD_DESTDIR}
-    format_fstab ${BSD_DESTDIR}
-    customize_base ${BSD_DESTDIR}
-    install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    mbr_ufs_partition_${_class} ${DESTDIR} mirror/${_mirror}
+    install_release ${FREEBSD_REL_URL} ${DESTDIR}
+    swap_setup ${DESTDIR}
+    procfs_setup ${DESTDIR}
+    fsdescfs_setup ${DESTDIR}
+    format_fstab ${DESTDIR}
+    customize_base ${DESTDIR}
+    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
+    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1186,18 +1186,18 @@ install_gpt_ufs()
 
     valid_class ${_class} || return 1
 
-    mkdir -p ${BSD_DESTDIR}
+    mkdir -p ${DESTDIR}
 
     reset_state
-    gpt_ufs_partition_${_class} ${BSD_DESTDIR} ${_device}
-    install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
-    swap_setup ${BSD_DESTDIR}
-    procfs_setup ${BSD_DESTDIR}
-    fsdescfs_setup ${BSD_DESTDIR}
-    format_fstab ${BSD_DESTDIR}
-    customize_base ${BSD_DESTDIR}
-    install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    gpt_ufs_partition_${_class} ${DESTDIR} ${_device}
+    install_release ${FREEBSD_REL_URL} ${DESTDIR}
+    swap_setup ${DESTDIR}
+    procfs_setup ${DESTDIR}
+    fsdescfs_setup ${DESTDIR}
+    format_fstab ${DESTDIR}
+    customize_base ${DESTDIR}
+    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
+    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1222,20 +1222,20 @@ install_zfs()
 
     kldload -n zfs
 
-    mkdir -p ${BSD_DESTDIR}
+    mkdir -p ${DESTDIR}
 
     reset_state
-    zfs_create_pool ${BSD_DESTDIR} ${_devices}
-    zfs_create_fs ${BSD_DESTDIR}
-    install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
-    install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${BSD_DESTDIR}/boot/zfs
-    swap_setup ${BSD_DESTDIR}
-    procfs_setup ${BSD_DESTDIR}
-    fsdescfs_setup ${BSD_DESTDIR}
-    format_fstab ${BSD_DESTDIR}
-    customize_base ${BSD_DESTDIR}
-    install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    zfs_create_pool ${DESTDIR} ${_devices}
+    zfs_create_fs ${DESTDIR}
+    install_release ${FREEBSD_REL_URL} ${DESTDIR}
+    install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
+    swap_setup ${DESTDIR}
+    procfs_setup ${DESTDIR}
+    fsdescfs_setup ${DESTDIR}
+    format_fstab ${DESTDIR}
+    customize_base ${DESTDIR}
+    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
+    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1260,20 +1260,20 @@ install_gpt_zfs()
 
     kldload -n zfs
 
-    mkdir -p ${BSD_DESTDIR}
+    mkdir -p ${DESTDIR}
 
     reset_state
-    zfs_create_gpt_pool ${BSD_DESTDIR} ${_devices}
-    zfs_create_fs ${BSD_DESTDIR}
-    install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
-    install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${BSD_DESTDIR}/boot/zfs
-    swap_setup ${BSD_DESTDIR}
-    procfs_setup ${BSD_DESTDIR}
-    fsdescfs_setup ${BSD_DESTDIR}
-    format_fstab ${BSD_DESTDIR}
-    customize_base ${BSD_DESTDIR}
-    install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    zfs_create_gpt_pool ${DESTDIR} ${_devices}
+    zfs_create_fs ${DESTDIR}
+    install_release ${FREEBSD_REL_URL} ${DESTDIR}
+    install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
+    swap_setup ${DESTDIR}
+    procfs_setup ${DESTDIR}
+    fsdescfs_setup ${DESTDIR}
+    format_fstab ${DESTDIR}
+    customize_base ${DESTDIR}
+    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
+    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1298,20 +1298,20 @@ install_mbr_zfs()
 
     kldload -n zfs
 
-    mkdir -p ${BSD_DESTDIR}
+    mkdir -p ${DESTDIR}
 
     reset_state
-    zfs_create_mbr_pool ${BSD_DESTDIR} ${_devices}
-    zfs_create_fs ${BSD_DESTDIR}
-    install_release ${FREEBSD_REL_URL} ${BSD_DESTDIR}
-    install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${BSD_DESTDIR}/boot/zfs
-    swap_setup ${BSD_DESTDIR}
-    procfs_setup ${BSD_DESTDIR}
-    fsdescfs_setup ${BSD_DESTDIR}
-    format_fstab ${BSD_DESTDIR}
-    customize_base ${BSD_DESTDIR}
-    install_repo ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${BSD_DESTDIR} ${FREEBSD_PKG_URL}
+    zfs_create_mbr_pool ${DESTDIR} ${_devices}
+    zfs_create_fs ${DESTDIR}
+    install_release ${FREEBSD_REL_URL} ${DESTDIR}
+    install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
+    swap_setup ${DESTDIR}
+    procfs_setup ${DESTDIR}
+    fsdescfs_setup ${DESTDIR}
+    format_fstab ${DESTDIR}
+    customize_base ${DESTDIR}
+    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
+    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1938,7 +1938,7 @@ run()
 
     ${BSDKIT_DIR}/bsdkit start_jail_nat
     ${BSDKIT_DIR}/bsdkit "$@"
-    ${BSDKIT_DIR}/bsdkit start_jail ${BSD_DESTDIR}
+    ${BSDKIT_DIR}/bsdkit start_jail ${DESTDIR}
     ${BSDKIT_DIR}/bsdkit ansible_jail_playbook
 }
 
@@ -2003,8 +2003,8 @@ EOF
     - name: "Run requested bsdkit function"
       shell: $(environment) /root/bsdkit/bsdkit "$@" >> /tmp/bsdkit.log 2>&1
 
-    - name: "Run start_jail ${BSD_DESTDIR}"
-      shell: $(environment) /root/bsdkit/bsdkit start_jail ${BSD_DESTDIR} >> /tmp/bsdkit.log 2>&1
+    - name: "Run start_jail ${DESTDIR}"
+      shell: $(environment) /root/bsdkit/bsdkit start_jail ${DESTDIR} >> /tmp/bsdkit.log 2>&1
 
     - name: "Run ansible_jail_playbook"
       shell: $(environment) /root/bsdkit/bsdkit ansible_jail_playbook >> /tmp/bsdkit.log 2>&1
