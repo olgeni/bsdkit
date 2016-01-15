@@ -56,8 +56,8 @@ environment()
 : ${JAIL_INTERFACE:=lo0}
 : ${JAIL_SSH_PORT:=2200}
 
-: ${FREEBSD_REL_URL_TEMPLATE:=%%HOST%%/release-%%VERSION%%-%%ARCH%%}
-: ${FREEBSD_PKG_URL_TEMPLATE:=%%HOST%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
+: ${FREEBSD_REL_URL_TEMPLATE:=%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%}
+: ${FREEBSD_PKG_URL_TEMPLATE:=%%ROOT_URL%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
 
 : ${FREEBSD_URL_HOST:=http://olgeni.olgeni.com/FreeBSD}
 : ${FREEBSD_URL_VERSION:=10.2}
@@ -78,7 +78,7 @@ parse_url()
 {
     local _url="$1"
 
-    echo ${_url} | sed -e "s|%%HOST%%|${FREEBSD_URL_HOST}|g" \
+    echo ${_url} | sed -e "s|%%ROOT_URL%%|${FREEBSD_URL_HOST}|g" \
                        -e "s|%%VERSION%%|${FREEBSD_URL_VERSION}|g" \
                        -e "s|%%ARCH%%|${FREEBSD_URL_ARCH}|g" \
                        -e "s|%%PKGSET%%|${FREEBSD_URL_PKGSET}|g"
