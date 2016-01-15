@@ -2065,6 +2065,10 @@ EOF
 
 print_jail_conf()
 {
+    parse_options "$@"
+
+    shift ${PARSE_OPTIONS_SHIFT}
+
     local _destdir="$1"
 
     valid_destdir ${_destdir} || return 1
