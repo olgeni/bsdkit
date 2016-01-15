@@ -36,19 +36,19 @@ fi
 
 environment()
 {
-    echo INSTALL_KERNEL=\"${INSTALL_KERNEL}\" \
-         INSTALL_SRC=\"${INSTALL_SRC}\" \
-         ZFS_POOL=\"${ZFS_POOL}\" \
-         PROCFS_ENABLE=\"${PROCFS_ENABLE}\" \
-         FSDESCFS_ENABLE=\"${FSDESCFS_ENABLE}\" \
-         FS_SWAP_SIZE=\"${FS_SWAP_SIZE}\" \
-         FS_ROOT_SIZE=\"${FS_ROOT_SIZE}\" \
-         FS_VAR_SIZE=\"${FS_VAR_SIZE}\" \
-         FS_TMP_SIZE=\"${FS_TMP_SIZE}\" \
-         PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\" \
+    echo INSTALL_KERNEL=\"${INSTALL_KERNEL}\"     \
+         INSTALL_SRC=\"${INSTALL_SRC}\"           \
+         ZFS_POOL=\"${ZFS_POOL}\"                 \
+         PROCFS_ENABLE=\"${PROCFS_ENABLE}\"       \
+         FSDESCFS_ENABLE=\"${FSDESCFS_ENABLE}\"   \
+         FS_SWAP_SIZE=\"${FS_SWAP_SIZE}\"         \
+         FS_ROOT_SIZE=\"${FS_ROOT_SIZE}\"         \
+         FS_VAR_SIZE=\"${FS_VAR_SIZE}\"           \
+         FS_TMP_SIZE=\"${FS_TMP_SIZE}\"           \
+         PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\"   \
          PGSQL_JAIL_GROUP=\"${PGSQL_JAIL_GROUP}\" \
-         DESTDIR=\"${DESTDIR}\" \
-         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\" \
+         DESTDIR=\"${DESTDIR}\"                   \
+         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"     \
          ROOT_PASSWORD=\"${ROOT_PASSWORD}\"
 }
 
