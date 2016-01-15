@@ -1859,7 +1859,7 @@ build_setup_img()
 
     eval $(stat -s ${_iso})
 
-    local _img_md_size=$(($st_size / 1048576))
+    local _img_md_size=$((${st_size} / 1048576))
 
     _img_md_size=$((${_img_md_size} + ${_img_md_size} * ${IMG_FREE_SPACE_PERCENT} / 100))
 
