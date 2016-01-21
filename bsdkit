@@ -64,6 +64,8 @@ environment()
 : ${FREEBSD_URL_ARCH:=amd64}
 : ${FREEBSD_URL_PKGSET:=nox11}
 
+: ${IOCAGE_JAILS:=/iocage/jails}
+
 # FREEBSD_REL_URL, FREEBSD_PKG_URL: initialized by parse_options
 
 : ${PARSE_OPTIONS_SHIFT:=0}
@@ -1290,26 +1292,62 @@ install_mbr_zfs()
     return 0
 }
 
+install_iocage()
+{
+    parse_options "$@"
+
+    shift ${PARSE_OPTIONS_SHIFT}
+
+    local _tag="$1"
+
+    shift
+
+    if [ $# -ne 0 ]; then
+        error "too many arguments (install_iocage)."
+    fi
+
+    which iocage > /dev/null 2>&1 || error "iocage not found (install_iocage)."
+
+    local _install_tag=$(uuidgen)
+
+    iocage create -e tag="${_install_tag}" > /dev/null 2>&1
+
+    local _uuid=$(iocage get host_hostuuid ${_install_tag})
+    local _destdir=${IOCAGE_JAILS}/${_uuid}/root
+
+    [ -d ${_destdir} ] || "iocage root does not exist (install_iocage)."
+
+    do_install_jail ${_destdir}
+
+    sysrc -f ${_destdir}/etc/rc.conf -x hostname
+
+    iocage set tag="${_tag}" ${_uuid}
+}
+
 install_jail()
 {
-    local - > /dev/null
-
-    set -e -u
-
     parse_options "$@"
 
     shift ${PARSE_OPTIONS_SHIFT}
 
     local _destdir="$1"
 
-    local _jail_name=$(basename ${_destdir})
+    shift
 
-    if ! echo ${_jail_name} | grep -v -E -e "^[0-9]|[-]|[.]" > /dev/null 2>&1; then
-        echo "Invalid jail name: ${_jail_name}"
-        return 1
+    if [ $# -ne 0 ]; then
+        error "too many arguments (install_jail)."
     fi
 
-    [ -d ${_destdir} ] && error "${_destdir} already exists (install_jail)."
+    do_install_jail "${_destdir}"
+}
+
+do_install_jail()
+{
+    local _destdir="$1"
+
+    local _jail_name=$(basename ${_destdir})
+
+    [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
 
     jail -c \
          path=/ \
@@ -1317,9 +1355,8 @@ install_jail()
          host.hostname=${_jail_name} \
          ip4.addr=${JAIL_ADDRESS} \
          interface=${JAIL_INTERFACE} \
-         command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1
-
-    [ $? -ne 0 ] && error "network unreachable (install_jail)"
+         command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1 \
+        || error "network unreachable (install_jail)"
 
     local _dirname="$(dirname ${_destdir})"
     local _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
