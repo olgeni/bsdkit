@@ -1084,10 +1084,6 @@ reset_state()
 
 install_mbr_ufs()
 {
-    local - > /dev/null
-
-    set -e -u
-
     valid_host || return 1
 
     parse_options "$@"
@@ -1120,10 +1116,6 @@ install_mbr_ufs()
 
 install_mbr_ufs_gmirror()
 {
-    local - > /dev/null
-
-    set -e -u
-
     valid_host || return 1
 
     parse_options "$@"
@@ -1166,10 +1158,6 @@ install_mbr_ufs_gmirror()
 
 install_gpt_ufs()
 {
-    local - > /dev/null
-
-    set -e -u
-
     valid_host || return 1
 
     parse_options "$@"
@@ -1202,10 +1190,6 @@ install_gpt_ufs()
 
 install_zfs()
 {
-    local - > /dev/null
-
-    set -e -u
-
     valid_host || return 1
 
     parse_options "$@"
@@ -1240,10 +1224,6 @@ install_zfs()
 
 install_gpt_zfs()
 {
-    local - > /dev/null
-
-    set -e -u
-
     valid_host || return 1
 
     parse_options "$@"
@@ -1278,10 +1258,6 @@ install_gpt_zfs()
 
 install_mbr_zfs()
 {
-    local - > /dev/null
-
-    set -e -u
-
     valid_host || return 1
 
     parse_options "$@"
@@ -1393,10 +1369,6 @@ install_jail()
 
 remove_jail()
 {
-    local - > /dev/null
-
-    set -e -u
-
     local _destdir="$(realpath "$1")"
 
     valid_destdir ${_destdir}
@@ -1858,8 +1830,6 @@ build_setup_img()
     local _img_mounted=0
     local _iso_mounted=0
 
-    local _error=0
-
     eval $(stat -s ${_iso})
 
     local _img_md_size=$((${st_size} / 1048576))
@@ -1904,8 +1874,6 @@ build_setup_img()
         cd ${_pwd}
 
         cp ${_iso} ${_img_path}
-    } || {
-        _error=$?
     }
 
     set +e
@@ -1926,8 +1894,6 @@ build_setup_img()
 
     [ -n "${_iso_md}" ] && mdconfig -d -u ${_iso_md}
     [ -n "${_img_md}" ] && mdconfig -d -u ${_img_md}
-
-    return ${_error}
 }
 
 run()
