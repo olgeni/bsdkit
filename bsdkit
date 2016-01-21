@@ -829,7 +829,7 @@ install_release()
             _local_relpath="${_destdir}"
         fi
 
-        fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
+        (cd ${_local_relpath} && fetch -o MANIFEST ${_relpath}/MANIFEST)
 
         read_manifest ${_local_relpath} \
             | while read _filename _package; do
@@ -841,7 +841,7 @@ install_release()
                       continue
                   fi
 
-                  fetch -o ${_local_relpath}/${_filename} ${_relpath}/${_filename}
+                  (cd ${_local_relpath} && fetch -o ${_filename} ${_relpath}/${_filename})
               done
 
         _relpath=${_local_relpath}
