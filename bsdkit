@@ -1321,7 +1321,7 @@ install_iocage()
 
     sysrc -f ${_destdir}/etc/rc.conf -x hostname
 
-    iocage set tag="${_tag}" ${_uuid}
+    iocage set tag="${_tag}" host_hostname="${_tag}" ${_uuid}
 }
 
 install_jail()
