@@ -25,7 +25,6 @@ error()
 : ${PGSQL_JAIL_GROUP:=700}
 : ${DESTDIR:=/mnt}
 : ${SSH_PUBLIC_KEY:=""}
-: ${ROOT_PASSWORD:='$1$xDEGRcY5$Pey9l65xEoRL9A5s7ggsD/'}
 
 if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
     SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
@@ -48,8 +47,7 @@ environment()
          PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\"   \
          PGSQL_JAIL_GROUP=\"${PGSQL_JAIL_GROUP}\" \
          DESTDIR=\"${DESTDIR}\"                   \
-         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"     \
-         ROOT_PASSWORD=\"${ROOT_PASSWORD}\"
+         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
 }
 
 : ${JAIL_ADDRESS:=127.0.0.2}
@@ -888,7 +886,7 @@ customize_base()
 
     valid_destdir ${_destdir} || return 1
 
-    chroot ${_destdir} chpass -p "${ROOT_PASSWORD}" root
+    chroot ${_destdir} chpass -p '$1$El8jLO2w$KX9lQ3ScWeZF6SqG267w9.' root
 
     mkdir -p ${_destdir}/root/.ssh
 
