@@ -1531,6 +1531,7 @@ install_setup_runtime()
     _runtime="${_runtime} align"
     _runtime="${_runtime} ansible"
     _runtime="${_runtime} ataidle"
+    _runtime="${_runtime} beadm"
     _runtime="${_runtime} bar"
     _runtime="${_runtime} bcwipe"
     _runtime="${_runtime} buffer"
