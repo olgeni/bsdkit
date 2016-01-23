@@ -657,9 +657,10 @@ zfs_create_fs()
 
     [ -d ${_destdir} ] || return 1
 
-    ${ZFS_CREATE_CMD} -o mountpoint=/ ${ZFS_POOL}/zfsroot
+    ${ZFS_CREATE_CMD} ${ZFS_POOL}/ROOT
+    ${ZFS_CREATE_CMD} -o mountpoint=/ ${ZFS_POOL}/ROOT/default
 
-    zpool set bootfs=${ZFS_POOL}/zfsroot ${ZFS_POOL}
+    zpool set bootfs=${ZFS_POOL}/ROOT/default ${ZFS_POOL}
 
     zfs set atime=off ${ZFS_POOL}
 
@@ -700,7 +701,7 @@ zfs_create_fs()
     touch ${_destdir}/etc/fstab
 
     rc_set ${_destdir}/boot/loader.conf.local zfs_load YES
-    rc_set ${_destdir}/boot/loader.conf.local vfs.root.mountfrom zfs:${ZFS_POOL}/zfsroot
+    rc_set ${_destdir}/boot/loader.conf.local vfs.root.mountfrom zfs:${ZFS_POOL}/ROOT/default
     rc_set ${_destdir}/etc/rc.conf zfs_enable YES
 
     link_home ${_destdir}
