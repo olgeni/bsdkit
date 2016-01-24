@@ -479,6 +479,17 @@ mbr_ufs_partition_small()
     return 0
 }
 
+zfs_auto_snapshot()
+{
+    local _pool="$1"
+
+    local _freq
+
+    for _freq in frequent hourly daily weekly monthly; do
+        zfs set com.sun:auto-snapshot:${_freq}=false ${_pool}
+    done
+}
+
 zfs_create_pool()
 {
     local _destdir="$1"
@@ -518,6 +529,8 @@ zfs_create_pool()
             ;;
         *)
     esac
+
+    zfs_auto_snapshot ${ZFS_POOL}
 
     if has_swap; then
         zfs create \
@@ -591,6 +604,8 @@ zfs_create_gpt_pool()
         *)
     esac
 
+    zfs_auto_snapshot ${ZFS_POOL}
+
     return 0
 }
 
@@ -647,6 +662,8 @@ zfs_create_mbr_pool()
             ;;
         *)
     esac
+
+    zfs_auto_snapshot ${ZFS_POOL}
 
     return 0
 }
