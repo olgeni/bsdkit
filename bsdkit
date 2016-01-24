@@ -528,6 +528,7 @@ zfs_create_pool()
             ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1} ${2} ${3}
             ;;
         *)
+            error "unsupported number of devices in pool (zfs_create_pool)."
     esac
 
     zfs_auto_snapshot ${ZFS_POOL}
@@ -602,6 +603,7 @@ zfs_create_gpt_pool()
             ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1}p${_pool_partition} ${2}p${_pool_partition} ${3}p${_pool_partition}
             ;;
         *)
+            error "unsupported number of devices in pool (zfs_create_gpt_pool)."
     esac
 
     zfs_auto_snapshot ${ZFS_POOL}
@@ -661,6 +663,7 @@ zfs_create_mbr_pool()
             ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1}s1a ${2}s1a ${3}s1a
             ;;
         *)
+            error "unsupported number of devices in pool (zfs_create_mbr_pool)."
     esac
 
     zfs_auto_snapshot ${ZFS_POOL}
