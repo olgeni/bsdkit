@@ -592,15 +592,17 @@ zfs_create_gpt_pool()
 
     set ${_devices}
 
+    local _suffix="p${_pool_partition}"
+
     case $# in
         1)
-            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}p${_pool_partition}
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}${_suffix}
             ;;
         2)
-            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} mirror ${1}p${_pool_partition} ${2}p${_pool_partition}
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} mirror ${1}${_suffix} ${2}${_suffix}
             ;;
         3)
-            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1}p${_pool_partition} ${2}p${_pool_partition} ${3}p${_pool_partition}
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1}${_suffix} ${2}${_suffix} ${3}${_suffix}
             ;;
         *)
             error "unsupported number of devices in pool (zfs_create_gpt_pool)."
@@ -652,15 +654,17 @@ zfs_create_mbr_pool()
 
     set ${_devices}
 
+    local _suffix="s1a"
+
     case $# in
         1)
-            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}s1a
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}${_suffix}
             ;;
         2)
-            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} mirror ${1}s1a ${2}s1a
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} mirror ${1}${_suffix} ${2}${_suffix}
             ;;
         3)
-            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1}s1a ${2}s1a ${3}s1a
+            ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} raidz1 ${1}${_suffix} ${2}${_suffix} ${3}${_suffix}
             ;;
         *)
             error "unsupported number of devices in pool (zfs_create_mbr_pool)."
