@@ -1370,7 +1370,9 @@ do_install_jail()
 
     local _jail_name=$(basename ${_destdir})
 
-    [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
+    if [ -d "${_destdir}" ]; then
+        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
+    fi
 
     jail -c \
          path=/ \
