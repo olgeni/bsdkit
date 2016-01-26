@@ -899,9 +899,6 @@ install_release()
     mtree -ideU -f ${_destdir}/etc/mtree/BSD.var.dist  -p ${_destdir}/var > /dev/null
     mtree -ideU -f ${_destdir}/etc/mtree/BSD.usr.dist  -p ${_destdir}/usr > /dev/null
 
-    chmod 1777 ${_destdir}/tmp
-    chmod 1777 ${_destdir}/var/tmp
-
     return 0
 }
 
