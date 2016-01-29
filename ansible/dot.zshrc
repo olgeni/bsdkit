@@ -48,8 +48,8 @@ WORDCHARS=""
 
 prompt="[%l:%n@%m %2~]%# "
 
-bindkey "^N" q-history-search-forward
-bindkey "^P" q-history-search-backward
+bindkey "^N"      q-history-search-forward
+bindkey "^P"      q-history-search-backward
 
 bindkey '\e[A'    up-line-or-history
 bindkey '\e[B'    down-line-or-history
