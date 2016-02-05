@@ -531,7 +531,7 @@ zfs_create_pool()
             error "unsupported number of devices in pool (zfs_create_pool)."
     esac
 
-    zfs_auto_snapshot ${ZFS_POOL}
+    # zfs_auto_snapshot ${ZFS_POOL}
 
     if has_swap; then
         zfs create \
@@ -608,7 +608,7 @@ zfs_create_gpt_pool()
             error "unsupported number of devices in pool (zfs_create_gpt_pool)."
     esac
 
-    zfs_auto_snapshot ${ZFS_POOL}
+    # zfs_auto_snapshot ${ZFS_POOL}
 
     return 0
 }
@@ -670,7 +670,7 @@ zfs_create_mbr_pool()
             error "unsupported number of devices in pool (zfs_create_mbr_pool)."
     esac
 
-    zfs_auto_snapshot ${ZFS_POOL}
+    # zfs_auto_snapshot ${ZFS_POOL}
 
     return 0
 }
