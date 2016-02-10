@@ -1723,6 +1723,10 @@ EOF
     cat >> ${_staging}/boot/loader.conf.local << EOF
 geom_uzip_load="YES"
 
+nullfs_load="YES"
+tmpfs_load="YES"
+unionfs_load="YES"
+
 hw.mca.enabled="0"
 hint.atrtc.0.clock="0"
 
