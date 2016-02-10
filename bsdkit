@@ -1523,6 +1523,7 @@ EOF
 
     sed -i '' -e '/^PermitRootLogin/d' ${_destdir}/etc/ssh/sshd_config
     sed -i '' -e '/^UseDNS/d' ${_destdir}/etc/ssh/sshd_config
+    sed -i '' -e '/^leapfile/d' ${_destdir}/etc/ntp.conf
 
     cat >> ${_destdir}/etc/ssh/sshd_config << EOF
 UseDNS no
