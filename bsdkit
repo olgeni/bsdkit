@@ -1639,6 +1639,11 @@ EOF
 
     install -m 644 -o root -g wheel ${_bsdkit}/ansible/dot.zshrc ${_destdir}/root/.zshrc
 
+    cat >> ${_destdir}/root/.zshrc << EOF
+echo -n "Available disks: "
+sysctl -n kern.disks | rs 0 1 | sort | grep -v -E "^cd|^acd" | rs 1 0 | sed -E -e "s/ +/ /g"
+EOF
+
     return 0
 }
 
