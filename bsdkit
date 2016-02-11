@@ -1092,11 +1092,13 @@ jail_ssh()
 reset_state()
 {
     jail -R '*'
+
     mount -p \
         | cut -w -f 2 \
         | grep /baseroot${DESTDIR} \
         | sort -r \
         | xargs umount -f
+
     swapctl -l | grep "^/" | cut -f 1 -d' ' | xargs swapoff
 
     # This is dangerous, and we do not do it here:
