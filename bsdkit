@@ -517,6 +517,12 @@ zfs_create_pool()
 
     set ${_devices}
 
+    local _device
+
+    for _device in ${_device}; do
+        zpool labelclear -f ${_device}
+    done
+
     case $# in
         1)
             ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}
@@ -594,6 +600,12 @@ zfs_create_gpt_pool()
 
     local _suffix="p${_pool_partition}"
 
+    local _device
+
+    for _device in ${_device}; do
+        zpool labelclear -f ${_device}${_suffix}
+    done
+
     case $# in
         1)
             ${ZPOOL_CREATE_CMD} ${_options} ${ZFS_POOL} ${1}${_suffix}
@@ -655,6 +667,12 @@ zfs_create_mbr_pool()
     set ${_devices}
 
     local _suffix="s1a"
+
+    local _device
+
+    for _device in ${_device}; do
+        zpool labelclear -f ${_device}${_suffix}
+    done
 
     case $# in
         1)
