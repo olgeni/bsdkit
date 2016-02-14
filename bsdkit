@@ -2080,7 +2080,9 @@ EOF
 
     write_bsdkit_key ${_ansible_key}
 
-    ANSIBLE_CONFIG=${_ansible_cfg} SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" ansible-playbook ${_ansible_yml}
+    env ANSIBLE_CONFIG=${_ansible_cfg} \
+        SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
+        ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
 }
