@@ -2121,7 +2121,16 @@ EOF
 
     write_bsdkit_key ${_ansible_key}
 
-    ANSIBLE_CONFIG=${_ansible_cfg} SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" ansible-playbook ${_ansible_yml}
+    BSDKIT_INTERFACE="$(ifconfig -l -u ether | awk '{ print $1 }')"
+    BSDKIT_IFCONFIG="$(kenv bsdkit_ifconfig || :)"
+    BSDKIT_DEFAULTROUTER="$(kenv bsdkit_defaultrouter || :)"
+
+    env ANSIBLE_CONFIG=${_ansible_cfg} \
+        SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
+        BSDKIT_INTERFACE="${BSDKIT_INTERFACE}" \
+        BSDKIT_IFCONFIG="${BSDKIT_IFCONFIG}" \
+        BSDKIT_DEFAULTROUTER="${BSDKIT_DEFAULTROUTER}" \
+        ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
 }
