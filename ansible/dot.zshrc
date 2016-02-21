@@ -132,11 +132,9 @@ export MANWIDTH=tty
 export CLICOLOR=yes
 
 if which vim >/dev/null 2>&1; then
-    _vim=$(which vim)
-    export ALTERNATE_EDITOR=${_vim}
-    export EDITOR=${_vim}
-    export VISUAL=${_vim}
-    unset _vim
+    export ALTERNATE_EDITOR=vim
+    export EDITOR=vim
+    export VISUAL=vim
 fi
 
 cdpath=()
