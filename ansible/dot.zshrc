@@ -137,4 +137,11 @@ if which vim >/dev/null 2>&1; then
     export VISUAL=vim
 fi
 
+if [ -n "${INSIDE_EMACS}" ]; then
+    export ALTERNATE_EDITOR=emacsclient
+    export EDITOR=emacsclient
+    export VISUAL=emacsclient
+    unset zle_bracketed_paste
+fi
+
 cdpath=()
