@@ -20,6 +20,8 @@
     - set_fact: bsdkit_ifconfig="{{lookup('env','BSDKIT_IFCONFIG')}}"
     - set_fact: bsdkit_defaultrouter="{{lookup('env','BSDKIT_DEFAULTROUTER')}}"
 
+    - set_fact: jail_proxy="{{lookup('env','JAIL_PROXY')}}"
+
     - stat: path=/boot/kernel/kernel
       register: stat_kernel
 
@@ -81,6 +83,14 @@
     - name: "Set defaultrouter in rc.conf"
       command: sysrc defaultrouter="{{bsdkit_defaultrouter}}"
       when: bsdkit_defaultrouter != ""
+
+    - name: "Set http_proxy in pkg.conf"
+      lineinfile: >
+        dest=/usr/local/etc/pkg.conf
+        line="pkg_env: { http_proxy: \"{{jail_proxy}}\" }"
+        regexp="^pkg_env"
+        insertafter=EOF
+      when: jail_proxy != ""
 
     - copy: >
         src=../ansible/{{item}} dest=/etc/{{item}}

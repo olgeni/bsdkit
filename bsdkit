@@ -53,6 +53,7 @@ environment()
 : ${JAIL_ADDRESS:=127.0.0.2}
 : ${JAIL_INTERFACE:=lo0}
 : ${JAIL_SSH_PORT:=2200}
+: ${JAIL_PROXY:=""}
 
 : ${FREEBSD_REL_URL_TEMPLATE:=%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%}
 : ${FREEBSD_PKG_URL_TEMPLATE:=%%ROOT_URL%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
@@ -2130,6 +2131,7 @@ EOF
         BSDKIT_INTERFACE="${BSDKIT_INTERFACE}" \
         BSDKIT_IFCONFIG="${BSDKIT_IFCONFIG}" \
         BSDKIT_DEFAULTROUTER="${BSDKIT_DEFAULTROUTER}" \
+        JAIL_PROXY="${JAIL_PROXY}" \
         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
