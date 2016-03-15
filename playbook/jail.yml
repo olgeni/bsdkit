@@ -3,7 +3,7 @@
   user: root
   gather_facts: no
   tasks:
-    - raw: pkg install -y python
+    - raw: /usr/bin/env http_proxy="{{lookup('env','JAIL_PROXY')}}" pkg install -y python
 
 - hosts: jail
   user: root
