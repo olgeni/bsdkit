@@ -1391,14 +1391,16 @@ do_install_jail()
         [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
     fi
 
-    jail -c \
-         path=/ \
-         name=${_jail_name} \
-         host.hostname=${_jail_name} \
-         ip4.addr=${JAIL_ADDRESS} \
-         interface=${JAIL_INTERFACE} \
-         command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1 \
-        || error "network unreachable (install_jail)"
+    if [ -z "${JAIL_PROXY}" ]; then
+        jail -c \
+             path=/ \
+             name=${_jail_name} \
+             host.hostname=${_jail_name} \
+             ip4.addr=${JAIL_ADDRESS} \
+             interface=${JAIL_INTERFACE} \
+             command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1 \
+            || error "network unreachable (install_jail)"
+    fi
 
     local _dirname="$(dirname ${_destdir})"
     local _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
