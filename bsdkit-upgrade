@@ -1,0 +1,159 @@
+#!/bin/sh
+
+set -e -u
+
+: ${SITE_ROOT:=http://olgeni.olgeni.com/FreeBSD}
+: ${VERSION:=10.3}
+: ${ARCH:=amd64}
+: ${DESTDIR:=}
+
+_source=host
+_srcdir=/usr/src
+
+while getopts "r:v:a:d:j" OPT; do
+    case $OPT in
+        r)
+            SITE_ROOT=${OPTARG}
+            ;;
+        v)
+            VERSION=${OPTARG}
+            ;;
+        a)
+            ARCH=${OPTARG}
+            ;;
+        d)
+            DESTDIR=${OPTARG%/}
+            ;;
+        j)
+            _source=jail
+            ;;
+        *)
+            exit 64 # EX_USAGE
+    esac
+done
+
+shift $((${OPTIND} - 1))
+
+if [ "${_source}" == "jail" ]; then
+    _srcdir=${DESTDIR}/usr/src
+fi
+
+_release=${SITE_ROOT}/release-${VERSION}-${ARCH}/
+
+_distdir=/usr/freebsd-dist
+
+rm -r -f ${_distdir}
+
+mkdir -p ${_distdir}
+
+cd ${_distdir}
+
+if [ ! -e ${_distdir}/MANIFEST ]; then
+    fetch ${_release}/MANIFEST
+
+    cat MANIFEST | cut -f 1 | while read _file; do
+        fetch ${_release}/${_file}
+    done
+
+    cat MANIFEST | cut -f 1 | while read _file; do
+        unxz -tv ${_file}
+    done
+fi
+
+export PATH=/rescue:${PATH}
+
+if [ -f ${_srcdir}/Makefile ]; then
+    # check for pending conflicts
+    etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
+fi
+
+if [ ${_source} = host -a -z "${DESTDIR}" ] || [ ${_source} = jail ]; then
+    if [ -d ${_srcdir} ]; then
+        echo "Extracting: src.txz"
+
+        for _file in ${_srcdir}/*; do
+            rm -r -f  ${_file}
+        done
+
+        tar -x -z -U -f ${_distdir}/src.txz -C ${DESTDIR}/
+    fi
+fi
+
+find ${DESTDIR}/bin       \
+     ${DESTDIR}/lib       \
+     ${DESTDIR}/libexec   \
+     ${DESTDIR}/sbin      \
+     ${DESTDIR}/usr/bin   \
+     ${DESTDIR}/usr/lib   \
+     ${DESTDIR}/usr/lib32 \
+     -flags -schg         \
+     -exec chflags noschg {} \;
+
+if [ -f ${_srcdir}/Makefile ]; then
+    etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
+fi
+
+if [ -z "${DESTDIR}" ]; then
+    echo "Extracting: kernel.txz"
+
+    rm -r -f ${DESTDIR}/boot/kernel
+    rm -r -f ${DESTDIR}/boot/kernel.old
+
+    tar -x -z -U -f ${_distdir}/kernel.txz -C ${DESTDIR}/
+fi
+
+echo "Extracting: base.txz"
+tar -x -z -U -f ${_distdir}/base.txz -C ${DESTDIR}/ \
+    --exclude ./.cshrc   \
+    --exclude ./.profile \
+    --exclude ./dev      \
+    --exclude ./etc      \
+    --exclude ./media    \
+    --exclude ./mnt      \
+    --exclude ./proc     \
+    --exclude ./root     \
+    --exclude ./tmp      \
+    --exclude ./var
+
+echo "Extracting: doc.txz"
+tar -x -z -U -f ${_distdir}/doc.txz -C ${DESTDIR}/
+
+if [ -f ${_distdir}/games.txz ]; then
+    echo "Extracting: games.txz"
+    tar -x -z -U -f ${_distdir}/games.txz -C ${DESTDIR}/
+fi
+
+if [ -f ${_distdir}/lib32.txz ]; then
+    echo "Extracting: lib32.txz"
+    tar -x -z -U -f ${_distdir}/lib32.txz -C ${DESTDIR}/
+fi
+
+rm -r -f ${_distdir}
+
+echo "Running: mtree"
+
+mtree -ideU -f /etc/mtree/BSD.root.dist -p ${DESTDIR}/
+mtree -ideU -f /etc/mtree/BSD.var.dist  -p ${DESTDIR}/var
+mtree -ideU -f /etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
+
+if [ -f ${_srcdir}/Makefile ]; then
+    cd ${_srcdir}
+
+    echo "Running: delete-old"
+    yes y | make delete-old DESTDIR=${DESTDIR}/ > /dev/null 2>&1
+
+    echo "Running: delete-old-libs"
+    yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
+fi
+
+if [ -f ${_srcdir}/Makefile ]; then
+    echo "Running: etcupdate"
+    etcupdate -F -I '*.cf' -s ${_srcdir} -D ${DESTDIR}/
+fi
+
+etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
+
+chroot ${DESTDIR}/ newaliases
+
+# gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
+# gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada1
