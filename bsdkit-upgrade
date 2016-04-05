@@ -38,32 +38,39 @@ if [ "${_source}" == "jail" ]; then
     _srcdir=${DESTDIR}/usr/src
 fi
 
-_release=${SITE_ROOT}/release-${VERSION}-${ARCH}/
+if [ -f ${_srcdir}/Makefile ]; then
+    etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
+fi
 
-_distdir=/usr/freebsd-dist
+_release=${SITE_ROOT}/release-${VERSION}-${ARCH}
 
-rm -r -f ${_distdir}
+_distdir=/usr/freebsd-dist/${VERSION}-${ARCH}
 
 mkdir -p ${_distdir}
 
 cd ${_distdir}
 
-if [ ! -e ${_distdir}/MANIFEST ]; then
-    fetch ${_release}/MANIFEST
+fetch ${_release}/MANIFEST
 
-    cat MANIFEST | cut -f 1 | while read _file; do
+cat MANIFEST | cut -f 1 | while read _file; do
+    _sha256=$(awk "\$1 == \"${_file}\" { print \$2 }" < MANIFEST)
+
+    if [ -e "${_file}" ]; then
+        echo "Checking ${_file}"
+        _sha256_local=$(sha256 -q "${_file}")
+    else
+        _sha256_local="0"
+    fi
+
+    while [ "${_sha256}" != "${_sha256_local}" ]; do
         fetch ${_release}/${_file}
+        _sha256_local=$(sha256 -q "${_file}")
     done
-
-    cat MANIFEST | cut -f 1 | while read _file; do
-        unxz -tv ${_file}
-    done
-fi
+done
 
 export PATH=/rescue:${PATH}
 
 if [ -f ${_srcdir}/Makefile ]; then
-    # check for pending conflicts
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
 fi
 
