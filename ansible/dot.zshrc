@@ -1,11 +1,11 @@
-q-history-search-backward ()
+q-history-search-backward()
 {
     local cursor=$CURSOR
     zle .history-search-backward "$LBUFFER"
     CURSOR=$cursor
 }
 
-q-history-search-forward ()
+q-history-search-forward()
 {
     local cursor=$CURSOR
     zle .history-search-forward "$LBUFFER"
@@ -88,7 +88,7 @@ if [[ $TERM = screen ]]; then
     bindkey '^?' backward-delete-char
 fi
 
-chpwd ()
+chpwd()
 {
     [[ -t 1 ]] || return
 
@@ -100,7 +100,7 @@ chpwd ()
 }
 
 if [[ $HOST != "freebsd" ]]; then
-    _rctools ()
+    _rctools()
     {
 	compadd `ls /etc/rc.d`
 	compadd `ls /usr/local/etc/rc.d`
