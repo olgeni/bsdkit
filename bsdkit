@@ -934,6 +934,20 @@ install_release()
     return 0
 }
 
+install_resolv_conf()
+{
+    if [ -f /etc/resolv.conf -a ! -f ${_destdir}/etc/resolv.conf ]; then
+	install -m 644 -o root -g wheel /etc/resolv.conf ${_destdir}/etc/resolv.conf
+    fi
+}
+
+install_ca_root_nss()
+{
+    if [ -f /usr/local/share/certs/ca-root-nss.crt -a ! -e ${_destdir}/etc/ssl/cert.pem ]; then
+	install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/etc/ssl/cert.pem
+    fi
+}
+
 customize_base()
 {
     local _destdir="$1"
@@ -959,6 +973,9 @@ PermitRootLogin yes
 EOF
 
     mkdir -p ${_destdir}/etc/rc.conf.d
+
+    install_resolv_conf ${_destdir}
+    install_ca_root_nss ${_destdir}
 
     return 0
 }
@@ -1000,13 +1017,8 @@ install_pkg()
     valid_destdir ${_destdir} || return 1
     valid_pkgpath ${_pkgpath} || return 1
 
-    if [ -f /etc/resolv.conf -a ! -f ${_destdir}/etc/resolv.conf ]; then
-	install -m 644 -o root -g wheel /etc/resolv.conf ${_destdir}/etc/resolv.conf
-    fi
-
-    if [ -f /usr/local/share/certs/ca-root-nss.crt -a ! -e ${_destdir}/etc/ssl/cert.pem ]; then
-	install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/etc/ssl/cert.pem
-    fi
+    install_resolv_conf ${_destdir}
+    install_ca_root_nss ${_destdir}
 
     local _use_files=no
 
