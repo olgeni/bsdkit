@@ -50,10 +50,24 @@ environment()
          SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
 }
 
+next_ip4_addr()
+{
+    local _ip4_addr="$1"
+
+    set $(echo ${_ip4_addr} | sed -e "s/\./ /g")
+    echo $1.$2.$3.$(($4 + 1))
+}
+
 : ${JAIL_ADDRESS:=127.0.0.2}
 : ${JAIL_INTERFACE:=lo0}
 : ${JAIL_SSH_PORT:=2200}
 : ${JAIL_PROXY:=""}
+
+for _ip4_addr in $(jls -n ip4.addr | sed -e "s/ip4.addr=//"); do
+    if [ "${JAIL_ADDRESS}" = "${_ip4_addr}" ]; then
+        JAIL_ADDRESS=$(next_ip4_addr ${JAIL_ADDRESS})
+    fi
+done
 
 : ${FREEBSD_REL_URL_TEMPLATE:=%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%}
 : ${FREEBSD_PKG_URL_TEMPLATE:=%%ROOT_URL%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
