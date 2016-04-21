@@ -33,6 +33,9 @@ fi
 : ${IMG_FREE_SPACE_PERCENT:=50}
 : ${IMG_DATA_LABEL:=2e158b17-5e10-11e5-ac21-080027af0e2a}
 
+: ${PKG_LOCKFILE:="/tmp/pkg.lock"}
+: ${PKG_LOCKTIME:=120}
+
 environment()
 {
     echo INSTALL_KERNEL=\"${INSTALL_KERNEL}\"     \
@@ -1041,9 +1044,9 @@ EOF
     export PACKAGE_BUILDING="YES"
     export UNAME_r=$(uname -r | sed -e "s/-.*//")-RELEASE
 
-    pkg -c ${_destdir} update -f
-    pkg -c ${_destdir} install -y pkg
-    pkg -c ${_destdir} clean -y -a
+    lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} update -f
+    lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} install -y pkg
+    lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
 
     if is_yes ${_use_files}; then
         rm -f ${_destdir}/usr/local/etc/pkg/repos/pkg.conf
@@ -1670,9 +1673,8 @@ pkg: {
 }
 EOF
 
-        pkg -c ${_destdir} install -y ${_runtime}
-
-        pkg -c ${_destdir} clean -a -y
+        lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} install -y ${_runtime}
+        lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -a -y
 
         rm -f ${_destdir}/usr/local/etc/pkg/repos/pkg.conf
 
