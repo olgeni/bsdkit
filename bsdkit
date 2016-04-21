@@ -1453,6 +1453,10 @@ do_install_jail()
 
     customize_base ${_destdir}
 
+    if [ -f /etc/hosts -a ! -f ${_destdir}/etc/hosts ]; then
+	install -m 644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
+    fi
+
     install_repo ${_destdir} ${FREEBSD_PKG_URL}
     install_pkg ${_destdir} ${FREEBSD_PKG_URL}
 
