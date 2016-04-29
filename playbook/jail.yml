@@ -43,10 +43,6 @@
         path=/var/service state=directory
         owner=root group=wheel mode=755
 
-    - file: >
-        path=/service src=var/service state=link
-        owner=root group=wheel mode=755
-
     - copy: >
         src=../ansible/RELENG_{{freebsd_release}}.{{ansible_architecture}}
         dest=/usr/src/sys/{{ansible_architecture}}/conf/KERNEL
