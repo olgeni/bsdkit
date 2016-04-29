@@ -3,61 +3,80 @@
   user: root
   gather_facts: no
   tasks:
-    - raw: /usr/bin/env http_proxy="{{lookup('env','JAIL_PROXY')}}" pkg install -y python
+    - raw: /usr/bin/env http_proxy="{{lookup('env', 'JAIL_PROXY')}}" pkg install -y python
 
 - hosts: jail
   user: root
   tasks:
-    - set_fact: freebsd_release=11
+    - name: "set_fact: freebsd_release (11)"
+      set_fact: freebsd_release=11
       when: ansible_distribution_release[:3] == "11."
 
-    - set_fact: freebsd_release=10
+    - name: "set_fact: freebsd_release (10)"
+      set_fact: freebsd_release=10
       when: ansible_distribution_release[:3] == "10."
 
-    - set_fact: ssh_public_key="{{lookup('env','SSH_PUBLIC_KEY')}}"
+    - name: "set_fact: ssh_public_key"
+      set_fact: ssh_public_key="{{lookup('env', 'SSH_PUBLIC_KEY')}}"
 
-    - set_fact: bsdkit_interface="{{lookup('env','BSDKIT_INTERFACE')}}"
-    - set_fact: bsdkit_ifconfig="{{lookup('env','BSDKIT_IFCONFIG')}}"
-    - set_fact: bsdkit_defaultrouter="{{lookup('env','BSDKIT_DEFAULTROUTER')}}"
+    - name: "set_fact: bsdkit_interface"
+      set_fact: bsdkit_interface="{{lookup('env', 'BSDKIT_INTERFACE')}}"
 
-    - set_fact: jail_proxy="{{lookup('env','JAIL_PROXY')}}"
+    - name: "set_fact: bsdkit_ifconfig"
+      set_fact: bsdkit_ifconfig="{{lookup('env', 'BSDKIT_IFCONFIG')}}"
 
-    - stat: path=/boot/kernel/kernel
+    - name: "set_fact: bsdkit_defaultrouter"
+      set_fact: bsdkit_defaultrouter="{{lookup('env', 'BSDKIT_DEFAULTROUTER')}}"
+
+    - name: "set_fact: jail_proxy"
+      set_fact: jail_proxy="{{lookup('env', 'JAIL_PROXY')}}"
+
+    - name: "stat: /boot/kernel/kernel"
+      stat: path=/boot/kernel/kernel
       register: stat_kernel
 
-    - stat: path=/usr/src/sys
+    - name: "stat: /usr/src/sys"
+      stat: path=/usr/src/sys
       register: stat_sys
 
-    - authorized_key: user=root key="{{ssh_public_key}}"
+    - name: "Set authorized_key"
+      authorized_key: user=root key="{{ssh_public_key}}"
       when: ssh_public_key != ""
 
-    - file: >
+    - name: "Create /usr/local/etc"
+      file: >
         path=/usr/local/etc state=directory
         owner=root group=wheel mode=755
 
-    - file: >
+    - name: "Create /usr/local/etc/sv"
+      file: >
         path=/usr/local/etc/sv state=directory
         owner=root group=wheel mode=755
 
-    - file: >
+    - name: "Create /var/service"
+      file: >
         path=/var/service state=directory
         owner=root group=wheel mode=755
 
-    - copy: >
+    - name: "Install kernel configuration"
+      copy: >
         src=../ansible/RELENG_{{freebsd_release}}.{{ansible_architecture}}
         dest=/usr/src/sys/{{ansible_architecture}}/conf/KERNEL
         owner=root group=wheel mode=644
       when: stat_sys.stat.exists
 
-    - copy: >
+    - name: "Install kernel configuration (debug)"
+      copy: >
         src=../ansible/DEBUG dest=/usr/src/sys/{{ansible_architecture}}/conf/DEBUG
         owner=root group=wheel mode=644
       when: stat_sys.stat.exists
 
-    - command: sysrc -n zfs_enable
+    - name: "Gather zfs_enable"
+      command: sysrc -n zfs_enable
       register: sysrc_zfs_enable
 
-    - copy: >
+    - name: "Install configuration files in /etc"
+      copy: >
         src=../ansible/{{item}} dest=/etc/{{item}}
         owner=root group=wheel mode=644
       with_items:
@@ -88,21 +107,24 @@
         insertafter=EOF
       when: jail_proxy != ""
 
-    - copy: >
+    - name: "Install sysctl.conf"
+      copy: >
         src=../ansible/{{item}} dest=/etc/{{item}}
         owner=root group=wheel mode=644
       with_items:
         - sysctl.conf
       when: stat_kernel.stat.exists
 
-    - copy: >
+    - name: "Install loader.conf"
+      copy: >
         src=../ansible/{{item}} dest=/boot/{{item}}
         owner=root group=wheel mode=644
       with_items:
         - loader.conf
       when: stat_kernel.stat.exists
 
-    - copy: >
+    - name: "Install dotfiles in /usr/share/skel"
+      copy: >
         src=../ansible/dot.{{item}} dest=/usr/share/skel/dot.{{item}}
         owner=root group=wheel mode=644
       with_items:
@@ -110,7 +132,8 @@
         - inputrc
         - zshrc
 
-    - copy: >
+    - name: "Install dotfiles in /root"
+      copy: >
         src=../ansible/dot.{{item}} dest=/root/.{{item}}
         owner=root group=wheel mode=644
       with_items:
@@ -118,45 +141,54 @@
         - inputrc
         - zshrc
 
-    - copy: >
+    - name: "Install sudoers"
+      copy: >
         src=../ansible/sudoers dest=/usr/local/etc/sudoers
         owner=root group=wheel mode=440
 
-    - file: >
+    - name: "Create /etc/newsyslog.conf.d/"
+      file: >
         path=/etc/newsyslog.conf.d/ state=directory
         owner=root group=wheel mode=755
 
-    - copy: >
+    - name: "Install newsyslog.conf"
+      copy: >
         src=../ansible/newsyslog.conf dest=/etc/newsyslog.conf.d/newsyslog.conf
         owner=root group=wheel mode=644
 
-    - copy: >
+    - name: "Install /etc/firewall"
+      copy: >
         src=../ansible/firewall dest=/etc/firewall
         owner=root group=wheel mode=644
       when: stat_kernel.stat.exists
 
-    - copy: >
+    - name: "Install /usr/local/etc/smartd.conf"
+      copy: >
         src=../ansible/smartd.conf dest=/usr/local/etc/smartd.conf
         owner=root group=wheel mode=644
       when: stat_kernel.stat.exists
 
-    - copy: >
+    - name: "Install /usr/local/etc/portmaster.rc"
+      copy: >
         src=../ansible/portmaster.rc dest=/usr/local/etc/portmaster.rc
         owner=root group=wheel mode=644
 
-    - lineinfile: >
+    - name: "Set 'UseDNS no' in /etc/ssh/sshd_config"
+      lineinfile: >
         dest=/etc/ssh/sshd_config
         line="UseDNS no"
         regexp="^UseDNS"
         insertafter=EOF
 
-    - lineinfile: >
+    - name: "Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config"
+      lineinfile: >
         dest=/etc/ssh/sshd_config
         line="PermitRootLogin without-password"
         regexp="^PermitRootLogin"
         insertafter=EOF
 
-    - lineinfile: >
+    - name: "Configure /etc/devfs.conf"
+      lineinfile: >
         dest=/etc/devfs.conf
         regexp="^{{item}}"
         state=absent
@@ -165,39 +197,47 @@
         - ".*fuse.*"
       when: stat_kernel.stat.exists
 
-    - stat: path=/var/db/zoneinfo
+    - name: "stat: /var/db/zoneinfo"
+      stat: path=/var/db/zoneinfo
       register: stat_zoneinfo
 
-    - command: tzsetup Europe/Rome
+    - name: "Run tzsetup"
+      command: tzsetup Europe/Rome
       when: not stat_zoneinfo.stat.exists
 
-    - lineinfile: >
+    - name: "Set 'MAILTO' in /etc/crontab"
+      lineinfile: >
         dest=/etc/crontab
         line="MAILTO=\"\""
         regexp="^MAILTO"
         insertafter="^SHELL="
 
-    - lineinfile: >
+    - name: "Disable '/dev/console' in /etc/syslog.conf"
+      lineinfile: >
         dest=/etc/syslog.conf
         regexp="/dev/console$"
         state=absent
 
-    - file: >
+    - name: "Create /var/ftp"
+      file: >
         path=/var/ftp state=directory
         owner=root group=wheel mode=755
 
-    - lineinfile: >
+    - name: "Add FTP user"
+      lineinfile: >
         dest=/etc/master.passwd
         line="ftp:*:14:14::0:0:Anonymous FTP Admin:/var/ftp:/nonexistent"
         regexp="^ftp:"
         insertafter="^man:"
       notify: pwd_mkdb
 
-    - file: >
+    - name: "Create /etc/ssl/certs"
+      file: >
         path=/etc/ssl/certs state=directory
         owner=root group=wheel mode=755
 
-    - pkgng: name={{item}} state=present
+    - name: "Install base packages"
+      pkgng: name={{item}} state=present
       with_items:
         - ca_root_nss
         - rsync
@@ -206,16 +246,19 @@
         - vim
         - zsh
 
-    - stat: path=/usr/local/share/certs/ca-root-nss.crt
+    - name: "stat: ca-root-nss.crt"
+      stat: path=/usr/local/share/certs/ca-root-nss.crt
       register: stat_ca_root_nss
 
-    - copy: >
+    - name: "Install ca-root-nss.crt"
+      copy: >
         src=/usr/local/share/certs/ca-root-nss.crt
         dest=/etc/ssl/cert.pem
         owner=root group=wheel mode=644
       when: stat_ca_root_nss.stat.exists
 
-    - command: pkg clean -a -y
+    - name: "Run pkg clean"
+      command: pkg clean -a -y
       changed_when: false
 
   handlers:
@@ -228,4 +271,5 @@
   user: root
   gather_facts: no
   tasks:
-    - authorized_key: user=root key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit" state=absent
+    - name: "Remove authorized_key"
+      authorized_key: user=root key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit" state=absent
