@@ -168,8 +168,6 @@ if [ -f ${_distdir}/lib32.txz ]; then
     extract -s ${_distdir}/lib32.txz -d ${DESTDIR}/
 fi
 
-rm -r -f ${_distdir}
-
 echo "Running: mtree"
 
 mtree -ideU -f /etc/mtree/BSD.root.dist -p ${DESTDIR}/
