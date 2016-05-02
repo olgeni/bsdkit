@@ -2,6 +2,8 @@
 
 set -e -u
 
+which cpdup > /dev/null
+
 : ${SITE_ROOT:=http://olgeni.olgeni.com/FreeBSD}
 : ${VERSION:=10.3}
 : ${ARCH:=amd64}
@@ -46,6 +48,51 @@ _release=${SITE_ROOT}/release-${VERSION}-${ARCH}
 
 _distdir=/usr/freebsd-dist/${VERSION}-${ARCH}
 
+extract()
+{
+    local _src=""
+    local _dst=""
+    local _options=""
+    local _exclude=""
+
+    while getopts "s:d:x:" OPT; do
+        case $OPT in
+            s)
+                _src=${OPTARG}
+                ;;
+            d)
+                _dst=${OPTARG}
+                ;;
+            x)
+                _exclude="${OPTARG}"
+                ;;
+            *)
+                exit 64 # EX_USAGE
+        esac
+    done
+
+    [ -f ${_src} ]
+    [ -d ${_dst} ]
+
+    _dst="$(echo ${_dst} | sed -e "s@//@/@")"
+
+    find ${_distdir}/__staging__ -flags -schg -exec chflags noschg {} \; > /dev/null 2>&1 || :
+    rm -r -f ${_distdir}/__staging__
+
+    mkdir -p ${_distdir}/__staging__
+
+    if [ -n "${_exclude}" ]; then
+        echo "${_exclude}" | rs 0 1 > ${_distdir}/__staging__/.cpignore
+    fi
+
+    tar -x -z -U -f ${_src} -C ${_distdir}/__staging__
+
+    cpdup -x -o -l -VV ${_distdir}/__staging__ ${_dst}
+
+    find ${_distdir}/__staging__ -flags -schg -exec chflags noschg {} \; > /dev/null 2>&1 || :
+    rm -r -f ${_distdir}/__staging__ > /dev/null 2>&1
+}
+
 mkdir -p ${_distdir}
 
 cd ${_distdir}
@@ -82,7 +129,7 @@ if [ ${_source} = host -a -z "${DESTDIR}" ] || [ ${_source} = jail ]; then
             rm -r -f  ${_file}
         done
 
-        tar -x -z -U -f ${_distdir}/src.txz -C ${DESTDIR}/
+        extract -s ${_distdir}/src.txz -d ${DESTDIR}/
     fi
 fi
 
@@ -102,37 +149,23 @@ fi
 
 if [ -z "${DESTDIR}" ]; then
     echo "Extracting: kernel.txz"
-
-    rm -r -f ${DESTDIR}/boot/kernel
-    rm -r -f ${DESTDIR}/boot/kernel.old
-
-    tar -x -z -U -f ${_distdir}/kernel.txz -C ${DESTDIR}/
+    extract -s ${_distdir}/kernel.txz -d ${DESTDIR}/
 fi
 
 echo "Extracting: base.txz"
-tar -x -z -U -f ${_distdir}/base.txz -C ${DESTDIR}/ \
-    --exclude ./.cshrc   \
-    --exclude ./.profile \
-    --exclude ./dev      \
-    --exclude ./etc      \
-    --exclude ./media    \
-    --exclude ./mnt      \
-    --exclude ./proc     \
-    --exclude ./root     \
-    --exclude ./tmp      \
-    --exclude ./var
+extract -s ${_distdir}/base.txz -d ${DESTDIR}/ -x ".cshrc .profile dev etc media mnt proc root tmp var"
 
 echo "Extracting: doc.txz"
-tar -x -z -U -f ${_distdir}/doc.txz -C ${DESTDIR}/
+extract -s ${_distdir}/doc.txz -d ${DESTDIR}/
 
 if [ -f ${_distdir}/games.txz ]; then
     echo "Extracting: games.txz"
-    tar -x -z -U -f ${_distdir}/games.txz -C ${DESTDIR}/
+    extract -s ${_distdir}/games.txz -d ${DESTDIR}/
 fi
 
 if [ -f ${_distdir}/lib32.txz ]; then
     echo "Extracting: lib32.txz"
-    tar -x -z -U -f ${_distdir}/lib32.txz -C ${DESTDIR}/
+    extract -s ${_distdir}/lib32.txz -d ${DESTDIR}/
 fi
 
 rm -r -f ${_distdir}
