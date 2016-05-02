@@ -240,6 +240,7 @@
       pkgng: name={{item}} state=present
       with_items:
         - ca_root_nss
+        - cpdup
         - rsync
         - sudo
         - tmux
