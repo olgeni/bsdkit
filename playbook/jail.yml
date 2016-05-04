@@ -241,7 +241,9 @@
       with_items:
         - ca_root_nss
         - cpdup
+        - curl
         - rsync
+        - socat
         - sudo
         - tmux
         - vim
