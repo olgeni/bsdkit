@@ -41,10 +41,6 @@ OS_MAJOR=$(echo ${_version} | sed -e "s/\\..*//")
 
 install -o root -g wheel -m 644 ansible/RELENG_${OS_MAJOR}.${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/KERNEL
 
-export MAKEOBJDIRPREFIX=${MAKEOBJDIRPREFIX:=/usr/obj}
-
-rm -r -f ${MAKEOBJDIRPREFIX}/*
-
 echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
 make -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" ${JOBS_OPTION} buildworld buildkernel
