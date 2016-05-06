@@ -54,8 +54,9 @@ extract()
     local _dst=""
     local _options=""
     local _exclude=""
+    local _chdir=""
 
-    while getopts "s:d:x:" OPT; do
+    while getopts "s:d:x:C:" OPT; do
         case $OPT in
             s)
                 _src=${OPTARG}
@@ -65,6 +66,9 @@ extract()
                 ;;
             x)
                 _exclude="${OPTARG}"
+                ;;
+            C)
+                _chdir="${OPTARG}"
                 ;;
             *)
                 exit 64 # EX_USAGE
@@ -87,7 +91,7 @@ extract()
 
     tar -x -z -U -f ${_src} -C ${_distdir}/__staging__
 
-    cpdup -x -o -l -VV ${_distdir}/__staging__ ${_dst}
+    cpdup -x -o -l -VV ${_distdir}/__staging__/${_chdir} ${_dst}
 
     find ${_distdir}/__staging__ -flags -schg -exec chflags noschg {} \; > /dev/null 2>&1 || :
     rm -r -f ${_distdir}/__staging__ > /dev/null 2>&1
@@ -129,7 +133,7 @@ if [ ${_source} = host -a -z "${DESTDIR}" ] || [ ${_source} = jail ]; then
             rm -r -f  ${_file}
         done
 
-        extract -s ${_distdir}/src.txz -d ${DESTDIR}/
+        extract -s ${_distdir}/src.txz -C /usr/src -d ${DESTDIR}/usr/src
     fi
 fi
 
