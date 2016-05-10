@@ -15,18 +15,18 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
-JOBS="$(sysctl -n hw.ncpu)"
+_jobs="$(sysctl -n hw.ncpu)"
 
 while getopts "j:" OPT; do
     case ${OPT} in
         j)
-            JOBS="${OPTARG}"
+            _jobs="${OPTARG}"
             ;;
         *)
     esac
 done
 
-JOBS_OPTION="-j${JOBS}"
+_jobs_option="-j${_jobs}"
 
 shift $((${OPTIND} - 1))
 
@@ -43,7 +43,7 @@ install -o root -g wheel -m 644 ansible/RELENG_${OS_MAJOR}.${_arch} ${OS_SRCDIR}
 
 echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
-make -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" ${JOBS_OPTION} buildworld buildkernel
+make -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" ${_jobs_option} buildworld buildkernel
 make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" release NOPORTS=yes
 
 rm -r -f ${OS_RELDIR}
