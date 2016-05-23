@@ -1032,7 +1032,10 @@ EOF
 
     lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} update -f
     lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} install -y pkg
-    lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
+
+    if [ -d ${_destdir}/var/cache/pkg ]; then
+        lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
+    fi
 
     if is_yes ${_use_files}; then
         rm -f ${_destdir}/usr/local/etc/pkg/repos/pkg.conf
@@ -1660,7 +1663,10 @@ pkg: {
 EOF
 
         lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} install -y ${_runtime}
-        lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -a -y
+
+        if [ -d ${_destdir}/var/cache/pkg ]; then
+            lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
+        fi
 
         rm -f ${_destdir}/usr/local/etc/pkg/repos/pkg.conf
 
