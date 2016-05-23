@@ -94,6 +94,7 @@ extract()
     cpdup -x -o -l -VV ${_distdir}/__staging__/${_chdir} ${_dst}
 
     find ${_distdir}/__staging__ -flags -schg -exec chflags noschg {} \; > /dev/null 2>&1 || :
+
     rm -r -f ${_distdir}/__staging__ > /dev/null 2>&1
 }
 
