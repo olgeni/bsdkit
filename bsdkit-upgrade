@@ -56,7 +56,7 @@ extract()
     local _exclude=""
     local _chdir=""
 
-    while getopts "s:d:x:C:" OPT; do
+    while getopts "s:d:x:C:o" OPT; do
         case $OPT in
             s)
                 _src=${OPTARG}
@@ -69,6 +69,9 @@ extract()
                 ;;
             C)
                 _chdir="${OPTARG}"
+                ;;
+            o)
+                _options="${_options} -o"
                 ;;
             *)
                 exit 64 # EX_USAGE
@@ -91,7 +94,7 @@ extract()
 
     tar -x -z -U -f ${_src} -C ${_distdir}/__staging__
 
-    cpdup -x -o -l -VV ${_distdir}/__staging__/${_chdir} ${_dst}
+    cpdup ${_options} -x -l -VV ${_distdir}/__staging__/${_chdir} ${_dst}
 
     find ${_distdir}/__staging__ -flags -schg -exec chflags noschg {} \; > /dev/null 2>&1 || :
 
@@ -134,7 +137,7 @@ if [ ${_source} = host -a -z "${DESTDIR}" ] || [ ${_source} = jail ]; then
             rm -r -f  ${_file}
         done
 
-        extract -s ${_distdir}/src.txz -C /usr/src -d ${DESTDIR}/usr/src
+        extract -o -s ${_distdir}/src.txz -C /usr/src -d ${DESTDIR}/usr/src
     fi
 fi
 
@@ -154,23 +157,23 @@ fi
 
 if [ -z "${DESTDIR}" ]; then
     echo "Extracting: kernel.txz"
-    extract -s ${_distdir}/kernel.txz -d ${DESTDIR}/
+    extract -o -s ${_distdir}/kernel.txz -d ${DESTDIR}/
 fi
 
 echo "Extracting: base.txz"
-extract -s ${_distdir}/base.txz -d ${DESTDIR}/ -x ".cshrc .profile dev etc media mnt proc root tmp var"
+extract -o -s ${_distdir}/base.txz -d ${DESTDIR}/ -x ".cshrc .profile dev etc media mnt proc root tmp var"
 
 echo "Extracting: doc.txz"
-extract -s ${_distdir}/doc.txz -d ${DESTDIR}/
+extract -o -s ${_distdir}/doc.txz -d ${DESTDIR}/
 
 if [ -f ${_distdir}/games.txz ]; then
     echo "Extracting: games.txz"
-    extract -s ${_distdir}/games.txz -d ${DESTDIR}/
+    extract -o -s ${_distdir}/games.txz -d ${DESTDIR}/
 fi
 
 if [ -f ${_distdir}/lib32.txz ]; then
     echo "Extracting: lib32.txz"
-    extract -s ${_distdir}/lib32.txz -d ${DESTDIR}/
+    extract -o -s ${_distdir}/lib32.txz -d ${DESTDIR}/
 fi
 
 echo "Running: mtree"
