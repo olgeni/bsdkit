@@ -239,6 +239,7 @@
     - name: "Install base packages"
       pkgng: name={{item}} state=present
       with_items:
+        - beadm
         - ca_root_nss
         - cpdup
         - curl
