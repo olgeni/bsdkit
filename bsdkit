@@ -2071,7 +2071,7 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-install connection=ssh ansible_shell_type=csh ansible_ssh_host=${_remote_address} ansible_ssh_port=${_remote_port} ansible_ssh_private_key_file=${_ansible_key}
+install connection=ssh ansible_shell_type=csh ansible_python_interpreter=/usr/local/bin/python ansible_ssh_host=${_remote_address} ansible_ssh_port=${_remote_port} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
     cat > ${_ansible_yml} << EOF
@@ -2138,7 +2138,7 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-jail connection=ssh ansible_shell_type=csh ansible_ssh_host=${JAIL_ADDRESS} ansible_ssh_port=${JAIL_SSH_PORT} ansible_ssh_private_key_file=${_ansible_key}
+jail connection=ssh ansible_shell_type=csh ansible_python_interpreter=/usr/local/bin/python ansible_ssh_host=${JAIL_ADDRESS} ansible_ssh_port=${JAIL_SSH_PORT} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
     cat > ${_ansible_yml} << EOF
