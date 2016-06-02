@@ -1441,7 +1441,7 @@ do_install_jail()
          host.hostname=${_jail_name} \
          ip4.addr=${JAIL_ADDRESS} \
          interface=${JAIL_INTERFACE} \
-         sysvmsg sysvsem sysvshm \
+         sysvmsg=new sysvsem=new sysvshm=new \
          command=/bin/pwd > /dev/null 2>&1; then
         pw -V ${_destdir}/etc groupadd pgsql -g ${PGSQL_JAIL_GROUP}
 
