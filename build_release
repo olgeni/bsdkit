@@ -2,6 +2,8 @@
 
 set -e -u
 
+unset POSIXLY_CORRECT
+
 SCRIPT_NAME=$(basename $0)
 
 error()
