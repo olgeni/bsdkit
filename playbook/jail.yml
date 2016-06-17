@@ -239,10 +239,12 @@
     - name: "Install base packages"
       pkgng: name={{item}} state=present
       with_items:
+        - align
         - beadm
         - ca_root_nss
         - cpdup
         - curl
+        - inplace
         - rsync
         - socat
         - sudo
