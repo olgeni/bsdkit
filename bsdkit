@@ -1377,6 +1377,11 @@ install_iocage()
 
     sysrc -f ${_destdir}/etc/rc.conf -x hostname
 
+    sysrc -f ${_destdir}/etc/rc.conf cron_enable=NO
+    sysrc -f ${_destdir}/etc/rc.conf ntpd_enable=NO
+    sysrc -f ${_destdir}/etc/rc.conf ntpd_sync_on_start=NO
+    sysrc -f ${_destdir}/etc/rc.conf sendmail_enable=NONE
+
     iocage set host_hostname="${_tag}" ${_uuid}
 }
 
