@@ -1366,11 +1366,9 @@ install_iocage()
 
     which iocage > /dev/null 2>&1 || error "iocage not found (install_iocage)."
 
-    local _install_tag=$(uuidgen)
+    iocage create -e tag="${_tag}" > /dev/null 2>&1
 
-    iocage create -e tag="${_install_tag}" > /dev/null 2>&1
-
-    local _uuid=$(iocage get host_hostuuid ${_install_tag})
+    local _uuid=$(iocage get host_hostuuid ${_tag})
     local _destdir=${IOCAGE_JAILS}/${_uuid}/root
 
     [ -d ${_destdir} ] || error "iocage root does not exist (install_iocage)."
@@ -1379,7 +1377,7 @@ install_iocage()
 
     sysrc -f ${_destdir}/etc/rc.conf -x hostname
 
-    iocage set tag="${_tag}" host_hostname="${_tag}" ${_uuid}
+    iocage set host_hostname="${_tag}" ${_uuid}
 }
 
 install_jail()
