@@ -1373,7 +1373,7 @@ install_iocage()
     local _uuid=$(iocage get host_hostuuid ${_install_tag})
     local _destdir=${IOCAGE_JAILS}/${_uuid}/root
 
-    [ -d ${_destdir} ] || "iocage root does not exist (install_iocage)."
+    [ -d ${_destdir} ] || error "iocage root does not exist (install_iocage)."
 
     do_install_jail ${_destdir}
 
