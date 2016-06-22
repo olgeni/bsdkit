@@ -82,7 +82,6 @@
       with_items:
         - csh.cshrc
         - make.conf
-        - mergemaster.rc
         - periodic.conf
         - rc.conf
         - src.conf

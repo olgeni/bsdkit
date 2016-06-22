@@ -1,9 +1,0 @@
-AUTO_INSTALL='yes'
-AUTO_UPGRADE='yes'
-# THIS ONE IS FOR JAILS
-# IGNORE_FILES='/boot/device.hints /etc/motd'
-IGNORE_FILES='/etc/motd'
-# Do not display changes that only affect whitespace
-DIFF_FLAG='-Bub'
-FREEBSD_ID='yes'
-DELETE_STALE_RC_FILES='yes'
