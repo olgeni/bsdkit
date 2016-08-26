@@ -518,7 +518,7 @@ zfs_create_pool()
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device} || :
+        zpool labelclear -f ${_device} 2> /dev/null || :
     done
 
     case $# in
@@ -600,7 +600,7 @@ zfs_create_gpt_pool()
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device}${_suffix} || :
+        zpool labelclear -f ${_device}${_suffix} 2> /dev/null || :
     done
 
     case $# in
@@ -666,7 +666,7 @@ zfs_create_mbr_pool()
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device}${_suffix} || :
+        zpool labelclear -f ${_device}${_suffix} 2> /dev/null || :
     done
 
     case $# in
