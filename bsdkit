@@ -1564,15 +1564,21 @@ install_setup_runtime()
 
     local _runtime=""
 
-    _runtime="${_runtime} align"
+    # required
     _runtime="${_runtime} ansible"
-    _runtime="${_runtime} ataidle"
     _runtime="${_runtime} bar"
+    _runtime="${_runtime} ca_root_nss"
+    _runtime="${_runtime} pkg"
+    _runtime="${_runtime} python"
+    _runtime="${_runtime} zsh"
+
+    # optional
+    _runtime="${_runtime} align"
+    _runtime="${_runtime} ataidle"
     _runtime="${_runtime} bcwipe"
     _runtime="${_runtime} beadm"
     _runtime="${_runtime} buffer"
     _runtime="${_runtime} bvi"
-    _runtime="${_runtime} ca_root_nss"
     _runtime="${_runtime} cdialog"
     _runtime="${_runtime} clone"
     _runtime="${_runtime} cpdup"
@@ -1594,9 +1600,7 @@ install_setup_runtime()
     _runtime="${_runtime} openvpn"
     _runtime="${_runtime} pefs-kmod"
     _runtime="${_runtime} pipemeter"
-    _runtime="${_runtime} pkg"
     _runtime="${_runtime} pv"
-    _runtime="${_runtime} python"
     _runtime="${_runtime} rdate"
     _runtime="${_runtime} redir"
     _runtime="${_runtime} renameutils"
@@ -1605,7 +1609,6 @@ install_setup_runtime()
     _runtime="${_runtime} tinyproxy"
     _runtime="${_runtime} tmux"
     _runtime="${_runtime} zip"
-    _runtime="${_runtime} zsh"
 
     local _allpkg=${_pkgpath}/All
 
