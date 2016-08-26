@@ -295,12 +295,12 @@ gpt_ufs_partition_large()
 
     gpart bootcode -b /boot/pmbr ${_device}
 
-    gpart add -i 1 -a 4k -s 256K             -t freebsd-boot -l boot ${_device}
-    gpart add -i 2 -a 4k -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap ${_device}
-    gpart add -i 3 -a 4k -s ${FS_ROOT_SIZE}M -t freebsd-ufs  -l root ${_device}
-    gpart add -i 4 -a 4k -s ${FS_TMP_SIZE}M  -t freebsd-ufs  -l tmp  ${_device}
-    gpart add -i 5 -a 4k -s ${FS_VAR_SIZE}M  -t freebsd-ufs  -l var  ${_device}
-    gpart add -i 6 -a 4k                     -t freebsd-ufs  -l usr  ${_device}
+    gpart add -i 1 -s 256K             -t freebsd-boot -l boot ${_device}
+    gpart add -i 2 -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap ${_device}
+    gpart add -i 3 -s ${FS_ROOT_SIZE}M -t freebsd-ufs  -l root ${_device}
+    gpart add -i 4 -s ${FS_TMP_SIZE}M  -t freebsd-ufs  -l tmp  ${_device}
+    gpart add -i 5 -s ${FS_VAR_SIZE}M  -t freebsd-ufs  -l var  ${_device}
+    gpart add -i 6                     -t freebsd-ufs  -l usr  ${_device}
 
     gpart bootcode -p /boot/gptboot -i 1 ${_device}
 
@@ -349,8 +349,8 @@ gpt_ufs_partition_small()
 
     gpart bootcode -b /boot/pmbr ${_device}
 
-    gpart add -i 1 -a 4k -s 256K -t freebsd-boot -l boot ${_device}
-    gpart add -i 2 -a 4k         -t freebsd-ufs  -l root ${_device}
+    gpart add -i 1 -s 256K -t freebsd-boot -l boot ${_device}
+    gpart add -i 2         -t freebsd-ufs  -l root ${_device}
 
     gpart bootcode -p /boot/gptboot -i 1 ${_device}
 
@@ -395,12 +395,12 @@ mbr_ufs_partition_large()
 
     # FIXME refactor (end)
 
-    gpart add -i 1 -a 4k -s ${FS_ROOT_SIZE}M -t freebsd-ufs  ${_device}s1 # a
-    gpart add -i 2 -a 4k -s ${FS_SWAP_SIZE}M -t freebsd-swap ${_device}s1 # b
+    gpart add -i 1 -s ${FS_ROOT_SIZE}M -t freebsd-ufs  ${_device}s1 # a
+    gpart add -i 2 -s ${FS_SWAP_SIZE}M -t freebsd-swap ${_device}s1 # b
     # reserved partition c
-    gpart add -i 4 -a 4k -s ${FS_TMP_SIZE}M  -t freebsd-ufs  ${_device}s1 # d
-    gpart add -i 5 -a 4k -s ${FS_VAR_SIZE}M  -t freebsd-ufs  ${_device}s1 # e
-    gpart add -i 6 -a 4k                     -t freebsd-ufs  ${_device}s1 # f
+    gpart add -i 4 -s ${FS_TMP_SIZE}M  -t freebsd-ufs  ${_device}s1 # d
+    gpart add -i 5 -s ${FS_VAR_SIZE}M  -t freebsd-ufs  ${_device}s1 # e
+    gpart add -i 6                     -t freebsd-ufs  ${_device}s1 # f
 
     # FIXME use -j
 
@@ -458,7 +458,7 @@ mbr_ufs_partition_small()
 
     # FIXME refactor (end)
 
-    gpart add -i 1 -a 4k -t freebsd-ufs  ${_device}s1 # a
+    gpart add -i 1 -t freebsd-ufs  ${_device}s1 # a
 
     # FIXME use -j
 
@@ -574,16 +574,16 @@ zfs_create_gpt_pool()
 
         local _partition=1
 
-        gpart add -i ${_partition} -a 4k -s 256K -t freebsd-boot -l boot${_device_index} ${_device}
+        gpart add -i ${_partition} -s 256K -t freebsd-boot -l boot${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_partition} ${_device}
         _partition=$((${_partition} + 1))
 
         if has_swap; then
-            gpart add -i ${_partition} -a 4k -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap${_device_index} ${_device}
+            gpart add -i ${_partition} -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap${_device_index} ${_device}
             _partition=$((${_partition} + 1))
         fi
 
-        gpart add -i ${_partition} -a 4k -t freebsd-zfs -l pool${_device_index} ${_device}
+        gpart add -i ${_partition} -t freebsd-zfs -l pool${_device_index} ${_device}
         gpart set -a bootme -i ${_partition} ${_device}
         _pool_partition=${_partition}
         _partition=$((${_partition} + 1))
@@ -1939,8 +1939,8 @@ build_setup_img()
 
     gpart bootcode -b /boot/pmbr ${_img_md}
 
-    gpart add -i 1 -a 4k -s 256K -t freebsd-boot ${_img_md}
-    gpart add -i 2 -a 4k         -t freebsd-ufs  -l ${IMG_DATA_LABEL} ${_img_md}
+    gpart add -i 1 -s 256K -t freebsd-boot ${_img_md}
+    gpart add -i 2         -t freebsd-ufs  -l ${IMG_DATA_LABEL} ${_img_md}
 
     gpart bootcode -p /boot/gptboot -i 1 ${_img_md}
 
