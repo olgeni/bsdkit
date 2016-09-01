@@ -30,7 +30,6 @@ if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
     SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 fi
 
-: ${IMG_FREE_SPACE_PERCENT:=50}
 : ${IMG_DATA_LABEL:=2e158b17-5e10-11e5-ac21-080027af0e2a}
 
 : ${PKG_LOCKFILE:="/tmp/pkg.lock"}
@@ -1919,75 +1918,26 @@ build_setup_img()
     local _iso="$1"
     local _img="$2"
 
-    local _img_md=""
-    local _iso_md=""
-    local _img_mounted=0
-    local _iso_mounted=0
+    local _staging=$(mktemp -d /tmp/XXXXXX)
 
-    eval $(stat -s ${_iso})
+    tar -x -f ${_iso} -C ${_staging} boot memroot.ufs.gz
 
-    local _img_md_size=$((${st_size} / 1048576))
+    cp ${_iso} ${_staging}
 
-    _img_md_size=$((${_img_md_size} + ${_img_md_size} * ${IMG_FREE_SPACE_PERCENT} / 100))
+    local _ufs=$(mktemp /tmp/XXXXXX)
 
-    dd if=/dev/zero of=${_img} bs=1m count=${_img_md_size}
+    makefs ${_ufs} ${_staging}
 
-    _img_md=$(mdconfig -a -t vnode -f ${_img})
+    rm -r -f ${_staging}/memroot.ufs.gz ${_staging}
 
-    gpart destroy -F ${_img_md} 2> /dev/null || :
+    mkimg -v \
+          -s gpt \
+          -b /boot/pmbr \
+          -p freebsd-boot:=/boot/gptboot \
+          -p freebsd-ufs/${IMG_DATA_LABEL}:=${_ufs} \
+          -o ${_img}
 
-    local _iso_path=$(mktemp -d /tmp/XXXXXX)
-    local _img_path=$(mktemp -d /tmp/XXXXXX)
-
-    gpart create -s gpt ${_img_md}
-
-    gpart bootcode -b /boot/pmbr ${_img_md}
-
-    gpart add -i 1 -s 256K -t freebsd-boot ${_img_md}
-    gpart add -i 2         -t freebsd-ufs  -l ${IMG_DATA_LABEL} ${_img_md}
-
-    gpart bootcode -p /boot/gptboot -i 1 ${_img_md}
-
-    newfs -n /dev/gpt/${IMG_DATA_LABEL}
-
-    {
-        mount -o async,noatime /dev/gpt/${IMG_DATA_LABEL} ${_img_path}
-
-        _img_mounted=1
-
-        _iso_md=$(mdconfig -a -t vnode -f ${_iso})
-
-        mount -t cd9660 /dev/${_iso_md} ${_iso_path}
-
-        _iso_mounted=1
-
-        local _pwd=$(pwd)
-
-        (cd ${_iso_path} && pax -r -w -pe boot memroot.ufs.gz ${_img_path})
-
-        cd ${_pwd}
-
-        cp ${_iso} ${_img_path}
-    }
-
-    set +e
-
-    [ "${_iso_mounted}" -eq 1 ] &&  while ! umount -f ${_iso_path}; do
-        echo "Waiting for ${_iso_path} (iso)"
-        sleep 3
-    done
-
-    rmdir ${_iso_path}
-
-    [ "${_img_mounted}" -eq 1 ] &&  while ! umount -f ${_img_path}; do
-        echo "Waiting for ${_img_path} (img)"
-        sleep 3
-    done
-
-    rmdir ${_img_path}
-
-    [ -n "${_iso_md}" ] && mdconfig -d -u ${_iso_md}
-    [ -n "${_img_md}" ] && mdconfig -d -u ${_img_md}
+    rm -f ${_ufs}
 }
 
 run()
