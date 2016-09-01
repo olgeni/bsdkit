@@ -736,12 +736,17 @@ zfs_create_fs()
 
     touch ${_destdir}/etc/fstab
 
-    rc_set ${_destdir}/boot/loader.conf.local zfs_load YES
-    rc_set ${_destdir}/etc/rc.conf zfs_enable YES
-
     link_home ${_destdir}
 
     return 0
+}
+
+zfs_enable()
+{
+    local _destdir="$1"
+
+    rc_set ${_destdir}/boot/loader.conf.local zfs_load YES
+    rc_set ${_destdir}/etc/rc.conf zfs_enable YES
 }
 
 link_home()
@@ -1261,6 +1266,7 @@ install_zfs()
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
+    zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
     fsdescfs_setup ${DESTDIR}
@@ -1295,6 +1301,7 @@ install_gpt_zfs()
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
+    zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
     fsdescfs_setup ${DESTDIR}
@@ -1329,6 +1336,7 @@ install_mbr_zfs()
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
+    zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
     fsdescfs_setup ${DESTDIR}
