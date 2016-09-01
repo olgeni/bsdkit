@@ -1592,6 +1592,7 @@ install_setup_runtime()
     _runtime="${_runtime} gnu-watch"
     _runtime="${_runtime} hextools"
     _runtime="${_runtime} hfsutils"
+    _runtime="${_runtime} inplace"
     _runtime="${_runtime} ipmitool"
     _runtime="${_runtime} kermit"
     _runtime="${_runtime} lftp"
