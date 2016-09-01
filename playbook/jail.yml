@@ -71,10 +71,6 @@
         owner=root group=wheel mode=644
       when: stat_usr_src_sys.stat.exists
 
-    - name: "Gather zfs_enable"
-      command: sysrc -n zfs_enable
-      register: sysrc_zfs_enable
-
     - name: "Install configuration files in /etc"
       copy: >
         src=../ansible/{{item}} dest=/etc/{{item}}
@@ -83,8 +79,16 @@
         - csh.cshrc
         - make.conf
         - periodic.conf
-        - rc.conf
         - src.conf
+
+    - name: "Gather zfs_enable"
+      command: sysrc -n zfs_enable
+      register: sysrc_zfs_enable
+
+    - name: "Install /etc/rc.conf"
+      copy: >
+        src=../ansible/rc.conf dest=/etc/rc.conf
+        owner=root group=wheel mode=644
 
     - name: "Set zfs_enable in rc.conf"
       command: sysrc zfs_enable="{{sysrc_zfs_enable.stdout}}"

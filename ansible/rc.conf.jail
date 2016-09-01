@@ -1,0 +1,4 @@
+# This file now contains just the overrides from /etc/defaults/rc.conf
+# please make all changes to this file.
+
+sshd_enable="YES"

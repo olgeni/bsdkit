@@ -1433,13 +1433,6 @@ do_install_jail()
     ansible_jail_playbook
     stop_jail ${_destdir}
 
-    sysrc -f ${_destdir}/etc/rc.conf hostname=${_jail_name}
-
-    sysrc -f ${_destdir}/etc/rc.conf cron_enable=NO
-    sysrc -f ${_destdir}/etc/rc.conf ntpd_enable=NO
-    sysrc -f ${_destdir}/etc/rc.conf ntpd_sync_on_start=NO
-    sysrc -f ${_destdir}/etc/rc.conf sendmail_enable=NONE
-
     [ "${_zfs}" = "YES" ] && zfs snapshot "${_parent_fs}/${_jail_name}@base"
 
     return 0
