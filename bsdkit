@@ -693,8 +693,8 @@ zfs_create_fs()
 
     [ -d ${_destdir} ] || return 1
 
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/ROOT
-    ${ZFS_CREATE_CMD} -o mountpoint=/ ${ZFS_POOL}/ROOT/default
+    ${ZFS_CREATE_CMD} -o canmount=noauto ${ZFS_POOL}/ROOT
+    ${ZFS_CREATE_CMD} -o canmount=on -o mountpoint=/ ${ZFS_POOL}/ROOT/default
 
     zpool set bootfs=${ZFS_POOL}/ROOT/default ${ZFS_POOL}
 
