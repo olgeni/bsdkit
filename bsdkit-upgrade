@@ -183,6 +183,15 @@ mtree -ideU -f /etc/mtree/BSD.var.dist  -p ${DESTDIR}/var
 mtree -ideU -f /etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
 
 if [ -f ${_srcdir}/Makefile ]; then
+    echo "Running: etcupdate"
+    etcupdate -F -I '*.cf' -s ${_srcdir} -D ${DESTDIR}/
+fi
+
+etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
+
+chroot ${DESTDIR}/ newaliases
+
+if [ -f ${_srcdir}/Makefile ]; then
     cd ${_srcdir}
 
     echo "Running: delete-old"
@@ -191,15 +200,6 @@ if [ -f ${_srcdir}/Makefile ]; then
     echo "Running: delete-old-libs"
     yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 fi
-
-if [ -f ${_srcdir}/Makefile ]; then
-    echo "Running: etcupdate"
-    etcupdate -F -I '*.cf' -s ${_srcdir} -D ${DESTDIR}/
-fi
-
-etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
-
-chroot ${DESTDIR}/ newaliases
 
 # gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
 # gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada1
