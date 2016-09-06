@@ -197,8 +197,8 @@ if [ -f ${_srcdir}/Makefile ]; then
     echo "Running: delete-old"
     yes y | make delete-old DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 
-    echo "Running: delete-old-libs"
-    yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
+    # echo "Running: delete-old-libs"
+    # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 fi
 
 # gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
