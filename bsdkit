@@ -1427,13 +1427,9 @@ do_install_jail()
     install_repo ${_destdir} ${FREEBSD_PKG_URL}
     install_pkg ${_destdir} ${FREEBSD_PKG_URL}
 
-    [ "${_zfs}" = "YES" ] && zfs snapshot "${_parent_fs}/${_jail_name}@raw"
-
     start_jail ${_destdir}
     ansible_jail_playbook
     stop_jail ${_destdir}
-
-    [ "${_zfs}" = "YES" ] && zfs snapshot "${_parent_fs}/${_jail_name}@base"
 
     return 0
 }
@@ -1471,8 +1467,6 @@ remove_jail()
     fi
 
     if [ "${_zfs}" = "YES" ]; then
-        zfs destroy "${_parent_fs}/${_jail_name}@raw" 2> /dev/null || :
-        zfs destroy "${_parent_fs}/${_jail_name}@base" 2> /dev/null || :
         zfs destroy "${_parent_fs}/${_jail_name}"
     else
         rm -r -f ${_destdir} 2> /dev/null || :
