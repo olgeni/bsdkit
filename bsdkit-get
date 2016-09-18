@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e -u
+
+for _version in ${BSDKIT_VERSIONS}; do
+    sudo -E rsync -avP --delete ${USER}@${BSDKIT_REMOTE}/release-${_version}-${BSDKIT_ARCH}/ \
+         ${BSDKIT_LOCAL}/release-${_version}-${BSDKIT_ARCH}/
+
+    sudo -E rsync -avP --delete ${BSDKIT_LOCAL}/release-${_version}-${BSDKIT_ARCH}/ \
+         ${BSDKIT_LOCAL}/src/${_version}/release-${BSDKIT_ARCH}/ftp/
+
+    sudo -E rsync -avP ${USER}@${BSDKIT_REMOTE}/release-${_version}-${BSDKIT_ARCH}.iso ${BSDKIT_LOCAL}/
+    sudo -E rsync -avP ${USER}@${BSDKIT_REMOTE}/release-${_version}-${BSDKIT_ARCH}.img ${BSDKIT_LOCAL}/
+done
