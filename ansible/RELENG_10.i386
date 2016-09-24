@@ -34,6 +34,3 @@ options		ALTQ_PRIQ	# Priority Queueing
 options		ALTQ_NOPCC	# Required for SMP build
 
 options		KVA_PAGES=512
-
-nocpu		I486_CPU
-nocpu		I586_CPU
