@@ -722,12 +722,8 @@ zfs_create_fs()
 
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/audit
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/crash
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/db
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/db/pkg
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/db/portsnap
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/log
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/mail
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/run
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/tmp
 
     mkdir -p ${_destdir}/altroot
