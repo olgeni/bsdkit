@@ -703,8 +703,8 @@ zfs_create_fs()
     ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off ${ZFS_POOL}/var
     ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off ${ZFS_POOL}/usr
 
-    ${ZFS_CREATE_CMD} -o mountpoint=/jails    ${ZFS_POOL}/jails
-    ${ZFS_CREATE_CMD} -o mountpoint=/tmp      ${ZFS_POOL}/tmp
+    ${ZFS_CREATE_CMD} -o mountpoint=/jails ${ZFS_POOL}/jails
+    ${ZFS_CREATE_CMD} -o mountpoint=/tmp   ${ZFS_POOL}/tmp
 
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/local
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/home
