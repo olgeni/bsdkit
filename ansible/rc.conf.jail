@@ -1,5 +1,0 @@
-# This file now contains just the overrides from /etc/defaults/rc.conf
-# please make all changes to this file.
-
-sendmail_enable="NONE"
-sshd_enable="YES"
