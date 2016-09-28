@@ -61,7 +61,7 @@ environment()
 : ${FREEBSD_PKG_URL_TEMPLATE:=%%ROOT_URL%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
 
 : ${FREEBSD_URL_HOST:=http://olgeni.olgeni.com/FreeBSD}
-: ${FREEBSD_URL_VERSION:=10.3}
+: ${FREEBSD_URL_VERSION:=11.0}
 : ${FREEBSD_URL_ARCH:=amd64}
 : ${FREEBSD_URL_PKGSET:=nox11}
 
