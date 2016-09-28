@@ -149,3 +149,7 @@ if [ -n "${INSIDE_EMACS}" ]; then
 fi
 
 cdpath=()
+
+if [ -e ${HOME}/.zshrc.local ]; then
+    source ${HOME}/.zshrc.local
+fi
