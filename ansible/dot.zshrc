@@ -20,13 +20,16 @@ HISTSIZE=1000
 SAVEHIST=1000
 
 setopt append_history
-setopt hist_fcntl_lock
 setopt hist_find_no_dups
 setopt hist_ignore_all_dups
 setopt hist_reduce_blanks
 setopt interactive_comments
 setopt notify
 setopt promptsubst
+
+if [ $(uname) != "CYGWIN_NT-10.0" ]; then
+    setopt hist_fcntl_lock
+fi
 
 zstyle ':completion:*' menu select
 
