@@ -982,7 +982,7 @@ FreeBSD: {
 EOF
 
     if valid_url ${_pkgpath}; then
-        cat > ${_destdir}/usr/local/etc/pkg/repos/pkg.conf << EOF
+        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 pkg: {
       url: "${_pkgpath}"
 }
@@ -1011,7 +1011,7 @@ install_pkg()
         mount -t nullfs ${_pkgpath} ${_destdir}/mnt
         export _packagesite=file:///mnt
 
-        cat > ${_destdir}/usr/local/etc/pkg/repos/pkg.conf << EOF
+        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 pkg: {
       url: "${_packagesite}"
 }
@@ -1030,7 +1030,7 @@ EOF
     fi
 
     if is_yes ${_use_files}; then
-        rm -f ${_destdir}/usr/local/etc/pkg/repos/pkg.conf
+        rm -f ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf
         umount -f ${_destdir}/mnt
     fi
 
@@ -1620,7 +1620,7 @@ FreeBSD: {
 }
 EOF
 
-        cat > ${_destdir}/usr/local/etc/pkg/repos/pkg.conf << EOF
+        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 pkg: {
       url: "file://${_pkgdir}"
 }
@@ -1632,7 +1632,7 @@ EOF
             lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
         fi
 
-        rm -f ${_destdir}/usr/local/etc/pkg/repos/pkg.conf
+        rm -f ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf
 
         umount -f ${_destdir}/${_pkgdir}
     }
