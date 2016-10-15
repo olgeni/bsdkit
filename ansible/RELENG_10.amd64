@@ -12,7 +12,6 @@ options		TEKEN_UTF8
 
 options		IPSEC		# IP security (requires device crypto)
 options		IPSEC_NAT_T	# NAT-T support, UDP encap of ESP
-options		IPSEC_DEBUG	# debug for IP security
 options		IPSEC_FILTERTUNNEL	# filter ipsec packets from a tunnel
 
 options 	SC_DFLT_FONT	# compile font in

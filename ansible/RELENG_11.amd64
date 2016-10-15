@@ -6,7 +6,6 @@ options 	DDB		# Enable the ddb debugger backend.
 options		SW_WATCHDOG     # Add software watchdog routines.
 
 options		IPSEC_NAT_T	# NAT-T support, UDP encap of ESP
-options		IPSEC_DEBUG	# debug for IP security
 
 # altq(9). Enable the base part of the hooks with the ALTQ option.
 # Individual disciplines must be built into the base system and can not be
