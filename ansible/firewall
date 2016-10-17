@@ -3,7 +3,5 @@
 add allow all from any to any
 
 # add 100 allow ip from any to any
-
 # add 65534 allow ip from any to any
-
 # delete 100
