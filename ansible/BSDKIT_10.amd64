@@ -1,6 +1,6 @@
 include		GENERIC
 
-ident		KERNEL
+ident		BSDKIT
 
 device		crypto		# core crypto support
 device		cryptodev	# /dev/crypto for access to h/w

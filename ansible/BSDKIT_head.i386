@@ -1,6 +1,6 @@
 include		GENERIC
 
-ident		KERNEL
+ident		BSDKIT
 
 options 	DDB		# Enable the ddb debugger backend.
 options		SW_WATCHDOG     # Add software watchdog routines.

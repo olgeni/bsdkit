@@ -41,17 +41,17 @@ OS_MAJOR=$(echo ${_version} | sed -e "s/\\..*//")
 
 # ===
 
-install -o root -g wheel -m 644 ansible/RELENG_${OS_MAJOR}.${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/KERNEL
+install -o root -g wheel -m 644 ansible/BSDKIT_${OS_MAJOR}.${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 
 echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
-make -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" ${_jobs_option} buildworld buildkernel
-make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" release NOPORTS=yes
+make -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" ${_jobs_option} buildworld buildkernel
+make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" release NOPORTS=yes
 
 rm -r -f ${OS_RELDIR}
 mkdir -p ${OS_RELDIR}
 
-make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" install DESTDIR=${OS_RELDIR}
-make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="KERNEL" clean
+make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" install DESTDIR=${OS_RELDIR}
+make -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" clean
 
 echo ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"

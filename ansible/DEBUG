@@ -1,9 +1,0 @@
-include		KERNEL
-
-options		DEADLKRES
-options		DEBUG_LOCKS
-options		DEBUG_VFS_LOCKS
-options		DIAGNOSTIC
-options		INVARIANTS
-options		INVARIANT_SUPPORT
-options		WITNESS

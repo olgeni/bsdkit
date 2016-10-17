@@ -60,14 +60,8 @@
 
     - name: "Install kernel configuration"
       copy: >
-        src=../ansible/RELENG_{{freebsd_release}}.{{ansible_architecture}}
-        dest=/usr/src/sys/{{ansible_architecture}}/conf/KERNEL
-        owner=root group=wheel mode=644
-      when: stat_usr_src_sys.stat.exists
-
-    - name: "Install kernel configuration (debug)"
-      copy: >
-        src=../ansible/DEBUG dest=/usr/src/sys/{{ansible_architecture}}/conf/DEBUG
+        src=../ansible/BSDKIT_{{freebsd_release}}.{{ansible_architecture}}
+        dest=/usr/src/sys/{{ansible_architecture}}/conf/BSDKIT
         owner=root group=wheel mode=644
       when: stat_usr_src_sys.stat.exists
 
