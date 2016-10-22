@@ -1751,8 +1751,6 @@ init_path="/rescue/init"
 init_shell="/rescue/sh"
 init_script="/baseroot.rc"
 init_chroot="/baseroot"
-
-hw.usb.no_boot_wait="0"
 EOF
 
     mkdir -p ${_mfsroot}/etc
