@@ -969,7 +969,7 @@ EOF
     if valid_url ${_pkgpath}; then
         cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 bsdkit: {
-      url: "${_pkgpath}"
+  url: "${_pkgpath}"
 }
 EOF
     fi
@@ -998,7 +998,7 @@ install_pkg()
 
         cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 bsdkit: {
-      url: "${_packagesite}"
+  url: "${_packagesite}"
 }
 EOF
     fi
@@ -1601,13 +1601,13 @@ install_setup_runtime()
 
         cat > ${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf << EOF
 FreeBSD: {
-      enabled: no
+  enabled: no
 }
 EOF
 
         cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 bsdkit: {
-      url: "file://${_pkgdir}"
+  url: "file://${_pkgdir}"
 }
 EOF
 
