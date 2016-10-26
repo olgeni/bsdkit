@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e -u
+
+SCRIPT_NAME=$(basename $0)
+
+error ()
+{
+    echo "${SCRIPT_NAME}: $@"
+    exit 1
+}
+
+if [ $(whoami) != "root" ]; then
+    error "must be executed as root."
+    exit 1
+fi
+
+for _version in ${BSDKIT_VERSIONS}; do
+    ./build-release ${_version} ${BSDKIT_ARCH}
+    ./build-staging ${_version} ${BSDKIT_ARCH}
+    ./build-iso ${_version} ${BSDKIT_ARCH}
+    ./build-img ${_version} ${BSDKIT_ARCH}
+done
