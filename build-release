@@ -28,9 +28,9 @@ while getopts "j:" OPT; do
     esac
 done
 
-_jobs_option="-j${_jobs}"
-
 shift $((${OPTIND} - 1))
+
+_jobs_option="-j${_jobs}"
 
 _version=$1
 _arch=$2
