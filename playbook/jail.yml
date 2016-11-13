@@ -261,7 +261,7 @@
       when: stat_ca_root_nss.stat.exists
 
     - name: "Run pkg clean"
-      command: pkg clean -a -y
+      shell: pkg clean -a -y || true
       changed_when: false
 
   handlers:
