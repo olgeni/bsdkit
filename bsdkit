@@ -312,6 +312,7 @@ gpt_ufs_partition_large()
 
     mount -o async,noatime /dev/gpt/root ${_destdir}
 
+    mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
     mkdir -p ${_destdir}/tmp
     mkdir -p ${_destdir}/usr
@@ -359,6 +360,7 @@ gpt_ufs_partition_small()
 
     mount -o async,noatime /dev/gpt/root ${_destdir}
 
+    mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
     touch ${_destdir}/etc/fstab
@@ -412,6 +414,7 @@ mbr_ufs_partition_large()
 
     mount -o async,noatime /dev/ufs/root ${_destdir}
 
+    mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
     mkdir -p ${_destdir}/tmp
     mkdir -p ${_destdir}/usr
@@ -465,6 +468,7 @@ mbr_ufs_partition_small()
 
     mount -o async,noatime /dev/ufs/root ${_destdir}
 
+    mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
     touch ${_destdir}/etc/fstab
@@ -714,6 +718,7 @@ zfs_create_fs()
 
     mkdir -p ${_destdir}/altroot
     mkdir -p ${_destdir}/boot
+    mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
     touch ${_destdir}/etc/fstab
