@@ -1983,17 +1983,8 @@ EOF
     - name: "Install bsdkit"
       synchronize: src=${BSDKIT_DIR} dest=/root/ delete=true archive=true mode=push rsync_opts="--exclude .git"
 
-    - name: "Run start_jail_nat"
-      shell: $(environment) /root/bsdkit/bsdkit start_jail_nat > /tmp/bsdkit.log 2>&1
-
     - name: "Run requested bsdkit function"
-      shell: $(environment) /root/bsdkit/bsdkit "$@" >> /tmp/bsdkit.log 2>&1
-
-    - name: "Run start_jail ${DESTDIR}"
-      shell: $(environment) /root/bsdkit/bsdkit start_jail ${DESTDIR} >> /tmp/bsdkit.log 2>&1
-
-    - name: "Run ansible_jail_playbook"
-      shell: $(environment) /root/bsdkit/bsdkit ansible_jail_playbook >> /tmp/bsdkit.log 2>&1
+      shell: $(environment) /root/bsdkit/bsdkit run "$@" >> /tmp/bsdkit.log 2>&1
 
 - hosts: install
   connection: ssh
