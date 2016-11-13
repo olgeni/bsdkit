@@ -986,23 +986,6 @@ install_pkg()
     install_resolv_conf ${_destdir}
     install_ca_root_nss ${_destdir}
 
-    local _use_files=no
-
-    if ! valid_url ${_pkgpath}; then
-        _use_files=yes
-    fi
-
-    if is_yes ${_use_files}; then
-        mount -t nullfs ${_pkgpath} ${_destdir}/mnt
-        export _packagesite=file:///mnt
-
-        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
-bsdkit: {
-  url: "${_packagesite}"
-}
-EOF
-    fi
-
     export BATCH="YES"
     export PACKAGE_BUILDING="YES"
     export UNAME_r=$(uname -r | sed -e "s/-.*//")-RELEASE
@@ -1012,11 +995,6 @@ EOF
 
     if [ -d ${_destdir}/var/cache/pkg ]; then
         lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
-    fi
-
-    if is_yes ${_use_files}; then
-        rm -f ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf
-        umount -f ${_destdir}/mnt
     fi
 
     find ${_destdir}/etc/ \( -name "*.bak" -or -name "*.bak.*" \) -delete
