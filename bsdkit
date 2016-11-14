@@ -2032,11 +2032,6 @@ EOF
 jail connection=ssh ansible_shell_type=csh ansible_python_interpreter=/usr/local/bin/python ansible_ssh_host=${JAIL_ADDRESS} ansible_ssh_port=${JAIL_SSH_PORT} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
-    cat > ${_ansible_yml} << EOF
----
-- include: ${_playbook}/jail.yml
-EOF
-
     write_bsdkit_key ${_ansible_key}
 
     BSDKIT_INTERFACE="$(ifconfig -l -u ether | awk '{ print $1 }')"
@@ -2049,7 +2044,7 @@ EOF
         BSDKIT_IFCONFIG="${BSDKIT_IFCONFIG}" \
         BSDKIT_DEFAULTROUTER="${BSDKIT_DEFAULTROUTER}" \
         JAIL_PROXY="${JAIL_PROXY}" \
-        ansible-playbook ${_ansible_yml}
+        ansible-playbook ${_playbook}/jail.yml
 
     rm -r ${_ansible_root}
 }
