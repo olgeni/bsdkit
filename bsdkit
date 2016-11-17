@@ -1019,11 +1019,12 @@ install_pkg()
 
 start_jail_nat()
 {
-    local _pf_conf=$(mktemp /tmp/XXXXXX)
+    local _interface=$(route get default | grep "interface:" | awk '{ print $2 }')
+
 
     kldload -n pf
 
-    local _interface=$(route get default | grep "interface:" | awk '{ print $2 }')
+    local _pf_conf=$(mktemp /tmp/XXXXXX)
 
     cat > ${_pf_conf} << EOF
 nat from ${JAIL_ADDRESS} to any -> (${_interface})
