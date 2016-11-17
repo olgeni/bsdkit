@@ -1027,7 +1027,7 @@ start_jail_nat()
 
     kldload -n pf
 
-    local _pf_conf=$(mktemp /tmp/XXXXXX)
+    local _pf_conf=$(mktemp /tmp/pf.conf.XXXXXX)
 
     cat > ${_pf_conf} << EOF
 nat from ${JAIL_ADDRESS} to any -> (${_interface})
@@ -1049,7 +1049,7 @@ start_jail()
 
     valid_destdir ${_destdir} || return 1
 
-    local _sshd_config=$(mktemp ${_destdir}/tmp/XXXXXX)
+    local _sshd_config=$(mktemp ${_destdir}/tmp/sshd_config.XXXXXX)
 
     cp ${_destdir}/etc/ssh/sshd_config ${_sshd_config}
 
@@ -1061,7 +1061,7 @@ EOF
 
     local _jail_name=$(basename ${_destdir})
 
-    local _jail_conf=$(mktemp /tmp/XXXXXX)
+    local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
     write_runtime_jail_conf ${_jail_conf} ${_destdir}
 
@@ -1086,7 +1086,7 @@ stop_jail()
 
     local _jail_name=$(basename ${_destdir})
 
-    local _jail_conf=$(mktemp /tmp/XXXXXX)
+    local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
     write_runtime_jail_conf ${_jail_conf} ${_destdir}
 
@@ -1622,15 +1622,15 @@ EOF
 
     rmdir ${_destdir}/${_pkgdir}
 
-    local _tmpfile=$(mktemp ${_destdir}/tmp/XXXXXX)
+    local _master_passwd=$(mktemp ${_destdir}/tmp/master.passwd.XXXXXX)
 
-    cp -p ${_destdir}/etc/master.passwd ${_tmpfile}
+    cp -p ${_destdir}/etc/master.passwd ${_master_passwd}
 
-    sed -i '' -e '/^root/s@/bin/csh@/usr/local/bin/zsh@' ${_tmpfile}
+    sed -i '' -e '/^root/s@/bin/csh@/usr/local/bin/zsh@' ${_master_passwd}
 
-    pwd_mkdb -d ${_destdir}/etc ${_tmpfile}
+    pwd_mkdb -d ${_destdir}/etc ${_master_passwd}
 
-    rm -f ${_tmpfile}
+    rm -f ${_master_passwd}
 
     install -m 644 -o root -g wheel ${_bsdkit}/ansible/dot.zshrc ${_destdir}/root/.zshrc
 
@@ -1900,13 +1900,13 @@ build_setup_img()
     local _iso="$1"
     local _img="$2"
 
-    local _staging=$(mktemp -d /tmp/XXXXXX)
+    local _staging=$(mktemp -d /tmp/staging.XXXXXX)
 
     tar -x -f ${_iso} -C ${_staging} boot memroot.ufs.gz
 
     cp ${_iso} ${_staging}
 
-    local _ufs=$(mktemp /tmp/XXXXXX)
+    local _ufs=$(mktemp /tmp/ufs.XXXXXX)
 
     makefs ${_ufs} ${_staging}
 
@@ -1958,7 +1958,7 @@ remote()
 
     local _playbook=${BSDKIT_DIR}/playbook
 
-    local _ansible_root=$(mktemp -d /tmp/XXXXX)
+    local _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
     local _ansible_cfg=${_ansible_root}/ansible.cfg
     local _ansible_hosts=${_ansible_root}/ansible_hosts
     local _ansible_yml=${_ansible_root}/ansible.yml
@@ -2016,7 +2016,7 @@ ansible_jail_playbook()
 
     local _playbook=${BSDKIT_DIR}/playbook
 
-    local _ansible_root=$(mktemp -d /tmp/XXXXX)
+    local _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
     local _ansible_cfg=${_ansible_root}/ansible.cfg
     local _ansible_hosts=${_ansible_root}/ansible_hosts
     local _ansible_yml=${_ansible_root}/ansible.yml
