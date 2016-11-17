@@ -1021,6 +1021,9 @@ start_jail_nat()
 {
     local _interface=$(route get default | grep "interface:" | awk '{ print $2 }')
 
+    if [ -z "${_interface}" ]; then
+        return 0
+    fi
 
     kldload -n pf
 
