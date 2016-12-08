@@ -44,9 +44,6 @@ autoload run-help-openssl
 autoload run-help-sudo
 autoload run-help-svn
 
-unalias run-help
-alias help=run-help
-
 WORDCHARS=""
 
 prompt="[%l:%n@%m %2~]%# "
