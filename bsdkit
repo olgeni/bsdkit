@@ -1342,6 +1342,22 @@ install_jail()
     fi
 
     do_install_jail "${_destdir}"
+
+    local _release=$(chroot ${_destdir} /bin/freebsd-version -u)
+
+    local _login_env=",UNAME_r=${_release% *}"
+    _login_env="${_login_env},UNAME_v=FreeBSD ${_release}"
+    _login_env="${_login_env},UNAME_m=${FREEBSD_URL_ARCH%.*}"
+    _login_env="${_login_env},UNAME_p=${FREEBSD_URL_ARCH#*.}"
+
+    if [ -e ${_destdir}/usr/include/sys/param.h ]; then
+        local _osversion=$(awk '/\#define __FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h)
+        _login_env="${_login_env},OSVERSION=${_osversion}"
+    fi
+
+    sed -i "" -e "s/,UNAME_r.*:/:/ ; s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
+
+    cap_mkdb ${_destdir}/etc/login.conf
 }
 
 do_install_jail()
