@@ -1343,6 +1343,8 @@ install_jail()
 
     do_install_jail "${_destdir}"
 
+    rc_delete ${_destdir}/etc/rc.conf hostname
+
     local _release=$(chroot ${_destdir} /bin/freebsd-version -u)
 
     local _login_env=",UNAME_r=${_release% *}"
