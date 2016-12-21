@@ -877,6 +877,10 @@ install_release()
                       continue
                   fi
 
+                  if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
+                      continue
+                  fi
+
                   (cd ${_local_relpath} && fetch -o ${_filename} ${_relpath}/${_filename})
               done
 
@@ -892,6 +896,10 @@ install_release()
               fi
 
               if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel" ]; then
+                  continue
+              fi
+
+              if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
                   continue
               fi
 
