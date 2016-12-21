@@ -24,6 +24,7 @@ OS_MAJOR=$(echo ${_version} | sed -e "s/\\..*//")
 
 # ===
 
+./build-release ${_version} ${_arch}
 ./build-staging ${_version} ${_arch}
 ./build-iso ${_version} ${_arch}
 ./build-img ${_version} ${_arch}
