@@ -2022,6 +2022,7 @@ EOF
 
     env ANSIBLE_CONFIG=${_ansible_cfg} \
         SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
+        SSH_AUTH_SOCK="" \
         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
@@ -2062,6 +2063,7 @@ EOF
 
     env ANSIBLE_CONFIG=${_ansible_cfg} \
         SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
+        SSH_AUTH_SOCK="" \
         BSDKIT_INTERFACE="${BSDKIT_INTERFACE}" \
         BSDKIT_IFCONFIG="${BSDKIT_IFCONFIG}" \
         BSDKIT_DEFAULTROUTER="${BSDKIT_DEFAULTROUTER}" \
