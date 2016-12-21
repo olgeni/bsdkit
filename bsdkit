@@ -79,9 +79,9 @@ parse_url()
 {
     local _url="$1"
 
-    echo ${_url} | sed -e "s|%%ROOT_URL%%|${FREEBSD_URL_HOST}|g" \
+    echo ${_url} | sed -e "s|%%ROOT_URL%%|${FREEBSD_URL_HOST}|g"   \
                        -e "s|%%VERSION%%|${FREEBSD_URL_VERSION}|g" \
-                       -e "s|%%ARCH%%|${FREEBSD_URL_ARCH}|g" \
+                       -e "s|%%ARCH%%|${FREEBSD_URL_ARCH}|g"       \
                        -e "s|%%PKGSET%%|${FREEBSD_URL_PKGSET}|g"
 }
 
@@ -1394,7 +1394,7 @@ do_install_jail()
         mkdir -p ${_destdir}
     fi
 
-    INSTALL_KERNEL=no INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir}
+    INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} install_release ${FREEBSD_REL_URL} ${_destdir}
 
     if ! jail -c \
          path=/ \
