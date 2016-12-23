@@ -189,7 +189,7 @@ fi
 
 etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
 
-chroot ${DESTDIR}/ newaliases
+chroot ${DESTDIR} newaliases
 
 if [ -f ${_srcdir}/Makefile ]; then
     cd ${_srcdir}
