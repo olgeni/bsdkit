@@ -2129,16 +2129,26 @@ print_jail_conf()
 
     cat << EOF
 ${_jail_name} {
-	path = "${_destdir%/}";
-	host.hostname = "${_jail_name}";
-	ip4.addr = ${JAIL_ADDRESS};
-	interface = "${JAIL_INTERFACE}";
-	mount.devfs;
-	persist;
-
 	exec.start = "/bin/sh /etc/rc";
 	exec.stop = "/bin/sh /etc/rc.shutdown";
 	exec.clean;
+
+	mount.devfs;
+	persist;
+
+	allow.raw_sockets;
+	allow.sysvipc;
+
+	sysvsem = new;
+	sysvshm = new;
+	sysvmsg = new;
+
+	path = "${_destdir%/}";
+	host.hostname = "\$name";
+	host.domainname = "local";
+	interface = "${JAIL_INTERFACE}";
+	ip4.addr = ${JAIL_ADDRESS};
+	# mount.fstab = "${_destdir%/}/\$name.fstab";
 }
 EOF
 }
@@ -2154,15 +2164,19 @@ write_runtime_jail_conf()
 
     cat > ${_jail_conf} << EOF
 ${_jail_name} {
-	path = "${_destdir%/}";
-	host.hostname = "${_jail_name}";
-	ip4.addr = ${JAIL_ADDRESS};
-	interface = "${JAIL_INTERFACE}";
+	exec.clean;
+
 	mount.devfs;
 	persist;
 
 	allow.raw_sockets;
 	allow.sysvipc;
+
+	path = "${_destdir%/}";
+	host.hostname = "${_jail_name}";
+	host.domainname = "local";
+	ip4.addr = ${JAIL_ADDRESS};
+	interface = "${JAIL_INTERFACE}";
 }
 EOF
 }
