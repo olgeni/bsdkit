@@ -1388,7 +1388,7 @@ do_install_jail()
              ip4.addr=${JAIL_ADDRESS} \
              interface=${JAIL_INTERFACE} \
              command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1 \
-            || error "network unreachable (install_jail)"
+            || error "network unreachable (do_install_jail)"
     fi
 
     local _dirname="$(dirname ${_destdir})"
