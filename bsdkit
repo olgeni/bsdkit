@@ -1482,7 +1482,7 @@ remove_jail()
     fi
 }
 
-create_jail_fstab()
+write_jail_fstab()
 {
     local _destdir="$1"
 
