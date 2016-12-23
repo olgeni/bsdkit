@@ -2058,8 +2058,6 @@ EOF
       file: path=/root/bsdkit state=absent
 EOF
 
-    # stop_jail ${_destdir}
-
     write_bsdkit_key ${_ansible_key}
 
     env ANSIBLE_CONFIG=${_ansible_cfg} \
@@ -2068,6 +2066,8 @@ EOF
         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
+
+    # stop_jail ${_destdir}
 }
 
 ansible_jail_playbook()
