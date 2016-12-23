@@ -24,6 +24,7 @@ error()
 : ${PGSQL_JAIL_USER:=700}
 : ${PGSQL_JAIL_GROUP:=700}
 : ${DESTDIR:=/mnt}
+: ${JAIL_ROOT:=/jails}
 : ${SSH_PUBLIC_KEY:=""}
 
 if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
@@ -49,6 +50,7 @@ environment()
          PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\"   \
          PGSQL_JAIL_GROUP=\"${PGSQL_JAIL_GROUP}\" \
          DESTDIR=\"${DESTDIR}\"                   \
+         JAIL_ROOT=\"${JAIL_ROOT}\"               \
          SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
 }
 
@@ -1341,15 +1343,11 @@ install_jail()
 
     shift ${PARSE_OPTIONS_SHIFT}
 
-    local _destdir="$1"
+    local _jail_name="$1"
 
-    shift
+    local _destdir=${JAIL_ROOT}/${_jail_name}
 
-    if [ $# -ne 0 ]; then
-        error "too many arguments (install_jail)."
-    fi
-
-    do_install_jail "${_destdir}"
+    do_install_jail "${_jail_name}"
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 
@@ -1372,9 +1370,9 @@ install_jail()
 
 do_install_jail()
 {
-    local _destdir="$1"
+    local _jail_name="$1"
 
-    local _jail_name=$(basename ${_destdir})
+    local _destdir=${JAIL_ROOT}/${_jail_name}
 
     if [ -d "${_destdir}" ]; then
         [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
@@ -1484,7 +1482,9 @@ remove_jail()
 
 write_jail_fstab()
 {
-    local _destdir="$1"
+    local _jail_name="$1"
+
+    local _destdir=${JAIL_ROOT}/${_jail_name}
 
     valid_destdir ${_destdir}
 
@@ -2117,11 +2117,9 @@ EOF
 
 print_jail_conf()
 {
-    parse_options "$@"
+    local _jail_name="$1"
 
-    shift ${PARSE_OPTIONS_SHIFT}
-
-    local _destdir="$1"
+    local _destdir=${JAIL_ROOT}/${_jail_name}
 
     valid_destdir ${_destdir} || return 1
 
