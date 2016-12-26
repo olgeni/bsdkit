@@ -312,6 +312,8 @@ gpt_ufs_partition_large()
     newfs -U -L var     /dev/gpt/var
     newfs -U -L usr     /dev/gpt/usr
 
+    swapon /dev/gpt/swap
+
     mount -o async,noatime /dev/gpt/root ${_destdir}
 
     mkdir -p ${_destdir}/cdrom
@@ -417,6 +419,8 @@ mbr_ufs_partition_large()
     newfs -U -L usr     /dev/${_device}s1f
 
     glabel label -v swap /dev/${_device}s1b
+
+    swapon /dev/${_device}s1b
 
     mount -o async,noatime /dev/ufs/root ${_destdir}
 
@@ -583,6 +587,7 @@ zfs_create_gpt_pool()
         if has_swap; then
             gpart add -i ${_partition} -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap${_device_index} ${_device}
             _partition=$((${_partition} + 1))
+            swapon /dev/gpt/swap${_device_index}
         fi
 
         gpart add -i ${_partition} -t freebsd-zfs -l pool${_device_index} ${_device}
@@ -652,6 +657,8 @@ zfs_create_mbr_pool()
         # do not align partitions here
         gpart add -i 1 -s ${_autorootsize}M -t freebsd-zfs  ${_device}s1 # a
         gpart add -i 2                      -t freebsd-swap ${_device}s1 # b
+
+        swapon /dev/${_device}s1b
 
         dd if=/boot/zfsboot of=/dev/${_device}s1a count=1
         dd if=/boot/zfsboot of=/dev/${_device}s1a skip=1 seek=1024
