@@ -107,9 +107,7 @@ cd ${_distdir}
 
 fetch ${_release}/MANIFEST
 
-cat MANIFEST | cut -f 1 | while read _file; do
-    _sha256=$(awk "\$1 == \"${_file}\" { print \$2 }" < MANIFEST)
-
+cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
     if [ -e "${_file}" ]; then
         echo "Checking ${_file}"
         _sha256_local=$(sha256 -q "${_file}")
