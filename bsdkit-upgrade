@@ -155,7 +155,7 @@ if [ -f ${_srcdir}/Makefile ]; then
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
 fi
 
-if [ -z "${DESTDIR}" ]; then
+if [ -f "${DESTDIR}/boot/kernel/kernel" ]; then
     echo "Extracting: kernel.txz"
     extract -o -s ${_distdir}/kernel.txz -d ${DESTDIR}/
 fi
