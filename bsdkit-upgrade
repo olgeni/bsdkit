@@ -9,10 +9,7 @@ which cpdup > /dev/null
 : ${ARCH:=amd64}
 : ${DESTDIR:=}
 
-_source=host
-_srcdir=/usr/src
-
-while getopts "r:v:a:d:j" OPT; do
+while getopts "r:v:a:d:" OPT; do
     case $OPT in
         r)
             SITE_ROOT=${OPTARG}
@@ -26,9 +23,6 @@ while getopts "r:v:a:d:j" OPT; do
         d)
             DESTDIR=${OPTARG%/}
             ;;
-        j)
-            _source=jail
-            ;;
         *)
             exit 64 # EX_USAGE
     esac
@@ -36,7 +30,9 @@ done
 
 shift $((${OPTIND} - 1))
 
-if [ "${_source}" == "jail" ]; then
+_srcdir=/usr/src
+
+if [ -d ${DESTDIR}/usr/src ]; then
     _srcdir=${DESTDIR}/usr/src
 fi
 
@@ -48,59 +44,6 @@ _release=${SITE_ROOT}/release-${VERSION}-${ARCH}
 
 _distdir=/usr/freebsd-dist/${VERSION}-${ARCH}
 
-extract()
-{
-    local _src=""
-    local _dst=""
-    local _options=""
-    local _exclude=""
-    local _chdir=""
-
-    while getopts "s:d:x:C:o" OPT; do
-        case $OPT in
-            s)
-                _src=${OPTARG}
-                ;;
-            d)
-                _dst=${OPTARG}
-                ;;
-            x)
-                _exclude="${OPTARG}"
-                ;;
-            C)
-                _chdir="${OPTARG}"
-                ;;
-            o)
-                _options="${_options} -o"
-                ;;
-            *)
-                exit 64 # EX_USAGE
-        esac
-    done
-
-    [ -f ${_src} ]
-    [ -d ${_dst} ]
-
-    _dst="$(echo ${_dst} | sed -e "s@//@/@")"
-
-    find ${_distdir}/__staging__ -flags -schg -exec chflags noschg {} \; > /dev/null 2>&1 || :
-    rm -r -f ${_distdir}/__staging__
-
-    mkdir -p ${_distdir}/__staging__
-
-    if [ -n "${_exclude}" ]; then
-        echo "${_exclude}" | rs 0 1 > ${_distdir}/__staging__/.cpignore
-    fi
-
-    tar -x -z -U -f ${_src} -C ${_distdir}/__staging__
-
-    cpdup ${_options} -x -l -VV ${_distdir}/__staging__/${_chdir} ${_dst}
-
-    find ${_distdir}/__staging__ -flags -schg -exec chflags noschg {} \; > /dev/null 2>&1 || :
-
-    rm -r -f ${_distdir}/__staging__ > /dev/null 2>&1
-}
-
 mkdir -p ${_distdir}
 
 cd ${_distdir}
@@ -108,7 +51,7 @@ cd ${_distdir}
 fetch ${_release}/MANIFEST
 
 cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
-    if [ -e "${_file}" ]; then
+    if [ -f "${_file}" ]; then
         echo "Checking ${_file}"
         _sha256_local=$(sha256 -q "${_file}")
     else
@@ -123,20 +66,14 @@ done
 
 export PATH=/rescue:${PATH}
 
-if [ -f ${_srcdir}/Makefile ]; then
-    etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
-fi
+if [ -f ${DESTDIR}/usr/src/Makefile ]; then
+    echo "Extracting: src.txz"
 
-if [ ${_source} = host -a -z "${DESTDIR}" ] || [ ${_source} = jail ]; then
-    if [ -d ${_srcdir} ]; then
-        echo "Extracting: src.txz"
+    for _file in ${DESTDIR}/usr/src/*; do
+        rm -r -f  ${_file}
+    done
 
-        for _file in ${_srcdir}/*; do
-            rm -r -f  ${_file}
-        done
-
-        extract -o -s ${_distdir}/src.txz -C /usr/src -d ${DESTDIR}/usr/src
-    fi
+    tar -x -z -U -f ${_distdir}/src.txz -C ${DESTDIR}
 fi
 
 find ${DESTDIR}/bin       \
@@ -153,26 +90,39 @@ if [ -f ${_srcdir}/Makefile ]; then
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
 fi
 
-if [ -f "${DESTDIR}/boot/kernel/kernel" ]; then
-    echo "Extracting: kernel.txz"
-    extract -o -s ${_distdir}/kernel.txz -d ${DESTDIR}/
-fi
+cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
+    _extract=""
+    _options=""
 
-echo "Extracting: base.txz"
-extract -o -s ${_distdir}/base.txz -d ${DESTDIR}/ -x ".cshrc .profile dev etc media mnt proc root tmp var"
+    case ${_file} in
+        kernel*)
+            if [ -f "${DESTDIR}/boot/kernel/kernel" ]; then
+                _extract="YES"
+            fi
+            ;;
+        base.txz)
+            _options="${_options} --exclude ./.cshrc"
+            _options="${_options} --exclude ./.profile"
+            _options="${_options} --exclude ./dev"
+            _options="${_options} --exclude ./etc"
+            _options="${_options} --exclude ./media"
+            _options="${_options} --exclude ./mnt"
+            _options="${_options} --exclude ./proc"
+            _options="${_options} --exclude ./root"
+            _options="${_options} --exclude ./tmp"
+            _options="${_options} --exclude ./var"
+            ;;
+        *)
+            _extract="YES"
+    esac
 
-echo "Extracting: doc.txz"
-extract -o -s ${_distdir}/doc.txz -d ${DESTDIR}/
-
-if [ -f ${_distdir}/games.txz ]; then
-    echo "Extracting: games.txz"
-    extract -o -s ${_distdir}/games.txz -d ${DESTDIR}/
-fi
-
-if [ -f ${_distdir}/lib32.txz ]; then
-    echo "Extracting: lib32.txz"
-    extract -o -s ${_distdir}/lib32.txz -d ${DESTDIR}/
-fi
+    if [ -n ${_extract} ]; then
+        echo "Extracting: ${_file}"
+        tar -x -z -U -f ${_distdir}/${_file} -C ${DESTDIR} ${_options}
+    else
+        echo "Skipping: ${_file}"
+    fi
+done
 
 echo "Running: mtree"
 
