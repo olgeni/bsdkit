@@ -925,6 +925,8 @@ install_release()
               fi
           done
 
+    rm -f ${_local_relpath}/MANIFEST
+
     mtree -ideU -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/    > /dev/null
     mtree -ideU -f ${_destdir}/etc/mtree/BSD.var.dist  -p ${_destdir}/var > /dev/null
     mtree -ideU -f ${_destdir}/etc/mtree/BSD.usr.dist  -p ${_destdir}/usr > /dev/null
