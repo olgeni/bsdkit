@@ -24,6 +24,7 @@ error()
 : ${PGSQL_JAIL_USER:=700}
 : ${PGSQL_JAIL_GROUP:=700}
 : ${DESTDIR:=/mnt}
+: ${INSTALL_JAIL:=no}
 : ${JAIL_ROOT:=/jails}
 : ${SSH_PUBLIC_KEY:=""}
 
@@ -50,6 +51,7 @@ environment()
          PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\"   \
          PGSQL_JAIL_GROUP=\"${PGSQL_JAIL_GROUP}\" \
          DESTDIR=\"${DESTDIR}\"                   \
+         INSTALL_JAIL=\"${INSTALL_JAIL}\"         \
          JAIL_ROOT=\"${JAIL_ROOT}\"               \
          SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
 }
@@ -808,13 +810,6 @@ fsdescfs_setup()
     return 0
 }
 
-read_manifest()
-{
-    local _relpath="$1"
-
-    cat ${_relpath}/MANIFEST | cut -f 1,4
-}
-
 is_yes()
 {
     case $1 in
@@ -863,73 +858,88 @@ install_release()
     [ -d ${_destdir} ] || return 1
     [ ${_destdir} != "/" ] || return 1
 
-    local _tag=$(echo ${_relpath} | sed -e "s@/\$@@" -e "s@.*/@@" -e "s@[a-z]*-@@")
-
-    local _is_remote="NO"
+    local _is_remote="no"
 
     if valid_url ${_relpath}; then
-        _local_relpath="${_destdir}/usr"
+        _is_remote="yes"
 
-        if [ ! -d ${_local_relpath} ]; then
-            _local_relpath="${_destdir}"
+        local _local_relpath
+
+        local _release_tag="${FREEBSD_URL_VERSION}-${FREEBSD_URL_ARCH}"
+
+        if is_yes ${INSTALL_JAIL}; then
+            _local_relpath="/usr/freebsd-dist/${_release_tag}"
+        else
+            _local_relpath="${_destdir}/freebsd-dist/${_release_tag}"
         fi
 
-        (cd ${_local_relpath} && fetch -o MANIFEST ${_relpath}/MANIFEST)
+        mkdir -p ${_local_relpath}
 
-        read_manifest ${_local_relpath} \
-            | while read _filename _package; do
-                  if ! is_yes ${INSTALL_SRC} && [ ${_package} = "src" ]; then
-                      continue
-                  fi
+        fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
 
-                  if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel" ]; then
-                      continue
-                  fi
+        cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package; do
+            local _sha256_local
 
-                  if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
-                      continue
-                  fi
+            if [ -f "${_local_relpath}/${_filename}" ]; then
+                _sha256_local=$(sha256 -q "${_local_relpath}/${_filename}")
+            else
+                _sha256_local="0"
+            fi
 
-                  (cd ${_local_relpath} && fetch -o ${_filename} ${_relpath}/${_filename})
-              done
+            while [ "${_sha256}" != "${_sha256_local}" ]; do
+                fetch -o ${_local_relpath}/${_filename} ${_relpath}/${_filename}
+
+                _sha256_local=$(sha256 -q "${_local_relpath}/${_filename}")
+            done
+        done
 
         _relpath=${_local_relpath}
-
-        _is_remote="YES"
     fi
 
-    read_manifest ${_relpath} \
-        | while read _filename _package; do
-              if ! is_yes ${INSTALL_SRC} && [ ${_package} = "src" ]; then
-                  continue
-              fi
+    cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package; do
+        if ! is_yes ${INSTALL_SRC} && [ ${_package} = "src" ]; then
+            continue
+        fi
 
-              if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel" ]; then
-                  continue
-              fi
+        if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel" ]; then
+            continue
+        fi
 
-              if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
-                  continue
-              fi
+        if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
+            continue
+        fi
 
-              if which bar > /dev/null 2>&1; then
-                  bar -t ${_relpath}/${_filename} | tar --unlink -xpJf - -C ${_destdir}
-              else
-                  tar --unlink -xpJf ${_relpath}/${_filename} -C ${_destdir}
-              fi
+        if which bar > /dev/null 2>&1; then
+            bar -T 16 -n -t ${_relpath}/${_filename} | tar --unlink -xpJf - -C ${_destdir}
+        else
+            tar --unlink -xpJf ${_relpath}/${_filename} -C ${_destdir}
+        fi
 
-              sync
+        sync
+    done
 
-              if is_yes "${_is_remote}"; then
-                  rm -f ${_relpath}/${_filename}
-              fi
-          done
+    if is_yes ${_is_remote}; then
+        if ! is_yes ${INSTALL_JAIL}; then
+            rm -f ${_relpath}/*
+            rmdir ${_relpath}
+        fi
+    fi
 
-    rm -f ${_local_relpath}/MANIFEST
+    mtree -ideU -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
+    mtree -ideU -f ${_destdir}/etc/mtree/BSD.var.dist  -p ${_destdir}/var
+    mtree -ideU -f ${_destdir}/etc/mtree/BSD.usr.dist  -p ${_destdir}/usr
 
-    mtree -ideU -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/    > /dev/null
-    mtree -ideU -f ${_destdir}/etc/mtree/BSD.var.dist  -p ${_destdir}/var > /dev/null
-    mtree -ideU -f ${_destdir}/etc/mtree/BSD.usr.dist  -p ${_destdir}/usr > /dev/null
+    if [ -f ${_destdir}/etc/mtree/BSD.include.dist ]; then
+        mtree -ideU -f ${_destdir}/etc/mtree/BSD.include.dist -p ${_destdir}/usr/include
+    fi
+
+    if [ -f ${_destdir}/etc/mtree/BSD.sendmail.dist ]; then
+        mtree -ideU -f ${_destdir}/etc/mtree/BSD.sendmail.dist -p ${_destdir}/
+    fi
+
+    if [ -f ${_destdir}/etc/mtree/BSD.tests.dist ]; then
+        mtree -ideU -f ${_destdir}/etc/mtree/BSD.tests.dist -p ${_destdir}/usr/tests
+    fi
 
     return 0
 }
@@ -1411,7 +1421,7 @@ do_install_jail()
         mkdir -p ${_destdir}
     fi
 
-    INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} install_release ${FREEBSD_REL_URL} ${_destdir}
+    INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} INSTALL_JAIL=yes install_release ${FREEBSD_REL_URL} ${_destdir}
 
     if ! jail -c \
          path=/ \
