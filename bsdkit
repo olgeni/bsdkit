@@ -1534,6 +1534,8 @@ EOF
             fi
         fi
     fi
+
+    echo ${_destdir}.fstab
 }
 
 make_read_only()
