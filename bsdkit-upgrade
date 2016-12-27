@@ -73,7 +73,7 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
         rm -r -f  ${_file}
     done
 
-    tar -x -z -U -f ${_distdir}/src.txz -C ${DESTDIR}
+    tar -x -z -U -f ${_distdir}/src.txz -C ${DESTDIR}/
 fi
 
 find ${DESTDIR}/bin       \
@@ -118,7 +118,7 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
 
     if [ -n ${_extract} ]; then
         echo "Extracting: ${_file}"
-        tar -x -z -U -f ${_distdir}/${_file} -C ${DESTDIR} ${_options}
+        tar -x -z -U -f ${_distdir}/${_file} -C ${DESTDIR}/ ${_options}
     else
         echo "Skipping: ${_file}"
     fi
@@ -137,7 +137,7 @@ fi
 
 etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
 
-chroot ${DESTDIR} newaliases
+chroot ${DESTDIR}/ newaliases
 
 if [ -f ${_srcdir}/Makefile ]; then
     cd ${_srcdir}
