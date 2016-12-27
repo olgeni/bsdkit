@@ -64,10 +64,10 @@ environment()
 : ${FREEBSD_REL_URL_TEMPLATE:=%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%}
 : ${FREEBSD_PKG_URL_TEMPLATE:=%%ROOT_URL%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
 
-: ${FREEBSD_URL_HOST:=http://olgeni.olgeni.com/FreeBSD}
-: ${FREEBSD_URL_VERSION:=11.0}
-: ${FREEBSD_URL_ARCH:=amd64}
-: ${FREEBSD_URL_PKGSET:=nox11}
+: ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
+: ${BSDKIT_VERSION:=11.0}
+: ${BSDKIT_ARCH:=amd64}
+: ${BSDKIT_PKGSET:=nox11}
 
 # FREEBSD_REL_URL, FREEBSD_PKG_URL: initialized by parse_options
 
@@ -83,23 +83,23 @@ parse_url()
 {
     local _url="$1"
 
-    echo ${_url} | sed -e "s|%%ROOT_URL%%|${FREEBSD_URL_HOST}|g"   \
-                       -e "s|%%VERSION%%|${FREEBSD_URL_VERSION}|g" \
-                       -e "s|%%ARCH%%|${FREEBSD_URL_ARCH}|g"       \
-                       -e "s|%%PKGSET%%|${FREEBSD_URL_PKGSET}|g"
+    echo ${_url} | sed -e "s|%%ROOT_URL%%|${BSDKIT_ROOT_URL}|g" \
+                       -e "s|%%VERSION%%|${BSDKIT_VERSION}|g"   \
+                       -e "s|%%ARCH%%|${BSDKIT_ARCH}|g"         \
+                       -e "s|%%PKGSET%%|${BSDKIT_PKGSET}|g"
 }
 
 parse_options()
 {
     while getopts "r:v:a:z:j:p:i:" OPT; do
         case ${OPT} in
-            r) FREEBSD_URL_HOST=${OPTARG}
+            r) BSDKIT_ROOT_URL=${OPTARG}
                ;;
-            v) FREEBSD_URL_VERSION=${OPTARG}
+            v) BSDKIT_VERSION=${OPTARG}
                ;;
-            a) FREEBSD_URL_ARCH=${OPTARG}
+            a) BSDKIT_ARCH=${OPTARG}
                ;;
-            z) FREEBSD_URL_PKGSET=${OPTARG}
+            z) BSDKIT_PKGSET=${OPTARG}
                ;;
             j) JAIL_ADDRESS=${OPTARG}
                ;;
@@ -114,7 +114,7 @@ parse_options()
 
     FREEBSD_REL_URL=$(parse_url ${FREEBSD_REL_URL_TEMPLATE})
 
-    if [ "${FREEBSD_URL_PKGSET}" = "none" ]; then
+    if [ "${BSDKIT_PKGSET}" = "none" ]; then
         FREEBSD_PKG_URL="none"
     else
         FREEBSD_PKG_URL=$(parse_url ${FREEBSD_PKG_URL_TEMPLATE})
@@ -868,7 +868,7 @@ install_release()
 
         local _local_relpath
 
-        local _release_tag="${FREEBSD_URL_VERSION}-${FREEBSD_URL_ARCH}"
+        local _release_tag="${BSDKIT_VERSION}-${BSDKIT_ARCH}"
 
         if is_yes ${INSTALL_JAIL}; then
             _local_relpath="/usr/freebsd-dist/${_release_tag}"
@@ -1377,8 +1377,8 @@ install_jail()
 
     local _login_env=",UNAME_r=${_release% *}"
     _login_env="${_login_env},UNAME_v=FreeBSD ${_release}"
-    _login_env="${_login_env},UNAME_m=${FREEBSD_URL_ARCH%.*}"
-    _login_env="${_login_env},UNAME_p=${FREEBSD_URL_ARCH#*.}"
+    _login_env="${_login_env},UNAME_m=${BSDKIT_ARCH%.*}"
+    _login_env="${_login_env},UNAME_p=${BSDKIT_ARCH#*.}"
 
     if [ -e ${_destdir}/usr/include/sys/param.h ]; then
         local _osversion=$(awk '/\#define __FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h)

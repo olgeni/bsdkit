@@ -2,21 +2,21 @@
 
 set -e -u
 
-: ${SITE_ROOT:=http://olgeni.olgeni.com/FreeBSD}
-: ${VERSION:=11.0}
-: ${ARCH:=amd64}
+: ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
+: ${BSDKIT_VERSION:=11.0}
+: ${BSDKIT_ARCH:=amd64}
 : ${DESTDIR:=}
 
 while getopts "r:v:a:d:" OPT; do
     case $OPT in
         r)
-            SITE_ROOT=${OPTARG}
+            BSDKIT_ROOT_URL=${OPTARG}
             ;;
         v)
-            VERSION=${OPTARG}
+            BSDKIT_VERSION=${OPTARG}
             ;;
         a)
-            ARCH=${OPTARG}
+            BSDKIT_ARCH=${OPTARG}
             ;;
         d)
             DESTDIR=${OPTARG%/}
@@ -38,9 +38,9 @@ if [ -f ${_srcdir}/Makefile ]; then
     etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
 fi
 
-_release=${SITE_ROOT}/release-${VERSION}-${ARCH}
+_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
-_distdir=/usr/freebsd-dist/${VERSION}-${ARCH}
+_distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
 mkdir -p ${_distdir}
 
