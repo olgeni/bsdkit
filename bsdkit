@@ -176,6 +176,9 @@ valid_url()
         http://*)
             return 0
             ;;
+        https://*)
+            return 0
+            ;;
         ftp://*)
             return 0
             ;;
