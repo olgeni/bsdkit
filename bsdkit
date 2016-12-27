@@ -721,7 +721,6 @@ zfs_create_fs()
 
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/home
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/src
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/obj
 
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/ports
     ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/ports/distfiles
