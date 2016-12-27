@@ -2,8 +2,6 @@
 
 set -e -u
 
-which cpdup > /dev/null
-
 : ${SITE_ROOT:=http://olgeni.olgeni.com/FreeBSD}
 : ${VERSION:=11.0}
 : ${ARCH:=amd64}
