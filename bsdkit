@@ -711,6 +711,7 @@ zfs_create_fs()
     ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off      ${ZFS_POOL}/tmp
     ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off    ${ZFS_POOL}/usr
     ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off    ${ZFS_POOL}/var
+    ${ZFS_CREATE_CMD} -o mountpoint=/jails                  ${ZFS_POOL}/jails
     ${ZFS_CREATE_CMD} -o compression=on                     ${ZFS_POOL}/usr/src
     ${ZFS_CREATE_CMD} -o setuid=off                         ${ZFS_POOL}/usr/ports
     ${ZFS_CREATE_CMD} -o setuid=off -o exec=off             ${ZFS_POOL}/var/audit
@@ -719,7 +720,6 @@ zfs_create_fs()
     ${ZFS_CREATE_CMD} -o atime=on                           ${ZFS_POOL}/var/mail
     ${ZFS_CREATE_CMD} -o setuid=off                         ${ZFS_POOL}/var/tmp
     ${ZFS_CREATE_CMD} -o canmount=off                       ${ZFS_POOL}/usr/local
-    ${ZFS_CREATE_CMD} -o mountpoint=/jails                  ${ZFS_POOL}/jails
     ${ZFS_CREATE_CMD}                                       ${ZFS_POOL}/usr/home
 
     mkdir -p ${_destdir}/altroot
@@ -817,6 +817,7 @@ has_swap()
 {
     [ -z "${FS_SWAP_SIZE}" ] && return 1
     [ "${FS_SWAP_SIZE}" = "0" ] && return 1
+
     return 0
 }
 
