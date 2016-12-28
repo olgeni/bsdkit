@@ -704,38 +704,23 @@ zfs_create_fs()
 
     [ -d ${_destdir} ] || return 1
 
-    ${ZFS_CREATE_CMD} -o canmount=noauto ${ZFS_POOL}/ROOT
-    ${ZFS_CREATE_CMD} -o canmount=on -o mountpoint=/ ${ZFS_POOL}/ROOT/default
-
-    zpool set bootfs=${ZFS_POOL}/ROOT/default ${ZFS_POOL}
-
     zfs set atime=off ${ZFS_POOL}
 
-    ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off ${ZFS_POOL}/var
-    ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off ${ZFS_POOL}/usr
-
-    ${ZFS_CREATE_CMD} -o mountpoint=/jails ${ZFS_POOL}/jails
-    ${ZFS_CREATE_CMD} -o mountpoint=/tmp   ${ZFS_POOL}/tmp
-
-    ${ZFS_CREATE_CMD} -o canmount=off ${ZFS_POOL}/usr/local
-
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/home
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/src
-
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/ports
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/ports/distfiles
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/usr/ports/packages
-
-    zfs set compression=on  ${ZFS_POOL}/usr/src
-    zfs set compression=on  ${ZFS_POOL}/usr/ports
-    zfs set compression=off ${ZFS_POOL}/usr/ports/distfiles
-    zfs set compression=off ${ZFS_POOL}/usr/ports/packages
-
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/audit
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/crash
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/log
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/mail
-    ${ZFS_CREATE_CMD} ${ZFS_POOL}/var/tmp
+    ${ZFS_CREATE_CMD} -o mountpoint=none -o canmount=noauto ${ZFS_POOL}/ROOT
+    ${ZFS_CREATE_CMD} -o mountpoint=/    -o canmount=on     ${ZFS_POOL}/ROOT/default
+    ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off      ${ZFS_POOL}/tmp
+    ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off    ${ZFS_POOL}/usr
+    ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off    ${ZFS_POOL}/var
+    ${ZFS_CREATE_CMD} -o compression=on                     ${ZFS_POOL}/usr/src
+    ${ZFS_CREATE_CMD} -o setuid=off                         ${ZFS_POOL}/usr/ports
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off             ${ZFS_POOL}/var/audit
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off             ${ZFS_POOL}/var/crash
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off             ${ZFS_POOL}/var/log
+    ${ZFS_CREATE_CMD} -o atime=on                           ${ZFS_POOL}/var/mail
+    ${ZFS_CREATE_CMD} -o setuid=off                         ${ZFS_POOL}/var/tmp
+    ${ZFS_CREATE_CMD} -o canmount=off                       ${ZFS_POOL}/usr/local
+    ${ZFS_CREATE_CMD} -o mountpoint=/jails                  ${ZFS_POOL}/jails
+    ${ZFS_CREATE_CMD}                                       ${ZFS_POOL}/usr/home
 
     mkdir -p ${_destdir}/altroot
     mkdir -p ${_destdir}/boot
@@ -747,6 +732,8 @@ zfs_create_fs()
     touch ${_destdir}/etc/fstab
 
     link_home ${_destdir}
+
+    zpool set bootfs=${ZFS_POOL}/ROOT/default ${ZFS_POOL}
 
     return 0
 }
