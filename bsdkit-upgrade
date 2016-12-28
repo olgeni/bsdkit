@@ -64,7 +64,7 @@ done
 
 export PATH=/rescue:${PATH}
 
-if [ -f ${DESTDIR}/usr/src/Makefile ]; then
+if [ -f ${DESTDIR}/usr/src/Makefile -a ! -d ${DESTDIR}/usr/src/.svn ]; then
     echo "Extracting: src.txz"
 
     for _file in ${DESTDIR}/usr/src/*; do
