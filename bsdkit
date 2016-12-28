@@ -16,7 +16,7 @@ error()
 : ${INSTALL_SRC:=yes}
 : ${ZFS_POOL:=rpool}
 : ${PROCFS_ENABLE:=yes}
-: ${FSDESCFS_ENABLE:=yes}
+: ${FDESCFS_ENABLE:=yes}
 : ${FS_SWAP_SIZE:=4096}
 : ${FS_ROOT_SIZE:=2048}
 : ${FS_VAR_SIZE:=6144}
@@ -43,7 +43,7 @@ environment()
          INSTALL_SRC=\"${INSTALL_SRC}\"           \
          ZFS_POOL=\"${ZFS_POOL}\"                 \
          PROCFS_ENABLE=\"${PROCFS_ENABLE}\"       \
-         FSDESCFS_ENABLE=\"${FSDESCFS_ENABLE}\"   \
+         FDESCFS_ENABLE=\"${FDESCFS_ENABLE}\"     \
          FS_SWAP_SIZE=\"${FS_SWAP_SIZE}\"         \
          FS_ROOT_SIZE=\"${FS_ROOT_SIZE}\"         \
          FS_VAR_SIZE=\"${FS_VAR_SIZE}\"           \
@@ -784,9 +784,9 @@ procfs_setup()
     return 0
 }
 
-fsdescfs_setup()
+fdescfs_setup()
 {
-    if ! is_yes "${FSDESCFS_ENABLE}"; then
+    if ! is_yes "${FDESCFS_ENABLE}"; then
         return 0
     fi
 
@@ -1157,7 +1157,7 @@ install_mbr_ufs()
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
-    fsdescfs_setup ${DESTDIR}
+    fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
     install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
@@ -1199,7 +1199,7 @@ install_mbr_ufs_gmirror()
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
-    fsdescfs_setup ${DESTDIR}
+    fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
     install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
@@ -1231,7 +1231,7 @@ install_gpt_ufs()
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
-    fsdescfs_setup ${DESTDIR}
+    fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
     install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
@@ -1266,7 +1266,7 @@ install_zfs()
     zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
-    fsdescfs_setup ${DESTDIR}
+    fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
     install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
@@ -1301,7 +1301,7 @@ install_gpt_zfs()
     zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
-    fsdescfs_setup ${DESTDIR}
+    fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
     install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
@@ -1336,7 +1336,7 @@ install_mbr_zfs()
     zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
-    fsdescfs_setup ${DESTDIR}
+    fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
     install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
