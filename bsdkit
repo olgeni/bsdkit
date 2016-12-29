@@ -853,15 +853,19 @@ install_release()
     if valid_url ${_relpath}; then
         _is_remote="yes"
 
+        local _local_relpath_root
         local _local_relpath
 
         local _release_tag="${BSDKIT_VERSION}-${BSDKIT_ARCH}"
 
         if is_yes ${INSTALL_JAIL}; then
-            _local_relpath="/usr/freebsd-dist/${_release_tag}"
+            _local_relpath_root="/usr/freebsd-dist/"
+
         else
-            _local_relpath="${_destdir}/freebsd-dist/${_release_tag}"
+            _local_relpath_root="${_destdir}/freebsd-dist"
         fi
+
+        _local_relpath="${_local_relpath_root}/${_release_tag}"
 
         mkdir -p ${_local_relpath}
 
@@ -910,8 +914,9 @@ install_release()
 
     if is_yes ${_is_remote}; then
         if ! is_yes ${INSTALL_JAIL}; then
-            rm -f ${_relpath}/*
-            rmdir ${_relpath}
+            rm -f ${_local_relpath}/*
+            rmdir ${_local_relpath}
+            rmdir ${_local_relpath_root}
         fi
     fi
 
