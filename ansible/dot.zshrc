@@ -143,6 +143,7 @@ if [ -n "${INSIDE_EMACS}" ]; then
     export EDITOR=emacsclient
     export VISUAL=emacsclient
     unset zle_bracketed_paste
+    bindkey -r "^[x"
 fi
 
 cdpath=()
