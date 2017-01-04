@@ -31,9 +31,8 @@
     - name: "set_fact: jail_proxy"
       set_fact: jail_proxy="{{lookup('env', 'JAIL_PROXY')}}"
 
-    - name: "stat: /boot/kernel/kernel"
-      stat: path=/boot/kernel/kernel
-      register: stat_kernel
+    - name: "set_fact: install_jail"
+      set_fact: install_jail="{{lookup('env', 'INSTALL_JAIL')}}"
 
     - name: "stat: /usr/src/sys"
       stat: path=/usr/src/sys
@@ -110,7 +109,7 @@
         owner=root group=wheel mode=644
       with_items:
         - sysctl.conf
-      when: stat_kernel.stat.exists
+      when: not install_jail
 
     - name: "Install loader.conf"
       copy: >
@@ -118,7 +117,7 @@
         owner=root group=wheel mode=644
       with_items:
         - loader.conf
-      when: stat_kernel.stat.exists
+      when: not install_jail
 
     - name: "Install dotfiles in /usr/share/skel"
       copy: >
@@ -157,13 +156,13 @@
       copy: >
         src=../ansible/firewall dest=/etc/firewall
         owner=root group=wheel mode=644
-      when: stat_kernel.stat.exists
+      when: not install_jail
 
     - name: "Install /usr/local/etc/smartd.conf"
       copy: >
         src=../ansible/smartd.conf dest=/usr/local/etc/smartd.conf
         owner=root group=wheel mode=644
-      when: stat_kernel.stat.exists
+      when: not install_jail
 
     - name: "Install /usr/local/etc/portmaster.rc"
       copy: >
@@ -192,7 +191,7 @@
       with_items:
         - ".*devstat"
         - ".*fuse.*"
-      when: stat_kernel.stat.exists
+      when: not install_jail
 
     - name: "stat: /var/db/zoneinfo"
       stat: path=/var/db/zoneinfo

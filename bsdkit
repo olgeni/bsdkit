@@ -1446,7 +1446,7 @@ do_install_jail()
     install_pkg ${_destdir} ${FREEBSD_PKG_URL}
 
     start_jail ${_destdir}
-    ansible_jail_playbook
+    INSTALL_JAIL=yes ansible_jail_playbook
     stop_jail ${_destdir}
 
     return 0
@@ -2122,6 +2122,7 @@ EOF
         BSDKIT_IFCONFIG="${BSDKIT_IFCONFIG}" \
         BSDKIT_DEFAULTROUTER="${BSDKIT_DEFAULTROUTER}" \
         JAIL_PROXY="${JAIL_PROXY}" \
+        INSTALL_JAIL="${INSTALL_JAIL}" \
         ansible-playbook ${_playbook}/jail.yml
 
     rm -r ${_ansible_root}
