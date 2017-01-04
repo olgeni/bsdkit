@@ -174,18 +174,30 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
     fi
 done
 
-echo "Running: mtree"
-
-mtree -ideU -f /etc/mtree/BSD.root.dist -p ${DESTDIR}/
-mtree -ideU -f /etc/mtree/BSD.var.dist  -p ${DESTDIR}/var
-mtree -ideU -f /etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
-
 if [ -f ${_srcdir}/Makefile ]; then
     echo "Running: etcupdate"
     etcupdate -F -I '*.cf' -s ${_srcdir} -D ${DESTDIR}/
 fi
 
 etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
+
+echo "Running: mtree"
+
+mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
+mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.var.dist  -p ${DESTDIR}/var
+mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
+
+if [ -f ${DESTDIR}/etc/mtree/BSD.include.dist ]; then
+    mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
+fi
+
+if [ -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist ]; then
+    mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist -p ${DESTDIR}/
+fi
+
+if [ -f ${DESTDIR}/etc/mtree/BSD.tests.dist ]; then
+    mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.tests.dist -p ${DESTDIR}/usr/tests
+fi
 
 chroot ${DESTDIR}/ newaliases
 
