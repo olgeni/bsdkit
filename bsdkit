@@ -860,7 +860,6 @@ install_release()
 
         if is_yes ${INSTALL_JAIL}; then
             _local_relpath_root="/usr/freebsd-dist/"
-
         else
             _local_relpath_root="${_destdir}/freebsd-dist"
         fi
