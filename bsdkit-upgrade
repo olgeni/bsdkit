@@ -2,13 +2,24 @@
 
 set -e -u
 
+error()
+{
+    echo "bsdkit-upgrade: $@"
+    exit 1
+}
+
 : ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
 : ${BSDKIT_VERSION:=11.0}
 : ${BSDKIT_ARCH:=amd64}
 : ${DESTDIR:=}
+: ${BOOTENV_ENABLE:=no}
+: ${BOOTENV_MOUNT:=/mnt}
 
-while getopts "r:v:a:d:" OPT; do
-    case $OPT in
+while getopts "er:v:a:d:" OPT; do
+    case ${OPT} in
+        e)
+            BOOTENV_ENABLE=yes
+            ;;
         r)
             BSDKIT_ROOT_URL=${OPTARG}
             ;;
@@ -27,6 +38,44 @@ while getopts "r:v:a:d:" OPT; do
 done
 
 shift $((${OPTIND} - 1))
+
+if [ -n "${BOOTENV_ENABLE}" ]; then
+    if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}\$"; then
+        error "mount point '${BOOTENV_MOUNT}' already in use"
+    fi
+
+    _bootfs=$(zpool get -H -p -o value bootfs 2>/dev/null | grep -v "^-")
+
+    if [ $? = 0 ]; then
+        _bootenv_base=$(dirname ${_bootfs})
+
+        zfs list -H -o name -r ${_bootenv_base} \
+            | grep -v "^${_bootenv_base}$" \
+            | while read _fs; do
+            echo "Setting noauto property on ${_fs}"
+            zfs set canmount=noauto ${_fs}
+        done
+    fi
+
+    _snapshot_name=$(date +%F)
+    _pool=$(echo ${_bootfs} | cut -d/ -f 1)
+    _snapshot=${_bootfs}@${_snapshot_name}
+    _clone=${_bootenv_base}/${_snapshot_name}
+
+    zfs snapshot ${_snapshot}
+
+    zfs clone -o mountpoint=/ -o canmount=noauto ${_snapshot} ${_clone}
+
+    mkdir -p ${BOOTENV_MOUNT}
+
+    mount -t zfs ${_clone} ${BOOTENV_MOUNT}
+
+    if zfs get -H -o name name ${_pool}/usr/src >/dev/null 2>&1; then
+        mount -t nullfs /usr/src ${BOOTENV_MOUNT}/usr/src
+    fi
+
+    DESTDIR=${BOOTENV_MOUNT}
+fi
 
 _srcdir=/usr/src
 
