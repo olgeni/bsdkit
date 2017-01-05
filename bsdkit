@@ -1417,6 +1417,8 @@ do_install_jail()
 
     INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} INSTALL_JAIL=yes install_release ${FREEBSD_REL_URL} ${_destdir}
 
+    link_home ${_destdir}
+
     if ! jail -c \
          path=/ \
          name=${_jail_name} \
