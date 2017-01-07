@@ -1,9 +1,5 @@
 #!/bin/sh
 
-if [ "${ZSH_NAME}" = "zsh" ]; then
-    setopt shwordsplit
-fi
-
 set -e -u
 
 error()
