@@ -28,7 +28,7 @@ _target=${BSDKIT_PATH}/release-${_version}-${_arch}
 
 rm -f ${_target}/*
 
-cp -v ${OS_RELDIR}/ftp/* ${_target}
+cp ${OS_RELDIR}/ftp/* ${_target}
 
 ./bsdkit build_setup_staging \
     ${BSDKIT_PATH}/staging-${_version}-${_arch} \
