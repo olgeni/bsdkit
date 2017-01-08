@@ -866,7 +866,7 @@ install_release()
 
         fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
 
-        cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package; do
+        cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             local _sha256_local
 
             if [ -f "${_local_relpath}/${_filename}" ]; then
@@ -885,7 +885,7 @@ install_release()
         _relpath=${_local_relpath}
     fi
 
-    cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package; do
+    cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         if ! is_yes ${INSTALL_SRC} && [ ${_package} = "src" ]; then
             continue
         fi
