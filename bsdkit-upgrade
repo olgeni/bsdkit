@@ -2,18 +2,42 @@
 
 set -e -u
 
+: ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
+: ${BSDKIT_VERSION:=11.0}
+: ${BSDKIT_ARCH:=amd64}
+: ${DESTDIR:=}
+: ${BOOTENV_ENABLE:=no}
+: ${BOOTENV_NAME:="$(date +%F)"}
+: ${BOOTENV_MOUNT:=/mnt}
+
 error()
 {
     echo "bsdkit-upgrade: $@"
     exit 1
 }
 
-: ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
-: ${BSDKIT_VERSION:=11.0}
-: ${BSDKIT_ARCH:=amd64}
-: ${DESTDIR:=}
-: ${BOOTENV_ENABLE:=no}
-: ${BOOTENV_MOUNT:=/mnt}
+bsdkit-noauto()
+{
+    _bootfs=$(zpool get -H -p -o value bootfs 2>/dev/null | grep -v "^-")
+
+    if [ $? = 0 ]; then
+        _bootenv_base=$(dirname ${_bootfs})
+
+        zfs list -H -o name -r ${_bootenv_base} \
+            | grep -v "^${_bootenv_base}$" \
+            | while read _fs; do
+
+            echo -n "Checking property 'canmount' on ${_fs}: "
+
+            if [ "$(zfs get -H -o value canmount rpool/ROOT)" != noauto ]; then
+                zfs set canmount=noauto ${_fs}
+                echo "changed."
+            else
+                echo "ok."
+            fi
+        done
+    fi
+}
 
 while getopts "er:v:a:d:" OPT; do
     case ${OPT} in
@@ -40,37 +64,16 @@ done
 shift $((${OPTIND} - 1))
 
 if [ -n "${BOOTENV_ENABLE}" ]; then
+    which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
+
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}\$"; then
         error "mount point '${BOOTENV_MOUNT}' already in use"
     fi
 
-    _bootfs=$(zpool get -H -p -o value bootfs 2>/dev/null | grep -v "^-")
+    beadm create ${BOOTENV_NAME}
+    beadm mount ${BOOTENV_NAME} ${BOOTENV_MOUNT}
 
-    if [ $? = 0 ]; then
-        _bootenv_base=$(dirname ${_bootfs})
-
-        zfs list -H -o name -r ${_bootenv_base} \
-            | grep -v "^${_bootenv_base}$" \
-            | while read _fs; do
-            echo "Setting noauto property on ${_fs}"
-            zfs set canmount=noauto ${_fs}
-        done
-    fi
-
-    _snapshot_name=$(date +%F)
-    _pool=$(echo ${_bootfs} | cut -d/ -f 1)
-    _snapshot=${_bootfs}@${_snapshot_name}
-    _clone=${_bootenv_base}/${_snapshot_name}
-
-    zfs snapshot ${_snapshot}
-
-    zfs clone -o mountpoint=/ -o canmount=noauto ${_snapshot} ${_clone}
-
-    mkdir -p ${BOOTENV_MOUNT}
-
-    mount -t zfs ${_clone} ${BOOTENV_MOUNT}
-
-    if zfs get -H -o name name ${_pool}/usr/src >/dev/null 2>&1; then
+    if mount | cut -w -f 3 | grep -q "^/usr/src\$"; then
         mount -t nullfs /usr/src ${BOOTENV_MOUNT}/usr/src
     fi
 
@@ -79,7 +82,7 @@ fi
 
 _srcdir=/usr/src
 
-if [ -d ${DESTDIR}/usr/src ]; then
+if [ -f ${DESTDIR}/usr/src/Makefile ]; then
     _srcdir=${DESTDIR}/usr/src
 fi
 
@@ -209,6 +212,17 @@ if [ -f ${_srcdir}/Makefile ]; then
 
     # echo "Running: delete-old-libs"
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
+fi
+
+if [ -n "${BOOTENV_ENABLE}" ]; then
+    if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}/usr/src\$"; then
+        umount -f ${BOOTENV_MOUNT}/usr/src
+    fi
+
+    beadm umount -f ${BOOTENV_NAME}
+    beadm activate ${BOOTENV_NAME}
+
+    bsdkit-noauto
 fi
 
 # gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
