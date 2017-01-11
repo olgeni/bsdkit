@@ -29,7 +29,7 @@ bsdkit-noauto()
 
             echo -n "Checking property 'canmount' on ${_fs}: "
 
-            if [ "$(zfs get -H -o value canmount rpool/ROOT)" != noauto ]; then
+            if [ "$(zfs get -H -o value canmount ${_fs})" != noauto ]; then
                 zfs set canmount=noauto ${_fs}
                 echo "changed."
             else
