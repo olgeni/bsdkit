@@ -825,7 +825,8 @@ format_fstab()
 
     local _fstab="${_destdir}/etc/fstab"
 
-    echo "#linprocfs /usr/compat/linux/proc linprocfs rw,late 0 0" >> ${_destdir}/etc/fstab
+    echo "#linprocfs /compat/linux/proc linprocfs rw 0 0"      >> ${_destdir}/etc/fstab
+    echo "#tmpfs /compat/linux/dev/shm tmpfs rw,mode=1777 0 0" >> ${_destdir}/etc/fstab
 
     column -t < ${_fstab} | sort > ${_fstab}.0
 
