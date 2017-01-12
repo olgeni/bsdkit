@@ -1400,7 +1400,7 @@ do_install_jail()
     fi
 
     local _dirname="$(dirname ${_destdir})"
-    local _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
+    local _parent_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${_dirname}\" { print \$3; }")
     local _zfs="NO"
 
     if [ -n "${_parent_fs}" ]; then
