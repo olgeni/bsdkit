@@ -1415,6 +1415,8 @@ do_install_jail()
 
     link_home ${_destdir}
 
+    mkdir -p ${_destdir}/usr/ports
+
     if ! jail -c \
          path=/ \
          name=${_jail_name} \
