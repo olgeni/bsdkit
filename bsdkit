@@ -1490,42 +1490,6 @@ remove_jail()
     fi
 }
 
-write_jail_fstab()
-{
-    local _jail_name="$1"
-
-    local _destdir=${JAIL_ROOT}/${_jail_name}
-
-    valid_destdir ${_destdir}
-
-    _destdir=$(realpath ${_destdir})
-
-    if [ -d /usr/ports ]; then
-        mkdir -p ${_destdir}/usr/ports
-
-        cat > ${_destdir}.fstab << EOF
-/usr/ports ${_destdir}/usr/ports nullfs rw 0 0
-EOF
-
-        local _mountfrom=$(kenv vfs.root.mountfrom)
-
-        if [ "${_mountfrom%:*}" = "zfs" ]; then
-            local _dataset=${_mountfrom#zfs:}
-            local _pool=$(echo ${_dataset} | cut -f1 -d/)
-
-            if zfs list -H -o name ${_pool}/usr/ports/distfiles > /dev/null 2>&1; then
-                mkdir -p ${_destdir}/usr/ports/distfiles
-
-                cat >> ${_destdir}.fstab << EOF
-/usr/ports/distfiles ${_destdir}/usr/ports/distfiles nullfs rw 0 0
-EOF
-            fi
-        fi
-    fi
-
-    echo ${_destdir}.fstab
-}
-
 make_read_only()
 {
     local _destdir="$1"
