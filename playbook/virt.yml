@@ -1,5 +1,5 @@
 ---
-- hosts: jail
+- hosts: all
   user: root
   gather_facts: no
   tasks:

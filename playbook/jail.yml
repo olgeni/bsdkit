@@ -1,11 +1,11 @@
 ---
-- hosts: jail
+- hosts: all
   user: root
   gather_facts: no
   tasks:
     - raw: /usr/bin/env http_proxy="{{lookup('env', 'JAIL_PROXY')}}" pkg install -y python
 
-- hosts: jail
+- hosts: all
   user: root
   tasks:
     - name: "set_fact: freebsd_release (11)"
@@ -274,13 +274,13 @@
 
 - include: virt.yml
 
-- hosts: jail
+- hosts: all
   user: root
   gather_facts: no
   tasks:
     - raw: rm -r -f .ansible
 
-- hosts: jail
+- hosts: all
   user: root
   gather_facts: no
   tasks:
