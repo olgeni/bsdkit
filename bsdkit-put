@@ -2,13 +2,15 @@
 
 set -e -u
 
-for _version in ${BSDKIT_VERSIONS}; do
-    sudo -E rsync -avP --delete ${BSDKIT_LOCAL}/src/${_version}/release-${BSDKIT_ARCH}/ftp/ \
-         ${BSDKIT_LOCAL}/release-${_version}-${BSDKIT_ARCH}/
+for _arch in ${BSDKIT_ARCH_LIST}; do
+    for _version in ${BSDKIT_VERSION_LIST}; do
+        sudo -E rsync -avP --delete ${BSDKIT_PATH}/src/${_version}/release-${_arch}/ftp/ \
+             ${BSDKIT_PATH}/release-${_version}-${_arch}/
 
-    rsync -avP --delete ${BSDKIT_LOCAL}/release-${_version}-${BSDKIT_ARCH}/ \
-          ${BSDKIT_REMOTE}/release-${_version}-${BSDKIT_ARCH}/
+        rsync -avP --delete ${BSDKIT_PATH}/release-${_version}-${_arch}/ \
+              ${BSDKIT_REMOTE}/release-${_version}-${_arch}/
 
-    rsync -avP ${BSDKIT_LOCAL}/release-${_version}-${BSDKIT_ARCH}.iso ${BSDKIT_REMOTE}/
-    rsync -avP ${BSDKIT_LOCAL}/release-${_version}-${BSDKIT_ARCH}.img ${BSDKIT_REMOTE}/
+        rsync -avP ${BSDKIT_PATH}/release-${_version}-${_arch}.iso ${BSDKIT_REMOTE}/
+        rsync -avP ${BSDKIT_PATH}/release-${_version}-${_arch}.img ${BSDKIT_REMOTE}/
+    done
 done

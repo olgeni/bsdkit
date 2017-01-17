@@ -15,9 +15,11 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
-for _version in ${BSDKIT_VERSIONS}; do
-    ./build-release ${_version} ${BSDKIT_ARCH}
-    ./build-staging ${_version} ${BSDKIT_ARCH}
-    ./build-iso ${_version} ${BSDKIT_ARCH}
-    ./build-img ${_version} ${BSDKIT_ARCH}
+for _arch in ${BSDKIT_ARCH_LIST}; do
+    for _version in ${BSDKIT_VERSION_LIST}; do
+        ./build-release ${_version} ${BSDKIT_ARCH}
+        ./build-staging ${_version} ${BSDKIT_ARCH}
+        ./build-iso ${_version} ${BSDKIT_ARCH}
+        ./build-img ${_version} ${BSDKIT_ARCH}
+    done
 done
