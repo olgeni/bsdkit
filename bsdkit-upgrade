@@ -6,7 +6,7 @@ set -e -u
 : ${BSDKIT_VERSION:=11.0}
 : ${BSDKIT_ARCH:=amd64}
 : ${DESTDIR:=}
-: ${BOOTENV_ENABLE:=no}
+: ${BOOTENV_ENABLE:=}
 : ${BOOTENV_NAME:="$(date +%F)"}
 : ${BOOTENV_MOUNT:=/mnt}
 
