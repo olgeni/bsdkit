@@ -703,7 +703,10 @@ zfs_create_fs()
     zfs set atime=off ${ZFS_POOL}
 
     ${ZFS_CREATE_CMD} -o mountpoint=none -o canmount=noauto ${ZFS_POOL}/ROOT
-    ${ZFS_CREATE_CMD} -o mountpoint=/    -o canmount=on     ${ZFS_POOL}/ROOT/default
+    ${ZFS_CREATE_CMD} -o mountpoint=/    -o canmount=noauto ${ZFS_POOL}/ROOT/default
+
+    zfs mount ${ZFS_POOL}/ROOT/default
+
     ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off      ${ZFS_POOL}/tmp
     ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off    ${ZFS_POOL}/usr
     ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off    ${ZFS_POOL}/var
