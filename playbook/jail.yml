@@ -83,11 +83,6 @@
         src=../ansible/rc.conf dest=/etc/rc.conf
         owner=root group=wheel mode=644
 
-    - name: "Install /etc/defaults/vendor.conf"
-      copy: >
-        src=../ansible/vendor.conf dest=/etc/defaults/vendor.conf
-        owner=root group=wheel mode=644
-
     - name: "Set zfs_enable in rc.conf"
       command: sysrc zfs_enable="{{sysrc_zfs_enable.stdout}}"
       when: sysrc_zfs_enable|success
