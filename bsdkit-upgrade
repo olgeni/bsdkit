@@ -63,6 +63,30 @@ done
 
 shift $((${OPTIND} - 1))
 
+_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
+
+_distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
+
+mkdir -p ${_distdir}
+
+cd ${_distdir}
+
+fetch ${_release}/MANIFEST
+
+cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
+    if [ -f "${_filename}" ]; then
+        echo "Checking ${_filename}"
+        _sha256_local=$(sha256 -q "${_filename}")
+    else
+        _sha256_local="0"
+    fi
+
+    while [ "${_sha256}" != "${_sha256_local}" ]; do
+        fetch ${_release}/${_filename}
+        _sha256_local=$(sha256 -q "${_filename}")
+    done
+done
+
 if [ -n "${BOOTENV_ENABLE}" ]; then
     which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
 
@@ -89,30 +113,6 @@ fi
 if [ -f ${_srcdir}/Makefile ]; then
     etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
 fi
-
-_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
-
-_distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
-
-mkdir -p ${_distdir}
-
-cd ${_distdir}
-
-fetch ${_release}/MANIFEST
-
-cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-    if [ -f "${_filename}" ]; then
-        echo "Checking ${_filename}"
-        _sha256_local=$(sha256 -q "${_filename}")
-    else
-        _sha256_local="0"
-    fi
-
-    while [ "${_sha256}" != "${_sha256_local}" ]; do
-        fetch ${_release}/${_filename}
-        _sha256_local=$(sha256 -q "${_filename}")
-    done
-done
 
 export PATH=/rescue:${PATH}
 
