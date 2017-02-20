@@ -45,6 +45,8 @@ install -o root -g wheel -m 644 ansible/BSDKIT_${OS_MAJOR}.${_arch} ${OS_SRCDIR}
 
 echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
+# optional: -DWITH_REPRODUCIBLE_BUILD
+
 make -s -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" ${_jobs_option} buildworld buildkernel
 make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" release NOPORTS=yes
 
