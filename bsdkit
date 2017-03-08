@@ -1555,6 +1555,7 @@ EOF
     cat >> ${_destdir}/etc/ssh/sshd_config << EOF
 UseDNS no
 PermitRootLogin yes
+GatewayPorts yes
 EOF
 
     cat > ${_destdir}/etc/host.conf << EOF
