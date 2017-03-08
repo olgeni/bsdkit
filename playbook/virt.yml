@@ -3,10 +3,6 @@
   user: root
   gather_facts: no
   tasks:
-    - name: "sysctl security.jail.jailed"
-      command: sysctl -n security.jail.jailed
-      register: security_jail_jailed
-
     - name: "kenv smbios.system.product"
       shell: kenv smbios.system.product || true
       register: system_product
@@ -24,7 +20,7 @@
       with_items:
         - vboxguest
         - vboxservice
-      when: system_product.stdout == "VirtualBox" and security_jail_jailed.stdout == "0"
+      when: system_product.stdout == "VirtualBox"
 
     - name: "VMware configuration"
       lineinfile: >
@@ -38,6 +34,6 @@
         - vmware_guest_vmmemctl
         - vmware_guest_vmxnet
         - vmware_guestd
-      when: system_product.stdout == "VMware Virtual Platform" and security_jail_jailed.stdout == "0"
+      when: system_product.stdout == "VMware Virtual Platform"
 
 # smbios.bios.vendor="BHYVE"
