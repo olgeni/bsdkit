@@ -101,6 +101,10 @@ if [ -n "${BOOTENV_ENABLE}" ]; then
         mount -t nullfs /usr/src ${BOOTENV_MOUNT}/usr/src
     fi
 
+    if mount | cut -w -f 3 | grep -q "^/usr/ports\$"; then
+        mount -t nullfs /usr/ports ${BOOTENV_MOUNT}/usr/ports
+    fi
+
     DESTDIR=${BOOTENV_MOUNT}
 fi
 
@@ -215,8 +219,45 @@ if [ -f ${_srcdir}/Makefile ]; then
 fi
 
 if [ -n "${BOOTENV_ENABLE}" ]; then
+    _port=x11/nvidia-driver
+
+    if pkg info -q ${_port}; then
+        if -d ${BOOTENV_MOUNT}/usr/ports/${_port}; then
+            pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
+            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} all deinstall install
+            pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
+        fi
+    fi
+
+    _port=sysutils/pefs-kmod
+
+    if pkg info -q ${_port}; then
+        if -d ${BOOTENV_MOUNT}/usr/ports/${_port}; then
+            pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
+            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} all deinstall install
+            pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
+        fi
+    fi
+
+    _port=emulators/virtualbox-ose-kmod
+
+    if pkg info -q ${_port}; then
+        if -d ${BOOTENV_MOUNT}/usr/ports/${_port}; then
+            pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
+            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} all deinstall install
+            pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
+        fi
+    fi
+
+    pkg -c ${BOOTENV_MOUNT} upgrade -Fy
+    pkg -c ${BOOTENV_MOUNT} upgrade -y
+
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}/usr/src\$"; then
         umount -f ${BOOTENV_MOUNT}/usr/src
+    fi
+
+    if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}/usr/ports\$"; then
+        umount -f ${BOOTENV_MOUNT}/usr/ports
     fi
 
     beadm umount -f ${BOOTENV_NAME}
