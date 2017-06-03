@@ -62,7 +62,7 @@
 
     - name: "Install kernel configuration"
       copy: >
-        src=../ansible/BSDKIT_{{freebsd_version}}.{{ansible_architecture}}
+        src=../ansible/BSDKIT-{{freebsd_version}}-{{ansible_architecture}}
         dest=/usr/src/sys/{{ansible_architecture}}/conf/BSDKIT
         owner=root group=wheel mode=644
       when: stat_usr_src_sys.stat.exists
