@@ -17,7 +17,7 @@
 
     - name: "Retrieve freebsd_version (checking for release)"
       set_fact: freebsd_version={{ansible_distribution_release.split("-")[0]}}
-      when: freebsd_branch == "RELEASE" or freebsd_branch[:4] == "BETA" or freebsd_branch[:2] == "RC"
+      when: freebsd_branch == "RELEASE" or freebsd_branch == "PRERELEASE" or freebsd_branch[:4] == "BETA" or freebsd_branch[:2] == "RC"
 
     - name: "set_fact: ssh_public_key"
       set_fact: ssh_public_key="{{lookup('env', 'SSH_PUBLIC_KEY')}}"
