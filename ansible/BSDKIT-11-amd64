@@ -3,7 +3,6 @@ include		GENERIC
 ident		BSDKIT
 
 options 	DDB		# Enable the ddb debugger backend.
-options		SW_WATCHDOG     # Add software watchdog routines.
 
 # altq(9). Enable the base part of the hooks with the ALTQ option.
 # Individual disciplines must be built into the base system and can not be

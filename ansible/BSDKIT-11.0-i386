@@ -3,7 +3,6 @@ include		GENERIC
 ident		BSDKIT
 
 options 	DDB		# Enable the ddb debugger backend.
-options		SW_WATCHDOG     # Add software watchdog routines.
 
 options		IPSEC_NAT_T	# NAT-T support, UDP encap of ESP
 

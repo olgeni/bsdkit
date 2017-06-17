@@ -7,7 +7,6 @@ device		cryptodev	# /dev/crypto for access to h/w
 device		enc		# IPsec interface.
 
 options 	DDB		# Enable the ddb debugger backend.
-options		SW_WATCHDOG     # Add software watchdog routines.
 options		TEKEN_UTF8
 
 options		IPSEC		# IP security (requires device crypto)
