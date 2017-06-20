@@ -176,8 +176,6 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
     if [ -n "${_extract}" ]; then
         echo "Extracting: ${_file}"
         tar -x -z -U -f ${_distdir}/${_file} -C ${DESTDIR}/ ${_options}
-    else
-        echo "Skipping: ${_file}"
     fi
 done
 
