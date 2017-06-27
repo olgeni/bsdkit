@@ -65,6 +65,8 @@ environment()
 : ${BSDKIT_ARCH:=amd64}
 : ${BSDKIT_PKGSET:=nox11}
 
+: ${IOCAGE_JAILS:=/iocage/jails}
+
 # FREEBSD_REL_URL, FREEBSD_PKG_URL: initialized by parse_options
 
 : ${PARSE_OPTIONS_SHIFT:=0}
@@ -1348,6 +1350,41 @@ install_mbr_zfs()
     install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
+}
+
+install_iocage()
+{
+    parse_options "$@"
+
+    shift ${PARSE_OPTIONS_SHIFT}
+
+    local _tag="$1"
+
+    shift
+
+    if [ $# -ne 0 ]; then
+        error "too many arguments (install_iocage)."
+    fi
+
+    which iocage > /dev/null 2>&1 || error "iocage not found (install_iocage)."
+
+    iocage create -e tag="${_tag}" > /dev/null 2>&1
+
+    local _uuid=$(iocage get host_hostuuid ${_tag})
+    local _destdir=${IOCAGE_JAILS}/${_uuid}/root
+
+    [ -d ${_destdir} ] || error "iocage root does not exist (install_iocage)."
+
+    do_install_jail ${_destdir}
+
+    sysrc -f ${_destdir}/etc/rc.conf -x hostname
+
+    sysrc -f ${_destdir}/etc/rc.conf cron_enable=NO
+    sysrc -f ${_destdir}/etc/rc.conf ntpd_enable=NO
+    sysrc -f ${_destdir}/etc/rc.conf ntpd_sync_on_start=NO
+    sysrc -f ${_destdir}/etc/rc.conf sendmail_enable=NONE
+
+    iocage set host_hostname="${_tag}" ${_uuid}
 }
 
 install_jail()
