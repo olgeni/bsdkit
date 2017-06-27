@@ -65,7 +65,7 @@ environment()
 : ${BSDKIT_ARCH:=amd64}
 : ${BSDKIT_PKGSET:=nox11}
 
-: ${IOCAGE_JAILS:=/iocage/jails}
+: ${IOCELL_JAILS:=/iocell/jails}
 
 # FREEBSD_REL_URL, FREEBSD_PKG_URL: initialized by parse_options
 
@@ -1352,7 +1352,7 @@ install_mbr_zfs()
     return 0
 }
 
-install_iocage()
+install_iocell()
 {
     parse_options "$@"
 
@@ -1363,28 +1363,19 @@ install_iocage()
     shift
 
     if [ $# -ne 0 ]; then
-        error "too many arguments (install_iocage)."
+        error "too many arguments (install_iocell)."
     fi
 
-    which iocage > /dev/null 2>&1 || error "iocage not found (install_iocage)."
+    which iocell > /dev/null 2>&1 || error "iocell not found (install_iocell)."
 
-    iocage create -e tag="${_tag}" > /dev/null 2>&1
+    local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}")
+    local _destdir=${IOCELL_JAILS}/${_uuid}/root
 
-    local _uuid=$(iocage get host_hostuuid ${_tag})
-    local _destdir=${IOCAGE_JAILS}/${_uuid}/root
-
-    [ -d ${_destdir} ] || error "iocage root does not exist (install_iocage)."
+    [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
 
     do_install_jail ${_destdir}
 
     sysrc -f ${_destdir}/etc/rc.conf -x hostname
-
-    sysrc -f ${_destdir}/etc/rc.conf cron_enable=NO
-    sysrc -f ${_destdir}/etc/rc.conf ntpd_enable=NO
-    sysrc -f ${_destdir}/etc/rc.conf ntpd_sync_on_start=NO
-    sysrc -f ${_destdir}/etc/rc.conf sendmail_enable=NONE
-
-    iocage set host_hostname="${_tag}" ${_uuid}
 }
 
 install_jail()
@@ -1397,7 +1388,9 @@ install_jail()
 
     local _destdir=${JAIL_ROOT}/${_jail_name}
 
-    do_install_jail "${_jail_name}"
+    create_jail_destdir ${_jail_name}
+
+    do_install_jail ${_destdir}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 
@@ -1418,15 +1411,9 @@ install_jail()
     cap_mkdb ${_destdir}/etc/login.conf
 }
 
-do_install_jail()
+validate_jail_network()
 {
-    local _jail_name="$1"
-
-    local _destdir=${JAIL_ROOT}/${_jail_name}
-
-    if [ -d "${_destdir}" ]; then
-        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
-    fi
+    local _jail_name=$(uuidgen)
 
     if [ -z "${JAIL_PROXY}" ]; then
         jail -c \
@@ -1436,7 +1423,20 @@ do_install_jail()
              ip4.addr=${JAIL_ADDRESS} \
              interface=${JAIL_INTERFACE} \
              command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1 \
-            || error "network unreachable (do_install_jail)"
+            || error "network unreachable (validate_jail_network)"
+    fi
+}
+
+create_jail_destdir()
+{
+    local _jail_name="$1"
+
+    validate_jail_network
+
+    local _destdir=${JAIL_ROOT}/${_jail_name}
+
+    if [ -d "${_destdir}" ]; then
+        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
     fi
 
     local _dirname="$(dirname ${_destdir})"
@@ -1451,6 +1451,13 @@ do_install_jail()
     else
         mkdir -p ${_destdir}
     fi
+}
+
+do_install_jail()
+{
+    local _destdir="$1"
+
+    local _jail_name=$(uuidgen)
 
     INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} INSTALL_JAIL=yes install_release ${FREEBSD_REL_URL} ${_destdir}
 

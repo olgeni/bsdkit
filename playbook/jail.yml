@@ -80,15 +80,23 @@
     - name: "Gather zfs_enable"
       command: sysrc -n zfs_enable
       register: sysrc_zfs_enable
+      when: not install_jail
 
-    - name: "Install /etc/rc.conf"
+    - name: "Install /etc/rc.conf (host version)"
       copy: >
         src=../ansible/rc.conf dest=/etc/rc.conf
         owner=root group=wheel mode=644
+      when: not install_jail
+
+    - name: "Install /etc/rc.conf (jail version)"
+      copy: >
+        src=../ansible/rc.conf.jail dest=/etc/rc.conf
+        owner=root group=wheel mode=644
+      when: install_jail
 
     - name: "Set zfs_enable in rc.conf"
       command: sysrc zfs_enable="{{sysrc_zfs_enable.stdout}}"
-      when: sysrc_zfs_enable|success
+      when: not install_jail and sysrc_zfs_enable|success
 
     - name: "Set ifconfig in rc.conf"
       command: sysrc ifconfig_{{bsdkit_interface}}="{{bsdkit_ifconfig}}"
