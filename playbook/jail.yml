@@ -66,6 +66,7 @@
         dest=/usr/src/sys/{{ansible_architecture}}/conf/BSDKIT
         owner=root group=wheel mode=644
       when: stat_usr_src_sys.stat.exists
+      failed_when: False
 
     - name: "Install configuration files in /etc"
       copy: >
@@ -138,6 +139,7 @@
         - kermrc
         - inputrc
         - zshrc
+      failed_when: False
 
     - name: "Install dotfiles in /root"
       copy: >

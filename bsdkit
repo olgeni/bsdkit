@@ -1374,8 +1374,42 @@ install_iocell()
     [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
 
     do_install_jail ${_destdir}
+    do_configure_jail ${_destdir}
 
     sysrc -f ${_destdir}/etc/rc.conf -x hostname
+}
+
+install_iocell_thin()
+{
+    parse_options "$@"
+
+    shift ${PARSE_OPTIONS_SHIFT}
+
+    local _tag="$1"
+    local _release="$2"
+
+    shift 2
+
+    if [ $# -ne 0 ]; then
+        error "too many arguments (install_iocell)."
+    fi
+
+    which iocell > /dev/null 2>&1 || error "iocell not found (install_iocell)."
+
+    iocell create tag="${_tag}" host_hostname="${_tag}" release="${_release}"
+
+    local _uuid=$(iocell get host_hostuuid "${_tag}")
+    local _destdir=${IOCELL_JAILS}/${_uuid}/root
+
+    [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
+
+    iocell start ${_uuid}
+
+    do_configure_jail ${_destdir}
+
+    sysrc -f ${_destdir}/etc/rc.conf -x hostname
+
+    iocell stop ${_uuid}
 }
 
 install_jail()
@@ -1391,6 +1425,7 @@ install_jail()
     create_jail_destdir ${_jail_name}
 
     do_install_jail ${_destdir}
+    do_configure_jail ${_destdir}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 
@@ -1457,13 +1492,18 @@ do_install_jail()
 {
     local _destdir="$1"
 
-    local _jail_name=$(uuidgen)
-
     INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} INSTALL_JAIL=yes install_release ${FREEBSD_REL_URL} ${_destdir}
+}
+
+do_configure_jail()
+{
+    local _destdir="$1"
 
     link_home ${_destdir}
 
     mkdir -p ${_destdir}/usr/ports
+
+    local _jail_name=$(uuidgen)
 
     if ! jail -c \
          path=/ \
