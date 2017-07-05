@@ -1362,13 +1362,9 @@ install_iocell()
 
     shift
 
-    if [ $# -ne 0 ]; then
-        error "too many arguments (install_iocell)."
-    fi
-
     which iocell > /dev/null 2>&1 || error "iocell not found (install_iocell)."
 
-    local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}")
+    local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}" "$@")
     local _destdir=${IOCELL_JAILS}/${_uuid}/root
 
     [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
@@ -1386,17 +1382,12 @@ install_iocell_thin()
     shift ${PARSE_OPTIONS_SHIFT}
 
     local _tag="$1"
-    local _release="$2"
 
-    shift 2
-
-    if [ $# -ne 0 ]; then
-        error "too many arguments (install_iocell)."
-    fi
+    shift 1
 
     which iocell > /dev/null 2>&1 || error "iocell not found (install_iocell)."
 
-    iocell create tag="${_tag}" host_hostname="${_tag}" release="${_release}"
+    iocell create tag="${_tag}" host_hostname="${_tag}" "$@"
 
     local _uuid=$(iocell get host_hostuuid "${_tag}")
     local _destdir=${IOCELL_JAILS}/${_uuid}/root
@@ -2297,7 +2288,7 @@ if ! which ansible-playbook > /dev/null 2>&1; then
 fi
 
 if [ $# -gt 0 ]; then
-    eval "$@"
+    "$@"
 fi
 
 # References:
