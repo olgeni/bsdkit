@@ -1395,12 +1395,10 @@ install_iocell_thin()
     [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
 
     iocell start ${_uuid}
-
     do_configure_jail ${_destdir}
+    iocell stop ${_uuid}
 
     sysrc -f ${_destdir}/etc/rc.conf -x hostname
-
-    iocell stop ${_uuid}
 }
 
 install_jail()
