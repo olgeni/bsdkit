@@ -9,6 +9,7 @@ set -e -u
 : ${BOOTENV_ENABLE:=}
 : ${BOOTENV_NAME:="$(date +%F)"}
 : ${BOOTENV_MOUNT:=/mnt}
+: ${INSTALL_DEBUG:=no}
 
 error()
 {
@@ -108,7 +109,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     done
 done
 
-if [ -n "${BOOTENV_ENABLE}" ]; then
+if is_yes "${BOOTENV_ENABLE}"; then
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}\$"; then
         error "mount point '${BOOTENV_MOUNT}' already in use"
     fi
@@ -163,9 +164,17 @@ if [ -f ${_srcdir}/Makefile ]; then
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
 fi
 
+if [ -f /usr/lib/debug/bin/sh.debug ]; then
+    INSTALL_DEBUG=yes
+fi
+
 cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
     _extract=""
     _options=""
+
+    if ! is_yes ${INSTALL_DEBUG} && [ "${_package}" != "${_package%_dbg}" ]; then
+        continue
+    fi
 
     case ${_file} in
         kernel*)
@@ -192,7 +201,7 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
             _extract="YES"
     esac
 
-    if [ -n "${_extract}" ]; then
+    if is_yes "${_extract}"; then
         echo "Extracting: ${_file}"
         tar -x -z -U -f ${_distdir}/${_file} -C ${DESTDIR}/ ${_options}
     fi
@@ -235,36 +244,29 @@ if [ -f ${_srcdir}/Makefile ]; then
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 fi
 
-if [ -n "${BOOTENV_ENABLE}" ]; then
-    _port=x11/nvidia-driver
+rebuild_port()
+{
+    local _port="$1"
 
     if pkg info -q ${_port}; then
         if [ -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
+            mount -t devfs devfs ${BOOTENV_MOUNT}/dev
+
             pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
-            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} all deinstall install
+            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean all deinstall install
+            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean
             pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
+
+            umount ${BOOTENV_MOUNT}/dev
         fi
     fi
+}
 
-    _port=sysutils/pefs-kmod
-
-    if pkg info -q ${_port}; then
-        if [ -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
-            pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
-            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} all deinstall install
-            pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
-        fi
-    fi
-
-    _port=emulators/virtualbox-ose-kmod
-
-    if pkg info -q ${_port}; then
-        if [ -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
-            pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
-            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} all deinstall install
-            pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
-        fi
-    fi
+if is_yes "${BOOTENV_ENABLE}"; then
+    rebuild_port x11/nvidia-driver
+    rebuild_port sysutils/pefs-kmod
+    rebuild_port emulators/virtualbox-ose-kmod
+    rebuild_port emulators/virtualbox-ose-additions
 
     pkg -c ${BOOTENV_MOUNT} upgrade -Fy
     pkg -c ${BOOTENV_MOUNT} upgrade -y
