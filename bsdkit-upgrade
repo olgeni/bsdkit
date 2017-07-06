@@ -16,6 +16,20 @@ error()
     exit 1
 }
 
+is_yes()
+{
+    case $1 in
+        [Yy][Ee][Ss])
+            return 0
+            ;;
+        [Nn][Oo])
+            return 1
+            ;;
+        *)
+            return 2
+    esac
+}
+
 bsdkit-noauto()
 {
     _bootfs=$(zpool get -H -p -o value bootfs 2>/dev/null | grep -v "^-")
