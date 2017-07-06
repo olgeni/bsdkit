@@ -80,6 +80,10 @@ done
 
 shift $((${OPTIND} - 1))
 
+if is_yes "${BOOTENV_ENABLE}"; then
+    which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
+fi
+
 _release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
 _distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
@@ -105,8 +109,6 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 done
 
 if [ -n "${BOOTENV_ENABLE}" ]; then
-    which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
-
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}\$"; then
         error "mount point '${BOOTENV_MOUNT}' already in use"
     fi
