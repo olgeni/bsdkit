@@ -10,6 +10,7 @@ set -e -u
 : ${BOOTENV_NAME:="$(date +%F)"}
 : ${BOOTENV_MOUNT:=/mnt}
 : ${INSTALL_DEBUG:=no}
+: ${INSTALL_TESTS:=no}
 
 error()
 {
@@ -89,6 +90,14 @@ _release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
 _distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
+if [ -f ${DESTDIR}/usr/lib/debug/bin/sh.debug ]; then
+    INSTALL_DEBUG=yes
+fi
+
+if [ -f ${DESTDIR}/usr/tests/Kyuafile ]; then
+    INSTALL_TESTS=yes
+fi
+
 mkdir -p ${_distdir}
 
 cd ${_distdir}
@@ -96,6 +105,14 @@ cd ${_distdir}
 fetch ${_release}/MANIFEST
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
+    if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != "${_package%_dbg}" ]; then
+        continue
+    fi
+
+    if ! is_yes ${INSTALL_TESTS} && [ ${_package} = "tests" ]; then
+        continue
+    fi
+
     if [ -f "${_filename}" ]; then
         echo "Checking ${_filename}"
         _sha256_local=$(sha256 -q "${_filename}")
@@ -164,15 +181,15 @@ if [ -f ${_srcdir}/Makefile ]; then
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
 fi
 
-if [ -f /usr/lib/debug/bin/sh.debug ]; then
-    INSTALL_DEBUG=yes
-fi
-
 cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
     _extract=""
     _options=""
 
-    if ! is_yes ${INSTALL_DEBUG} && [ "${_package}" != "${_package%_dbg}" ]; then
+    if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
+        continue
+    fi
+
+    if ! is_yes ${INSTALL_TESTS} && [ ${_package} = "tests" ]; then
         continue
     fi
 
