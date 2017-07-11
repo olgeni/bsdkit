@@ -8,6 +8,20 @@ error()
     exit 1
 }
 
+is_yes()
+{
+    case $1 in
+        [Yy][Ee][Ss])
+            return 0
+            ;;
+        [Nn][Oo])
+            return 1
+            ;;
+        *)
+            return 2
+    esac
+}
+
 : ${INSTALL_JAIL:=no}
 : ${INSTALL_KERNEL:=yes}
 : ${INSTALL_SRC:=yes}
@@ -802,20 +816,6 @@ fdescfs_setup()
     echo "fdescfs /dev/fd fdescfs rw 0 0" >> ${_destdir}/etc/fstab
 
     return 0
-}
-
-is_yes()
-{
-    case $1 in
-        [Yy][Ee][Ss])
-            return 0
-            ;;
-        [Nn][Oo])
-            return 1
-            ;;
-        *)
-            return 2
-    esac
 }
 
 has_swap()
