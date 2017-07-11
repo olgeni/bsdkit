@@ -1393,7 +1393,8 @@ install_iocell()
 
     [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
 
-    do_install_jail ${_destdir}
+    INSTALL_KERNEL=no do_install_jail ${_destdir}
+
     do_configure_jail ${_destdir}
 
     sysrc -f ${_destdir}/etc/rc.conf -x hostname
