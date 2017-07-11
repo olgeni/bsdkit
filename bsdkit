@@ -885,7 +885,7 @@ install_release()
                 continue
             fi
 
-            if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
+            if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel_dbg" ]; then
                 continue
             fi
 
@@ -924,7 +924,7 @@ install_release()
             continue
         fi
 
-        if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
+        if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel_dbg" ]; then
             continue
         fi
 
