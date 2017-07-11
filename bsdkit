@@ -8,6 +8,7 @@ error()
     exit 1
 }
 
+: ${INSTALL_JAIL:=no}
 : ${INSTALL_KERNEL:=yes}
 : ${INSTALL_SRC:=yes}
 : ${INSTALL_DEBUG:=no}
@@ -22,7 +23,6 @@ error()
 : ${PGSQL_JAIL_USER:=700}
 : ${PGSQL_JAIL_GROUP:=700}
 : ${DESTDIR:=/mnt}
-: ${INSTALL_JAIL:=no}
 : ${JAIL_ROOT:=/jails}
 : ${SSH_PUBLIC_KEY:=""}
 
@@ -904,14 +904,6 @@ install_release()
     fi
 
     cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-        if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
-            continue
-        fi
-
-        if ! is_yes ${INSTALL_TESTS} && [ ${_package} = "tests" ]; then
-            continue
-        fi
-
         if ! is_yes ${INSTALL_SRC} && [ ${_package} = "src" ]; then
             continue
         fi
@@ -921,6 +913,14 @@ install_release()
         fi
 
         if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
+            continue
+        fi
+
+        if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
+            continue
+        fi
+
+        if ! is_yes ${INSTALL_TESTS} && [ ${_package} = "tests" ]; then
             continue
         fi
 
