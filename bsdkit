@@ -877,7 +877,19 @@ install_release()
         fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
 
         cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-            if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != "${_package%_dbg}" ]; then
+            if ! is_yes ${INSTALL_SRC} && [ ${_package} = "src" ]; then
+                continue
+            fi
+
+            if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel" ]; then
+                continue
+            fi
+
+            if ! is_yes ${INSTALL_KERNEL} && [ ${_package} = "kernel-dbg" ]; then
+                continue
+            fi
+
+            if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
                 continue
             fi
 
