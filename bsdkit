@@ -1438,7 +1438,8 @@ install_jail()
 
     create_jail_destdir ${_jail_name}
 
-    do_install_jail ${_destdir}
+    INSTALL_KERNEL=no do_install_jail ${_destdir}
+
     do_configure_jail ${_destdir}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
