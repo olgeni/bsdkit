@@ -48,6 +48,7 @@ echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 # optional: -DWITH_REPRODUCIBLE_BUILD
 
 make -s -C ${OS_SRCDIR}         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" ${_jobs_option} buildworld buildkernel
+
 make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" release NOPORTS=yes
 
 rm -r -f ${OS_RELDIR}
