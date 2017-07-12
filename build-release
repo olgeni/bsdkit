@@ -58,3 +58,5 @@ make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=$
 make -s -C ${OS_SRCDIR}/release __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" clean
 
 echo ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
+
+rm -f ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
