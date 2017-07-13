@@ -61,6 +61,7 @@ while getopts "en:r:v:a:d:" OPT; do
             BOOTENV_ENABLE=yes
             ;;
         n)
+            BOOTENV_ENABLE=yes
             BOOTENV_NAME=${OPTARG}
             ;;
         r)
