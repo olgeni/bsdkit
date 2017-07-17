@@ -6,7 +6,7 @@ set -e -u
 : ${BSDKIT_VERSION:=11.0}
 : ${BSDKIT_ARCH:=amd64}
 : ${DESTDIR:=}
-: ${BOOTENV_ENABLE:=}
+: ${BOOTENV_ENABLE:=default}
 : ${BOOTENV_NAME:="$(date +%F)"}
 : ${BOOTENV_MOUNT:=/mnt}
 : ${INSTALL_DEBUG:=no}
@@ -55,13 +55,15 @@ bsdkit-noauto()
     fi
 }
 
-while getopts "en:r:v:a:d:" OPT; do
+while getopts "eEn:r:v:a:d:" OPT; do
     case ${OPT} in
         e)
             BOOTENV_ENABLE=yes
             ;;
+        E)
+            BOOTENV_ENABLE=no
+            ;;
         n)
-            BOOTENV_ENABLE=yes
             BOOTENV_NAME=${OPTARG}
             ;;
         r)
@@ -83,7 +85,19 @@ done
 
 shift $((${OPTIND} - 1))
 
-if is_yes "${BOOTENV_ENABLE}"; then
+if [ ${BOOTENV_ENABLE} = "default" ]; then
+    if kenv -q zfs_be_root >/dev/null 2>&1; then
+        BOOTENV_ENABLE=yes
+    else
+        BOOTENV_ENABLE=no
+    fi
+fi
+
+if [ "${DESTDIR}" != "" ] && is_yes ${BOOTENV_ENABLE}; then
+    error "incompatible BOOTENV_ENABLE and DESTDIR"
+fi
+
+if is_yes ${BOOTENV_ENABLE}; then
     which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
 fi
 
@@ -127,7 +141,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     done
 done
 
-if is_yes "${BOOTENV_ENABLE}"; then
+if is_yes ${BOOTENV_ENABLE}; then
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}\$"; then
         error "mount point '${BOOTENV_MOUNT}' already in use"
     fi
@@ -183,7 +197,7 @@ if [ -f ${_srcdir}/Makefile ]; then
 fi
 
 cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
-    _extract=""
+    _extract="no"
     _options=""
 
     if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
@@ -197,7 +211,7 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
     case ${_file} in
         kernel*)
             if [ -f "${DESTDIR}/boot/kernel/kernel" ]; then
-                _extract="YES"
+                _extract="yes"
             fi
             ;;
         base.txz)
@@ -211,15 +225,15 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
             _options="${_options} --exclude ./root"
             _options="${_options} --exclude ./tmp"
             _options="${_options} --exclude ./var"
-            _extract="YES"
+            _extract="yes"
             ;;
         src*)
             ;;
         *)
-            _extract="YES"
+            _extract="yes"
     esac
 
-    if is_yes "${_extract}"; then
+    if is_yes ${_extract}; then
         echo "Extracting: ${_file}"
         tar -x -z -U -f ${_distdir}/${_file} -C ${DESTDIR}/ ${_options}
     fi
@@ -280,7 +294,7 @@ rebuild_port()
     fi
 }
 
-if is_yes "${BOOTENV_ENABLE}"; then
+if is_yes ${BOOTENV_ENABLE}; then
     rebuild_port x11/nvidia-driver
     rebuild_port sysutils/pefs-kmod
     rebuild_port emulators/virtualbox-ose-kmod
