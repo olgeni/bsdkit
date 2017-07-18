@@ -2,17 +2,17 @@
 
 set -e -u
 
-: ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
-: ${BSDKIT_VERSION:=11.0}
-: ${BSDKIT_ARCH:=amd64}
-: ${DESTDIR:=}
-: ${BOOTENV_ENABLE:=default}
+: ${BSDKIT_ROOT_URL:="http://olgeni.olgeni.com/FreeBSD"}
+: ${BSDKIT_VERSION:="11.0"}
+: ${BSDKIT_ARCH:="amd64"}
+: ${DESTDIR:=""}
+: ${BOOTENV_ENABLE:="default"}
 : ${BOOTENV_NAME:="$(date +%F)"}
-: ${BOOTENV_MOUNT:=/mnt}
+: ${BOOTENV_MOUNT:="/mnt"}
 
-: ${_install_src:=no}
-: ${_install_debug:=no}
-: ${_install_tests:=no}
+: ${_install_src:="no"}
+: ${_install_debug:="no"}
+: ${_install_tests:="no"}
 
 error()
 {
