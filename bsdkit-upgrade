@@ -10,9 +10,9 @@ set -e -u
 : ${BOOTENV_NAME:="$(date +%F)"}
 : ${BOOTENV_MOUNT:=/mnt}
 
-: ${INSTALL_SRC:=no}
-: ${INSTALL_DEBUG:=no}
-: ${INSTALL_TESTS:=no}
+: ${_install_src:=no}
+: ${_install_debug:=no}
+: ${_install_tests:=no}
 
 error()
 {
@@ -104,7 +104,7 @@ if is_yes ${BOOTENV_ENABLE}; then
 fi
 
 if [ -f ${DESTDIR}/usr/src/Makefile -a ! -d ${DESTDIR}/usr/src/.svn ]; then
-    INSTALL_SRC=yes
+    _install_src=yes
 fi
 
 _release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
@@ -112,11 +112,11 @@ _release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
 _distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
 if [ -f ${DESTDIR}/usr/lib/debug/bin/sh.debug ]; then
-    INSTALL_DEBUG=yes
+    _install_debug=yes
 fi
 
 if [ -f ${DESTDIR}/usr/tests/Kyuafile ]; then
-    INSTALL_TESTS=yes
+    _install_tests=yes
 fi
 
 mkdir -p ${_distdir}
@@ -126,15 +126,15 @@ cd ${_distdir}
 fetch ${_release}/MANIFEST
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-    if ! is_yes ${INSTALL_SRC} && [ ${_package} = "src" ]; then
+    if ! is_yes ${_install_src} && [ ${_package} = "src" ]; then
         continue
     fi
 
-    if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != "${_package%_dbg}" ]; then
+    if ! is_yes ${_install_debug} && [ ${_package} != "${_package%_dbg}" ]; then
         continue
     fi
 
-    if ! is_yes ${INSTALL_TESTS} && [ ${_package} = "tests" ]; then
+    if ! is_yes ${_install_tests} && [ ${_package} = "tests" ]; then
         continue
     fi
 
@@ -182,7 +182,7 @@ fi
 
 export PATH=/rescue:${PATH}
 
-if is_yes ${INSTALL_SRC}; then
+if is_yes ${_install_src}; then
     echo "Extracting: src.txz"
 
     for _file in ${DESTDIR}/usr/src/*; do
@@ -210,11 +210,11 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
     _extract="no"
     _options=""
 
-    if ! is_yes ${INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
+    if ! is_yes ${_install_debug} && [ ${_package} != ${_package%_dbg} ]; then
         continue
     fi
 
-    if ! is_yes ${INSTALL_TESTS} && [ ${_package} = "tests" ]; then
+    if ! is_yes ${_install_tests} && [ ${_package} = "tests" ]; then
         continue
     fi
 
