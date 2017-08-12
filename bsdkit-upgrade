@@ -305,13 +305,13 @@ rebuild_port()
 }
 
 if is_yes ${BOOTENV_ENABLE}; then
+    pkg-static -c ${BOOTENV_MOUNT} upgrade -Fy
+    pkg-static -c ${BOOTENV_MOUNT} upgrade -y
+
     rebuild_port x11/nvidia-driver
     rebuild_port sysutils/pefs-kmod
     rebuild_port emulators/virtualbox-ose-kmod
     rebuild_port emulators/virtualbox-ose-additions
-
-    pkg-static -c ${BOOTENV_MOUNT} upgrade -Fy
-    pkg-static -c ${BOOTENV_MOUNT} upgrade -y
 
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}/usr/src\$"; then
         umount -f ${BOOTENV_MOUNT}/usr/src
