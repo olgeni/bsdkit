@@ -252,9 +252,8 @@ done
 if [ -f ${_srcdir}/Makefile ]; then
     echo "Running: etcupdate"
     etcupdate -F -I '*.cf' -s ${_srcdir} -D ${DESTDIR}/
+    etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
 fi
-
-etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
 
 echo "Running: mtree"
 
