@@ -1396,8 +1396,6 @@ install_iocell()
     INSTALL_KERNEL=no do_install_jail ${_destdir}
 
     do_configure_jail ${_destdir}
-
-    sysrc -f ${_destdir}/etc/rc.conf -x hostname
 }
 
 install_iocell_thin()
@@ -1422,8 +1420,6 @@ install_iocell_thin()
     iocell start ${_uuid}
     do_configure_jail ${_destdir}
     iocell stop ${_uuid}
-
-    sysrc -f ${_destdir}/etc/rc.conf -x hostname
 }
 
 install_jail()
