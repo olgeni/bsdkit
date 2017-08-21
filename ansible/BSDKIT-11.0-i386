@@ -2,8 +2,7 @@ include		GENERIC
 
 ident		BSDKIT
 
-options 	DDB		# Enable the ddb debugger backend.
-
+options		DDB		# Enable the ddb debugger backend.
 options		IPSEC_NAT_T	# NAT-T support, UDP encap of ESP
 
 # altq(9). Enable the base part of the hooks with the ALTQ option.
