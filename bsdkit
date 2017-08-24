@@ -222,7 +222,7 @@ valid_relpath()
 
     valid_url ${_relpath} && return 0
 
-    [ -d ${_relpath} ] || return 1
+    [ -d ${_relpath} ]
 
     [ -f ${_relpath}/base.txz ]
 
@@ -235,7 +235,7 @@ valid_pkgpath()
 
     valid_url ${_pkgpath} && return 0
 
-    [ -d ${_pkgpath} ] || return 1
+    [ -d ${_pkgpath} ]
 
     [ -f ${_pkgpath}/packagesite.txz ]
 }
@@ -244,9 +244,9 @@ valid_staging()
 {
     local _staging="$1"
 
-    [ -f ${_staging}/base.ufs.uzip ] || return 1
-    [ -d ${_staging}/boot ] || return 1
-    [ -f ${_staging}/memroot.ufs.gz ] || return 1
+    [ -f ${_staging}/base.ufs.uzip ]
+    [ -d ${_staging}/boot ]
+    [ -f ${_staging}/memroot.ufs.gz ]
 }
 
 valid_destdir()
@@ -285,13 +285,13 @@ gmirror_configure()
 
     shift
 
-    [ -n ${_mirror} ] || return 1
+    [ -n ${_mirror} ]
 
     local _device="$1"
 
     shift
 
-    [ -n ${_device} ] || return 1
+    [ -n ${_device} ]
 
     gmirror label -v ${_mirror} ${_device}
 
@@ -307,10 +307,10 @@ gpt_ufs_partition_large()
     local _destdir="$1"
     local _device="$2"
 
-    [ -d ${_destdir} ] || return 1
-    [ -n ${_device} ] || return 1
+    [ -d ${_destdir} ]
+    [ -n ${_device} ]
 
-    [ -e "/dev/${_device}" ] || return 1;
+    [ -e "/dev/${_device}" ];
 
     gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s gpt ${_device}
@@ -366,10 +366,10 @@ gpt_ufs_partition_small()
     local _destdir="$1"
     local _device="$2"
 
-    [ -d ${_destdir} ] || return 1
-    [ -n ${_device} ] || return 1
+    [ -d ${_destdir} ]
+    [ -n ${_device} ]
 
-    [ -e "/dev/${_device}" ] || return 1;
+    [ -e "/dev/${_device}" ];
 
     gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s gpt ${_device}
@@ -406,9 +406,9 @@ mbr_ufs_partition_large()
     local _destdir="$1"
     local _device="$2"
 
-    [ -d ${_destdir} ] || return 1
-    [ -n ${_device} ] || return 1
-    [ -e "/dev/${_device}" ] || return 1
+    [ -d ${_destdir} ]
+    [ -n ${_device} ]
+    [ -e "/dev/${_device}" ]
 
     # FIXME refactor
 
@@ -474,9 +474,9 @@ mbr_ufs_partition_small()
     local _destdir="$1"
     local _device="$2"
 
-    [ -d ${_destdir} ] || return 1
-    [ -n ${_device} ] || return 1
-    [ -e "/dev/${_device}" ] || return 1
+    [ -d ${_destdir} ]
+    [ -n ${_device} ]
+    [ -e "/dev/${_device}" ]
 
     # FIXME refactor
 
@@ -525,7 +525,7 @@ zfs_create_pool()
 
     _devices="$@"
 
-    [ -d ${_destdir} ] || return 1
+    [ -d ${_destdir} ]
 
     sysctl -q kern.geom.debugflags=0x10
 
@@ -589,7 +589,7 @@ zfs_create_gpt_pool()
 
     _devices="$@"
 
-    [ -d ${_destdir} ] || return 1
+    [ -d ${_destdir} ]
 
     local _device_index=0
 
@@ -658,7 +658,7 @@ zfs_create_mbr_pool()
 
     _devices="$@"
 
-    [ -d ${_destdir} ] || return 1
+    [ -d ${_destdir} ]
 
     local _device
 
@@ -718,7 +718,7 @@ zfs_create_fs()
 {
     local _destdir="$1"
 
-    [ -d ${_destdir} ] || return 1
+    [ -d ${_destdir} ]
 
     zfs set atime=off ${ZFS_POOL}
 
@@ -777,7 +777,7 @@ swap_setup()
 {
     local _destdir="$1"
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     local _swap
 
@@ -796,7 +796,7 @@ procfs_setup()
 
     local _destdir="$1"
 
-    [ -d ${_destdir} ] || return 1
+    [ -d ${_destdir} ]
 
     echo "proc /proc procfs rw 0 0" >> ${_destdir}/etc/fstab
 
@@ -811,7 +811,7 @@ fdescfs_setup()
 
     local _destdir="$1"
 
-    [ -d ${_destdir} ] || return 1
+    [ -d ${_destdir} ]
 
     echo "fdescfs /dev/fd fdescfs rw 0 0" >> ${_destdir}/etc/fstab
 
@@ -830,7 +830,7 @@ format_fstab()
 {
     local _destdir="$1"
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     local _fstab="${_destdir}/etc/fstab"
 
@@ -849,10 +849,10 @@ install_release()
     local _relpath="$1"
     local _destdir="$2"
 
-    valid_relpath ${_relpath} || return 1
+    valid_relpath ${_relpath}
 
-    [ -d ${_destdir} ] || return 1
-    [ ${_destdir} != "/" ] || return 1
+    [ -d ${_destdir} ]
+    [ ${_destdir} != "/" ]
 
     local _is_remote="no"
 
@@ -982,7 +982,7 @@ customize_base()
 {
     local _destdir="$1"
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     chroot ${_destdir} chpass -p '$1$El8jLO2w$KX9lQ3ScWeZF6SqG267w9.' root
 
@@ -1019,8 +1019,8 @@ install_repo()
         return 0
     fi
 
-    valid_destdir ${_destdir} || return 1
-    valid_pkgpath ${_pkgpath} || return 1
+    valid_destdir ${_destdir}
+    valid_pkgpath ${_pkgpath}
 
     mkdir -p ${_destdir}/usr/local/etc/pkg/repos
 
@@ -1044,8 +1044,8 @@ install_pkg()
     local _destdir="$1"
     local _pkgpath="$2"
 
-    valid_destdir ${_destdir} || return 1
-    valid_pkgpath ${_pkgpath} || return 1
+    valid_destdir ${_destdir}
+    valid_pkgpath ${_pkgpath}
 
     install_resolv_conf ${_destdir}
     install_ca_root_nss ${_destdir}
@@ -1096,7 +1096,7 @@ start_jail()
 {
     local _destdir="$1"
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     local _sshd_config=$(mktemp ${_destdir}/tmp/sshd_config.XXXXXX)
 
@@ -1131,7 +1131,7 @@ stop_jail()
 {
     local _destdir="$1"
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     local _jail_name=$(basename ${_destdir})
 
@@ -1167,7 +1167,7 @@ reset_state()
 
 install_mbr_ufs()
 {
-    valid_host || return 1
+    valid_host
 
     parse_options "$@"
 
@@ -1176,10 +1176,10 @@ install_mbr_ufs()
     local _class="$1"
     local _device="$2"
 
-    [ -n ${_class} ] || return 1
-    [ -n ${_device} ] || return 1
+    [ -n ${_class} ]
+    [ -n ${_device} ]
 
-    valid_class ${_class} || return 1
+    valid_class ${_class}
 
     mkdir -p ${DESTDIR}
 
@@ -1199,7 +1199,7 @@ install_mbr_ufs()
 
 install_mbr_ufs_gmirror()
 {
-    valid_host || return 1
+    valid_host
 
     parse_options "$@"
 
@@ -1214,11 +1214,11 @@ install_mbr_ufs_gmirror()
 
     _devices="$@"
 
-    [ -n ${_class} ] || return 1
-    [ -n ${_mirror} ] || return 1
-    [ -n "${_devices}" ] || return 1
+    [ -n ${_class} ]
+    [ -n ${_mirror} ]
+    [ -n "${_devices}" ]
 
-    valid_class ${_class} || return 1
+    valid_class ${_class}
 
     kldload -n geom_mirror
 
@@ -1241,7 +1241,7 @@ install_mbr_ufs_gmirror()
 
 install_gpt_ufs()
 {
-    valid_host || return 1
+    valid_host
 
     parse_options "$@"
 
@@ -1250,10 +1250,10 @@ install_gpt_ufs()
     local _class="$1"
     local _device="$2"
 
-    [ -n ${_class} ] || return 1
-    [ -n ${_device} ] || return 1
+    [ -n ${_class} ]
+    [ -n ${_device} ]
 
-    valid_class ${_class} || return 1
+    valid_class ${_class}
 
     mkdir -p ${DESTDIR}
 
@@ -1273,7 +1273,7 @@ install_gpt_ufs()
 
 install_zfs()
 {
-    valid_host || return 1
+    valid_host
 
     parse_options "$@"
 
@@ -1283,7 +1283,7 @@ install_zfs()
 
     _devices="$@"
 
-    [ -n "${_devices}" ] || return 1
+    [ -n "${_devices}" ]
 
     kldload -n zfs
 
@@ -1308,7 +1308,7 @@ install_zfs()
 
 install_gpt_zfs()
 {
-    valid_host || return 1
+    valid_host
 
     parse_options "$@"
 
@@ -1318,7 +1318,7 @@ install_gpt_zfs()
 
     _devices="$@"
 
-    [ -n "${_devices}" ] || return 1
+    [ -n "${_devices}" ]
 
     kldload -n zfs
 
@@ -1343,7 +1343,7 @@ install_gpt_zfs()
 
 install_mbr_zfs()
 {
-    valid_host || return 1
+    valid_host
 
     parse_options "$@"
 
@@ -1353,7 +1353,7 @@ install_mbr_zfs()
 
     _devices="$@"
 
-    [ -n "${_devices}" ] || return 1
+    [ -n "${_devices}" ]
 
     kldload -n zfs
 
@@ -1591,7 +1591,7 @@ make_read_only()
 {
     local _destdir="$1"
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     sed -i '' -e '/^root:/ c\
 root:$1$PkLp4/DM$/3D/umXPR0XIb0HsPHByU/:0:0::0:0:System Administrator:/root:/bin/csh' \
@@ -1668,9 +1668,9 @@ install_setup_runtime()
     local _bsdkit="$2"
     local _pkgpath="$3"
 
-    valid_destdir ${_destdir} || return 1
-    valid_bsdkit ${_bsdkit} || return 1
-    valid_pkgpath ${_pkgpath} || return 1
+    valid_destdir ${_destdir}
+    valid_bsdkit ${_bsdkit}
+    valid_pkgpath ${_pkgpath}
 
     local _runtime=""
 
@@ -1795,13 +1795,13 @@ build_setup_staging()
     _relpath=$(realpath ${_relpath})
     _pkgpath=$(realpath ${_pkgpath})
 
-    valid_bsdkit ${_bsdkit} || return 1
-    valid_relpath ${_relpath} || return 1
-    valid_pkgpath ${_pkgpath} || return 1
+    valid_bsdkit ${_bsdkit}
+    valid_relpath ${_relpath}
+    valid_pkgpath ${_pkgpath}
 
-    [ ${_staging} != ${_bsdkit} ] || return 1
-    [ ${_staging} != ${_relpath} ] || return 1
-    [ ${_staging} != ${_pkgpath} ] || return 1
+    [ ${_staging} != ${_bsdkit} ]
+    [ ${_staging} != ${_relpath} ]
+    [ ${_staging} != ${_pkgpath} ]
     [ ${_staging} != "/" ] || exit 1
 
     local _tmp="/tmp/tmp.$$"
@@ -2000,14 +2000,14 @@ build_setup_iso()
     local _relpath="$3"
     local _pkgpath="$4"
 
-    valid_staging ${_staging} || return 1
+    valid_staging ${_staging}
 
     if [ ${_relpath} != "none" ]; then
-        valid_relpath ${_relpath} || return 1
+        valid_relpath ${_relpath}
     fi
 
     if [ ${_pkgpath} != "none" ]; then
-        valid_pkgpath ${_pkgpath} || return 1
+        valid_pkgpath ${_pkgpath}
     fi
 
     local _iso_path="${_iso}.fs"
@@ -2089,8 +2089,8 @@ remote()
 
     shift $((${OPTIND} - 1))
 
-    [ -n "${_remote_address}" ] || return 1
-    [ -n "${_remote_port}" ] || return 1
+    [ -n "${_remote_address}" ]
+    [ -n "${_remote_port}" ]
 
     echo "Running: $@"
 
@@ -2150,8 +2150,8 @@ EOF
 
 ansible_jail_playbook()
 {
-    [ -n "${JAIL_ADDRESS}" ] || return 1
-    [ -n "${JAIL_SSH_PORT}" ] || return 1
+    [ -n "${JAIL_ADDRESS}" ]
+    [ -n "${JAIL_SSH_PORT}" ]
 
     local _playbook=${BSDKIT_DIR}/playbook
 
@@ -2200,7 +2200,7 @@ print_jail_conf()
 
     local _destdir=${JAIL_ROOT}/${_jail_name}
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     local _jail_name=$(basename ${_destdir})
 
@@ -2235,7 +2235,7 @@ write_runtime_jail_conf()
     local _jail_conf="$1"
     local _destdir="$2"
 
-    valid_destdir ${_destdir} || return 1
+    valid_destdir ${_destdir}
 
     local _jail_name=$(basename ${_destdir})
 
