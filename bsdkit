@@ -75,12 +75,13 @@ environment()
 : ${JAIL_SSH_PORT:=2200}
 : ${JAIL_PROXY:=""}
 
-: ${FREEBSD_REL_URL_TEMPLATE:=%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%}
-: ${FREEBSD_PKG_URL_TEMPLATE:=%%ROOT_URL%%/packages-%%VERSION%%-%%ARCH%%-%%PKGSET%%}
+: ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
+: ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
 
 : ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
 : ${BSDKIT_VERSION:=11.1}
 : ${BSDKIT_ARCH:=amd64}
+: ${BSDKIT_TREE:=default}
 : ${BSDKIT_PKGSET:=nox11}
 
 : ${IOCELL_JAILS:=/iocell/jails}
@@ -102,6 +103,7 @@ parse_url()
     echo ${_url} | sed -e "s|%%ROOT_URL%%|${BSDKIT_ROOT_URL}|g" \
                        -e "s|%%VERSION%%|${BSDKIT_VERSION}|g"   \
                        -e "s|%%ARCH%%|${BSDKIT_ARCH}|g"         \
+                       -e "s|%%TREE%%|${BSDKIT_TREE}|g"         \
                        -e "s|%%PKGSET%%|${BSDKIT_PKGSET}|g"
 }
 
@@ -109,11 +111,13 @@ parse_options()
 {
     while getopts "r:v:a:z:j:p:i:" OPT; do
         case ${OPT} in
-            r) BSDKIT_ROOT_URL=${OPTARG}
+            r) BSDKIT_ROOT_URL=${OPTARG%/}
                ;;
             v) BSDKIT_VERSION=${OPTARG}
                ;;
             a) BSDKIT_ARCH=${OPTARG}
+               ;;
+            p) BSDKIT_TREE=${OPTARG}
                ;;
             z) BSDKIT_PKGSET=${OPTARG}
                ;;
@@ -1026,14 +1030,14 @@ install_repo()
 
     cat > ${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf << EOF
 FreeBSD: {
-  enabled: no
+    enabled: no
 }
 EOF
 
     if valid_url ${_pkgpath}; then
         cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 bsdkit: {
-  url: "${_pkgpath}"
+    url: "${_pkgpath}"
 }
 EOF
     fi
