@@ -34,4 +34,4 @@ cp ${OS_RELDIR}/ftp/* ${_target}
     ${BSDKIT_PATH}/staging-${_version}-${_arch} \
     . \
     ${BSDKIT_PATH}/release-${_version}-${_arch} \
-    ${BSDKIT_PATH}/packages-${_version}-${_arch}-nox11
+    ${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
