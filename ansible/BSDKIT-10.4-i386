@@ -1,0 +1,34 @@
+include		GENERIC
+
+ident		BSDKIT
+
+device		crypto		# core crypto support
+device		cryptodev	# /dev/crypto for access to h/w
+device		enc		# IPsec interface.
+
+options		DDB		# Enable the ddb debugger backend.
+options		TEKEN_UTF8
+
+options		IPSEC		# IP security (requires device crypto)
+options		IPSEC_NAT_T	# NAT-T support, UDP encap of ESP
+options		IPSEC_FILTERTUNNEL	# filter ipsec packets from a tunnel
+
+options		SC_DFLT_FONT	# compile font in
+makeoptions	SC_DFLT_FONT=cp437
+options		SC_HISTORY_SIZE=512	# number of history buffer lines
+options		VGA_WIDTH90	# support 90 column modes
+
+# altq(9). Enable the base part of the hooks with the ALTQ option.
+# Individual disciplines must be built into the base system and can not be
+# loaded as modules at this point. In order to build a SMP kernel you must
+# also have the ALTQ_NOPCC option.
+options		ALTQ
+options		ALTQ_CBQ	# Class Bases Queueing
+options		ALTQ_RED	# Random Early Detection
+options		ALTQ_RIO	# RED In/Out
+options		ALTQ_HFSC	# Hierarchical Packet Scheduler
+options		ALTQ_CDNR	# Traffic conditioner
+options		ALTQ_PRIQ	# Priority Queueing
+options		ALTQ_NOPCC	# Required for SMP build
+
+options		KVA_PAGES=512
