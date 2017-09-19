@@ -128,7 +128,6 @@ fi
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/bin:/usr/local/sbin:~/bin
 export LANG=en_US.UTF-8
-export MANWIDTH=tty
 export CLICOLOR=yes
 export GPG_TTY=$(tty)
 
