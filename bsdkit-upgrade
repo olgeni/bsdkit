@@ -9,6 +9,7 @@ set -e -u
 : ${BOOTENV_ENABLE:="default"}
 : ${BOOTENV_NAME:="$(date +%F)"}
 : ${BOOTENV_MOUNT:="/mnt"}
+: ${FETCH_ONLY:="no"}
 
 : ${_install_src:="no"}
 : ${_install_debug:="no"}
@@ -57,7 +58,7 @@ bsdkit-noauto()
     fi
 }
 
-while getopts "eEn:r:v:a:d:" OPT; do
+while getopts "eEn:r:v:a:d:F" OPT; do
     case ${OPT} in
         e)
             BOOTENV_ENABLE=yes
@@ -80,6 +81,9 @@ while getopts "eEn:r:v:a:d:" OPT; do
         d)
             DESTDIR=${OPTARG%/}
             ;;
+        F)
+            FETCH_ONLY="yes"
+            ;;
         *)
             exit 64 # EX_USAGE
     esac
@@ -95,12 +99,14 @@ if [ ${BOOTENV_ENABLE} = "default" ]; then
     fi
 fi
 
-if [ "${DESTDIR}" != "" ] && is_yes ${BOOTENV_ENABLE}; then
-    error "incompatible BOOTENV_ENABLE and DESTDIR"
-fi
+if ! is_yes ${FETCH_ONLY}; then
+    if [ "${DESTDIR}" != "" ] && is_yes ${BOOTENV_ENABLE}; then
+        error "incompatible BOOTENV_ENABLE and DESTDIR"
+    fi
 
-if is_yes ${BOOTENV_ENABLE}; then
-    which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
+    if is_yes ${BOOTENV_ENABLE}; then
+        which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
+    fi
 fi
 
 if [ -f ${DESTDIR}/usr/src/Makefile -a ! -d ${DESTDIR}/usr/src/.svn ]; then
@@ -150,6 +156,10 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         _sha256_local=$(sha256 -q "${_filename}")
     done
 done
+
+if is_yes ${FETCH_ONLY}; then
+    exit 0
+fi
 
 if is_yes ${BOOTENV_ENABLE}; then
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}\$"; then
