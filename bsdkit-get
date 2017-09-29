@@ -7,6 +7,8 @@ for _arch in ${BSDKIT_ARCH_LIST}; do
         sudo -E rsync -avP --delete ${USER}@${BSDKIT_REMOTE}/release-${_version}-${_arch}/ \
              ${BSDKIT_PATH}/release-${_version}-${_arch}/
 
+        mkdir -p ${BSDKIT_PATH}/src/${_version}/release-${_arch}/ftp
+
         sudo -E rsync -avP --delete ${BSDKIT_PATH}/release-${_version}-${_arch}/ \
              ${BSDKIT_PATH}/src/${_version}/release-${_arch}/ftp/
 
