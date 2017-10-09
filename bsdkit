@@ -2112,7 +2112,7 @@ remote()
 
     cat > ${_ansible_cfg} << EOF
 [defaults]
-hostfile = ${_ansible_hosts}
+inventory = ${_ansible_hosts}
 host_key_checking = False
 
 [ssh_connection]
@@ -2171,7 +2171,7 @@ ansible_jail_playbook()
 
     cat > ${_ansible_cfg} << EOF
 [defaults]
-hostfile = ${_ansible_hosts}
+inventory = ${_ansible_hosts}
 host_key_checking = False
 
 [ssh_connection]
