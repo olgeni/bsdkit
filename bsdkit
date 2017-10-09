@@ -1720,6 +1720,8 @@ install_setup_runtime()
     _runtime="${_runtime} pefs-kmod"
     _runtime="${_runtime} pipemeter"
     _runtime="${_runtime} pv"
+    _runtime="${_runtime} py27-libzfs"
+    _runtime="${_runtime} py27-sh"
     _runtime="${_runtime} rdate"
     _runtime="${_runtime} redir"
     _runtime="${_runtime} renameutils"
