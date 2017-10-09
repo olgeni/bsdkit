@@ -280,7 +280,7 @@
     - name: pwd_mkdb
       command: pwd_mkdb /etc/master.passwd
 
-- include: virt.yml
+- import_playbook: virt.yml
   when: not install_jail
 
 - hosts: all
