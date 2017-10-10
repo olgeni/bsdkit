@@ -138,6 +138,7 @@
       with_items:
         - kermrc
         - inputrc
+        - vimrc
         - zshrc
       failed_when: False
 
@@ -148,6 +149,7 @@
       with_items:
         - kermrc
         - inputrc
+        - vimrc
         - zshrc
 
     - name: "Install sudoers"
