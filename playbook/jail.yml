@@ -136,8 +136,8 @@
         src=../ansible/dot.{{item}} dest=/usr/share/skel/dot.{{item}}
         owner=root group=wheel mode=644
       with_items:
-        - kermrc
         - inputrc
+        - kermrc
         - vimrc
         - zshrc
       failed_when: False
@@ -147,8 +147,8 @@
         src=../ansible/dot.{{item}} dest=/root/.{{item}}
         owner=root group=wheel mode=644
       with_items:
-        - kermrc
         - inputrc
+        - kermrc
         - vimrc
         - zshrc
 
