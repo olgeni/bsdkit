@@ -2,9 +2,11 @@
 
 set -e -u
 
+unset POSIXLY_CORRECT
+
 SCRIPT_NAME=$(basename $0)
 
-error ()
+error()
 {
     echo "${SCRIPT_NAME}: $@"
     exit 1
@@ -15,8 +17,27 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
+: ${_with_site:=""}
+
+_jobs="$(sysctl -n hw.ncpu)"
+
+while getopts "j:" OPT; do
+    case ${OPT} in
+        j)
+            _jobs="${OPTARG}"
+            ;;
+        *)
+    esac
+done
+
+shift $((${OPTIND} - 1))
+
+_jobs_option="-j${_jobs}"
+
 _version=$1
 _arch=$2
+
+# ===
 
 OS_SRCDIR=${BSDKIT_PATH}/src/${_version}/src
 OS_RELDIR=${BSDKIT_PATH}/src/${_version}/release-${_arch}
