@@ -1706,6 +1706,7 @@ install_setup_runtime()
     _runtime="${_runtime} git"
     _runtime="${_runtime} gnu-watch"
     _runtime="${_runtime} go-cs"
+    _runtime="${_runtime} go-www"
     _runtime="${_runtime} hextools"
     _runtime="${_runtime} hfsutils"
     _runtime="${_runtime} inplace"
