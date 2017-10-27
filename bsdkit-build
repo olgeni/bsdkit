@@ -2,9 +2,13 @@
 
 set -e -u
 
-SCRIPT_NAME=$(basename $0)
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
 
-error ()
+DEFAULT_VERSION=11
+DEFAULT_ARCH=amd64
+
+error()
 {
     echo "${SCRIPT_NAME}: $@"
     exit 1
@@ -15,11 +19,174 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
-for _arch in ${BSDKIT_ARCH_LIST}; do
-    for _version in ${BSDKIT_VERSION_LIST}; do
-        ./build-release ${_version} ${BSDKIT_ARCH}
-        ./build-staging ${_version} ${BSDKIT_ARCH}
-        ./build-iso ${_version} ${BSDKIT_ARCH}
-        ./build-img ${_version} ${BSDKIT_ARCH}
-    done
+if [ $# -eq 0 ]; then
+    cat <<EOF
+
+usage: ${SCRIPT_NAME} [option] ...
+Options and arguments:
+
+    -v version
+    -a arch
+    -j jobs
+    -P: build images with packages
+    -R: build release
+    -S: build staging
+    -C: build iso image
+    -M: build usb image
+    -A: build release/staging/iso/usb
+
+EOF
+fi
+
+_version=${DEFAULT_VERSION}
+_arch=${DEFAULT_ARCH}
+_jobs_option=""
+_with_packages=""
+
+_build_release=""
+_build_staging=""
+_build_iso=""
+_build_img=""
+
+while getopts "v:a:j:PRSCMA" OPT; do
+    case ${OPT} in
+        v)
+            _version="${OPTARG}"
+            ;;
+        a)
+            _arch="${OPTARG}"
+            ;;
+        j)
+            _jobs_option="-j${OPTARG}"
+            ;;
+        P)
+            _with_packages="YES"
+            ;;
+        R)
+            _build_release="YES"
+            ;;
+        S)
+            _build_staging="YES"
+            ;;
+        C)
+            _build_iso="YES"
+            ;;
+        M)
+            _build_img="YES"
+            ;;
+        A)
+            _build_release="YES"
+            _build_staging="YES"
+            _build_iso="YES"
+            _build_img="YES"
+            ;;
+        *)
+    esac
 done
+
+shift $((${OPTIND} - 1))
+
+# ===
+
+OS_SRCDIR=${BSDKIT_PATH}/src/${_version}/src
+OS_RELDIR=${BSDKIT_PATH}/src/${_version}/release-${_arch}
+OS_MAJOR=$(echo ${_version} | sed -e "s/\\..*//")
+
+# ===
+
+build_release()
+{
+    install -o root -g wheel -m 644 ansible/BSDKIT-${_version}-${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
+
+    echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
+
+    # optional: -DWITH_REPRODUCIBLE_BUILD
+
+    rm -r -f ${OS_RELDIR}
+    mkdir -p ${OS_RELDIR}
+
+    env -i make -s -C ${OS_SRCDIR} \
+        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        ${_jobs_option} buildworld buildkernel
+
+    env -i make -s -C ${OS_SRCDIR}/release \
+        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        release NOPORTS="YES"
+
+    env -i make -s -C ${OS_SRCDIR}/release \
+        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        install DESTDIR=${OS_RELDIR}
+
+    env -i make -s -C ${OS_SRCDIR}/release \
+        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        clean
+
+    echo ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
+
+    rm -f ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
+}
+
+build_staging()
+{
+    local _target=${BSDKIT_PATH}/release-${_version}-${_arch}
+
+    rm -f ${_target}/*
+
+    mkdir -p ${_target}
+
+    cp ${OS_RELDIR}/ftp/* ${_target}
+
+    ${SCRIPT_PATH}/bsdkit build_setup_staging \
+                  ${BSDKIT_PATH}/staging-${_version}-${_arch} \
+                  . \
+                  ${BSDKIT_PATH}/release-${_version}-${_arch} \
+                  ${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+}
+
+build_iso()
+{
+    local _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.iso
+    local _release="none"
+    local _packages="none"
+
+    if [ -n "${_with_packages}" ]; then
+        _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.full.iso
+        _release=${BSDKIT_PATH}/release-${_version}-${_arch}
+        _packages=${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+    fi
+
+    ${SCRIPT_PATH}/bsdkit build_setup_iso \
+                  ${_iso} \
+                  ${BSDKIT_PATH}/staging-${_version}-${_arch} \
+                  ${_release} \
+                  ${_packages}
+}
+
+build_img()
+{
+    local _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.iso
+    local _img=${BSDKIT_PATH}/release-${_version}-${_arch}.img
+
+    if [ -n "${_with_packages}" ]; then
+        _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.full.iso
+        _img=${BSDKIT_PATH}/release-${_version}-${_arch}.full.img
+    fi
+
+    ${SCRIPT_PATH}/bsdkit build_setup_img ${_iso} ${_img}
+}
+
+if [ -n "${_build_release}" ]; then
+    build_release
+fi
+
+if [ -n "${_build_staging}" ]; then
+    build_staging
+fi
+
+if [ -n "${_build_iso}" ]; then
+    build_iso
+fi
+
+if [ -n "${_build_img}" ]; then
+    build_img
+fi
