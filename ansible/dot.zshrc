@@ -106,6 +106,14 @@ if [[ $HOST != "freebsd" ]]; then
 	compadd `ls /usr/local/etc/rc.d`
     }
 
+    local _file
+
+    if ls ~/.zsh/*.sh >/dev/null 2>&1; then
+        for _file in ~/.zsh/*.sh; do
+            source ${_file}
+        done
+    fi
+
     if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
         if [ -d ~/.zsh/completion ]; then
             fpath=(~/.zsh/completion $fpath)
