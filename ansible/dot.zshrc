@@ -27,6 +27,8 @@ setopt interactive_comments
 setopt notify
 setopt promptsubst
 
+unsetopt flowcontrol
+
 if [ $(uname) != "CYGWIN_NT-10.0" ]; then
     setopt hist_fcntl_lock
 fi
