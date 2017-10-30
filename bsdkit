@@ -1729,6 +1729,7 @@ install_setup_runtime()
     _runtime="${_runtime} rsync"
     _runtime="${_runtime} smartmontools"
     _runtime="${_runtime} tinyproxy"
+    _runtime="${_runtime} tio"
     _runtime="${_runtime} tmux"
     _runtime="${_runtime} xe"
     _runtime="${_runtime} zip"
