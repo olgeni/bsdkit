@@ -1713,7 +1713,6 @@ install_setup_runtime()
     _runtime="${_runtime} ipmitool"
     _runtime="${_runtime} kermit"
     _runtime="${_runtime} lftp"
-    _runtime="${_runtime} lr"
     _runtime="${_runtime} mbuffer"
     _runtime="${_runtime} megacli"
     _runtime="${_runtime} ncdu"
