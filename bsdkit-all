@@ -18,6 +18,6 @@ fi
 
 for _arch in ${BSDKIT_ARCH_LIST}; do
     for _version in ${BSDKIT_VERSION_LIST}; do
-        ${SCRIPT_PATH}/bsdkit-build -v ${_version} -a ${BSDKIT_ARCH} -A
+        ${SCRIPT_PATH}/bsdkit-build -v ${_version} -a ${BSDKIT_ARCH} -A "$@"
     done
 done
