@@ -102,9 +102,6 @@ build_release()
 
     # optional: -DWITH_REPRODUCIBLE_BUILD
 
-    rm -r -f ${OS_RELDIR}
-    mkdir -p ${OS_RELDIR}
-
     env -i make -s -C ${OS_SRCDIR} \
         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
         ${_jobs_option} buildworld buildkernel
@@ -112,6 +109,9 @@ build_release()
     env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
         release NOPORTS="YES"
+
+    rm -r -f ${OS_RELDIR}
+    mkdir -p ${OS_RELDIR}
 
     env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
