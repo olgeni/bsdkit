@@ -1,0 +1,33 @@
+include		GENERIC
+
+ident		BSDKIT
+
+options		DDB		# Enable the ddb debugger backend.
+
+# altq(9). Enable the base part of the hooks with the ALTQ option.
+# Individual disciplines must be built into the base system and can not be
+# loaded as modules at this point. In order to build a SMP kernel you must
+# also have the ALTQ_NOPCC option.
+options 	ALTQ
+options 	ALTQ_CBQ	# Class Based Queueing
+options 	ALTQ_RED	# Random Early Detection
+options 	ALTQ_RIO	# RED In/Out
+options 	ALTQ_CODEL	# CoDel Active Queueing
+options 	ALTQ_HFSC	# Hierarchical Packet Scheduler
+options 	ALTQ_FAIRQ	# Fair Packet Scheduler
+options 	ALTQ_CDNR	# Traffic conditioner
+options 	ALTQ_PRIQ	# Priority Queueing
+options 	ALTQ_NOPCC	# Required if the TSC is unusable
+
+options		KVA_PAGES=512
+
+nooption 	BUF_TRACKING		# Track buffer history
+nooption 	DDB			# Support DDB.
+nooption 	FULL_BUF_TRACKING	# Track more buffer history
+nooption 	GDB			# Support remote GDB.
+nooption 	DEADLKRES		# Enable the deadlock resolver
+nooption 	INVARIANTS		# Enable calls of extra sanity checking
+nooption 	INVARIANT_SUPPORT	# Extra sanity checks of internal structures, required by INVARIANTS
+nooption 	WITNESS			# Enable checks to detect deadlocks and cycles
+nooption 	WITNESS_SKIPSPIN	# Don't run witness on spinlocks for speed
+nooption 	MALLOC_DEBUG_MAXZONES	# Separate malloc(9) zones
