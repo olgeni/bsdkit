@@ -8,6 +8,8 @@ SCRIPT_NAME="$(basename $0)"
 DEFAULT_VERSION=11
 DEFAULT_ARCH=amd64
 
+unset POSIXLY_CORRECT
+
 error()
 {
     echo "${SCRIPT_NAME}: $@"
