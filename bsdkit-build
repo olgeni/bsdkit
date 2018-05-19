@@ -33,8 +33,8 @@ Options and arguments:
     -P: build images with packages
     -R: build release
     -S: build staging
-    -C: build iso image
-    -M: build usb image
+    -I: build iso image
+    -U: build usb image
     -A: build release/staging/iso/usb
 
 EOF
@@ -48,9 +48,9 @@ _with_packages=""
 _build_release=""
 _build_staging=""
 _build_iso=""
-_build_img=""
+_build_usb=""
 
-while getopts "v:a:j:PRSCMA" OPT; do
+while getopts "v:a:j:PRSIUA" OPT; do
     case ${OPT} in
         v)
             _version="${OPTARG}"
@@ -70,17 +70,17 @@ while getopts "v:a:j:PRSCMA" OPT; do
         S)
             _build_staging="YES"
             ;;
-        C)
+        I)
             _build_iso="YES"
             ;;
-        M)
-            _build_img="YES"
+        U)
+            _build_usb="YES"
             ;;
         A)
             _build_release="YES"
             _build_staging="YES"
             _build_iso="YES"
-            _build_img="YES"
+            _build_usb="YES"
             ;;
         *)
     esac
@@ -164,17 +164,17 @@ build_iso()
                   ${_packages}
 }
 
-build_img()
+build_usb()
 {
     local _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.iso
-    local _img=${BSDKIT_PATH}/release-${_version}-${_arch}.img
+    local _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.usb
 
     if [ -n "${_with_packages}" ]; then
         _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.full.iso
-        _img=${BSDKIT_PATH}/release-${_version}-${_arch}.full.img
+        _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.full.usb
     fi
 
-    ${SCRIPT_PATH}/bsdkit build_setup_img ${_iso} ${_img}
+    ${SCRIPT_PATH}/bsdkit build_setup_img ${_iso} ${_usb}
 }
 
 if [ -n "${_build_release}" ]; then
@@ -189,6 +189,6 @@ if [ -n "${_build_iso}" ]; then
     build_iso
 fi
 
-if [ -n "${_build_img}" ]; then
-    build_img
+if [ -n "${_build_usb}" ]; then
+    build_usb
 fi
