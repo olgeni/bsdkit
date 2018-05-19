@@ -1681,10 +1681,10 @@ install_setup_runtime()
     local _runtime=""
 
     # required
-    _runtime="${_runtime} ansible"
     _runtime="${_runtime} bar"
     _runtime="${_runtime} ca_root_nss"
     _runtime="${_runtime} pkg"
+    _runtime="${_runtime} py27-ansible"
     _runtime="${_runtime} python"
     _runtime="${_runtime} zsh"
 
