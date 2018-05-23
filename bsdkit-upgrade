@@ -95,12 +95,16 @@ done
 
 shift $((${OPTIND} - 1))
 
-if [ ${BOOTENV_ENABLE} = "default" ]; then
-    if kenv -q zfs_be_root >/dev/null 2>&1; then
-        BOOTENV_ENABLE=yes
-    else
-        BOOTENV_ENABLE=no
+if kenv -q zfs_be_root >/dev/null 2>&1; then
+    if [ ${BOOTENV_ENABLE} = "default" ]; then
+        if [ -z "${DESTDIR}" ]; then
+            BOOTENV_ENABLE="yes"
+        else
+            BOOTENV_ENABLE="no"
+        fi
     fi
+else
+    BOOTENV_ENABLE="no"
 fi
 
 if ! is_yes ${FETCH_ONLY}; then
@@ -127,6 +131,12 @@ fi
 
 if [ -f ${DESTDIR}/usr/tests/Kyuafile ]; then
     _install_tests=yes
+fi
+
+_destdir_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }")
+
+if [ -n "${_destdir_fs}" ]; then
+    zfs snapshot "${_destdir_fs}@$(date -u "+%Y-%m-%dT%H:%M:%SZ")"
 fi
 
 mkdir -p ${_distdir}
