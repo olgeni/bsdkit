@@ -323,10 +323,9 @@ if is_yes ${BOOTENV_ENABLE}; then
         pkg-static -c ${BOOTENV_MOUNT} upgrade -y
     fi
 
-    rebuild_port x11/nvidia-driver
-    rebuild_port sysutils/pefs-kmod
-    rebuild_port emulators/virtualbox-ose-kmod
-    rebuild_port emulators/virtualbox-ose-additions
+    for _port in $(pkg which -qo /boot/modules/* | sort | uniq); do
+        rebuild_port ${_port}
+    done
 
     if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}/usr/src\$"; then
         umount -f ${BOOTENV_MOUNT}/usr/src
