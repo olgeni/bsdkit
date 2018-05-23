@@ -10,6 +10,7 @@ set -e -u
 : ${BOOTENV_NAME:="$(date +%F)"}
 : ${BOOTENV_MOUNT:="/mnt"}
 : ${FETCH_ONLY:="no"}
+: ${SKIP_PACKAGES:="no"}
 
 : ${_install_src:="no"}
 : ${_install_debug:="no"}
@@ -58,7 +59,7 @@ bsdkit-noauto()
     fi
 }
 
-while getopts "eEn:r:v:a:d:F" OPT; do
+while getopts "eEn:r:v:a:d:FP" OPT; do
     case ${OPT} in
         e)
             BOOTENV_ENABLE=yes
@@ -83,6 +84,9 @@ while getopts "eEn:r:v:a:d:F" OPT; do
             ;;
         F)
             FETCH_ONLY="yes"
+            ;;
+        P)
+            SKIP_PACKAGES="yes"
             ;;
         *)
             exit 64 # EX_USAGE
@@ -314,8 +318,10 @@ rebuild_port()
 }
 
 if is_yes ${BOOTENV_ENABLE}; then
-    pkg-static -c ${BOOTENV_MOUNT} upgrade -Fy
-    pkg-static -c ${BOOTENV_MOUNT} upgrade -y
+    if ! is_yes ${SKIP_PACKAGES}; then
+        pkg-static -c ${BOOTENV_MOUNT} upgrade -Fy
+        pkg-static -c ${BOOTENV_MOUNT} upgrade -y
+    fi
 
     rebuild_port x11/nvidia-driver
     rebuild_port sysutils/pefs-kmod
