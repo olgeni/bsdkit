@@ -1446,7 +1446,7 @@ install_jail()
 
     local _release=$(chroot ${_destdir} /bin/freebsd-version -u)
 
-    local _login_env=",LOCALE=en_US.UTF-8"
+    local _login_env=",LANG=en_US.UTF-8"
     _login_env="${_login_env},UNAME_r=${_release% *}"
     _login_env="${_login_env},UNAME_v=FreeBSD ${_release}"
     _login_env="${_login_env},UNAME_m=${BSDKIT_ARCH%.*}"
