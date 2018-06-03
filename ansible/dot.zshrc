@@ -110,7 +110,7 @@ if [[ $HOST != "freebsd" ]]; then
 
     local _file
 
-    if ls ~/.zsh/*.sh >/dev/null 2>&1; then
+    if [ -d ~/.zsh ] && ls ~/.zsh/ | grep -E '\.sh$' >/dev/null 2>&1; then
         for _file in ~/.zsh/*.sh; do
             source ${_file}
         done
