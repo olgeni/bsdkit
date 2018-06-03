@@ -537,7 +537,7 @@ zfs_create_pool()
         gpart destroy -F ${_device} 2> /dev/null || :
 
         dd if=/boot/zfsboot of=/dev/${_device} count=1
-        dd if=/boot/zfsboot of=/dev/${_device} skip=1 seek=1024
+        dd if=/boot/zfsboot of=/dev/${_device} iseek=1 oseek=1024
     done
 
     sysctl -q kern.geom.debugflags=0x00
@@ -686,7 +686,7 @@ zfs_create_mbr_pool()
         swapon /dev/${_device}s1b
 
         dd if=/boot/zfsboot of=/dev/${_device}s1a count=1
-        dd if=/boot/zfsboot of=/dev/${_device}s1a skip=1 seek=1024
+        dd if=/boot/zfsboot of=/dev/${_device}s1a iseek=1 oseek=1024
     done
 
     local _options="-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir}"
