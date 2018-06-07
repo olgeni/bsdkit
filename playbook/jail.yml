@@ -267,12 +267,16 @@
       stat: path=/usr/local/share/certs/ca-root-nss.crt
       register: stat_ca_root_nss
 
+    - name: "stat: cert.pem"
+      stat: path=/etc/cert.pem
+      register: stat_cert_pem
+
     - name: "Install ca-root-nss.crt"
       copy: >
         src=/usr/local/share/certs/ca-root-nss.crt
         dest=/etc/ssl/cert.pem
         owner=root group=wheel mode=644
-      when: stat_ca_root_nss.stat.exists
+      when: stat_ca_root_nss.stat.exists and not stat_cert_pem.exists
 
     - name: "Run pkg clean"
       shell: pkg clean -a -y || true
