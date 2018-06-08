@@ -37,3 +37,4 @@
       when: system_product.stdout == "VMware Virtual Platform"
 
 # smbios.bios.vendor="BHYVE"
+# smbios.bios.vendor="Amazon EC2"
