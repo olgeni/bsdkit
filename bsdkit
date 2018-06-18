@@ -34,8 +34,6 @@ is_yes()
 : ${FS_ROOT_SIZE:=2048}
 : ${FS_VAR_SIZE:=6144}
 : ${FS_TMP_SIZE:=512}
-: ${PGSQL_JAIL_USER:=700}
-: ${PGSQL_JAIL_GROUP:=700}
 : ${DESTDIR:=/mnt}
 : ${JAIL_ROOT:=/jails}
 : ${SSH_PUBLIC_KEY:=""}
@@ -62,8 +60,6 @@ environment()
          FS_ROOT_SIZE=\"${FS_ROOT_SIZE}\"         \
          FS_VAR_SIZE=\"${FS_VAR_SIZE}\"           \
          FS_TMP_SIZE=\"${FS_TMP_SIZE}\"           \
-         PGSQL_JAIL_USER=\"${PGSQL_JAIL_USER}\"   \
-         PGSQL_JAIL_GROUP=\"${PGSQL_JAIL_GROUP}\" \
          DESTDIR=\"${DESTDIR}\"                   \
          INSTALL_JAIL=\"${INSTALL_JAIL}\"         \
          JAIL_ROOT=\"${JAIL_ROOT}\"               \
@@ -1518,26 +1514,6 @@ do_configure_jail()
     link_home ${_destdir}
 
     mkdir -p ${_destdir}/usr/ports
-
-    local _jail_name=$(uuidgen)
-
-    if ! jail -c \
-         path=/ \
-         name=${_jail_name} \
-         host.hostname=${_jail_name} \
-         ip4.addr=${JAIL_ADDRESS} \
-         interface=${JAIL_INTERFACE} \
-         sysvmsg=new \
-         sysvsem=new \
-         sysvshm=new \
-         command=/bin/pwd > /dev/null 2>&1; then
-        pw -V ${_destdir}/etc groupadd pgsql -g ${PGSQL_JAIL_GROUP}
-        pw -V ${_destdir}/etc useradd pgsql -u ${PGSQL_JAIL_USER} \
-           -g pgsql \
-           -s /bin/sh \
-           -d /usr/local/pgsql \
-           -c "PostgreSQL pseudo-user"
-    fi
 
     customize_base ${_destdir}
 
