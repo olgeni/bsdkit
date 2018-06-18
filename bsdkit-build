@@ -167,11 +167,11 @@ build_iso()
 build_usb()
 {
     local _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.iso
-    local _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.usb
+    local _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.img
 
     if [ -n "${_with_packages}" ]; then
         _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.full.iso
-        _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.full.usb
+        _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.full.img
     fi
 
     ${SCRIPT_PATH}/bsdkit build_setup_img ${_iso} ${_usb}
