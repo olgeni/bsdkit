@@ -1,0 +1,21 @@
+include		GENERIC
+
+ident		BSDKIT
+
+options		DDB		# Enable the ddb debugger backend.
+options		TCP_RFC7413	# TCP Fast Open support
+
+# altq(9). Enable the base part of the hooks with the ALTQ option.
+# Individual disciplines must be built into the base system and can not be
+# loaded as modules at this point. In order to build a SMP kernel you must
+# also have the ALTQ_NOPCC option.
+options 	ALTQ
+options 	ALTQ_CBQ	# Class Based Queueing
+options 	ALTQ_RED	# Random Early Detection
+options 	ALTQ_RIO	# RED In/Out
+options 	ALTQ_CODEL	# CoDel Active Queueing
+options 	ALTQ_HFSC	# Hierarchical Packet Scheduler
+options 	ALTQ_FAIRQ	# Fair Packet Scheduler
+options 	ALTQ_CDNR	# Traffic conditioner
+options 	ALTQ_PRIQ	# Priority Queueing
+options 	ALTQ_NOPCC	# Required if the TSC is unusable
