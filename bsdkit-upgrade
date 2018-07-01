@@ -329,8 +329,10 @@ rebuild_port()
 
 if is_yes ${BOOTENV_ENABLE}; then
     if ! is_yes ${SKIP_PACKAGES}; then
-        pkg-static -c ${BOOTENV_MOUNT} upgrade -Fy
-        pkg-static -c ${BOOTENV_MOUNT} upgrade -y
+        if pkg-static -c ${BOOTENV_MOUNT} update -f; then
+            pkg-static -c ${BOOTENV_MOUNT} upgrade -Fy
+            pkg-static -c ${BOOTENV_MOUNT} upgrade -y
+        fi
     fi
 
     for _port in $(pkg which -qo /boot/modules/* | sort | uniq); do
