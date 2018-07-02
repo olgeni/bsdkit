@@ -98,6 +98,9 @@ OS_MAJOR=$(echo ${_version} | sed -e "s/\\..*//")
 
 build_release()
 {
+    local _make_conf=${SCRIPT_PATH}/etc/make.conf
+    local _src_conf=${SCRIPT_PATH}/etc/src.conf
+
     install -o root -g wheel -m 644 ansible/BSDKIT-${_version}-${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 
     echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
@@ -105,22 +108,22 @@ build_release()
     # optional: -DWITH_REPRODUCIBLE_BUILD
 
     env -i make -s -C ${OS_SRCDIR} \
-        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
         ${_jobs_option} buildworld buildkernel
 
     env -i make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
         release NOPORTS="YES"
 
     rm -r -f ${OS_RELDIR}
     mkdir -p ${OS_RELDIR}
 
     env -i make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
         install DESTDIR=${OS_RELDIR}
 
     env -i make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=/dev/null SRCCONF=/dev/null TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="BSDKIT" \
         clean
 
     echo ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
