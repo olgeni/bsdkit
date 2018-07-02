@@ -38,3 +38,5 @@
 
 # smbios.bios.vendor="BHYVE"
 # smbios.bios.vendor="Amazon EC2"
+# smbios.bios.vendor="Google"
+# smbios.system.product="Google Compute Engine"
