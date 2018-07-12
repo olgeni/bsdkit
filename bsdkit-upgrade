@@ -44,7 +44,7 @@ bsdkit-noauto()
         _bootenv_base=$(dirname ${_bootfs})
 
         zfs list -H -o name -r ${_bootenv_base} \
-            | grep -v "^${_bootenv_base}$" \
+            | fgrep -v "${_bootenv_base}" \
             | while read _fs; do
 
             echo -n "Checking property 'canmount' on ${_fs}: "
@@ -176,18 +176,18 @@ if is_yes ${FETCH_ONLY}; then
 fi
 
 if is_yes ${BOOTENV_ENABLE}; then
-    if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}\$"; then
+    if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
         error "mount point '${BOOTENV_MOUNT}' already in use"
     fi
 
     beadm create ${BOOTENV_NAME}
     beadm mount ${BOOTENV_NAME} ${BOOTENV_MOUNT}
 
-    if mount | cut -w -f 3 | grep -q "^/usr/src\$"; then
+    if mount | cut -w -f 3 | fgrep -q "/usr/src"; then
         mount -t nullfs /usr/src ${BOOTENV_MOUNT}/usr/src
     fi
 
-    if mount | cut -w -f 3 | grep -q "^/usr/ports\$"; then
+    if mount | cut -w -f 3 | fgrep -q "/usr/ports"; then
         mount -t nullfs /usr/ports ${BOOTENV_MOUNT}/usr/ports
     fi
 
