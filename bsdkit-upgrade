@@ -22,6 +22,29 @@ error()
     exit 1
 }
 
+cleanup()
+{
+    if is_yes ${BOOTENV_ENABLE}; then
+        if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/src"; then
+            umount -f ${BOOTENV_MOUNT}/usr/src || :
+        fi
+
+        if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/ports"; then
+            umount -f ${BOOTENV_MOUNT}/usr/ports || :
+        fi
+
+        if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/dev"; then
+            umount -f ${BOOTENV_MOUNT}/dev || :
+        fi
+
+        if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
+            umount -f ${BOOTENV_MOUNT} || :
+        fi
+    fi
+}
+
+trap cleanup EXIT
+
 is_yes()
 {
     case $1 in
