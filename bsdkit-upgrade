@@ -255,7 +255,7 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
             _options="${_options} --exclude ./etc"
             _options="${_options} --exclude ./media"
             _options="${_options} --exclude ./mnt"
-            _options="${_options} --exclude ./proc"
+            # _options="${_options} --exclude ./proc"
             _options="${_options} --exclude ./root"
             _options="${_options} --exclude ./tmp"
             _options="${_options} --exclude ./var"
