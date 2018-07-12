@@ -370,6 +370,8 @@ if is_yes ${BOOTENV_ENABLE}; then
     beadm activate ${BOOTENV_NAME}
 
     bsdkit-noauto
+
+    beadm list
 fi
 
 # gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
