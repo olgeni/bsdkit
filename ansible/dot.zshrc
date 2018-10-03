@@ -136,7 +136,16 @@ if [[ $HOST != "freebsd" ]]; then
     compdef _rctools rconerestart
 fi
 
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/bin:/usr/local/sbin:~/bin
+case $(uname) in
+    Darwin)
+        export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+        ;;
+    FreeBSD)
+        export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/bin:/usr/local/sbin:~/bin
+        ;;
+    *)
+esac
+
 export LANG=en_US.UTF-8
 export CLICOLOR=yes
 export GPG_TTY=$(tty)
