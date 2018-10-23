@@ -181,6 +181,10 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         continue
     fi
 
+    if [ ${_package} = "ports" ]; then
+        continue
+    fi
+
     if [ -f "${_filename}" ]; then
         echo "Checking ${_filename}"
         _sha256_local=$(sha256 -q "${_filename}")
