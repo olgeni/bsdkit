@@ -137,11 +137,11 @@ build_staging()
 {
     local _target=${BSDKIT_PATH}/release-${_version}-${_arch}
 
-    rm -f ${_target}/*
-
-    mkdir -p ${_target}
-
-    cp ${OS_RELDIR}/ftp/* ${_target}
+    if [ -d "${OS_RELDIR}/ftp" ]; then
+        rm -f ${_target}/*
+        mkdir -p ${_target}
+        cp ${OS_RELDIR}/ftp/* ${_target}
+    fi
 
     ${SCRIPT_PATH}/bsdkit build_setup_staging \
                   ${BSDKIT_PATH}/staging-${_version}-${_arch} \
