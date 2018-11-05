@@ -317,7 +317,7 @@ gpt_ufs_partition_large()
 
     gpart bootcode -b /boot/pmbr ${_device}
 
-    gpart add -i 1 -s 256K             -t freebsd-boot -l boot ${_device}
+    gpart add -i 1 -s 512K             -t freebsd-boot -l boot ${_device}
     gpart add -i 2 -s ${FS_SWAP_SIZE}M -t freebsd-swap -l swap ${_device}
     gpart add -i 3 -s ${FS_ROOT_SIZE}M -t freebsd-ufs  -l root ${_device}
     gpart add -i 4 -s ${FS_TMP_SIZE}M  -t freebsd-ufs  -l tmp  ${_device}
@@ -376,7 +376,7 @@ gpt_ufs_partition_small()
 
     gpart bootcode -b /boot/pmbr ${_device}
 
-    gpart add -i 1 -s 256K -t freebsd-boot -l boot ${_device}
+    gpart add -i 1 -s 512K -t freebsd-boot -l boot ${_device}
     gpart add -i 2         -t freebsd-ufs  -l root ${_device}
 
     gpart bootcode -p /boot/gptboot -i 1 ${_device}
@@ -601,7 +601,7 @@ zfs_create_gpt_pool()
 
         local _partition=1
 
-        gpart add -i ${_partition} -s 256K -t freebsd-boot -l boot${_device_index} ${_device}
+        gpart add -i ${_partition} -s 512K -t freebsd-boot -l boot${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_partition} ${_device}
         _partition=$((${_partition} + 1))
 
