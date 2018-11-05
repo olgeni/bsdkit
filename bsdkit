@@ -1853,6 +1853,7 @@ unionfs_load="YES"
 hw.mca.enabled="0"
 hint.atrtc.0.clock="0"
 
+kern.cam.ada.legacy_aliases="0"
 kern.cam.boot_delay="10000"
 
 mfsroot_load="YES"
