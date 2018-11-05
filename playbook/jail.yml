@@ -97,7 +97,7 @@
 
     - name: "Set zfs_enable in rc.conf"
       command: sysrc zfs_enable="{{sysrc_zfs_enable.stdout}}"
-      when: not install_jail and sysrc_zfs_enable|success
+      when: not install_jail and sysrc_zfs_enable is success
 
     - name: "Set ifconfig in rc.conf"
       command: sysrc ifconfig_{{bsdkit_interface}}="{{bsdkit_ifconfig}}"
