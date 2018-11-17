@@ -138,7 +138,7 @@ fi
 
 case $(uname) in
     Darwin)
-        export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+	# PATH is taken care of in /etc/paths
         ;;
     FreeBSD)
         export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/bin:/usr/local/sbin:~/bin
