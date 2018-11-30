@@ -988,7 +988,7 @@ customize_base()
 
     mkdir -p ${_destdir}/root/.ssh
 
-    echo_bsdkit_pubkey > ${_destdir}/root/.ssh/authorized_keys
+    echo_bsdkit_public_key > ${_destdir}/root/.ssh/authorized_keys
 
     chown -R root:wheel ${_destdir}/root
 
@@ -2128,7 +2128,8 @@ EOF
       file: path=/root/bsdkit state=absent
 EOF
 
-    write_bsdkit_key ${_ansible_key}
+    echo_bsdkit_private_key > ${_ansible_key}
+    chmod 600 ${_ansible_key}
 
     env ANSIBLE_CONFIG=${_ansible_cfg} \
         SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
@@ -2167,7 +2168,8 @@ EOF
 jail connection=ssh ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python ansible_ssh_host=${JAIL_ADDRESS} ansible_ssh_port=${JAIL_SSH_PORT} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
-    write_bsdkit_key ${_ansible_key}
+    echo_bsdkit_private_key > ${_ansible_key}
+    chmod 600 ${_ansible_key}
 
     BSDKIT_INTERFACE="$(ifconfig -l -u ether | awk '{ print $1 }')"
     BSDKIT_IFCONFIG="$(kenv bsdkit_ifconfig 2>/dev/null || :)"
@@ -2250,11 +2252,9 @@ ${_jail_name} {
 EOF
 }
 
-write_bsdkit_key()
+echo_bsdkit_private_key()
 {
-    local _key="$1"
-
-    cat > ${_key} << EOF
+    cat << EOF
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA1HXtR02wnKZhLILRVCWSmJqyMSvjDAAGRK9JQmNSkWTiMRu+
 eeta+/JMR6a1PdeOKzLaf9hoySY3w6CMHl4fmCp0SlY9wAz8OVh0vd3SVSubxxhr
@@ -2283,11 +2283,9 @@ nSxJrY3R2CaDt3O1YDRbv/ObGzQgQGnDuPoolsiBtT511tpgtm4WbXEQU/2X71p8
 aHEWO0IB4Qpy47FIEiPSCd35Mc1iu6EjuRDAFTrHfVb+dDatWlzDOA==
 -----END RSA PRIVATE KEY-----
 EOF
-
-    chmod 600 ${_key}
 }
 
-echo_bsdkit_pubkey()
+echo_bsdkit_public_key()
 {
     cat << EOF
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit
