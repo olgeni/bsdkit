@@ -1,0 +1,126 @@
+#!/bin/sh
+
+set -e -u
+
+error()
+{
+    echo "$(basename $0): $@"
+    exit 1
+}
+
+: ${BSDKIT_PORT:=2200}
+: ${BSDKIT_ISO:=""}
+: ${BSDKIT_EFI:=""}
+
+create_vm()
+{
+    [ -f "${BSDKIT_ISO}" ] || error "ISO file does not exist."
+
+    if VBoxManage showvminfo bsdkit --machinereadable >/dev/null 2>&1; then
+        VBoxManage unregistervm --delete bsdkit
+    fi
+
+    VBoxManage createvm --name bsdkit --ostype FreeBSD_64 --register
+
+    _vm_path=$(dirname "$(VBoxManage showvminfo bsdkit --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
+
+    VBoxManage createhd --filename "${_vm_path}/bsdkit0.vdi" --size 10000 --format VDI
+    VBoxManage createhd --filename "${_vm_path}/bsdkit1.vdi" --size 10000 --format VDI
+    VBoxManage createhd --filename "${_vm_path}/bsdkit2.vdi" --size 10000 --format VDI
+
+    VBoxManage modifyvm bsdkit --vrdeproperty "TCP/Ports=5900" --vrdeproperty "VNCPassword=bsd" --vrde on
+
+    VBoxManage modifyvm bsdkit --memory 2048
+    VBoxManage modifyvm bsdkit --vram 16
+
+    if [ -n "${BSDKIT_EFI}" ]; then
+        # bios|efi|efi32|efi64
+        VBoxManage modifyvm bsdkit --firmware efi
+    fi
+
+    VBoxManage storagectl bsdkit --name "SATA Controller" --add sata --hostiocache on
+    VBoxManage storagectl bsdkit --name "IDE Controller" --add ide --hostiocache on
+
+    VBoxManage storageattach bsdkit --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "${_vm_path}/bsdkit0.vdi"
+    VBoxManage storageattach bsdkit --storagectl "SATA Controller" --port 1 --device 0 --type hdd --medium "${_vm_path}/bsdkit1.vdi"
+    VBoxManage storageattach bsdkit --storagectl "SATA Controller" --port 2 --device 0 --type hdd --medium "${_vm_path}/bsdkit2.vdi"
+
+    # VBoxManage modifyvm bsdkit --nic1 bridged --bridgeadapter1 re0
+    # VBoxManage modifyvm bsdkit --natpf1 delete ssh
+
+    VBoxManage modifyvm bsdkit --natpf1 ssh,tcp,,${BSDKIT_PORT},,22
+
+    VBoxManage storageattach bsdkit \
+               --storagectl "IDE Controller" \
+               --port 0 \
+               --device 0 \
+               --type dvddrive \
+               --medium "${BSDKIT_ISO}"
+}
+
+while getopts "i:p:e" OPT; do
+    case ${OPT} in
+        i) BSDKIT_ISO="${OPTARG}"
+           ;;
+        p) BSDKIT_PORT="${OPTARG}"
+           ;;
+        e) BSDKIT_EFI="yes"
+           ;;
+        *) return 1
+           ;;
+    esac
+done
+
+shift $((${OPTIND} - 1))
+
+case $1 in
+    create)
+        create_vm
+        ;;
+
+    start)
+        VBoxManage startvm --type gui bsdkit
+        while ! nc -w 1 localhost ${BSDKIT_PORT} | grep SSH >/dev/null 2>&1; do
+            sleep 1
+        done
+        ;;
+
+    remote)
+        shift
+        eval ./bsdkit remote -h localhost -p ${BSDKIT_PORT} $@
+        ;;
+
+    shell)
+        _key=$(mktemp /tmp/XXXXXX)
+        ./bsdkit echo_bsdkit_private_key > ${_key}
+        ssh -i ${_key} -p 2200 root@localhost
+        rm -f ${_key}
+        ;;
+
+    logcat)
+        _key=$(mktemp /tmp/XXXXXX)
+        ./bsdkit echo_bsdkit_private_key > ${_key}
+        ssh -i ${_key} -p 2200 root@localhost cat /tmp/bsdkit.log
+        rm -f ${_key}
+        ;;
+
+    logtail)
+        _key=$(mktemp /tmp/XXXXXX)
+        ./bsdkit echo_bsdkit_private_key > ${_key}
+        ssh -i ${_key} -p 2200 root@localhost tail -F /tmp/bsdkit.log
+        rm -f ${_key}
+        ;;
+
+    stop)
+        VBoxManage controlvm bsdkit acpipowerbutton
+        while VBoxManage showvminfo bsdkit --machinereadable | fgrep 'VMState="running"' >/dev/null 2>&1; do
+            sleep 1
+        done
+        VBoxManage storageattach bsdkit --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive
+        ;;
+
+    destroy)
+        VBoxManage unregistervm --delete bsdkit
+        ;;
+    *)
+esac
