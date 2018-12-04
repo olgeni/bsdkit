@@ -22,6 +22,11 @@ is_yes()
     esac
 }
 
+is_efi()
+{
+    [ "$(kenv console)" = "efi" ]
+}
+
 : ${INSTALL_JAIL:=no}
 : ${INSTALL_KERNEL:=yes}
 : ${INSTALL_SRC:=yes}
