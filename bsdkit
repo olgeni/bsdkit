@@ -1587,11 +1587,11 @@ root:$1$PkLp4/DM$/3D/umXPR0XIb0HsPHByU/:0:0::0:0:System Administrator:/root:/bin
     # newsyslog -v -C -f ${_destdir}/etc/newsyslog.conf -d ${_destdir}
 
     cat > ${_destdir}/etc/ttys << EOF
-ttyv0 "/usr/libexec/getty autologin" cons25 on          secure
-ttyv1 "/usr/libexec/getty autologin" cons25 on          secure
-ttyv2 "/usr/libexec/getty autologin" cons25 on          secure
-ttyv3 "/usr/libexec/getty autologin" cons25 on          secure
-ttyu0 "/usr/libexec/getty autologin" vt100  onifconsole secure
+ttyv0 "/usr/libexec/getty autologin" xterm onifexists  secure
+ttyv1 "/usr/libexec/getty autologin" xterm onifexists  secure
+ttyv2 "/usr/libexec/getty autologin" xterm onifexists  secure
+ttyv3 "/usr/libexec/getty autologin" xterm onifexists  secure
+ttyu0 "/usr/libexec/getty autologin" vt100 onifconsole secure
 EOF
 
     cat > ${_destdir}/etc/rc.conf.local << EOF
