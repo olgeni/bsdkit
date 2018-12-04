@@ -2017,7 +2017,55 @@ build_setup_iso()
         ln -s -f $(realpath ${_pkgpath}) ${_iso_path}/$(basename ${_pkgpath})
     fi
 
-    mkisofs -no-emul-boot -b boot/cdboot -r -J -V FreeBSD -publisher FreeBSD -f -o ${_iso} ${_iso_path}
+    # From src/release/amd64/mkisoimages.sh
+
+    dd if=/dev/zero of=${_iso_path}/efiboot.img bs=4k count=200
+    _efiboot_md_device=$(mdconfig -a -t vnode -f ${_iso_path}/efiboot.img)
+
+    {
+        newfs_msdos -F 12 -m 0xF8 /dev/${_efiboot_md_device}
+
+        _efiboot_root=$(mktemp -d /tmp/XXXXXX)
+
+        mount -t msdosfs /dev/${_efiboot_md_device} ${_efiboot_root}
+        {
+            mkdir -p ${_efiboot_root}/efi/boot
+            cp "${_iso_path}/boot/loader.efi" ${_efiboot_root}/efi/boot/bootx64.efi
+        }
+        umount ${_efiboot_root}
+
+        rmdir ${_efiboot_root}
+    }
+
+    mdconfig -d -u ${_efiboot_md_device}
+
+    mkisofs -rational-rock -follow-links -J -V FreeBSD -publisher olgeni.com \
+            -eltorito-boot boot/cdboot -no-emul-boot \
+            -eltorito-platform efi -eltorito-boot efiboot.img -no-emul-boot \
+            -o ${_iso} ${_iso_path}
+
+    for _entry in $(etdump --format shell ${_iso}); do
+        eval ${_entry}
+        if [ "${et_platform}" = "efi" ]; then
+            _esp_start=$(expr ${et_lba} \* 2048)
+            _esp_size=$(expr ${et_sectors} \* 512)
+            _esp_param="-p efi::${_esp_size}:${_esp_start}"
+            break
+        fi
+    done
+
+    _hybrid_img=$(mktemp /tmp/XXXXXX)
+
+    mkimg -s gpt \
+          --capacity $(stat -f %z ${_iso}) \
+          -b ${_iso_path}/boot/pmbr \
+          ${_esp_param} \
+          -p freebsd-boot:=${_iso_path}/boot/isoboot \
+          -o ${_hybrid_img}
+
+    dd if=${_hybrid_img} of=${_iso} bs=32k count=1 conv=notrunc
+
+    rm -f ${_hybrid_img}
 
     rm -r -f ${_iso_path}
 
