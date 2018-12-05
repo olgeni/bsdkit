@@ -1695,7 +1695,6 @@ install_setup_runtime()
     _runtime="${_runtime} memtester"
     _runtime="${_runtime} ncdu"
     _runtime="${_runtime} openvpn"
-    _runtime="${_runtime} pefs-kmod"
     _runtime="${_runtime} pipemeter"
     _runtime="${_runtime} pv"
     _runtime="${_runtime} py27-libzfs"
