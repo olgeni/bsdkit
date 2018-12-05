@@ -1,0 +1,17 @@
+include		GENERIC
+
+ident		BSDKIT
+
+options		DDB		# Enable the ddb debugger backend.
+
+options		KVA_PAGES=512
+
+nooption 	BUF_TRACKING		# Track buffer history
+nooption 	FULL_BUF_TRACKING	# Track more buffer history
+nooption 	GDB			# Support remote GDB.
+nooption 	DEADLKRES		# Enable the deadlock resolver
+nooption 	INVARIANTS		# Enable calls of extra sanity checking
+nooption 	INVARIANT_SUPPORT	# Extra sanity checks of internal structures, required by INVARIANTS
+nooption 	WITNESS			# Enable checks to detect deadlocks and cycles
+nooption 	WITNESS_SKIPSPIN	# Don't run witness on spinlocks for speed
+nooption 	MALLOC_DEBUG_MAXZONES	# Separate malloc(9) zones
