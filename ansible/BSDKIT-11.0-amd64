@@ -1,7 +1,0 @@
-include		GENERIC
-
-ident		BSDKIT
-
-options		DDB		# Enable the ddb debugger backend.
-options		TCP_RFC7413	# TCP Fast Open support
-options		IPSEC_NAT_T	# NAT-T support, UDP encap of ESP
