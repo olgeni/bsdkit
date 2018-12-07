@@ -350,8 +350,6 @@ gpt_ufs_partition_large()
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    mount -t nullfs / ${DESTDIR}/cdrom
-
     mount -o async,noatime /dev/gpt/var ${_destdir}/var
     mount -o async,noatime /dev/gpt/tmp ${_destdir}/tmp
     mount -o async,noatime /dev/gpt/usr ${_destdir}/usr
@@ -403,8 +401,6 @@ gpt_ufs_partition_small()
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
-
-    mount -t nullfs / ${DESTDIR}/cdrom
 
     touch ${_destdir}/etc/fstab
 
@@ -465,8 +461,6 @@ mbr_ufs_partition_large()
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    mount -t nullfs / ${DESTDIR}/cdrom
-
     mount -o async,noatime /dev/ufs/var ${_destdir}/var
     mount -o async,noatime /dev/ufs/tmp ${_destdir}/tmp
     mount -o async,noatime /dev/ufs/usr ${_destdir}/usr
@@ -517,8 +511,6 @@ mbr_ufs_partition_small()
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
-
-    mount -t nullfs / ${DESTDIR}/cdrom
 
     touch ${_destdir}/etc/fstab
 
@@ -763,8 +755,6 @@ zfs_create_fs()
     mkdir -p ${_destdir}/boot
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
-
-    mount -t nullfs / ${DESTDIR}/cdrom
 
     touch ${_destdir}/etc/fstab
 
