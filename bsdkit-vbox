@@ -11,6 +11,7 @@ error()
 : ${BSDKIT_PORT:=2200}
 : ${BSDKIT_ISO:=""}
 : ${BSDKIT_EFI:=""}
+: ${BSDKIT_DISK_SIZE:="10000"}
 
 create_vm()
 {
@@ -24,9 +25,9 @@ create_vm()
 
     _vm_path=$(dirname "$(VBoxManage showvminfo bsdkit --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
-    VBoxManage createhd --filename "${_vm_path}/bsdkit0.vdi" --size 10000 --format VDI
-    VBoxManage createhd --filename "${_vm_path}/bsdkit1.vdi" --size 10000 --format VDI
-    VBoxManage createhd --filename "${_vm_path}/bsdkit2.vdi" --size 10000 --format VDI
+    VBoxManage createhd --filename "${_vm_path}/bsdkit0.vdi" --size ${BSDKIT_DISK_SIZE} --format VDI
+    VBoxManage createhd --filename "${_vm_path}/bsdkit1.vdi" --size ${BSDKIT_DISK_SIZE} --format VDI
+    VBoxManage createhd --filename "${_vm_path}/bsdkit2.vdi" --size ${BSDKIT_DISK_SIZE} --format VDI
 
     VBoxManage modifyvm bsdkit --vrdeproperty "TCP/Ports=5900" --vrdeproperty "VNCPassword=bsd" --vrde on
 
