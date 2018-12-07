@@ -82,7 +82,7 @@ environment()
 : ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
 
 : ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
-: ${BSDKIT_VERSION:=11.1}
+: ${BSDKIT_VERSION:=11.2}
 : ${BSDKIT_ARCH:=amd64}
 : ${BSDKIT_TREE:=default}
 : ${BSDKIT_PKGSET:=nox11}
