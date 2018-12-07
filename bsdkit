@@ -317,21 +317,21 @@ gpt_ufs_partition_large()
 
     gpart bootcode -b /boot/pmbr ${_device}
 
-    local _partition=1
+    local _p=1
 
-    gpart add -i ${_partition} -s ${FS_EFI_SIZE} -t efi -l efi ${_device}
-    gpart bootcode -p /boot/boot1.efifat -i ${_partition} ${_device}
-    _partition=$((${_partition} + 1))
+    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efi ${_device}
+    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
+    _p=$((${_p} + 1))
 
-    gpart add -i ${_partition} -s 512K -t freebsd-boot -l boot ${_device}
-    gpart bootcode -p /boot/gptboot -i ${_partition} ${_device}
-    _partition=$((${_partition} + 1))
+    gpart add -i ${_p} -s 512K -t freebsd-boot -l boot ${_device}
+    gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
+    _p=$((${_p} + 1))
 
-    gpart add -i ${_partition} -s ${FS_SWAP_SIZE} -t freebsd-swap -l swap ${_device}; _partition=$((${_partition} + 1))
-    gpart add -i ${_partition} -s ${FS_ROOT_SIZE} -t freebsd-ufs  -l root ${_device}; _partition=$((${_partition} + 1))
-    gpart add -i ${_partition} -s ${FS_TMP_SIZE}  -t freebsd-ufs  -l tmp  ${_device}; _partition=$((${_partition} + 1))
-    gpart add -i ${_partition} -s ${FS_VAR_SIZE}  -t freebsd-ufs  -l var  ${_device}; _partition=$((${_partition} + 1))
-    gpart add -i ${_partition}                    -t freebsd-ufs  -l usr  ${_device}; _partition=$((${_partition} + 1))
+    gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l swap ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_ROOT_SIZE} -t freebsd-ufs  -l root ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_TMP_SIZE}  -t freebsd-ufs  -l tmp  ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_VAR_SIZE}  -t freebsd-ufs  -l var  ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p}                    -t freebsd-ufs  -l usr  ${_device}; _p=$((${_p} + 1))
 
     # FIXME use -j
 
@@ -381,17 +381,17 @@ gpt_ufs_partition_small()
 
     gpart bootcode -b /boot/pmbr ${_device}
 
-    local _partition=1
+    local _p=1
 
-    gpart add -i ${_partition} -s ${FS_EFI_SIZE} -t efi -l efi ${_device}
-    gpart bootcode -p /boot/boot1.efifat -i ${_partition} ${_device}
-    _partition=$((${_partition} + 1))
+    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efi ${_device}
+    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
+    _p=$((${_p} + 1))
 
-    gpart add -i ${_partition} -s 512K -t freebsd-boot -l boot ${_device};
-    gpart bootcode -p /boot/gptboot -i ${_partition} ${_device}
-    _partition=$((${_partition} + 1))
+    gpart add -i ${_p} -s 512K -t freebsd-boot -l boot ${_device};
+    gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
+    _p=$((${_p} + 1))
 
-    gpart add -i ${_partition} -t freebsd-ufs -l root ${_device}; _partition=$((${_partition} + 1))
+    gpart add -i ${_p} -t freebsd-ufs -l root ${_device}; _p=$((${_p} + 1))
 
     # FIXME use -j
 
@@ -605,26 +605,26 @@ zfs_create_gpt_pool()
         gpart destroy -F ${_device} 2> /dev/null || :
         gpart create -s gpt ${_device}
 
-        local _partition=1
+        local _p=1
 
-        gpart add -i ${_partition} -s ${FS_EFI_SIZE} -t efi -l efi${_device_index} ${_device}
-        gpart bootcode -p /boot/boot1.efifat -i ${_partition} ${_device}
-        _partition=$((${_partition} + 1))
+        gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efi${_device_index} ${_device}
+        gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
+        _p=$((${_p} + 1))
 
-        gpart add -i ${_partition} -s 512K -t freebsd-boot -l boot${_device_index} ${_device}
-        gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_partition} ${_device}
-        _partition=$((${_partition} + 1))
+        gpart add -i ${_p} -s 512K -t freebsd-boot -l boot${_device_index} ${_device}
+        gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_p} ${_device}
+        _p=$((${_p} + 1))
 
         if has_swap; then
-            gpart add -i ${_partition} -s ${FS_SWAP_SIZE} -t freebsd-swap -l swap${_device_index} ${_device}
-            _partition=$((${_partition} + 1))
+            gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l swap${_device_index} ${_device}
+            _p=$((${_p} + 1))
             swapon /dev/gpt/swap${_device_index}
         fi
 
-        gpart add -i ${_partition} -t freebsd-zfs -l pool${_device_index} ${_device}
-        gpart set -a bootme -i ${_partition} ${_device}
-        _pool_partition=${_partition}
-        _partition=$((${_partition} + 1))
+        gpart add -i ${_p} -t freebsd-zfs -l pool${_device_index} ${_device}
+        gpart set -a bootme -i ${_p} ${_device}
+        _pool_partition=${_p}
+        _p=$((${_p} + 1))
 
         _device_index=$((${_device_index} + 1))
     done
