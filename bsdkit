@@ -1572,8 +1572,8 @@ remove_jail()
     if [ "${_zfs}" = "YES" ]; then
         zfs destroy "${_parent_fs}/${_jail_name}"
     else
-        rm -r -f ${_destdir} 2> /dev/null || :
-        chflags -R noschg ${_destdir}
+        rm -r -f ${_destdir} > /dev/null 2>&1 || :
+        chflags -R noschg ${_destdir} > /dev/null 2>&1 || :
         rm -r -f ${_destdir}
     fi
 }
