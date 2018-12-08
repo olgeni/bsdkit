@@ -215,7 +215,12 @@ valid_url()
 
 valid_host()
 {
-    [ -f /baseroot.sh ]
+    if [ $(mount -p | grep "/baseroot" | wc -l) -eq 0 ]; then
+        echo "FATAL: valid_host failed" >&2
+        return 1
+    fi
+
+    return 0
 }
 
 valid_relpath()
@@ -246,7 +251,9 @@ valid_staging()
 {
     local _staging="$1"
 
-    [ -f ${_staging}/baseroot.sh ]
+    [ -f ${_staging}/base.ufs.uzip ]
+    [ -d ${_staging}/boot ]
+    [ -f ${_staging}/memroot.ufs.gz ]
 }
 
 valid_destdir()
@@ -350,6 +357,8 @@ gpt_ufs_partition_large()
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
+    mount -t nullfs /cdrom ${DESTDIR}/cdrom
+
     mount -o async,noatime /dev/gpt/var ${_destdir}/var
     mount -o async,noatime /dev/gpt/tmp ${_destdir}/tmp
     mount -o async,noatime /dev/gpt/usr ${_destdir}/usr
@@ -401,6 +410,8 @@ gpt_ufs_partition_small()
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
+
+    mount -t nullfs /cdrom ${DESTDIR}/cdrom
 
     touch ${_destdir}/etc/fstab
 
@@ -461,6 +472,8 @@ mbr_ufs_partition_large()
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
+    mount -t nullfs /cdrom ${DESTDIR}/cdrom
+
     mount -o async,noatime /dev/ufs/var ${_destdir}/var
     mount -o async,noatime /dev/ufs/tmp ${_destdir}/tmp
     mount -o async,noatime /dev/ufs/usr ${_destdir}/usr
@@ -511,6 +524,8 @@ mbr_ufs_partition_small()
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
+
+    mount -t nullfs /cdrom ${DESTDIR}/cdrom
 
     touch ${_destdir}/etc/fstab
 
@@ -755,6 +770,8 @@ zfs_create_fs()
     mkdir -p ${_destdir}/boot
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
+
+    mount -t nullfs /cdrom ${DESTDIR}/cdrom
 
     touch ${_destdir}/etc/fstab
 
@@ -1801,36 +1818,57 @@ build_setup_staging()
     [ ${_staging} != ${_pkgpath} ]
     [ ${_staging} != "/" ] || exit 1
 
-    rm -r -f ${_staging} >/dev/null 2>&1 || :
-    chflags -R noschg ${_staging} || :
+    local _tmp="/tmp/tmp.$$"
+    mkdir -p ${_tmp}
+    mount -t tmpfs tmpfs ${_tmp}
+
+    local _destdir="${_tmp}/destdir"
+
+    mkdir -p ${_destdir}
+
+    INSTALL_SRC=no install_release ${_relpath} ${_destdir}
+
+    rm -f ${_destdir}/boot/kernel/*.symbols
+
+    rm -f ${_destdir}/home
+
+    mkdir -p ${_destdir}/cdrom
+    mkdir -p ${_destdir}/img
+
+    touch ${_destdir}/root/.hushlogin
+
+    mkdir ${_destdir}/root/.ssh
+
+    echo_bsdkit_public_key > ${_destdir}/root/.ssh/authorized_keys
+
+    local _mfsroot="${_tmp}/mfsroot"
+
+    mkdir -p ${_mfsroot}
+
+    (cd ${_destdir} && pax -r -w -pe rescue ${_mfsroot})
+
+    make_read_only ${_destdir}
+
+    install_setup_runtime ${_destdir} ${_bsdkit} ${_pkgpath}
+
+    mkdir ${_mfsroot}/dev
+    mkdir ${_mfsroot}/baseroot
+
     rm -r -f ${_staging}
 
     mkdir ${_staging}
-    mkdir ${_staging}/.tmpfs
 
     _staging=$(realpath ${_staging})
 
-    INSTALL_SRC=no install_release ${_relpath} ${_staging}
+    (cd ${_destdir} && pax -r -w -pe boot ${_staging})
 
-    touch ${_staging}/.bsdkit
-
-    rm -f ${_staging}/boot/kernel/*.symbols
-
-    rm -f ${_staging}/home
-
-    touch ${_staging}/root/.hushlogin
-
-    mkdir ${_staging}/root/.ssh
-
-    echo_bsdkit_public_key > ${_staging}/root/.ssh/authorized_keys
-
-    make_read_only ${_staging}
-
-    install_setup_runtime ${_staging} ${_bsdkit} ${_pkgpath}
+    gzip ${_staging}/boot/kernel/kernel
 
     install -m 644 -o root -g wheel ${_bsdkit}/ansible/loader.conf ${_staging}/boot/loader.conf
 
     cat > ${_staging}/boot/loader.conf.local << EOF
+geom_uzip_load="YES"
+
 nullfs_load="YES"
 tmpfs_load="YES"
 unionfs_load="YES"
@@ -1843,37 +1881,85 @@ kern.cam.boot_delay="10000"
 
 kern.geom.label.disk_ident.enable="0"
 
-vfs.mountroot.timeout="10"
+mfsroot_load="YES"
+mfsroot_type="md_image"
+mfsroot_name="/memroot.ufs"
 
-init_script="/baseroot.sh"
+init_path="/rescue/init"
+init_shell="/rescue/sh"
+init_script="/baseroot.rc"
+init_chroot="/baseroot"
 EOF
 
-    cat > ${_staging}/etc/fstab << EOF
-/dev/iso9660/FreeBSD / cd9660 ro 0 0
-EOF
+    mkdir -p ${_mfsroot}/etc
 
-    cat > ${_staging}/baseroot.sh << "EOF"
-#!/bin/sh
+    touch ${_mfsroot}/etc/fstab
+
+    install -m 600 -o root -g wheel ${_destdir}/etc/login.conf ${_mfsroot}/etc
+
+    echo "#!/bin/sh" > ${_mfsroot}/baseroot.rc
+    echo "IMG_PART=/dev/gpt/${IMG_DATA_LABEL}" >> ${_mfsroot}/baseroot.rc
+
+    cat >> ${_mfsroot}/baseroot.rc << "EOF"
+BASEROOT_IMG=/base.ufs.uzip
+
+BASEROOT_MP=/baseroot
+CDROM_MP=/cdrom
+IMG_MP=/img
+DEV_MP=/dev
+TMP_MP=/tmp
 
 ETC_MP=/etc
-ETC_RDWR_MP=/.tmpfs/etc.rdwr
+ETC_RDWR_MP=/etc.rdwr
 ROOT_MP=/root
-ROOT_RDWR_MP=/.tmpfs/root.rdwr
+ROOT_RDWR_MP=/root.rdwr
 
 PATH=/rescue
 
 mount -u -w /
 
-mount -t tmpfs tmpfs /.tmpfs
-
+mkdir -p ${BASEROOT_MP}
+mkdir -p ${CDROM_MP}
 mkdir -p ${ETC_RDWR_MP}
 mkdir -p ${ROOT_RDWR_MP}
+
+if [ -e ${IMG_PART} ]; then
+    mkdir -p ${IMG_MP}
+    mount -t ufs ${IMG_PART} ${IMG_MP}
+    ISO_MD=$(mdconfig -a -t vnode -f ${IMG_MP}/*.[iI][sS][oO])
+    mount -t cd9660 /dev/${ISO_MD} ${CDROM_MP}
+else
+    mount -t cd9660 /dev/cd0 ${CDROM_MP} >/dev/null 2>&1
+
+    if [ $? -ne 0 ]; then
+        mount -t cd9660 /dev/cd1 ${CDROM_MP} >/dev/null 2>&1
+    fi
+
+    if [ $? -ne 0 ]; then
+        mount -t cd9660 /dev/acd0 ${CDROM_MP} >/dev/null 2>&1
+    fi
+
+    if [ $? -ne 0 ]; then
+        mount -t cd9660 /dev/acd1 ${CDROM_MP} >/dev/null 2>&1
+    fi
+fi
+
+mdmfs -P -F ${CDROM_MP}${BASEROOT_IMG} -o ro md.uzip ${BASEROOT_MP}
+
+mount -t devfs devfs ${BASEROOT_MP}${DEV_MP}
+
+mount -t nullfs -o ro ${CDROM_MP} ${BASEROOT_MP}${CDROM_MP}
 
 mdmfs -s 8m  md ${ETC_RDWR_MP}
 mdmfs -s 64m md ${ROOT_RDWR_MP}
 
-mount -t unionfs ${ETC_RDWR_MP}  ${ETC_MP}
-mount -t unionfs ${ROOT_RDWR_MP} ${ROOT_MP}
+mount -t unionfs ${ETC_RDWR_MP}  ${BASEROOT_MP}${ETC_MP}
+mount -t unionfs ${ROOT_RDWR_MP} ${BASEROOT_MP}${ROOT_MP}
+
+if [ -d ${IMG_MP} ]; then
+    mkdir -p ${BASEROOT_MP}${IMG_MP}
+    mount -t nullfs -o rw ${IMG_MP} ${BASEROOT_MP}${IMG_MP}
+fi
 
 kenv init_shell="/bin/sh"
 
@@ -1882,19 +1968,42 @@ if kenv bsdkit_ifconfig >/dev/null 2>&1; then
     set $(ifconfig -l ether)
     _interface=$1
     if [ -n "${_interface}" ]; then
-        echo "ifconfig_${_interface}=\"${bsdkit_ifconfig}\"" >> /etc/rc.conf
+        echo "ifconfig_${_interface}=\"${bsdkit_ifconfig}\"" >> /baseroot/etc/rc.conf
     fi
 fi
 
 if kenv bsdkit_defaultrouter >/dev/null 2>&1; then
     bsdkit_defaultrouter=$(kenv bsdkit_defaultrouter)
-    echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >> /etc/rc.conf
+    echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >> /baseroot/etc/rc.conf
 fi
 
 exit 0
 EOF
 
-    install -m 644 -o root -g wheel ${_bsdkit}/ansible/rc.conf ${_staging}/etc/rc.conf
+    install -m 644 -o root -g wheel ${_bsdkit}/ansible/rc.conf ${_destdir}/etc/rc.conf
+
+    makefs ${_staging}/memroot.ufs ${_mfsroot}
+
+    chmod -x ${_staging}/memroot.ufs
+
+    rm -f ${_staging}/memroot.ufs.gz
+
+    gzip ${_staging}/memroot.ufs
+
+    makefs -b 10% ${_staging}/base.ufs ${_destdir}
+
+    mkuzip -o ${_staging}/base.ufs.uzip ${_staging}/base.ufs
+
+    rm -f ${_staging}/base.ufs
+
+    chmod -x ${_staging}/base.ufs.uzip
+
+    while ! umount -f ${_tmp}; do
+	echo "Waiting for ${_tmp} (tmp)"
+	sleep 3
+    done
+
+    rmdir ${_tmp}
 
     return 0
 }
@@ -1920,14 +2029,14 @@ build_setup_iso()
 
     mkdir -p ${_iso_path}
 
-    local _pathspec="${_iso_path} $(realpath ${_staging})"
+    ln -s -f $(realpath ${_staging}/*) ${_iso_path}
 
     if [ ${_relpath} != "none" ]; then
-        _pathspec="${_pathspec} $(realpath ${_relpath})"
+        ln -s -f $(realpath ${_relpath}) ${_iso_path}/$(basename ${_relpath})
     fi
 
     if [ ${_pkgpath} != "none" ]; then
-        _pathspec="${_pathspec} $(realpath ${_pkgpath})"
+        ln -s -f $(realpath ${_pkgpath}) ${_iso_path}/$(basename ${_pkgpath})
     fi
 
     # From src/release/amd64/mkisoimages.sh
@@ -1943,7 +2052,7 @@ build_setup_iso()
         mount -t msdosfs /dev/${_efiboot_md_device} ${_efiboot_root}
         {
             mkdir -p ${_efiboot_root}/efi/boot
-            cp "${_staging}/boot/loader.efi" ${_efiboot_root}/efi/boot/bootx64.efi
+            cp "${_iso_path}/boot/loader.efi" ${_efiboot_root}/efi/boot/bootx64.efi
         }
         umount ${_efiboot_root}
 
@@ -1952,10 +2061,10 @@ build_setup_iso()
 
     mdconfig -d -u ${_efiboot_md_device}
 
-    mkisofs -rational-rock -J -V FreeBSD -publisher olgeni.com \
+    mkisofs -rational-rock -follow-links -J -V FreeBSD -publisher olgeni.com \
             -eltorito-boot boot/cdboot -no-emul-boot \
             -eltorito-platform efi -eltorito-boot efiboot.img -no-emul-boot \
-            -o ${_iso} ${_pathspec}
+            -o ${_iso} ${_iso_path}
 
     for _entry in $(etdump --format shell ${_iso}); do
         eval ${_entry}
@@ -1971,9 +2080,9 @@ build_setup_iso()
 
     mkimg -s gpt \
           --capacity $(stat -f %z ${_iso}) \
-          -b ${_staging}/boot/pmbr \
+          -b ${_iso_path}/boot/pmbr \
           ${_esp_param} \
-          -p freebsd-boot:=${_staging}/boot/isoboot \
+          -p freebsd-boot:=${_iso_path}/boot/isoboot \
           -o ${_hybrid_img}
 
     dd if=${_hybrid_img} of=${_iso} bs=32k count=1 conv=notrunc
