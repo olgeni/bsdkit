@@ -1990,7 +1990,7 @@ EOF
 
     gzip ${_staging}/memroot.ufs
 
-    makefs -b 10% ${_staging}/base.ufs ${_destdir}
+    makefs ${_staging}/base.ufs ${_destdir}
 
     mkuzip -o ${_staging}/base.ufs.uzip ${_staging}/base.ufs
 
