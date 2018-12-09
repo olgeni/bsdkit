@@ -152,12 +152,12 @@ build_staging()
 
 build_iso()
 {
-    local _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.iso
+    local _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.iso
     local _release="none"
     local _packages="none"
 
     if [ -n "${_with_packages}" ]; then
-        _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.full.iso
+        _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.full.iso
         _release=${BSDKIT_PATH}/release-${_version}-${_arch}
         _packages=${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
     fi
@@ -171,12 +171,12 @@ build_iso()
 
 build_usb()
 {
-    local _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.iso
-    local _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.img
+    local _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.iso
+    local _usb=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.img
 
     if [ -n "${_with_packages}" ]; then
-        _iso=${BSDKIT_PATH}/release-${_version}-${_arch}.full.iso
-        _usb=${BSDKIT_PATH}/release-${_version}-${_arch}.full.img
+        _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.full.iso
+        _usb=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.full.img
     fi
 
     ${SCRIPT_PATH}/bsdkit build_setup_img ${_iso} ${_usb}
