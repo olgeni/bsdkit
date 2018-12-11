@@ -326,7 +326,7 @@ gpt_ufs_partition_large()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efi ${_device}
+    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efiboot ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -392,7 +392,7 @@ gpt_ufs_partition_small()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efi ${_device}
+    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efiboot ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -622,7 +622,7 @@ zfs_create_gpt_pool()
 
         local _p=1
 
-        gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efi${_device_index} ${_device}
+        gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efiboot${_device_index} ${_device}
         gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
