@@ -305,3 +305,4 @@
   tasks:
     - name: "Remove authorized_key"
       authorized_key: user=root key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit" state=absent
+      when: ssh_public_key != ""
