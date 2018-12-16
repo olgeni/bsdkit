@@ -2324,6 +2324,15 @@ ${_jail_name} {
 EOF
 }
 
+shell()
+{
+    local _private_key=$(mktemp /tmp/key.XXXXXX)
+
+    ssh -v -i ${_private_key} "$@" || :
+
+    rm -f ${_private_key}
+}
+
 echo_bsdkit_private_key()
 {
     cat << EOF
