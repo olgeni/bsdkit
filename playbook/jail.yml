@@ -255,10 +255,14 @@
         - ca_root_nss
         - cpdup
         - curl
+        - diff-so-fancy
+        - gnu-watch
         - inplace
+        - lftp
         - rsync
         - socat
         - sudo
+        - the_silver_searcher
         - tmux
         - vim
         - zsh
