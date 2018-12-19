@@ -247,25 +247,33 @@
         path=/etc/ssl/certs state=directory
         owner=root group=wheel mode=755
 
-    - name: "Install base packages"
-      pkgng: name={{item}} state=present
-      with_items:
-        - align
-        - beadm
-        - ca_root_nss
-        - cpdup
-        - curl
-        - diff-so-fancy
-        - gnu-watch
-        - inplace
-        - lftp
-        - rsync
-        - socat
-        - sudo
-        - the_silver_searcher
-        - tmux
-        - vim
-        - zsh
+    - name: "Install base packages (common)"
+      pkgng:
+        name:
+          - align
+          - ca_root_nss
+          - cpdup
+          - curl
+          - diff-so-fancy
+          - gnu-watch
+          - inplace
+          - lftp
+          - rsync
+          - socat
+          - sudo
+          - the_silver_searcher
+          - tmux
+          - vim
+          - zsh
+        state: present
+
+    - name: "Install base packages (host)"
+      pkgng:
+        name:
+          - beadm
+          - smartmontools
+        state: present
+      when: not install_jail
 
     - name: "stat: ca-root-nss.crt"
       stat: path=/usr/local/share/certs/ca-root-nss.crt
