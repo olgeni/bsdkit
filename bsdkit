@@ -27,24 +27,24 @@ is_efi()
     [ "$(kenv console)" = "efi" ]
 }
 
-: ${INSTALL_JAIL:=no}
-: ${INSTALL_KERNEL:=yes}
-: ${INSTALL_SRC:=yes}
-: ${INSTALL_DEBUG:=no}
-: ${INSTALL_TESTS:=no}
-: ${ZFS_POOL:=rpool}
-: ${PROCFS_ENABLE:=yes}
-: ${FDESCFS_ENABLE:=yes}
-: ${DESTDIR:=/mnt}
-: ${JAIL_ROOT:=/jails}
+: ${INSTALL_JAIL:="no"}
+: ${INSTALL_KERNEL:="yes"}
+: ${INSTALL_SRC:="yes"}
+: ${INSTALL_DEBUG:="no"}
+: ${INSTALL_TESTS:="no"}
+: ${ZFS_POOL:="rpool"}
+: ${PROCFS_ENABLE:="yes"}
+: ${FDESCFS_ENABLE:="yes"}
+: ${DESTDIR:="/mnt"}
+: ${JAIL_ROOT:="/jails"}
 : ${SSH_PUBLIC_KEY:=""}
 
-: ${PART_SIZE_BOOT:=512K}
-: ${PART_SIZE_EFI:=8M}
-: ${PART_SIZE_ROOT:=2G}
-: ${PART_SIZE_SWAP:=4G}
-: ${PART_SIZE_TMP:=512K}
-: ${PART_SIZE_VAR:=6G}
+: ${PART_SIZE_BOOT:="512K"}
+: ${PART_SIZE_EFI:="8M"}
+: ${PART_SIZE_ROOT:="2G"}
+: ${PART_SIZE_SWAP:="4G"}
+: ${PART_SIZE_TMP:="512K"}
+: ${PART_SIZE_VAR:="6G"}
 
 : ${LABEL_BOOT:="boot"}
 : ${LABEL_EFI:="efiboot"}
