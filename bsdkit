@@ -46,7 +46,7 @@ is_efi()
 : ${SSH_PUBLIC_KEY:=""}
 
 : ${LABEL_BOOT:="boot"}
-: ${LABEL_EFIBOOT:="efiboot"}
+: ${LABEL_EFI:="efiboot"}
 : ${LABEL_ROOT:="root"}
 : ${LABEL_SWAP:="swap"}
 : ${LABEL_TMP:="tmp"}
@@ -85,7 +85,7 @@ environment()
          JAIL_ROOT=\"${JAIL_ROOT}\"               \
          SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"     \
          LABEL_BOOT=\"${LABEL_BOOT}\"             \
-         LABEL_EFIBOOT=\"${LABEL_EFIBOOT}\"       \
+         LABEL_EFI=\"${LABEL_EFI}\"               \
          LABEL_ROOT=\"${LABEL_ROOT}\"             \
          LABEL_SWAP=\"${LABEL_SWAP}\"             \
          LABEL_TMP=\"${LABEL_TMP}\"               \
@@ -346,7 +346,7 @@ gpt_ufs_partition_large()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFIBOOT} ${_device}
+    gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -417,7 +417,7 @@ gpt_ufs_partition_small()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFIBOOT} ${_device}
+    gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -656,7 +656,7 @@ zfs_create_gpt_pool()
 
         local _p=1
 
-        gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFIBOOT}${_device_index} ${_device}
+        gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFI}${_device_index} ${_device}
         gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
