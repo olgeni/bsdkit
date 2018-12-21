@@ -1218,8 +1218,6 @@ reset_state()
 
 install_mbr_ufs()
 {
-    valid_host
-
     parse_options "$@"
 
     shift ${PARSE_OPTIONS_SHIFT}
@@ -1249,8 +1247,6 @@ install_mbr_ufs()
 
 install_mbr_ufs_gmirror()
 {
-    valid_host
-
     parse_options "$@"
 
     shift ${PARSE_OPTIONS_SHIFT}
@@ -1290,8 +1286,6 @@ install_mbr_ufs_gmirror()
 
 install_gpt_ufs()
 {
-    valid_host
-
     parse_options "$@"
 
     shift ${PARSE_OPTIONS_SHIFT}
