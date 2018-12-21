@@ -44,6 +44,14 @@ is_efi()
 : ${JAIL_ROOT:=/jails}
 : ${SSH_PUBLIC_KEY:=""}
 
+: ${LABEL_BOOT:="boot"}
+: ${LABEL_EFIBOOT:="efiboot"}
+: ${LABEL_ROOT:="root"}
+: ${LABEL_SWAP:="swap"}
+: ${LABEL_TMP:="tmp"}
+: ${LABEL_USR:="usr"}
+: ${LABEL_VAR:="var"}
+
 if [ -z "${FS_SWAP_SIZE}" ]; then
     FS_SWAP_SIZE=0
 fi
@@ -74,7 +82,14 @@ environment()
          DESTDIR=\"${DESTDIR}\"                   \
          INSTALL_JAIL=\"${INSTALL_JAIL}\"         \
          JAIL_ROOT=\"${JAIL_ROOT}\"               \
-         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"
+         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"     \
+         LABEL_BOOT=\"${LABEL_BOOT}\"             \
+         LABEL_EFIBOOT=\"${LABEL_EFIBOOT}\"       \
+         LABEL_ROOT=\"${LABEL_ROOT}\"             \
+         LABEL_SWAP=\"${LABEL_SWAP}\"             \
+         LABEL_TMP=\"${LABEL_TMP}\"               \
+         LABEL_USR=\"${LABEL_USR}\"               \
+         LABEL_VAR=\"${LABEL_VAR}\"
 }
 
 : ${JAIL_ADDRESS:=127.0.0.2}
@@ -330,30 +345,33 @@ gpt_ufs_partition_large()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efiboot ${_device}
+    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l ${LABEL_EFIBOOT} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
-    gpart add -i ${_p} -s 512K -t freebsd-boot -l boot ${_device}
+    gpart add -i ${_p} -s 512K -t freebsd-boot -l ${LABEL_BOOT} ${_device}
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
-    gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l swap ${_device}; _p=$((${_p} + 1))
-    gpart add -i ${_p} -s ${FS_ROOT_SIZE} -t freebsd-ufs  -l root ${_device}; _p=$((${_p} + 1))
-    gpart add -i ${_p} -s ${FS_TMP_SIZE}  -t freebsd-ufs  -l tmp  ${_device}; _p=$((${_p} + 1))
-    gpart add -i ${_p} -s ${FS_VAR_SIZE}  -t freebsd-ufs  -l var  ${_device}; _p=$((${_p} + 1))
-    gpart add -i ${_p}                    -t freebsd-ufs  -l usr  ${_device}; _p=$((${_p} + 1))
+    if has_swap; then
+        gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l ${LABEL_SWAP} ${_device}
+        _p=$((${_p} + 1))
+        swapon /dev/gpt/${LABEL_SWAP}
+    fi
+
+    gpart add -i ${_p} -s ${FS_ROOT_SIZE} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_TMP_SIZE}  -t freebsd-ufs -l ${LABEL_TMP}  ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_VAR_SIZE}  -t freebsd-ufs -l ${LABEL_VAR}  ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p}                    -t freebsd-ufs -l ${LABEL_USR}  ${_device}; _p=$((${_p} + 1))
 
     # FIXME use -j
 
-    newfs    -L root -n /dev/gpt/root
-    newfs -U -L tmp  -n /dev/gpt/tmp
-    newfs -U -L var     /dev/gpt/var
-    newfs -U -L usr     /dev/gpt/usr
+    newfs    -L ${LABEL_ROOT}    /dev/gpt/${LABEL_ROOT}
+    newfs -U -L ${LABEL_TMP}  -n /dev/gpt/${LABEL_TMP}
+    newfs -U -L ${LABEL_VAR}     /dev/gpt/${LABEL_VAR}
+    newfs -U -L ${LABEL_USR}     /dev/gpt/${LABEL_USR}
 
-    swapon /dev/gpt/swap
-
-    mount -o async,noatime /dev/gpt/root ${_destdir}
+    mount -o async,noatime /dev/gpt/${LABEL_ROOT} ${_destdir}
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
@@ -363,16 +381,16 @@ gpt_ufs_partition_large()
 
     mount -t nullfs /cdrom ${DESTDIR}/cdrom
 
-    mount -o async,noatime /dev/gpt/var ${_destdir}/var
-    mount -o async,noatime /dev/gpt/tmp ${_destdir}/tmp
-    mount -o async,noatime /dev/gpt/usr ${_destdir}/usr
+    mount -o async,noatime /dev/gpt/${LABEL_VAR} ${_destdir}/var
+    mount -o async,noatime /dev/gpt/${LABEL_TMP} ${_destdir}/tmp
+    mount -o async,noatime /dev/gpt/${LABEL_USR} ${_destdir}/usr
 
     touch ${_destdir}/etc/fstab
 
-    echo "/dev/ufs/root /    ufs rw 1 1" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/var  /var ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/tmp  /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/usr  /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_ROOT} /    ufs rw 1 1" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_VAR}  /var ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_TMP}  /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_USR}  /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -396,21 +414,21 @@ gpt_ufs_partition_small()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efiboot ${_device}
+    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l ${LABEL_EFIBOOT} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
-    gpart add -i ${_p} -s 512K -t freebsd-boot -l boot ${_device};
+    gpart add -i ${_p} -s 512K -t freebsd-boot -l ${LABEL_BOOT} ${_device};
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
-    gpart add -i ${_p} -t freebsd-ufs -l root ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}; _p=$((${_p} + 1))
 
     # FIXME use -j
 
-    newfs -U -L root -n /dev/gpt/root
+    newfs -U -L ${LABEL_ROOT} -n /dev/gpt/${LABEL_ROOT}
 
-    mount -o async,noatime /dev/gpt/root ${_destdir}
+    mount -o async,noatime /dev/gpt/${LABEL_ROOT} ${_destdir}
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
@@ -419,7 +437,7 @@ gpt_ufs_partition_small()
 
     touch ${_destdir}/etc/fstab
 
-    echo "/dev/ufs/root / ufs rw 1 1" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_ROOT} / ufs rw 1 1" >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -451,7 +469,12 @@ mbr_ufs_partition_large()
     # FIXME refactor (end)
 
     gpart add -i 1 -s ${FS_ROOT_SIZE} -t freebsd-ufs  ${_device}s1 # a
-    gpart add -i 2 -s ${FS_SWAP_SIZE} -t freebsd-swap ${_device}s1 # b
+
+    if has_swap; then
+        gpart add -i 2 -s ${FS_SWAP_SIZE} -t freebsd-swap ${_device}s1 # b
+        swapon /dev/${_device}s1b
+    fi
+
     # reserved partition c
     gpart add -i 4 -s ${FS_TMP_SIZE}  -t freebsd-ufs  ${_device}s1 # d
     gpart add -i 5 -s ${FS_VAR_SIZE}  -t freebsd-ufs  ${_device}s1 # e
@@ -459,16 +482,14 @@ mbr_ufs_partition_large()
 
     # FIXME use -j
 
-    newfs    -L root -n /dev/${_device}s1a
-    newfs -U -L tmp  -n /dev/${_device}s1e
-    newfs -U -L var     /dev/${_device}s1d
-    newfs -U -L usr     /dev/${_device}s1f
+    newfs    -L ${LABEL_ROOT} -n /dev/${_device}s1a
+    newfs -U -L ${LABEL_TMP}  -n /dev/${_device}s1e
+    newfs -U -L ${LABEL_VAR}     /dev/${_device}s1d
+    newfs -U -L ${LABEL_USR}     /dev/${_device}s1f
 
     glabel label -v swap /dev/${_device}s1b
 
-    swapon /dev/${_device}s1b
-
-    mount -o async,noatime /dev/ufs/root ${_destdir}
+    mount -o async,noatime /dev/ufs/${LABEL_ROOT} ${_destdir}
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
@@ -478,16 +499,16 @@ mbr_ufs_partition_large()
 
     mount -t nullfs /cdrom ${DESTDIR}/cdrom
 
-    mount -o async,noatime /dev/ufs/var ${_destdir}/var
-    mount -o async,noatime /dev/ufs/tmp ${_destdir}/tmp
-    mount -o async,noatime /dev/ufs/usr ${_destdir}/usr
+    mount -o async,noatime /dev/ufs/${LABEL_VAR} ${_destdir}/var
+    mount -o async,noatime /dev/ufs/${LABEL_TMP} ${_destdir}/tmp
+    mount -o async,noatime /dev/ufs/${LABEL_USR} ${_destdir}/usr
 
     touch ${_destdir}/etc/fstab
 
-    echo "/dev/ufs/root /    ufs rw 1 1" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/var  /var ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/tmp  /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
-    echo "/dev/ufs/usr  /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_ROOT} /    ufs rw 1 1" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_VAR}  /var ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_TMP}  /tmp ufs rw 2 2" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_USR}  /usr ufs rw 2 2" >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -522,9 +543,9 @@ mbr_ufs_partition_small()
 
     # FIXME use -j
 
-    newfs -U -L root /dev/${_device}s1a
+    newfs -U -L ${LABEL_ROOT} /dev/${_device}s1a
 
-    mount -o async,noatime /dev/ufs/root ${_destdir}
+    mount -o async,noatime /dev/ufs/${LABEL_ROOT} ${_destdir}
 
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
@@ -533,7 +554,7 @@ mbr_ufs_partition_small()
 
     touch ${_destdir}/etc/fstab
 
-    echo "/dev/ufs/root / ufs rw 1 1" >> ${_destdir}/etc/fstab
+    echo "/dev/ufs/${LABEL_ROOT} / ufs rw 1 1" >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -626,18 +647,18 @@ zfs_create_gpt_pool()
 
         local _p=1
 
-        gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l efiboot${_device_index} ${_device}
+        gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l ${LABEL_EFIBOOT}${_device_index} ${_device}
         gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
-        gpart add -i ${_p} -s 512K -t freebsd-boot -l boot${_device_index} ${_device}
+        gpart add -i ${_p} -s 512K -t freebsd-boot -l ${LABEL_BOOT}${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
         if has_swap; then
-            gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l swap${_device_index} ${_device}
+            gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l ${LABEL_SWAP}${_device_index} ${_device}
             _p=$((${_p} + 1))
-            swapon /dev/gpt/swap${_device_index}
+            swapon /dev/gpt/${LABEL_SWAP}${_device_index}
         fi
 
         gpart add -i ${_p} -t freebsd-zfs -l pool${_device_index} ${_device}
@@ -706,9 +727,11 @@ zfs_create_mbr_pool()
 
         # do not align partitions here
         gpart add -i 1 -s ${_autorootsize} -t freebsd-zfs  ${_device}s1 # a
-        gpart add -i 2                     -t freebsd-swap ${_device}s1 # b
 
-        swapon /dev/${_device}s1b
+        if has_swap; then
+            gpart add -i 2 -t freebsd-swap ${_device}s1 # b
+            swapon /dev/${_device}s1b
+        fi
 
         dd if=/boot/zfsboot of=/dev/${_device}s1a count=1
         dd if=/boot/zfsboot of=/dev/${_device}s1a iseek=1 oseek=1024
