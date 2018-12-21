@@ -35,6 +35,7 @@ is_efi()
 : ${ZFS_POOL:=rpool}
 : ${PROCFS_ENABLE:=yes}
 : ${FDESCFS_ENABLE:=yes}
+: ${FS_SIZE_BOOT:=512K}
 : ${FS_SIZE_SWAP:=4G}
 : ${FS_SIZE_ROOT:=2G}
 : ${FS_SIZE_VAR:=6G}
@@ -349,7 +350,7 @@ gpt_ufs_partition_large()
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
-    gpart add -i ${_p} -s 512K -t freebsd-boot -l ${LABEL_BOOT} ${_device}
+    gpart add -i ${_p} -s ${FS_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT} ${_device}
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -420,7 +421,7 @@ gpt_ufs_partition_small()
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
-    gpart add -i ${_p} -s 512K -t freebsd-boot -l ${LABEL_BOOT} ${_device};
+    gpart add -i ${_p} -s ${FS_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT} ${_device};
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -659,7 +660,7 @@ zfs_create_gpt_pool()
         gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
-        gpart add -i ${_p} -s 512K -t freebsd-boot -l ${LABEL_BOOT}${_device_index} ${_device}
+        gpart add -i ${_p} -s ${FS_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT}${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
