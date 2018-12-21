@@ -232,10 +232,10 @@ valid_url()
     esac
 }
 
-valid_host()
+check_bsdkit_runtime()
 {
     if [ $(mount -p | grep "/baseroot" | wc -l) -eq 0 ]; then
-        echo "FATAL: valid_host failed" >&2
+        echo "FATAL: check_bsdkit_runtime failed" >&2
         return 1
     fi
 
@@ -379,7 +379,9 @@ gpt_ufs_partition_large()
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    if check_bsdkit_runtime; then
+        mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    fi
 
     mount -o async,noatime /dev/gpt/${LABEL_VAR} ${_destdir}/var
     mount -o async,noatime /dev/gpt/${LABEL_TMP} ${_destdir}/tmp
@@ -433,7 +435,9 @@ gpt_ufs_partition_small()
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    if check_bsdkit_runtime; then
+        mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    fi
 
     touch ${_destdir}/etc/fstab
 
@@ -497,7 +501,9 @@ mbr_ufs_partition_large()
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    if check_bsdkit_runtime; then
+        mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    fi
 
     mount -o async,noatime /dev/ufs/${LABEL_VAR} ${_destdir}/var
     mount -o async,noatime /dev/ufs/${LABEL_TMP} ${_destdir}/tmp
@@ -550,7 +556,9 @@ mbr_ufs_partition_small()
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    if check_bsdkit_runtime; then
+        mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    fi
 
     touch ${_destdir}/etc/fstab
 
@@ -798,7 +806,9 @@ zfs_create_fs()
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    if check_bsdkit_runtime; then
+        mount -t nullfs /cdrom ${DESTDIR}/cdrom
+    fi
 
     touch ${_destdir}/etc/fstab
 
@@ -1315,7 +1325,7 @@ install_gpt_ufs()
 
 install_zfs()
 {
-    valid_host
+    check_bsdkit_runtime
 
     parse_options "$@"
 
@@ -1349,7 +1359,7 @@ install_zfs()
 
 install_gpt_zfs()
 {
-    valid_host
+    check_bsdkit_runtime
 
     parse_options "$@"
 
@@ -1383,7 +1393,7 @@ install_gpt_zfs()
 
 install_mbr_zfs()
 {
-    valid_host
+    check_bsdkit_runtime
 
     parse_options "$@"
 
