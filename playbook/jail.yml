@@ -242,9 +242,9 @@
         insertafter="^man:"
       notify: pwd_mkdb
 
-    - name: "Create /etc/ssl/certs"
+    - name: "Create /usr/local/etc/ssl/certs"
       file: >
-        path=/etc/ssl/certs state=directory
+        path=/usr/local/etc/ssl/certs state=directory
         owner=root group=wheel mode=755
 
     - name: "Install base packages (common)"
@@ -280,14 +280,14 @@
       register: stat_ca_root_nss
 
     - name: "stat: cert.pem"
-      stat: path=/etc/ssl/cert.pem
+      stat: path=/usr/local/etc/ssl/cert.pem
       register: stat_cert_pem
 
-    - name: "Install ca-root-nss.crt"
-      copy: >
+    - name: "Link ca-root-nss.crt"
+      file: >
         src=/usr/local/share/certs/ca-root-nss.crt
-        dest=/etc/ssl/cert.pem
-        owner=root group=wheel mode=644
+        dest=/usr/local/etc/ssl/cert.pem
+        state=link owner=root group=wheel mode=644
       when: stat_ca_root_nss.stat.exists and not stat_cert_pem.stat.exists
 
     - name: "Run pkg clean"

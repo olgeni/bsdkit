@@ -1037,8 +1037,9 @@ install_resolv_conf()
 
 install_ca_root_nss()
 {
-    if [ -f /usr/local/share/certs/ca-root-nss.crt -a ! -e ${_destdir}/etc/ssl/cert.pem ]; then
-	install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/etc/ssl/cert.pem
+    if [ -f /usr/local/share/certs/ca-root-nss.crt -a ! -e ${_destdir}/usr/local/etc/ssl/cert.pem ]; then
+        mkdir -p ${_destdir}/usr/local/etc/ssl
+	install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/usr/local/etc/ssl/cert.pem
     fi
 }
 
