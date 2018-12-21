@@ -1509,6 +1509,25 @@ install_jail()
     cap_mkdb ${_destdir}/etc/login.conf
 }
 
+install_md()
+{
+    local _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
+
+    env INSTALL_SRC=no FS_SWAP_SIZE=0 LABEL_ROOT=mdroot "$0" run install_gpt_ufs "$@" small "${_md_device}"
+
+    sysrc -f ${DESTDIR}/etc/rc.conf saver=NO kld_list=""
+
+    sed -i '' -e '/^PermitRootLogin/d' ${DESTDIR}/etc/ssh/sshd_config
+
+    cat >> ${DESTDIR}/etc/ssh/sshd_config << EOF
+PermitRootLogin yes
+EOF
+
+    echo "Previous value of vfs.root.mountfrom: \"$(kenv vfs.root.mountfrom)\""
+
+    kenv vfs.root.mountfrom="ufs:/dev/${_md_device}p3"
+}
+
 validate_jail_network()
 {
     local _jail_name=$(uuidgen)
