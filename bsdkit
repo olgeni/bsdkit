@@ -44,6 +44,10 @@ is_efi()
 : ${JAIL_ROOT:=/jails}
 : ${SSH_PUBLIC_KEY:=""}
 
+if [ -z "${FS_SWAP_SIZE}" ]; then
+    FS_SWAP_SIZE=0
+fi
+
 if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
     SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 fi
@@ -845,7 +849,6 @@ fdescfs_setup()
 
 has_swap()
 {
-    [ -z "${FS_SWAP_SIZE}" ] && return 1
     [ "${FS_SWAP_SIZE}" = "0" ] && return 1
 
     return 0
