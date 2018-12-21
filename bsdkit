@@ -35,11 +35,11 @@ is_efi()
 : ${ZFS_POOL:=rpool}
 : ${PROCFS_ENABLE:=yes}
 : ${FDESCFS_ENABLE:=yes}
-: ${FS_SWAP_SIZE:=4G}
-: ${FS_ROOT_SIZE:=2G}
-: ${FS_VAR_SIZE:=6G}
-: ${FS_TMP_SIZE:=512K}
-: ${FS_EFI_SIZE:=8M}
+: ${FS_SIZE_SWAP:=4G}
+: ${FS_SIZE_ROOT:=2G}
+: ${FS_SIZE_VAR:=6G}
+: ${FS_SIZE_TMP:=512K}
+: ${FS_SIZE_EFI:=8M}
 : ${DESTDIR:=/mnt}
 : ${JAIL_ROOT:=/jails}
 : ${SSH_PUBLIC_KEY:=""}
@@ -52,8 +52,8 @@ is_efi()
 : ${LABEL_USR:="usr"}
 : ${LABEL_VAR:="var"}
 
-if [ -z "${FS_SWAP_SIZE}" ]; then
-    FS_SWAP_SIZE=0
+if [ -z "${FS_SIZE_SWAP}" ]; then
+    FS_SIZE_SWAP=0
 fi
 
 if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
@@ -74,11 +74,11 @@ environment()
          ZFS_POOL=\"${ZFS_POOL}\"                 \
          PROCFS_ENABLE=\"${PROCFS_ENABLE}\"       \
          FDESCFS_ENABLE=\"${FDESCFS_ENABLE}\"     \
-         FS_SWAP_SIZE=\"${FS_SWAP_SIZE}\"         \
-         FS_ROOT_SIZE=\"${FS_ROOT_SIZE}\"         \
-         FS_VAR_SIZE=\"${FS_VAR_SIZE}\"           \
-         FS_TMP_SIZE=\"${FS_TMP_SIZE}\"           \
-         FS_EFI_SIZE=\"${FS_EFI_SIZE}\"           \
+         FS_SIZE_SWAP=\"${FS_SIZE_SWAP}\"         \
+         FS_SIZE_ROOT=\"${FS_SIZE_ROOT}\"         \
+         FS_SIZE_VAR=\"${FS_SIZE_VAR}\"           \
+         FS_SIZE_TMP=\"${FS_SIZE_TMP}\"           \
+         FS_SIZE_EFI=\"${FS_SIZE_EFI}\"           \
          DESTDIR=\"${DESTDIR}\"                   \
          INSTALL_JAIL=\"${INSTALL_JAIL}\"         \
          JAIL_ROOT=\"${JAIL_ROOT}\"               \
@@ -345,7 +345,7 @@ gpt_ufs_partition_large()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l ${LABEL_EFIBOOT} ${_device}
+    gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFIBOOT} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -354,14 +354,14 @@ gpt_ufs_partition_large()
     _p=$((${_p} + 1))
 
     if has_swap; then
-        gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l ${LABEL_SWAP} ${_device}
+        gpart add -i ${_p} -s ${FS_SIZE_SWAP} -t freebsd-swap -l ${LABEL_SWAP} ${_device}
         _p=$((${_p} + 1))
         swapon /dev/gpt/${LABEL_SWAP}
     fi
 
-    gpart add -i ${_p} -s ${FS_ROOT_SIZE} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}; _p=$((${_p} + 1))
-    gpart add -i ${_p} -s ${FS_TMP_SIZE}  -t freebsd-ufs -l ${LABEL_TMP}  ${_device}; _p=$((${_p} + 1))
-    gpart add -i ${_p} -s ${FS_VAR_SIZE}  -t freebsd-ufs -l ${LABEL_VAR}  ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_SIZE_ROOT} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_SIZE_TMP}  -t freebsd-ufs -l ${LABEL_TMP}  ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p} -s ${FS_SIZE_VAR}  -t freebsd-ufs -l ${LABEL_VAR}  ${_device}; _p=$((${_p} + 1))
     gpart add -i ${_p}                    -t freebsd-ufs -l ${LABEL_USR}  ${_device}; _p=$((${_p} + 1))
 
     # FIXME use -j
@@ -416,7 +416,7 @@ gpt_ufs_partition_small()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l ${LABEL_EFIBOOT} ${_device}
+    gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFIBOOT} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
@@ -472,16 +472,16 @@ mbr_ufs_partition_large()
 
     # FIXME refactor (end)
 
-    gpart add -i 1 -s ${FS_ROOT_SIZE} -t freebsd-ufs  ${_device}s1 # a
+    gpart add -i 1 -s ${FS_SIZE_ROOT} -t freebsd-ufs  ${_device}s1 # a
 
     if has_swap; then
-        gpart add -i 2 -s ${FS_SWAP_SIZE} -t freebsd-swap ${_device}s1 # b
+        gpart add -i 2 -s ${FS_SIZE_SWAP} -t freebsd-swap ${_device}s1 # b
         swapon /dev/${_device}s1b
     fi
 
     # reserved partition c
-    gpart add -i 4 -s ${FS_TMP_SIZE}  -t freebsd-ufs  ${_device}s1 # d
-    gpart add -i 5 -s ${FS_VAR_SIZE}  -t freebsd-ufs  ${_device}s1 # e
+    gpart add -i 4 -s ${FS_SIZE_TMP}  -t freebsd-ufs  ${_device}s1 # d
+    gpart add -i 5 -s ${FS_SIZE_VAR}  -t freebsd-ufs  ${_device}s1 # e
     gpart add -i 6                    -t freebsd-ufs  ${_device}s1 # f
 
     # FIXME use -j
@@ -626,7 +626,7 @@ zfs_create_pool()
             -o sync=disabled       \
             -o primarycache=none   \
             -o org.freebsd:swap=on \
-            -V ${FS_SWAP_SIZE}     \
+            -V ${FS_SIZE_SWAP}     \
             ${ZFS_POOL}/swap
     fi
 
@@ -655,7 +655,7 @@ zfs_create_gpt_pool()
 
         local _p=1
 
-        gpart add -i ${_p} -s ${FS_EFI_SIZE} -t efi -l ${LABEL_EFIBOOT}${_device_index} ${_device}
+        gpart add -i ${_p} -s ${FS_SIZE_EFI} -t efi -l ${LABEL_EFIBOOT}${_device_index} ${_device}
         gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
@@ -664,7 +664,7 @@ zfs_create_gpt_pool()
         _p=$((${_p} + 1))
 
         if has_swap; then
-            gpart add -i ${_p} -s ${FS_SWAP_SIZE} -t freebsd-swap -l ${LABEL_SWAP}${_device_index} ${_device}
+            gpart add -i ${_p} -s ${FS_SIZE_SWAP} -t freebsd-swap -l ${LABEL_SWAP}${_device_index} ${_device}
             _p=$((${_p} + 1))
             swapon /dev/gpt/${LABEL_SWAP}${_device_index}
         fi
@@ -731,7 +731,7 @@ zfs_create_mbr_pool()
         gpart create -s BSD ${_device}s1
         gpart bootcode -b /boot/mbr ${_device}
 
-        local _autorootsize="$(($(diskinfo ${_device} | cut -f 3) / 1024 / 1024 - ${FS_SWAP_SIZE}))"
+        local _autorootsize="$(($(diskinfo ${_device} | cut -f 3) / 1024 / 1024 - ${FS_SIZE_SWAP}))"
 
         # do not align partitions here
         gpart add -i 1 -s ${_autorootsize} -t freebsd-zfs  ${_device}s1 # a
@@ -882,7 +882,7 @@ fdescfs_setup()
 
 has_swap()
 {
-    [ "${FS_SWAP_SIZE}" = "0" ] && return 1
+    [ "${FS_SIZE_SWAP}" = "0" ] && return 1
 
     return 0
 }
