@@ -32,6 +32,7 @@ is_efi()
 : ${INSTALL_SRC:="yes"}
 : ${INSTALL_DEBUG:="no"}
 : ${INSTALL_TESTS:="no"}
+
 : ${ZFS_POOL:="rpool"}
 : ${PROCFS_ENABLE:="yes"}
 : ${FDESCFS_ENABLE:="yes"}
@@ -69,22 +70,22 @@ fi
 
 environment()
 {
-    echo INSTALL_KERNEL=\"${INSTALL_KERNEL}\"     \
+    echo INSTALL_JAIL=\"${INSTALL_JAIL}\"         \
+         INSTALL_KERNEL=\"${INSTALL_KERNEL}\"     \
          INSTALL_SRC=\"${INSTALL_SRC}\"           \
          INSTALL_DEBUG=\"${INSTALL_DEBUG}\"       \
          INSTALL_TESTS=\"${INSTALL_TESTS}\"       \
          ZFS_POOL=\"${ZFS_POOL}\"                 \
          PROCFS_ENABLE=\"${PROCFS_ENABLE}\"       \
          FDESCFS_ENABLE=\"${FDESCFS_ENABLE}\"     \
+         DESTDIR=\"${DESTDIR}\"                   \
+         JAIL_ROOT=\"${JAIL_ROOT}\"               \
+         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"     \
          PART_SIZE_EFI=\"${PART_SIZE_EFI}\"       \
          PART_SIZE_ROOT=\"${PART_SIZE_ROOT}\"     \
          PART_SIZE_SWAP=\"${PART_SIZE_SWAP}\"     \
          PART_SIZE_TMP=\"${PART_SIZE_TMP}\"       \
          PART_SIZE_VAR=\"${PART_SIZE_VAR}\"       \
-         DESTDIR=\"${DESTDIR}\"                   \
-         INSTALL_JAIL=\"${INSTALL_JAIL}\"         \
-         JAIL_ROOT=\"${JAIL_ROOT}\"               \
-         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"     \
          LABEL_BOOT=\"${LABEL_BOOT}\"             \
          LABEL_EFI=\"${LABEL_EFI}\"               \
          LABEL_ROOT=\"${LABEL_ROOT}\"             \
