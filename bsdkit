@@ -1514,7 +1514,9 @@ install_md()
 
     env INSTALL_SRC=no FS_SWAP_SIZE=0 LABEL_ROOT=mdroot "$0" run install_gpt_ufs "$@" small "${_md_device}"
 
-    sysrc -f ${DESTDIR}/etc/rc.conf saver=NO kld_list=""
+    rm -f ${DESTDIR}/etc/rc.conf
+
+    sysrc -f ${DESTDIR}/etc/rc.conf hostname=localhost
 
     sed -i '' -e '/^PermitRootLogin/d' ${DESTDIR}/etc/ssh/sshd_config
 
