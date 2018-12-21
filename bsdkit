@@ -1112,9 +1112,6 @@ install_pkg()
     valid_destdir ${_destdir}
     valid_pkgpath ${_pkgpath}
 
-    install_resolv_conf ${_destdir}
-    install_ca_root_nss ${_destdir}
-
     export BATCH="YES"
     export PACKAGE_BUILDING="YES"
     export UNAME_r=$(uname -r | sed -e "s/-.*//")-RELEASE
