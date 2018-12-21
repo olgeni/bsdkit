@@ -43,7 +43,7 @@ is_efi()
 : ${PART_SIZE_EFI:="8M"}
 : ${PART_SIZE_ROOT:="2G"}
 : ${PART_SIZE_SWAP:="4G"}
-: ${PART_SIZE_TMP:="512K"}
+: ${PART_SIZE_TMP:="16M"}
 : ${PART_SIZE_VAR:="6G"}
 
 : ${LABEL_BOOT:="boot"}
