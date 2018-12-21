@@ -1211,7 +1211,6 @@ install_mbr_ufs()
 
     mkdir -p ${DESTDIR}
 
-    reset_state
     mbr_ufs_partition_${_class} ${DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     swap_setup ${DESTDIR}
@@ -1252,7 +1251,6 @@ install_mbr_ufs_gmirror()
 
     mkdir -p ${DESTDIR}
 
-    reset_state
     gmirror_configure ${_mirror} ${_devices}
     mbr_ufs_partition_${_class} ${DESTDIR} mirror/${_mirror}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
@@ -1285,7 +1283,6 @@ install_gpt_ufs()
 
     mkdir -p ${DESTDIR}
 
-    reset_state
     gpt_ufs_partition_${_class} ${DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     swap_setup ${DESTDIR}
@@ -1317,7 +1314,6 @@ install_zfs()
 
     mkdir -p ${DESTDIR}
 
-    reset_state
     zfs_create_pool ${DESTDIR} ${_devices}
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
@@ -1352,7 +1348,6 @@ install_gpt_zfs()
 
     mkdir -p ${DESTDIR}
 
-    reset_state
     zfs_create_gpt_pool ${DESTDIR} ${_devices}
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
@@ -1387,7 +1382,6 @@ install_mbr_zfs()
 
     mkdir -p ${DESTDIR}
 
-    reset_state
     zfs_create_mbr_pool ${DESTDIR} ${_devices}
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
