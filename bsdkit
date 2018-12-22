@@ -24,7 +24,7 @@ is_yes()
 
 is_efi()
 {
-    [ "$(kenv console)" = "efi" ]
+    [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
 
 : ${INSTALL_JAIL:="no"}
