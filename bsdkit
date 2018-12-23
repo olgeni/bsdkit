@@ -1114,7 +1114,7 @@ install_pkg()
 
     export BATCH="YES"
     export PACKAGE_BUILDING="YES"
-    export UNAME_r=$(uname -r | sed -e "s/-.*//")-RELEASE
+    export UNAME_r=$(uname -r | sed -e 's/-.*//')-RELEASE
 
     lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} update -f
     lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} install -y pkg
@@ -1503,7 +1503,7 @@ install_jail()
         _login_env="${_login_env},OSVERSION=${_osversion}"
     fi
 
-    sed -i "" -e "s/,UNAME_r.*:/:/ ; s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
+    sed -i '' -e "s/,UNAME_r.*:/:/ ; s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
 
     cap_mkdb ${_destdir}/etc/login.conf
 }
