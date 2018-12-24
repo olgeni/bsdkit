@@ -2314,8 +2314,6 @@ echo_jail_conf()
 
     valid_destdir ${_destdir}
 
-    local _jail_name=$(basename ${_destdir})
-
     cat << EOF
 ${_jail_name} {
 	exec.start = "/bin/sh /etc/rc";
