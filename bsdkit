@@ -2180,7 +2180,7 @@ deploy()
     ${BSDKIT_DIR}/bsdkit ansible_jail_playbook
 }
 
-remote()
+remote_deploy()
 {
     local _remote_address=""
     local _remote_port="22"
