@@ -1206,11 +1206,6 @@ stop_jail()
     rm ${_jail_conf}
 }
 
-jail_ssh()
-{
-    ssh -p ${JAIL_SSH_PORT} -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${JAIL_ADDRESS}
-}
-
 reset_state()
 {
     jail -R '*'
