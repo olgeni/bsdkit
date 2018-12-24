@@ -2306,7 +2306,7 @@ EOF
     rm -r ${_ansible_root}
 }
 
-print_jail_conf()
+echo_jail_conf()
 {
     local _jail_name="$1"
 
