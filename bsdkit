@@ -2306,6 +2306,18 @@ EOF
     rm -r ${_ansible_root}
 }
 
+osrelease()
+{
+    local _destdir="$1"
+    ${_destdir}/bin/freebsd-version -u
+}
+
+osreldate()
+{
+    local _destdir="$1"
+    ${_destdir}/usr/bin/uname -K
+}
+
 echo_jail_conf()
 {
     local _jail_name="$1"
