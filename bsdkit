@@ -2323,12 +2323,12 @@ ${_jail_name} {
 	mount.devfs;
 	persist;
 
-	allow.raw_sockets;
-	allow.sysvipc;
-
 	sysvsem = new;
 	sysvshm = new;
 	sysvmsg = new;
+
+	allow.raw_sockets;
+	allow.sysvipc;
 
 	path = "${_destdir%/}";
 	host.hostname = "\$name";
