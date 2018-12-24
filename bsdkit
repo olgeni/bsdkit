@@ -1512,7 +1512,7 @@ install_md()
 {
     local _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
-    env INSTALL_SRC=no FS_SWAP_SIZE=0 LABEL_ROOT=mdroot "$0" run install_gpt_ufs "$@" small "${_md_device}"
+    env INSTALL_SRC=no FS_SWAP_SIZE=0 LABEL_ROOT=mdroot "$0" deploy install_gpt_ufs "$@" small "${_md_device}"
 
     rm -f ${DESTDIR}/etc/rc.conf
 
@@ -2170,7 +2170,7 @@ build_setup_img()
     rm -f ${_ufs}
 }
 
-run()
+deploy()
 {
     echo "Running: $@"
 
@@ -2236,7 +2236,7 @@ EOF
       synchronize: src=${BSDKIT_DIR} dest=/root/ delete=true archive=true mode=push rsync_opts="--exclude=.git"
 
     - name: "Run requested bsdkit function"
-      shell: $(environment) /root/bsdkit/bsdkit run "$@" >> /tmp/bsdkit.log 2>&1
+      shell: $(environment) /root/bsdkit/bsdkit deploy "$@" >> /tmp/bsdkit.log 2>&1
 
 - hosts: install
   connection: ssh
