@@ -847,7 +847,7 @@ swap_setup()
     local _swap
 
     for _swap in $(find /dev | grep -E "(gpt|label)/swap" | rs 1 0); do
-	echo "${_swap} none swap sw 0 0" >> ${_destdir}/etc/fstab
+        echo "${_swap} none swap sw 0 0" >> ${_destdir}/etc/fstab
     done
 
     return 0
@@ -1031,7 +1031,7 @@ install_release()
 install_resolv_conf()
 {
     if [ -f /etc/resolv.conf -a ! -f ${_destdir}/etc/resolv.conf ]; then
-	install -m 644 -o root -g wheel /etc/resolv.conf ${_destdir}/etc/resolv.conf
+        install -m 644 -o root -g wheel /etc/resolv.conf ${_destdir}/etc/resolv.conf
     fi
 }
 
@@ -1039,7 +1039,7 @@ install_ca_root_nss()
 {
     if [ -f /usr/local/share/certs/ca-root-nss.crt -a ! -e ${_destdir}/usr/local/etc/ssl/cert.pem ]; then
         mkdir -p ${_destdir}/usr/local/etc/ssl
-	install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/usr/local/etc/ssl/cert.pem
+        install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/usr/local/etc/ssl/cert.pem
     fi
 }
 
@@ -1589,7 +1589,7 @@ do_configure_jail()
     customize_base ${_destdir}
 
     if [ -f /etc/hosts -a ! -f ${_destdir}/etc/hosts ]; then
-	install -m 644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
+        install -m 644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
     fi
 
     install_repo ${_destdir} ${FREEBSD_PKG_URL}
@@ -2045,8 +2045,8 @@ EOF
     chmod -x ${_staging}/base.ufs.uzip
 
     while ! umount -f ${_tmp}; do
-	echo "Waiting for ${_tmp} (tmp)"
-	sleep 3
+        echo "Waiting for ${_tmp} (tmp)"
+        sleep 3
     done
 
     rmdir ${_tmp}
