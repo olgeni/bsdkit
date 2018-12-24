@@ -1174,7 +1174,7 @@ EOF
 
     local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
-    write_runtime_jail_conf ${_jail_conf} ${_destdir}
+    echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
 
     jail -f ${_jail_conf} -c ${_jail_name}
 
@@ -1199,7 +1199,7 @@ stop_jail()
 
     local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
-    write_runtime_jail_conf ${_jail_conf} ${_destdir}
+    echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
 
     jail -f ${_jail_conf} -r ${_jail_name}
 
@@ -1490,20 +1490,14 @@ install_jail()
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 
-    local _release=$(chroot ${_destdir} /bin/freebsd-version -u)
-
     local _login_env=",LC_ALL=en_US.UTF-8"
-    _login_env="${_login_env},UNAME_r=${_release% *}"
-    _login_env="${_login_env},UNAME_v=FreeBSD ${_release}"
-    _login_env="${_login_env},UNAME_m=${BSDKIT_ARCH%.*}"
-    _login_env="${_login_env},UNAME_p=${BSDKIT_ARCH#*.}"
+    # _login_env="${_login_env},..."
 
-    if [ -e ${_destdir}/usr/include/sys/param.h ]; then
-        local _osversion=$(awk '/\#define __FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h)
-        _login_env="${_login_env},OSVERSION=${_osversion}"
-    fi
+    sed -i '' -e "s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
 
-    sed -i '' -e "s/,UNAME_r.*:/:/ ; s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
+    sed -i '' -e '/^	:umask=022:/i\
+	:charset=UTF-8:\\\
+	:lang=en_US.UTF-8:\\\' ${_destdir}/etc/login.conf
 
     cap_mkdb ${_destdir}/etc/login.conf
 }
@@ -2327,20 +2321,23 @@ echo_jail_conf()
     valid_destdir ${_destdir}
 
     cat << EOF
+exec.start = "/bin/sh /etc/rc";
+exec.stop = "/bin/sh /etc/rc.shutdown";
+exec.clean;
+
+mount.devfs;
+persist;
+
+sysvsem = new;
+sysvshm = new;
+sysvmsg = new;
+
 ${_jail_name} {
-	exec.start = "/bin/sh /etc/rc";
-	exec.stop = "/bin/sh /etc/rc.shutdown";
-	exec.clean;
-
-	mount.devfs;
-	persist;
-
-	sysvsem = new;
-	sysvshm = new;
-	sysvmsg = new;
-
 	allow.raw_sockets;
 	allow.sysvipc;
+
+	osrelease = "$(osrelease ${_destdir})";
+	osreldate = "$(osreldate ${_destdir})";
 
 	path = "${_destdir%/}";
 	host.hostname = "\$name";
@@ -2352,22 +2349,25 @@ ${_jail_name} {
 EOF
 }
 
-write_runtime_jail_conf()
+echo_runtime_jail_conf()
 {
-    local _jail_conf="$1"
-    local _destdir="$2"
+    local _destdir="$1"
 
     valid_destdir ${_destdir}
 
     local _jail_name=$(basename ${_destdir})
 
     cat > ${_jail_conf} << EOF
+exec.clean;
+
+mount.devfs;
+persist;
+
+sysvsem = new;
+sysvshm = new;
+sysvmsg = new;
+
 ${_jail_name} {
-	exec.clean;
-
-	mount.devfs;
-	persist;
-
 	allow.raw_sockets;
 	allow.sysvipc;
 
