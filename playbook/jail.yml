@@ -138,6 +138,7 @@
       with_items:
         - inputrc
         - kermrc
+        - login_conf
         - vimrc
         - zshrc
       failed_when: False
@@ -149,6 +150,7 @@
       with_items:
         - inputrc
         - kermrc
+        - login_conf
         - vimrc
         - zshrc
 
