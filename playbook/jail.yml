@@ -3,7 +3,7 @@
   user: root
   gather_facts: no
   tasks:
-    - raw: /usr/bin/env http_proxy="{{lookup('env', 'JAIL_PROXY')}}" pkg install -y python
+    - raw: /usr/bin/env http_proxy="{{lookup('env', 'BSDKIT_JAIL_PROXY')}}" pkg install -y python
 
 - hosts: all
   user: root
@@ -19,8 +19,8 @@
       set_fact: freebsd_version={{ansible_distribution_release.split("-")[0]}}
       when: freebsd_branch == "RELEASE" or freebsd_branch == "PRERELEASE" or freebsd_branch[:4] == "BETA" or freebsd_branch[:2] == "RC"
 
-    - name: "set_fact: ssh_public_key"
-      set_fact: ssh_public_key="{{lookup('env', 'SSH_PUBLIC_KEY')}}"
+    - name: "set_fact: bsdkit_ssh_public_key"
+      set_fact: bsdkit_ssh_public_key="{{lookup('env', 'BSDKIT_SSH_PUBLIC_KEY')}}"
 
     - name: "set_fact: bsdkit_interface"
       set_fact: bsdkit_interface="{{lookup('env', 'BSDKIT_INTERFACE')}}"
@@ -31,19 +31,19 @@
     - name: "set_fact: bsdkit_defaultrouter"
       set_fact: bsdkit_defaultrouter="{{lookup('env', 'BSDKIT_DEFAULTROUTER')}}"
 
-    - name: "set_fact: jail_proxy"
-      set_fact: jail_proxy="{{lookup('env', 'JAIL_PROXY')}}"
+    - name: "set_fact: bsdkit_jail_proxy"
+      set_fact: bsdkit_jail_proxy="{{lookup('env', 'BSDKIT_JAIL_PROXY')}}"
 
-    - name: "set_fact: install_jail"
-      set_fact: install_jail="{{lookup('env', 'INSTALL_JAIL')}}"
+    - name: "set_fact: bsdkit_install_jail"
+      set_fact: bsdkit_install_jail="{{lookup('env', 'BSDKIT_INSTALL_JAIL')}}"
 
     - name: "stat: /usr/src/sys"
       stat: path=/usr/src/sys
       register: stat_usr_src_sys
 
     - name: "Set authorized_key"
-      authorized_key: user=root key="{{ssh_public_key}}"
-      when: ssh_public_key != ""
+      authorized_key: user=root key="{{bsdkit_ssh_public_key}}"
+      when: bsdkit_ssh_public_key != ""
 
     - name: "Create /usr/local/etc"
       file: >
@@ -81,23 +81,23 @@
     - name: "Gather zfs_enable"
       command: sysrc -n zfs_enable
       register: sysrc_zfs_enable
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "Install /etc/rc.conf (host version)"
       copy: >
         src=../ansible/rc.conf dest=/etc/rc.conf
         owner=root group=wheel mode=644
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "Install /etc/rc.conf (jail version)"
       copy: >
         src=../ansible/rc.conf.jail dest=/etc/rc.conf
         owner=root group=wheel mode=644
-      when: install_jail
+      when: bsdkit_install_jail
 
     - name: "Set zfs_enable in rc.conf"
       command: sysrc zfs_enable="{{sysrc_zfs_enable.stdout}}"
-      when: not install_jail and sysrc_zfs_enable is success
+      when: not bsdkit_install_jail and sysrc_zfs_enable is success
 
     - name: "Set ifconfig in rc.conf"
       command: sysrc ifconfig_{{bsdkit_interface}}="{{bsdkit_ifconfig}}"
@@ -110,10 +110,10 @@
     - name: "Set http_proxy in pkg.conf"
       lineinfile: >
         dest=/usr/local/etc/pkg.conf
-        line="pkg_env: { http_proxy: \"{{jail_proxy}}\" }"
+        line="pkg_env: { http_proxy: \"{{bsdkit_jail_proxy}}\" }"
         regexp="^pkg_env"
         insertafter=EOF
-      when: jail_proxy != ""
+      when: bsdkit_jail_proxy != ""
 
     - name: "Install sysctl.conf"
       copy: >
@@ -121,7 +121,7 @@
         owner=root group=wheel mode=644
       with_items:
         - sysctl.conf
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "Install loader.conf"
       copy: >
@@ -129,7 +129,7 @@
         owner=root group=wheel mode=644
       with_items:
         - loader.conf
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "Install dotfiles in /usr/share/skel"
       copy: >
@@ -171,13 +171,13 @@
       copy: >
         src=../ansible/firewall dest=/etc/firewall
         owner=root group=wheel mode=644
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "Install /usr/local/etc/smartd.conf"
       copy: >
         src=../ansible/smartd.conf dest=/usr/local/etc/smartd.conf
         owner=root group=wheel mode=644
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "Install /usr/local/etc/portmaster.rc"
       copy: >
@@ -206,7 +206,7 @@
       with_items:
         - ".*devstat"
         - ".*fuse.*"
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "stat: /var/db/zoneinfo"
       stat: path=/var/db/zoneinfo
@@ -273,7 +273,7 @@
           - beadm
           - smartmontools
         state: present
-      when: not install_jail
+      when: not bsdkit_install_jail
 
     - name: "stat: ca-root-nss.crt"
       stat: path=/usr/local/share/certs/ca-root-nss.crt
@@ -299,7 +299,7 @@
       command: pwd_mkdb /etc/master.passwd
 
 - import_playbook: virt.yml
-  when: not install_jail
+  when: not bsdkit_install_jail
 
 - hosts: all
   user: root
@@ -313,4 +313,4 @@
   tasks:
     - name: "Remove authorized_key"
       authorized_key: user=root key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit" state=absent
-      when: ssh_public_key != ""
+      when: bsdkit_ssh_public_key != ""
