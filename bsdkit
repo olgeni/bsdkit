@@ -1552,7 +1552,7 @@ create_jail_destdir()
 
     if [ -n "${_parent_fs}" ]; then
         if ! zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" > /dev/null 2>&1; then
-            ${ZFS_CREATE_CMD} "${_parent_fs}/${_jail_name}"
+            ${ZFS_CREATE_CMD} -o compression=on "${_parent_fs}/${_jail_name}"
             _zfs="YES"
         fi
     else
