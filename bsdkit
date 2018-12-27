@@ -2304,7 +2304,12 @@ osrelease()
 osreldate()
 {
     local _destdir="$1"
-    ${_destdir}/usr/bin/uname -K
+
+    if [ -f ${_destdir}/usr/include/sys/param.h ]; then
+        awk '/\#define __FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h
+    else
+        ${_destdir}/usr/bin/uname -K
+    fi
 }
 
 echo_jail_conf()
