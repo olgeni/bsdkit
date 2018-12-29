@@ -86,7 +86,7 @@
     - name: "Install /etc/rc.conf (host version)"
       copy: >
         src=../ansible/rc.conf dest=/etc/rc.conf
-        owner=root group=wheel mode=644
+        owner=root group=wheel mode=644 backup=yes
       when: not bsdkit_install_jail
 
     - name: "Install /etc/rc.conf (jail version)"
@@ -118,7 +118,7 @@
     - name: "Install sysctl.conf"
       copy: >
         src=../ansible/{{item}} dest=/etc/{{item}}
-        owner=root group=wheel mode=644
+        owner=root group=wheel mode=644 backup=yes
       with_items:
         - sysctl.conf
       when: not bsdkit_install_jail
@@ -126,7 +126,7 @@
     - name: "Install loader.conf"
       copy: >
         src=../ansible/{{item}} dest=/boot/{{item}}
-        owner=root group=wheel mode=644
+        owner=root group=wheel mode=644 backup=yes
       with_items:
         - loader.conf
       when: not bsdkit_install_jail
@@ -157,7 +157,7 @@
     - name: "Install sudoers"
       copy: >
         src=../ansible/sudoers dest=/usr/local/etc/sudoers
-        owner=root group=wheel mode=440
+        owner=root group=wheel mode=440 backup=yes
 
     - name: "Create /etc/newsyslog.conf.d/"
       file: >
