@@ -2306,7 +2306,7 @@ osreldate()
     local _destdir="$1"
 
     if [ -f ${_destdir}/usr/include/sys/param.h ]; then
-        awk '/\#define __FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h
+        awk '/^\#define[[:blank:]]__FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h
     else
         ${_destdir}/usr/bin/uname -K
     fi
