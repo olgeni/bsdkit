@@ -223,7 +223,7 @@
         dest=/etc/crontab
         line="MAILTO=\"\""
         regexp="^MAILTO"
-        insertafter="^SHELL="
+        insertbefore="^SHELL="
 
     - name: "Disable '/dev/console' in /etc/syslog.conf"
       lineinfile: >
