@@ -1009,20 +1009,20 @@ install_release()
         fi
     fi
 
-    mtree -ideU -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
-    mtree -ideU -f ${_destdir}/etc/mtree/BSD.var.dist  -p ${_destdir}/var
-    mtree -ideU -f ${_destdir}/etc/mtree/BSD.usr.dist  -p ${_destdir}/usr
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.var.dist  -p ${_destdir}/var
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.usr.dist  -p ${_destdir}/usr
 
     if [ -f ${_destdir}/etc/mtree/BSD.include.dist ]; then
-        mtree -ideU -f ${_destdir}/etc/mtree/BSD.include.dist -p ${_destdir}/usr/include
+        mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.include.dist -p ${_destdir}/usr/include
     fi
 
     if [ -f ${_destdir}/etc/mtree/BSD.sendmail.dist ]; then
-        mtree -ideU -f ${_destdir}/etc/mtree/BSD.sendmail.dist -p ${_destdir}/
+        mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.sendmail.dist -p ${_destdir}/
     fi
 
     if [ -f ${_destdir}/etc/mtree/BSD.tests.dist ]; then
-        mtree -ideU -f ${_destdir}/etc/mtree/BSD.tests.dist -p ${_destdir}/usr/tests
+        mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.tests.dist -p ${_destdir}/usr/tests
     fi
 
     return 0

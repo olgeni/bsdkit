@@ -337,20 +337,20 @@ fi
 
 echo "Running: mtree"
 
-mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
-mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.var.dist  -p ${DESTDIR}/var
-mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
+mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
+mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist  -p ${DESTDIR}/var
+mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.include.dist ]; then
-    mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
 fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist ]; then
-    mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist -p ${DESTDIR}/
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist -p ${DESTDIR}/
 fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.tests.dist ]; then
-    mtree -ideU -f ${DESTDIR}/etc/mtree/BSD.tests.dist -p ${DESTDIR}/usr/tests
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.tests.dist -p ${DESTDIR}/usr/tests
 fi
 
 chroot ${DESTDIR}/ newaliases
