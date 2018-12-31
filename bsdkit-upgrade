@@ -384,11 +384,11 @@ if is_yes ${BOOTENV_ENABLE}; then
         rebuild_port ${_port}
     done
 
-    if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}/usr/src\$"; then
+    if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/src"; then
         umount -f ${BOOTENV_MOUNT}/usr/src
     fi
 
-    if mount | cut -w -f 3 | grep -q "^${BOOTENV_MOUNT}/usr/ports\$"; then
+    if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/ports"; then
         umount -f ${BOOTENV_MOUNT}/usr/ports
     fi
 
