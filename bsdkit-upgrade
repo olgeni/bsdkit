@@ -15,6 +15,7 @@ set -e -u
 : ${_install_src:="no"}
 : ${_install_debug:="no"}
 : ${_install_tests:="no"}
+: ${_proc_mounted:="no"}
 
 error()
 {
@@ -39,6 +40,12 @@ cleanup()
 
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
             umount -f ${BOOTENV_MOUNT} || :
+        fi
+    else
+        if [ -z "${DESTDIR}" ]; then
+            if is_yes ${_proc_mounted}; then
+                mount /proc
+            fi
         fi
     fi
 }
@@ -99,6 +106,10 @@ rebuild_port()
 }
 
 trap cleanup EXIT
+
+if mount | cut -w -f 3 | fgrep -q "/proc"; then
+    _proc_mounted=yes
+fi
 
 while getopts "eEn:r:v:a:d:FP" OPT; do
     case ${OPT} in
@@ -237,6 +248,10 @@ if is_yes ${BOOTENV_ENABLE}; then
     fi
 
     DESTDIR=${BOOTENV_MOUNT}
+else
+    if [ -z "${DESTDIR}" ]; then
+        umount -f /proc
+    fi
 fi
 
 _srcdir=/usr/src
