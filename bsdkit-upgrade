@@ -43,8 +43,6 @@ cleanup()
     fi
 }
 
-trap cleanup EXIT
-
 is_yes()
 {
     case $1 in
@@ -81,6 +79,26 @@ bsdkit-noauto()
         done
     fi
 }
+
+rebuild_port()
+{
+    local _port="$1"
+
+    if pkg-static info -q ${_port}; then
+        if [ -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
+            mount -t devfs devfs ${BOOTENV_MOUNT}/dev
+
+            pkg-static -c ${BOOTENV_MOUNT} unlock -y ${_port}
+            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean all deinstall install
+            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean
+            pkg-static -c ${BOOTENV_MOUNT} lock -y ${_port}
+
+            umount ${BOOTENV_MOUNT}/dev
+        fi
+    fi
+}
+
+trap cleanup EXIT
 
 while getopts "eEn:r:v:a:d:FP" OPT; do
     case ${OPT} in
@@ -331,24 +349,6 @@ if [ -f ${_srcdir}/Makefile ]; then
     # echo "Running: delete-old-libs"
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 fi
-
-rebuild_port()
-{
-    local _port="$1"
-
-    if pkg-static info -q ${_port}; then
-        if [ -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
-            mount -t devfs devfs ${BOOTENV_MOUNT}/dev
-
-            pkg-static -c ${BOOTENV_MOUNT} unlock -y ${_port}
-            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean all deinstall install
-            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean
-            pkg-static -c ${BOOTENV_MOUNT} lock -y ${_port}
-
-            umount ${BOOTENV_MOUNT}/dev
-        fi
-    fi
-}
 
 if is_yes ${BOOTENV_ENABLE}; then
     if ! is_yes ${SKIP_PACKAGES}; then
