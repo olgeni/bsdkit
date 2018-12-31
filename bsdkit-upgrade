@@ -380,7 +380,7 @@ if is_yes ${BOOTENV_ENABLE}; then
         fi
     fi
 
-    for _port in $(pkg which -qo /boot/modules/* | sort | uniq); do
+    for _port in $(pkg-static which -qo /boot/modules/* | sort | uniq); do
         rebuild_port ${_port}
     done
 
