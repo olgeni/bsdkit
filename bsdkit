@@ -1159,7 +1159,6 @@ pass out all
 EOF
 
     pfctl -n -f ${_pf_conf}
-
     pfctl -e -f ${_pf_conf} || :
 
     rm ${_pf_conf}
