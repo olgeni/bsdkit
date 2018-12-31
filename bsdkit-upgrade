@@ -87,12 +87,19 @@ bsdkit-noauto()
     fi
 }
 
+osmajor()
+{
+    local _destdir="$1"
+
+    awk '/^\#define[[:blank:]]__FreeBSD_version/ { print substr($3, 1, 2); }' ${_destdir}/usr/include/sys/param.h
+}
+
 rebuild_port()
 {
     local _port="$1"
 
     if pkg-static info -q ${_port}; then
-        if [ -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
+        if [ $(osmajor /) = $(osmajor ${BOOTENV_MOUNT}) -a -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
             mount -t devfs devfs ${BOOTENV_MOUNT}/dev
 
             pkg-static -c ${BOOTENV_MOUNT} unlock -y ${_port}
