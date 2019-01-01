@@ -38,6 +38,7 @@ is_efi()
 : ${FDESCFS_ENABLE:="yes"}
 : ${DESTDIR:="/mnt"}
 : ${JAIL_ROOT:="/jails"}
+: ${JAIL_NAME:="bsdkit"}
 : ${SSH_PUBLIC_KEY:=""}
 
 : ${PART_SIZE_BOOT:="512K"}
@@ -55,6 +56,14 @@ is_efi()
 : ${LABEL_USR:="usr"}
 : ${LABEL_VAR:="var"}
 
+: ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
+: ${BSDKIT_VERSION:=11.2}
+: ${BSDKIT_ARCH:=amd64}
+: ${BSDKIT_TREE:=default}
+: ${BSDKIT_PKGSET:=nox11}
+
+: ${JAIL_PROXY:=""}
+
 if [ -z "${PART_SIZE_SWAP}" ]; then
     PART_SIZE_SWAP=0
 fi
@@ -70,44 +79,40 @@ fi
 
 environment()
 {
-    echo INSTALL_JAIL=\"${INSTALL_JAIL}\"         \
-         INSTALL_KERNEL=\"${INSTALL_KERNEL}\"     \
-         INSTALL_SRC=\"${INSTALL_SRC}\"           \
-         INSTALL_DEBUG=\"${INSTALL_DEBUG}\"       \
-         INSTALL_TESTS=\"${INSTALL_TESTS}\"       \
-         ZFS_POOL=\"${ZFS_POOL}\"                 \
-         PROCFS_ENABLE=\"${PROCFS_ENABLE}\"       \
-         FDESCFS_ENABLE=\"${FDESCFS_ENABLE}\"     \
-         DESTDIR=\"${DESTDIR}\"                   \
-         JAIL_ROOT=\"${JAIL_ROOT}\"               \
-         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"     \
-         PART_SIZE_EFI=\"${PART_SIZE_EFI}\"       \
-         PART_SIZE_ROOT=\"${PART_SIZE_ROOT}\"     \
-         PART_SIZE_SWAP=\"${PART_SIZE_SWAP}\"     \
-         PART_SIZE_TMP=\"${PART_SIZE_TMP}\"       \
-         PART_SIZE_VAR=\"${PART_SIZE_VAR}\"       \
-         LABEL_BOOT=\"${LABEL_BOOT}\"             \
-         LABEL_EFI=\"${LABEL_EFI}\"               \
-         LABEL_ROOT=\"${LABEL_ROOT}\"             \
-         LABEL_SWAP=\"${LABEL_SWAP}\"             \
-         LABEL_TMP=\"${LABEL_TMP}\"               \
-         LABEL_USR=\"${LABEL_USR}\"               \
-         LABEL_VAR=\"${LABEL_VAR}\"
+    echo INSTALL_JAIL=\"${INSTALL_JAIL}\"       \
+         INSTALL_KERNEL=\"${INSTALL_KERNEL}\"   \
+         INSTALL_SRC=\"${INSTALL_SRC}\"         \
+         INSTALL_DEBUG=\"${INSTALL_DEBUG}\"     \
+         INSTALL_TESTS=\"${INSTALL_TESTS}\"     \
+         ZFS_POOL=\"${ZFS_POOL}\"               \
+         PROCFS_ENABLE=\"${PROCFS_ENABLE}\"     \
+         FDESCFS_ENABLE=\"${FDESCFS_ENABLE}\"   \
+         DESTDIR=\"${DESTDIR}\"                 \
+         JAIL_ROOT=\"${JAIL_ROOT}\"             \
+         JAIL_NAME=\"${JAIL_NAME}\"             \
+         SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\"   \
+         PART_SIZE_EFI=\"${PART_SIZE_EFI}\"     \
+         PART_SIZE_ROOT=\"${PART_SIZE_ROOT}\"   \
+         PART_SIZE_SWAP=\"${PART_SIZE_SWAP}\"   \
+         PART_SIZE_TMP=\"${PART_SIZE_TMP}\"     \
+         PART_SIZE_VAR=\"${PART_SIZE_VAR}\"     \
+         LABEL_BOOT=\"${LABEL_BOOT}\"           \
+         LABEL_EFI=\"${LABEL_EFI}\"             \
+         LABEL_ROOT=\"${LABEL_ROOT}\"           \
+         LABEL_SWAP=\"${LABEL_SWAP}\"           \
+         LABEL_TMP=\"${LABEL_TMP}\"             \
+         LABEL_USR=\"${LABEL_USR}\"             \
+         LABEL_VAR=\"${LABEL_VAR}\"             \
+         BSDKIT_ROOT_URL=\"${BSDKIT_ROOT_URL}\" \
+         BSDKIT_VERSION=\"${BSDKIT_VERSION}\"   \
+         BSDKIT_ARCH=\"${BSDKIT_ARCH}\"         \
+         BSDKIT_TREE=\"${BSDKIT_TREE}\"         \
+         BSDKIT_PKGSET=\"${BSDKIT_PKGSET}\"     \
+         JAIL_PROXY=\"${JAIL_PROXY}\"
 }
-
-: ${JAIL_ADDRESS:=127.0.0.2}
-: ${JAIL_INTERFACE:=lo0}
-: ${JAIL_SSH_PORT:=2200}
-: ${JAIL_PROXY:=""}
 
 : ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
 : ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
-
-: ${BSDKIT_ROOT_URL:=http://olgeni.olgeni.com/FreeBSD}
-: ${BSDKIT_VERSION:=11.2}
-: ${BSDKIT_ARCH:=amd64}
-: ${BSDKIT_TREE:=default}
-: ${BSDKIT_PKGSET:=nox11}
 
 : ${IOCELL_JAILS:=/iocell/jails}
 
@@ -134,7 +139,7 @@ parse_url()
 
 parse_options()
 {
-    while getopts "r:v:a:z:j:p:i:" OPT; do
+    while getopts "r:v:a:p:z:" OPT; do
         case ${OPT} in
             r) BSDKIT_ROOT_URL=${OPTARG%/}
                ;;
@@ -145,12 +150,6 @@ parse_options()
             p) BSDKIT_TREE=${OPTARG}
                ;;
             z) BSDKIT_PKGSET=${OPTARG}
-               ;;
-            j) JAIL_ADDRESS=${OPTARG}
-               ;;
-            p) JAIL_PORT=${OPTARG}
-               ;;
-            i) JAIL_INTERFACE=${OPTARG}
                ;;
             *) return 1
                ;;
@@ -1139,80 +1138,33 @@ install_pkg()
     return 0
 }
 
-start_jail_nat()
+inet_interface()
 {
-    local _interface=$(route get default | grep "interface:" | awk '{ print $2 }')
+    route get default | awk '/interface:/ { print $2 }'
+}
 
-    if [ -z "${_interface}" ]; then
-        return 0
-    fi
-
-    kldload -n pf
-
-    local _pf_conf=$(mktemp /tmp/pf.conf.XXXXXX)
-
-    cat > ${_pf_conf} << EOF
-nat from ${JAIL_ADDRESS} to any -> (${_interface})
-
-pass in all
-pass out all
-EOF
-
-    pfctl -n -f ${_pf_conf}
-    pfctl -e -f ${_pf_conf} || :
-
-    rm ${_pf_conf}
+inet_address()
+{
+    ifconfig $(inet_interface) | awk '$1 == "inet" { print $2; exit }'
 }
 
 start_jail()
 {
     local _destdir="$1"
-
     valid_destdir ${_destdir}
-
-    local _sshd_config=$(mktemp ${_destdir}/tmp/sshd_config.XXXXXX)
-
-    cp ${_destdir}/etc/ssh/sshd_config ${_sshd_config}
-
-    cat >> ${_sshd_config} << EOF
-UseDNS no
-PermitRootLogin without-password
-Port ${JAIL_SSH_PORT}
-EOF
-
-    local _jail_name=$(basename ${_destdir})
-
     local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
-
     echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
-
-    jail -f ${_jail_conf} -c ${_jail_name}
-
+    jail -f ${_jail_conf} -c ${JAIL_NAME}
     rm ${_jail_conf}
-
-    jexec ${_jail_name} service sshd onekeygen
-
-    jexec ${_jail_name} /usr/sbin/sshd -f ${_sshd_config#${_destdir}}
-
-    sleep 1
-
-    rm -f ${_sshd_config}
 }
 
 stop_jail()
 {
     local _destdir="$1"
-
     valid_destdir ${_destdir}
-
-    local _jail_name=$(basename ${_destdir})
-
     local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
-
     echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
-
-    jail -f ${_jail_conf} -r ${_jail_name}
-
+    jail -f ${_jail_conf} -r ${JAIL_NAME}
     rm ${_jail_conf}
 }
 
@@ -1517,27 +1469,9 @@ EOF
     kenv vfs.root.mountfrom="ufs:/dev/${_md_device}p3"
 }
 
-validate_jail_network()
-{
-    local _jail_name=$(uuidgen)
-
-    if [ -z "${JAIL_PROXY}" ]; then
-        jail -c \
-             path=/ \
-             name=${_jail_name} \
-             host.hostname=${_jail_name} \
-             ip4.addr=${JAIL_ADDRESS} \
-             interface=${JAIL_INTERFACE} \
-             command=/usr/bin/fetch -o /dev/null -T 5 ${FREEBSD_REL_URL}/MANIFEST > /dev/null 2>&1 \
-            || error "network unreachable (validate_jail_network)"
-    fi
-}
-
 create_jail_destdir()
 {
     local _jail_name="$1"
-
-    validate_jail_network
 
     local _destdir=${JAIL_ROOT}/${_jail_name}
 
@@ -1599,8 +1533,6 @@ remove_jail()
     local _destdir=${JAIL_ROOT}/${_jail_name}
 
     valid_destdir ${_destdir}
-
-    jls -j ${_jail_name} > /dev/null 2>&1 && return 1
 
     local _dirname="$(dirname ${_destdir})"
     local _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
@@ -2164,7 +2096,6 @@ deploy()
 
     ${BSDKIT_DIR}/bsdkit "$@"
     ${BSDKIT_DIR}/bsdkit start_jail ${DESTDIR}
-    ${BSDKIT_DIR}/bsdkit start_jail_nat
     ${BSDKIT_DIR}/bsdkit ansible_jail_playbook
 }
 
@@ -2192,13 +2123,14 @@ remote_deploy()
 
     echo "Running: $@"
 
-    local _playbook=${BSDKIT_DIR}/playbook
-
     local _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
     local _ansible_cfg=${_ansible_root}/ansible.cfg
     local _ansible_hosts=${_ansible_root}/ansible_hosts
     local _ansible_yml=${_ansible_root}/ansible.yml
     local _ansible_key=${_ansible_root}/ansible.key
+
+    echo_bsdkit_private_key > ${_ansible_key}
+    chmod 600 ${_ansible_key}
 
     cat > ${_ansible_cfg} << EOF
 [defaults]
@@ -2234,12 +2166,9 @@ EOF
       file: path=/root/bsdkit state=absent
 EOF
 
-    echo_bsdkit_private_key > ${_ansible_key}
-    chmod 600 ${_ansible_key}
-
-    env ANSIBLE_CONFIG=${_ansible_cfg} \
-        SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
-        SSH_AUTH_SOCK="" \
+    env ANSIBLE_CONFIG=${_ansible_cfg}            \
+        SSH_AUTH_SOCK=""                          \
+        BSDKIT_SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
@@ -2249,16 +2178,9 @@ EOF
 
 ansible_jail_playbook()
 {
-    [ -n "${JAIL_ADDRESS}" ]
-    [ -n "${JAIL_SSH_PORT}" ]
-
-    local _playbook=${BSDKIT_DIR}/playbook
-
     local _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
     local _ansible_cfg=${_ansible_root}/ansible.cfg
     local _ansible_hosts=${_ansible_root}/ansible_hosts
-    local _ansible_yml=${_ansible_root}/ansible.yml
-    local _ansible_key=${_ansible_root}/ansible.key
 
     cat > ${_ansible_cfg} << EOF
 [defaults]
@@ -2271,25 +2193,22 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-jail connection=ssh ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python ansible_ssh_host=${JAIL_ADDRESS} ansible_ssh_port=${JAIL_SSH_PORT} ansible_ssh_private_key_file=${_ansible_key}
+${JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
 EOF
-
-    echo_bsdkit_private_key > ${_ansible_key}
-    chmod 600 ${_ansible_key}
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2>/dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2>/dev/null || :)"
 
-    env ANSIBLE_CONFIG=${_ansible_cfg} \
-        SSH_AUTH_SOCK="" \
-        BSDKIT_SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
-        BSDKIT_JAIL_PROXY="${JAIL_PROXY}" \
-        BSDKIT_INSTALL_JAIL="${INSTALL_JAIL}" \
-        BSDKIT_INTERFACE="${_bsdkit_interface}" \
-        BSDKIT_IFCONFIG="${_bsdkit_ifconfig}" \
+    env ANSIBLE_CONFIG=${_ansible_cfg}                  \
+        SSH_AUTH_SOCK=""                                \
+        BSDKIT_SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}"       \
+        BSDKIT_JAIL_PROXY="${JAIL_PROXY}"               \
+        BSDKIT_INSTALL_JAIL="${INSTALL_JAIL}"           \
+        BSDKIT_INTERFACE="${_bsdkit_interface}"         \
+        BSDKIT_IFCONFIG="${_bsdkit_ifconfig}"           \
         BSDKIT_DEFAULTROUTER="${_bsdkit_defaultrouter}" \
-        ansible-playbook ${_playbook}/jail.yml
+        ansible-playbook ${BSDKIT_DIR}/playbook/jail.yml
 
     rm -r ${_ansible_root}
 }
@@ -2341,8 +2260,8 @@ ${_jail_name} {
 	path = "${_destdir%/}";
 	host.hostname = "\$name";
 	host.domainname = "local";
-	interface = "${JAIL_INTERFACE}";
-	ip4.addr = ${JAIL_ADDRESS};
+        interface = "$(inet_interface)";
+	# ip4.addr = "";
 	# mount.fstab = "${_destdir%/}/\$name.fstab";
 }
 EOF
@@ -2354,8 +2273,6 @@ echo_runtime_jail_conf()
 
     valid_destdir ${_destdir}
 
-    local _jail_name=$(basename ${_destdir})
-
     cat > ${_jail_conf} << EOF
 exec.clean;
 
@@ -2366,15 +2283,17 @@ sysvsem = new;
 sysvshm = new;
 sysvmsg = new;
 
-${_jail_name} {
+${JAIL_NAME} {
 	allow.raw_sockets;
 	allow.sysvipc;
 
+	osrelease = "$(osrelease ${_destdir})";
+	osreldate = "$(osreldate ${_destdir})";
+
 	path = "${_destdir%/}";
-	host.hostname = "${_jail_name}";
+	host.hostname = "${JAIL_NAME}";
 	host.domainname = "local";
-	ip4.addr = ${JAIL_ADDRESS};
-	interface = "${JAIL_INTERFACE}";
+	ip4.addr = "$(inet_address)";
 }
 EOF
 }
