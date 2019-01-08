@@ -236,12 +236,7 @@ valid_url()
 
 check_bsdkit_runtime()
 {
-    if [ $(mount -p | grep "/baseroot" | wc -l) -eq 0 ]; then
-        echo "FATAL: check_bsdkit_runtime failed" >&2
-        return 1
-    fi
-
-    return 0
+    mount -p | grep "/baseroot" > /dev/null 2>&1
 }
 
 valid_relpath()
