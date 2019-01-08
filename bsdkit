@@ -1457,6 +1457,7 @@ install_md()
     rm -f ${DESTDIR}/etc/rc.conf
 
     rc_set ${DESTDIR}/etc/rc.conf hostname localhost
+    rc_set ${DESTDIR}/etc/rc.conf sshd_enable YES
 
     sed -i '' -e '/^PermitRootLogin/d' ${DESTDIR}/etc/ssh/sshd_config
 
