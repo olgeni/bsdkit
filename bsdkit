@@ -342,12 +342,12 @@ gpt_ufs_partition_large()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
-    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
-    _p=$((${_p} + 1))
-
     gpart add -i ${_p} -s ${PART_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT} ${_device}
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
+    _p=$((${_p} + 1))
+
+    gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
+    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
     if has_swap; then
@@ -413,12 +413,12 @@ gpt_ufs_partition_small()
 
     local _p=1
 
-    gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
-    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
-    _p=$((${_p} + 1))
-
     gpart add -i ${_p} -s ${PART_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT} ${_device};
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
+    _p=$((${_p} + 1))
+
+    gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
+    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
     _p=$((${_p} + 1))
 
     gpart add -i ${_p} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}; _p=$((${_p} + 1))
@@ -652,12 +652,12 @@ zfs_create_gpt_pool()
 
         local _p=1
 
-        gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI}${_device_index} ${_device}
-        gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
-        _p=$((${_p} + 1))
-
         gpart add -i ${_p} -s ${PART_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT}${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_p} ${_device}
+        _p=$((${_p} + 1))
+
+        gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI}${_device_index} ${_device}
+        gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
         _p=$((${_p} + 1))
 
         if has_swap; then
