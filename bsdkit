@@ -1887,7 +1887,7 @@ mkdir -p ${ROOT_RDWR_MP}
 if [ -e ${IMG_PART} ]; then
     mkdir -p ${IMG_MP}
     fsck -y -t ufs ${IMG_PART}
-    mount -t ufs ${IMG_PART} ${IMG_MP}
+    mount -r -t ufs ${IMG_PART} ${IMG_MP}
     ISO_MD=$(mdconfig -a -t vnode -f ${IMG_MP}/*.[iI][sS][oO])
     mount -t cd9660 /dev/${ISO_MD} ${CDROM_MP}
 else
