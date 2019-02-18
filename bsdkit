@@ -115,6 +115,7 @@ environment()
 : ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
 
 : ${IOCELL_JAILS:=/iocell/jails}
+: ${IOCAGE_JAILS:=/iocage/jails}
 
 # FREEBSD_REL_URL, FREEBSD_PKG_URL: initialized by parse_options
 
@@ -1422,6 +1423,29 @@ install_iocell_thin()
     iocell start ${_uuid}
     do_configure_jail ${_destdir}
     iocell stop ${_uuid}
+}
+
+install_iocage()
+{
+    parse_options "$@"
+
+    shift ${PARSE_OPTIONS_SHIFT}
+
+    local _jail_name="$1"
+
+    shift
+
+    which iocage > /dev/null 2>&1 || error "iocage not found (install_iocage)."
+
+    iocage create -e --name "${_jail_name}" "$@"
+
+    local _destdir=${IOCAGE_JAILS}/${_jail_name}/root
+
+    [ -d ${_destdir} ] || error "iocage root does not exist (install_iocage)."
+
+    INSTALL_KERNEL=no do_install_jail ${_destdir}
+
+    do_configure_jail ${_destdir}
 }
 
 install_jail()
