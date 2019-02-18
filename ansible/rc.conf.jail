@@ -1,4 +1,6 @@
 # This file now contains just the overrides from /etc/defaults/rc.conf
 # please make all changes to this file.
 
+cron_flags="$cron_flags -J 15"
 sshd_enable="YES"
+syslogd_flags="-c -s"
