@@ -1379,7 +1379,7 @@ install_mbr_zfs()
     return 0
 }
 
-install_iocell()
+create_iocell()
 {
     parse_options "$@"
 
@@ -1389,12 +1389,12 @@ install_iocell()
 
     shift
 
-    which iocell > /dev/null 2>&1 || error "iocell not found (install_iocell)."
+    which iocell > /dev/null 2>&1 || error "iocell not found (create_iocell)."
 
     local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}" "$@")
     local _destdir=${IOCELL_JAILS}/${_uuid}/root
 
-    [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
+    [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell)."
 
     INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
@@ -1403,7 +1403,7 @@ install_iocell()
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
-install_iocell_thin()
+create_iocell_thin()
 {
     parse_options "$@"
 
@@ -1413,14 +1413,14 @@ install_iocell_thin()
 
     shift 1
 
-    which iocell > /dev/null 2>&1 || error "iocell not found (install_iocell)."
+    which iocell > /dev/null 2>&1 || error "iocell not found (create_iocell_thin)."
 
     iocell create tag="${_tag}" host_hostname="${_tag}" "$@"
 
     local _uuid=$(iocell get host_hostuuid "${_tag}")
     local _destdir=${IOCELL_JAILS}/${_uuid}/root
 
-    [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
+    [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell_thin)."
 
     iocell start ${_uuid}
     _do_configure_jail ${_destdir}
@@ -1429,7 +1429,7 @@ install_iocell_thin()
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
-install_iocage()
+create_iocage()
 {
     parse_options "$@"
 
@@ -1439,13 +1439,13 @@ install_iocage()
 
     shift
 
-    which iocage > /dev/null 2>&1 || error "iocage not found (install_iocage)."
+    which iocage > /dev/null 2>&1 || error "iocage not found (create_iocage)."
 
     iocage create -e --name "${_jail_name}" "$@"
 
     local _destdir=${IOCAGE_JAILS}/${_jail_name}/root
 
-    [ -d ${_destdir} ] || error "iocage root does not exist (install_iocage)."
+    [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
 
     INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
@@ -1454,7 +1454,7 @@ install_iocage()
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
-install_jail()
+create_jail()
 {
     parse_options "$@"
 
@@ -1491,7 +1491,7 @@ configure_jail()
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
-install_md()
+create_md()
 {
     local _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
@@ -1520,7 +1520,7 @@ create_jail_destdir()
     local _destdir=${JAIL_ROOT}/${_jail_name}
 
     if [ -d "${_destdir}" ]; then
-        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (install_jail)."
+        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (create_jail_destdir)."
     fi
 
     local _dirname="$(dirname ${_destdir})"
