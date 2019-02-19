@@ -1398,7 +1398,7 @@ install_iocell()
 
     INSTALL_KERNEL=no do_install_jail ${_destdir}
 
-    do_configure_jail ${_destdir}
+    _do_configure_jail ${_destdir}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
@@ -1423,7 +1423,7 @@ install_iocell_thin()
     [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
 
     iocell start ${_uuid}
-    do_configure_jail ${_destdir}
+    _do_configure_jail ${_destdir}
     iocell stop ${_uuid}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
@@ -1449,7 +1449,7 @@ install_iocage()
 
     INSTALL_KERNEL=no do_install_jail ${_destdir}
 
-    do_configure_jail ${_destdir}
+    _do_configure_jail ${_destdir}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
@@ -1468,7 +1468,7 @@ install_jail()
 
     INSTALL_KERNEL=no do_install_jail ${_destdir}
 
-    do_configure_jail ${_destdir}
+    _do_configure_jail ${_destdir}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
@@ -1486,7 +1486,7 @@ configure_jail()
     [ -d ${_destdir} ] || error "jail root does not exist (configure_jail)."
     [ -f ${_destdir}/etc/rc.conf ] || error "rc.conf does not exist in jail (configure_jail)."
 
-    do_configure_jail ${_destdir}
+    _do_configure_jail ${_destdir}
 
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
@@ -1544,7 +1544,7 @@ do_install_jail()
     INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} INSTALL_JAIL=yes install_release ${FREEBSD_REL_URL} ${_destdir}
 }
 
-do_configure_jail()
+_do_configure_jail()
 {
     local _destdir="$1"
 
