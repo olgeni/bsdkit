@@ -1396,7 +1396,7 @@ install_iocell()
 
     [ -d ${_destdir} ] || error "iocell root does not exist (install_iocell)."
 
-    INSTALL_KERNEL=no do_install_jail ${_destdir}
+    INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
 
@@ -1447,7 +1447,7 @@ install_iocage()
 
     [ -d ${_destdir} ] || error "iocage root does not exist (install_iocage)."
 
-    INSTALL_KERNEL=no do_install_jail ${_destdir}
+    INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
 
@@ -1466,7 +1466,7 @@ install_jail()
 
     create_jail_destdir ${_jail_name}
 
-    INSTALL_KERNEL=no do_install_jail ${_destdir}
+    INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
 
@@ -1537,7 +1537,7 @@ create_jail_destdir()
     fi
 }
 
-do_install_jail()
+_do_create_jail()
 {
     local _destdir="$1"
 
