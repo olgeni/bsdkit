@@ -1467,6 +1467,24 @@ install_jail()
     rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
+configure_jail()
+{
+    parse_options "$@"
+
+    shift ${PARSE_OPTIONS_SHIFT}
+
+    local _destdir="$1"
+
+    shift
+
+    [ -d ${_destdir} ] || error "jail root does not exist (configure_jail)."
+    [ -f ${_destdir}/etc/rc.conf ] || error "rc.conf does not exist in jail (configure_jail)."
+
+    do_configure_jail ${_destdir}
+
+    rc_delete ${_destdir}/etc/rc.conf hostname
+}
+
 install_md()
 {
     local _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
