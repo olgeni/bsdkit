@@ -2,5 +2,9 @@
 # please make all changes to this file.
 
 cron_flags="$cron_flags -J 15"
+sendmail_enable="NO"
+sendmail_msp_queue_enable="NO"
+sendmail_outbound_enable="NO"
+sendmail_submit_enable="NO"
 sshd_enable="YES"
 syslogd_flags="-c -s"
