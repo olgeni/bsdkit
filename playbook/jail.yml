@@ -252,13 +252,10 @@
     - name: "Install base packages (common)"
       pkgng:
         name:
-          - align
           - ca_root_nss
           - cpdup
           - curl
-          - diff-so-fancy
           - gnu-watch
-          - inplace
           - lftp
           - rsync
           - socat
