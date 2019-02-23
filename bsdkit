@@ -1729,6 +1729,7 @@ install_setup_runtime()
     _runtime="${_runtime} mbuffer"
     _runtime="${_runtime} megacli"
     _runtime="${_runtime} memtester"
+    _runtime="${_runtime} nano"
     _runtime="${_runtime} ncdu"
     _runtime="${_runtime} openvpn"
     _runtime="${_runtime} pipemeter"
