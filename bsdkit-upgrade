@@ -308,7 +308,7 @@ if [ -f ${_srcdir}/Makefile ]; then
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
 fi
 
-cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
+cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     _extract="no"
     _options=""
 
@@ -320,13 +320,13 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
         continue
     fi
 
-    case ${_file} in
+    case ${_package} in
         kernel*)
             if [ -f "${DESTDIR}/boot/kernel/kernel" ]; then
                 _extract="yes"
             fi
             ;;
-        base.txz)
+        base)
             _options="${_options} --exclude ./.cshrc"
             _options="${_options} --exclude ./.profile"
             _options="${_options} --exclude ./etc"
@@ -335,15 +335,15 @@ cat MANIFEST | while read _file _sha256 _size _package _desc _enable; do
             _options="${_options} --exclude ./var"
             _extract="yes"
             ;;
-        src*)
+        src)
             ;;
         *)
             _extract="yes"
     esac
 
     if is_yes ${_extract}; then
-        echo "Extracting: ${_file}"
-        tar -x -z -U -f ${_distdir}/${_file} -C ${DESTDIR}/ ${_options}
+        echo "Extracting: ${_filename}"
+        tar -x -z -U -f ${_distdir}/${_filename} -C ${DESTDIR}/ ${_options}
     fi
 done
 
