@@ -204,6 +204,17 @@ cd ${_distdir}
 
 fetch ${_release}/MANIFEST
 
+# base-dbg.txz    [sha256]  [size]  base_dbg    "Base system (Debugging)"                     off
+# base.txz        [sha256]  [size]  base        "Base system (MANDATORY)"                     on
+# doc.txz         [sha256]  [size]  doc         "Additional Documentation"                    off
+# kernel-dbg.txz  [sha256]  [size]  kernel_dbg  "Kernel (Debugging)"                          off
+# kernel.txz      [sha256]  [size]  kernel      "Kernel (MANDATORY)"                          on
+# lib32-dbg.txz   [sha256]  [size]  lib32_dbg   "32-bit compatibility libraries (Debugging)"  off
+# lib32.txz       [sha256]  [size]  lib32       "32-bit compatibility libraries"              on
+# ports.txz       [sha256]  [size]  ports       "Ports tree"                                  on
+# src.txz         [sha256]  [size]  src         "System source tree"                          off
+# tests.txz       [sha256]  [size]  tests       "Test suite"                                  off
+
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     if ! is_yes ${_install_src} && [ ${_package} = "src" ]; then
         continue
