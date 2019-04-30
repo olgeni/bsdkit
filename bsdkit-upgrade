@@ -335,6 +335,8 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             _options="${_options} --exclude ./var"
             _extract="yes"
             ;;
+        ports)
+            ;;
         src)
             ;;
         *)
