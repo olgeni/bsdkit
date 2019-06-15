@@ -136,6 +136,22 @@ if [[ $HOST != "freebsd" ]]; then
     compdef _rctools rconerestart
 fi
 
+if [ -f /usr/local/google-cloud-sdk/completion.zsh.inc ]; then
+    source /usr/local/google-cloud-sdk/completion.zsh.inc
+elif [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc ]; then
+    source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
+fi
+
+if which doctl >/dev/null 2>&1; then
+    source <(doctl completion zsh)
+fi
+
+if which vim >/dev/null 2>&1; then
+    export ALTERNATE_EDITOR=vim
+    export EDITOR=vim
+    export VISUAL=vim
+fi
+
 case $(uname) in
     Darwin)
 	# PATH is taken care of in /etc/paths
@@ -153,12 +169,6 @@ export PATH="$PATH:$HOME/.rvm/bin"
 export LANG=en_US.UTF-8
 export CLICOLOR=yes
 export GPG_TTY=$(tty)
-
-if which vim >/dev/null 2>&1; then
-    export ALTERNATE_EDITOR=vim
-    export EDITOR=vim
-    export VISUAL=vim
-fi
 
 if [ -n "${INSIDE_EMACS}" ]; then
     export ALTERNATE_EDITOR=emacsclient
