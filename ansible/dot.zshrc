@@ -156,6 +156,10 @@ if which vim >/dev/null 2>&1; then
     export VISUAL=vim
 fi
 
+if which direnv >/dev/null 2>&1; then
+    source <(direnv hook zsh)
+fi
+
 case $(uname) in
     Darwin)
 	# PATH is taken care of in /etc/paths
