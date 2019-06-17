@@ -2392,8 +2392,14 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KR
 EOF
 }
 
+if ! which mkisofs > /dev/null 2>&1; then
+    error "required command missing (mkisofs)"
+    # EX_UNAVAILABLE
+    exit 69
+fi
+
 if ! which ansible-playbook > /dev/null 2>&1; then
-    echo "Required command missing: ansible-playbook"
+    error "required command missing (ansible-playbook)"
     # EX_UNAVAILABLE
     exit 69
 fi
