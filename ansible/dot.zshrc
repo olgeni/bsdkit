@@ -146,6 +146,10 @@ if which doctl >/dev/null 2>&1; then
     source <(doctl completion zsh)
 fi
 
+if which kubectl >/dev/null 2>&1; then
+    source <(kubectl completion zsh)
+fi
+
 if which vim >/dev/null 2>&1; then
     export ALTERNATE_EDITOR=vim
     export EDITOR=vim
