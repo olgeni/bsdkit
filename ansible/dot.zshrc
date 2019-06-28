@@ -150,14 +150,14 @@ if which kubectl >/dev/null 2>&1; then
     source <(kubectl completion zsh)
 fi
 
+if which direnv >/dev/null 2>&1; then
+    source <(direnv hook zsh)
+fi
+
 if which vim >/dev/null 2>&1; then
     export ALTERNATE_EDITOR=vim
     export EDITOR=vim
     export VISUAL=vim
-fi
-
-if which direnv >/dev/null 2>&1; then
-    source <(direnv hook zsh)
 fi
 
 case $(uname) in
