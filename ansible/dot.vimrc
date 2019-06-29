@@ -11,7 +11,6 @@ set breakat=80
 set breakindent
 set clipboard=exclude:.*
 set cryptmethod=blowfish2
-set diffopt=algorithm:patience
 set encoding=utf8
 set fileencoding=utf8
 set hlsearch
