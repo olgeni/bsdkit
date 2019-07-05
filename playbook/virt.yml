@@ -1,33 +1,37 @@
 ---
 - hosts: all
   user: root
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: "kenv smbios.system.product"
-      shell: kenv smbios.system.product || true
+      command: "kenv smbios.system.product"
+      changed_when: false
+      ignore_errors: true
       register: system_product
 
     - name: "kenv smbios.bios.vendor"
-      shell: kenv smbios.bios.vendor || true
+      command: "kenv smbios.bios.vendor"
+      changed_when: false
+      ignore_errors: true
       register: bios_vendor
 
     - name: "VirtualBox configuration"
-      lineinfile: >
-        dest=/etc/rc.conf
-        line="{{item}}_enable=\"YES\""
-        regexp="^{{item}}_enable"
-        insertafter=EOF
+      lineinfile:
+        dest: /etc/rc.conf
+        line: "{{ item }}_enable=\"YES\""
+        regexp: "^{{ item }}_enable"
+        insertafter: EOF
       with_items:
         - vboxguest
         - vboxservice
       when: system_product.stdout == "VirtualBox"
 
     - name: "VMware configuration"
-      lineinfile: >
-        dest=/etc/rc.conf
-        line="{{item}}_enable=\"YES\""
-        regexp="^{{item}}_enable"
-        insertafter=EOF
+      lineinfile:
+        dest: /etc/rc.conf
+        line: "{{ item }}_enable=\"YES\""
+        regexp: "^{{ item }}_enable"
+        insertafter: EOF
       with_items:
         - vmware_guest_vmblock
         - vmware_guest_vmhgfs

@@ -1,77 +1,95 @@
 ---
 - hosts: all
   user: root
-  gather_facts: no
+  gather_facts: false
   tasks:
-    - raw: /usr/bin/env http_proxy="{{lookup('env', 'BSDKIT_JAIL_PROXY')}}" pkg install -y python
+    - name: "Install Python"
+      raw: /usr/bin/env http_proxy="{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
+        pkg install -y python
+      changed_when: false
 
 - hosts: all
   user: root
   tasks:
     - name: "Retrieve freebsd_branch"
-      set_fact: freebsd_branch={{ansible_distribution_release.split("-")[1]}}
+      set_fact:
+        freebsd_branch: '{{ ansible_distribution_release.split("-")[1] }}'
 
     - name: "Retrieve freebsd_version (checking for stable)"
-      set_fact: freebsd_version={{ansible_distribution_release.split(".")[0]}}
+      set_fact:
+        freebsd_version: '{{ ansible_distribution_release.split(".")[0] }}'
       when: freebsd_branch == "STABLE"
 
     - name: "Retrieve freebsd_version (checking for release)"
-      set_fact: freebsd_version={{ansible_distribution_release.split("-")[0]}}
-      when: freebsd_branch == "RELEASE" or freebsd_branch == "PRERELEASE" or freebsd_branch[:4] == "BETA" or freebsd_branch[:2] == "RC"
+      set_fact:
+        freebsd_version: '{{ ansible_distribution_release.split("-")[0] }}'
+      when: |
+        freebsd_branch == "RELEASE"
+        or freebsd_branch == "PRERELEASE"
+        or freebsd_branch[:4] == "BETA"
+        or freebsd_branch[:2] == "RC"
 
-    - name: "set_fact: bsdkit_ssh_public_key"
-      set_fact: bsdkit_ssh_public_key="{{lookup('env', 'BSDKIT_SSH_PUBLIC_KEY')}}"
-
-    - name: "set_fact: bsdkit_interface"
-      set_fact: bsdkit_interface="{{lookup('env', 'BSDKIT_INTERFACE')}}"
-
-    - name: "set_fact: bsdkit_ifconfig"
-      set_fact: bsdkit_ifconfig="{{lookup('env', 'BSDKIT_IFCONFIG')}}"
-
-    - name: "set_fact: bsdkit_defaultrouter"
-      set_fact: bsdkit_defaultrouter="{{lookup('env', 'BSDKIT_DEFAULTROUTER')}}"
-
-    - name: "set_fact: bsdkit_jail_proxy"
-      set_fact: bsdkit_jail_proxy="{{lookup('env', 'BSDKIT_JAIL_PROXY')}}"
-
-    - name: "set_fact: bsdkit_install_jail"
-      set_fact: bsdkit_install_jail="{{lookup('env', 'BSDKIT_INSTALL_JAIL')}}"
+    - name: "set_fact: bsdkit variables"
+      set_fact:
+        bsdkit_ssh_public_key: "{{ lookup('env', 'BSDKIT_SSH_PUBLIC_KEY') }}"
+        bsdkit_interface: "{{ lookup('env', 'BSDKIT_INTERFACE') }}"
+        bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
+        bsdkit_defaultrouter: "{{ lookup('env', 'BSDKIT_DEFAULTROUTER') }}"
+        bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
+        bsdkit_install_jail: "{{ lookup('env', 'BSDKIT_INSTALL_JAIL') }}"
 
     - name: "stat: /usr/src/sys"
-      stat: path=/usr/src/sys
+      stat:
+        path: /usr/src/sys
       register: stat_usr_src_sys
 
     - name: "Set authorized_key"
-      authorized_key: user=root key="{{bsdkit_ssh_public_key}}"
-      when: bsdkit_ssh_public_key != ""
+      authorized_key:
+        user: root
+        key: "{{ bsdkit_ssh_public_key }}"
+      when: bsdkit_ssh_public_key | length > 0
 
     - name: "Create /usr/local/etc"
-      file: >
-        path=/usr/local/etc state=directory
-        owner=root group=wheel mode=755
+      file:
+        path: /usr/local/etc
+        state: directory
+        owner: root
+        group: wheel
+        mode: "0755"
 
     - name: "Create /usr/local/etc/sv"
-      file: >
-        path=/usr/local/etc/sv state=directory
-        owner=root group=wheel mode=755
+      file:
+        path: /usr/local/etc/sv
+        state: directory
+        owner: root
+        group: wheel
+        mode: "0755"
 
     - name: "Create /var/service"
-      file: >
-        path=/var/service state=directory
-        owner=root group=wheel mode=755
+      file:
+        path: /var/service
+        state: directory
+        owner: root
+        group: wheel
+        mode: "0755"
 
     - name: "Install kernel configuration"
-      copy: >
-        src=../ansible/BSDKIT-{{freebsd_version}}-{{ansible_architecture}}
-        dest=/usr/src/sys/{{ansible_architecture}}/conf/BSDKIT
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/BSDKIT-{{ freebsd_version }}-{{ ansible_architecture }}
+        dest: /usr/src/sys/{{ ansible_architecture }}/conf/BSDKIT
+        owner: root
+        group: wheel
+        mode: "0644"
       when: stat_usr_src_sys.stat.exists
-      failed_when: False
+      failed_when: false
 
     - name: "Install configuration files in /etc"
-      copy: >
-        src=../ansible/{{item}} dest=/etc/{{item}}
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/{{ item }}
+        dest: /etc/{{ item }}
+        owner: root
+        group: wheel
+        mode: "0644"
       with_items:
         - csh.cshrc
         - make.conf
@@ -84,69 +102,90 @@
       when: not bsdkit_install_jail
 
     - name: "Install /etc/rc.conf (host version)"
-      copy: >
-        src=../ansible/rc.conf dest=/etc/rc.conf
-        owner=root group=wheel mode=644 backup=yes
+      copy:
+        src: ../ansible/rc.conf
+        dest: /etc/rc.conf
+        owner: root
+        group: wheel
+        mode: "0644"
+        backup: yes
       when: not bsdkit_install_jail
 
     - name: "Install /etc/rc.conf (jail version)"
-      copy: >
-        src=../ansible/rc.conf.jail dest=/etc/rc.conf
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/rc.conf.jail
+        dest: /etc/rc.conf
+        owner: root
+        group: wheel
+        mode: "0644"
       when: bsdkit_install_jail
 
     - name: "Set zfs_enable in rc.conf"
-      command: sysrc zfs_enable="{{sysrc_zfs_enable.stdout}}"
+      command: sysrc zfs_enable="{{ sysrc_zfs_enable.stdout }}"
       when: not bsdkit_install_jail and sysrc_zfs_enable is success
 
     - name: "Set ifconfig in rc.conf"
-      command: sysrc ifconfig_{{bsdkit_interface}}="{{bsdkit_ifconfig}}"
-      when: (bsdkit_interface != "") and (bsdkit_ifconfig != "")
+      command: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
+      when: (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
 
     - name: "Set defaultrouter in rc.conf"
-      command: sysrc defaultrouter="{{bsdkit_defaultrouter}}"
-      when: bsdkit_defaultrouter != ""
+      command: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"
+      when: bsdkit_defaultrouter | length > 0
 
     - name: "Set http_proxy in pkg.conf"
-      lineinfile: >
-        dest=/usr/local/etc/pkg.conf
-        line="pkg_env: { http_proxy: \"{{bsdkit_jail_proxy}}\" }"
-        regexp="^pkg_env"
-        insertafter=EOF
-      when: bsdkit_jail_proxy != ""
+      lineinfile:
+        dest: /usr/local/etc/pkg.conf
+        line: "pkg_env: { http_proxy: \"{{ bsdkit_jail_proxy }}\" }"
+        regexp: ^pkg_env
+        insertafter: EOF
+      when: bsdkit_jail_proxy | length > 0
 
     - name: "Install sysctl.conf"
-      copy: >
-        src=../ansible/{{item}} dest=/etc/{{item}}
-        owner=root group=wheel mode=644 backup=yes
+      copy:
+        src: ../ansible/{{ item }}
+        dest: /etc/{{ item }}
+        owner: root
+        group: wheel
+        mode: "0644"
+        backup: yes
       with_items:
         - sysctl.conf
       when: not bsdkit_install_jail
 
     - name: "Install loader.conf"
-      copy: >
-        src=../ansible/{{item}} dest=/boot/{{item}}
-        owner=root group=wheel mode=644 backup=yes
+      copy:
+        src: ../ansible/{{ item }}
+        dest: /boot/{{ item }}
+        owner: root
+        group: wheel
+        mode: "0644"
+        backup: yes
       with_items:
         - loader.conf
       when: not bsdkit_install_jail
 
     - name: "Install dotfiles in /usr/share/skel"
-      copy: >
-        src=../ansible/dot.{{item}} dest=/usr/share/skel/dot.{{item}}
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/dot.{{ item }}
+        dest: /usr/share/skel/dot.{{ item }}
+        owner: root
+        group: wheel
+        mode: "0644"
       with_items:
         - inputrc
         - kermrc
         - login_conf
         - vimrc
         - zshrc
-      failed_when: False
+      failed_when: false
 
     - name: "Install dotfiles in /root"
-      copy: >
-        src=../ansible/dot.{{item}} dest=/root/.{{item}}
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/dot.{{ item }}
+        dest: /root/.{{ item }}
+        owner: root
+        group: wheel
+        mode: "0644"
       with_items:
         - inputrc
         - kermrc
@@ -155,63 +194,83 @@
         - zshrc
 
     - name: "Install sudoers"
-      copy: >
-        src=../ansible/sudoers dest=/usr/local/etc/sudoers
-        owner=root group=wheel mode=440 backup=yes
+      copy:
+        src: ../ansible/sudoers
+        dest: /usr/local/etc/sudoers
+        owner: root
+        group: wheel
+        mode: "0440"
+        backup: yes
 
     - name: "Create /etc/newsyslog.conf.d/"
-      file: >
-        path=/etc/newsyslog.conf.d/ state=directory
-        owner=root group=wheel mode=755
+      file:
+        path: /etc/newsyslog.conf.d/
+        state: directory
+        owner: root
+        group: wheel
+        mode: "0755"
 
     - name: "Install newsyslog.conf"
-      copy: >
-        src=../ansible/newsyslog.conf dest=/etc/newsyslog.conf.d/newsyslog.conf
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/newsyslog.conf
+        dest: /etc/newsyslog.conf.d/newsyslog.conf
+        owner: root
+        group: wheel
+        mode: "0644"
 
     - name: "Install /etc/firewall"
-      copy: >
-        src=../ansible/firewall dest=/etc/firewall
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/firewall
+        dest: /etc/firewall
+        owner: root
+        group: wheel
+        mode: "0644"
       when: not bsdkit_install_jail
 
     - name: "Install /usr/local/etc/smartd.conf"
-      copy: >
-        src=../ansible/smartd.conf dest=/usr/local/etc/smartd.conf
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/smartd.conf
+        dest: /usr/local/etc/smartd.conf
+        owner: root
+        group: wheel
+        mode: "0644"
       when: not bsdkit_install_jail
 
     - name: "Install /usr/local/etc/portmaster.rc"
-      copy: >
-        src=../ansible/portmaster.rc dest=/usr/local/etc/portmaster.rc
-        owner=root group=wheel mode=644
+      copy:
+        src: ../ansible/portmaster.rc
+        dest: /usr/local/etc/portmaster.rc
+        owner: root
+        group: wheel
+        mode: "0644"
 
     - name: "Set 'UseDNS no' in /etc/ssh/sshd_config"
-      lineinfile: >
-        dest=/etc/ssh/sshd_config
-        line="UseDNS no"
-        regexp="^UseDNS"
-        insertafter=EOF
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: "UseDNS no"
+        regexp: "^UseDNS"
+        insertafter: EOF
 
     - name: "Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config"
-      lineinfile: >
-        dest=/etc/ssh/sshd_config
-        line="PermitRootLogin without-password"
-        regexp="^PermitRootLogin"
-        insertafter=EOF
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        line: "PermitRootLogin without-password"
+        regexp: "^PermitRootLogin"
+        insertafter: EOF
 
     - name: "Configure /etc/devfs.conf"
-      lineinfile: >
-        dest=/etc/devfs.conf
-        regexp="^{{item}}"
-        state=absent
+      lineinfile:
+        dest: /etc/devfs.conf
+        regexp: "^{{ item }}"
+        state: absent
       with_items:
         - ".*devstat"
         - ".*fuse.*"
       when: not bsdkit_install_jail
 
     - name: "stat: /var/db/zoneinfo"
-      stat: path=/var/db/zoneinfo
+      stat:
+        path: /var/db/zoneinfo
       register: stat_zoneinfo
 
     - name: "Run tzsetup"
@@ -219,35 +278,41 @@
       when: not stat_zoneinfo.stat.exists
 
     - name: "Set 'MAILTO' in /etc/crontab"
-      lineinfile: >
-        dest=/etc/crontab
-        line="MAILTO=\"\""
-        regexp="^MAILTO"
-        insertbefore="^SHELL="
+      lineinfile:
+        dest: /etc/crontab
+        line: "MAILTO=\"\""
+        regexp: "^MAILTO"
+        insertbefore: "^SHELL="
 
     - name: "Disable '/dev/console' in /etc/syslog.conf"
-      lineinfile: >
-        dest=/etc/syslog.conf
-        regexp="/dev/console$"
-        state=absent
+      lineinfile:
+        dest: /etc/syslog.conf
+        regexp: "/dev/console$"
+        state: absent
 
     - name: "Create /var/ftp"
-      file: >
-        path=/var/ftp state=directory
-        owner=root group=wheel mode=755
+      file:
+        path: /var/ftp
+        state: directory
+        owner: root
+        group: wheel
+        mode: "0755"
 
     - name: "Add FTP user"
-      lineinfile: >
-        dest=/etc/master.passwd
-        line="ftp:*:14:14::0:0:Anonymous FTP Admin:/var/ftp:/nonexistent"
-        regexp="^ftp:"
-        insertafter="^man:"
+      lineinfile:
+        dest: /etc/master.passwd
+        line: "ftp:*:14:14::0:0:Anonymous FTP Admin:/var/ftp:/nonexistent"
+        regexp: "^ftp:"
+        insertafter: "^man:"
       notify: pwd_mkdb
 
     - name: "Create /usr/local/etc/ssl/certs"
-      file: >
-        path=/usr/local/etc/ssl/certs state=directory
-        owner=root group=wheel mode=755
+      file:
+        path: /usr/local/etc/ssl/certs
+        state: directory
+        owner: root
+        group: wheel
+        mode: "0755"
 
     - name: "Install base packages (common)"
       pkgng:
@@ -275,41 +340,53 @@
       when: not bsdkit_install_jail
 
     - name: "stat: ca-root-nss.crt"
-      stat: path=/usr/local/share/certs/ca-root-nss.crt
+      stat:
+        path: /usr/local/share/certs/ca-root-nss.crt
       register: stat_ca_root_nss
 
     - name: "stat: cert.pem"
-      stat: path=/usr/local/etc/ssl/cert.pem
+      stat:
+        path: /usr/local/etc/ssl/cert.pem
       register: stat_cert_pem
 
     - name: "Link ca-root-nss.crt"
-      file: >
-        src=/usr/local/share/certs/ca-root-nss.crt
-        dest=/usr/local/etc/ssl/cert.pem
-        state=link owner=root group=wheel mode=644
+      file:
+        src: /usr/local/share/certs/ca-root-nss.crt
+        dest: /usr/local/etc/ssl/cert.pem
+        state: link
+        owner: root
+        group: wheel
+        mode: "0644"
       when: stat_ca_root_nss.stat.exists and not stat_cert_pem.stat.exists
 
     - name: "Run pkg clean"
-      shell: pkg clean -a -y || true
+      command: "pkg clean -a -y"
+      ignore_errors: true
       changed_when: false
 
   handlers:
     - name: pwd_mkdb
-      command: pwd_mkdb /etc/master.passwd
+      command: "pwd_mkdb /etc/master.passwd"
 
 - import_playbook: virt.yml
   when: not bsdkit_install_jail
 
 - hosts: all
   user: root
-  gather_facts: no
+  gather_facts: false
   tasks:
-    - raw: rm -r -f .ansible
+    - name: "Remove ansible directory"
+      file:
+        path: "/root/.ansible"
+        state: absent
 
 - hosts: all
   user: root
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: "Remove authorized_key"
-      authorized_key: user=root key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit" state=absent
-      when: bsdkit_ssh_public_key != ""
+      authorized_key:
+        user: root
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit"
+        state: absent
+      when: bsdkit_ssh_public_key | length > 0
