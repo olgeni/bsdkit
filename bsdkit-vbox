@@ -101,14 +101,14 @@ case $1 in
     logcat)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        ssh -i ${_key} -p 2200 root@localhost cat /tmp/bsdkit.log
+        env -u SSH_AUTH_SOCK ssh -i ${_key} -p 2200 root@localhost cat /tmp/bsdkit.log
         rm -f ${_key}
         ;;
 
     logtail)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        ssh -i ${_key} -p 2200 root@localhost tail -F /tmp/bsdkit.log
+        env -u SSH_AUTH_SOCK ssh -i ${_key} -p 2200 root@localhost tail -F /tmp/bsdkit.log
         rm -f ${_key}
         ;;
 
