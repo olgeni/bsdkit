@@ -1663,12 +1663,14 @@ EOF
     sed -i '' -e '/^PermitRootLogin/d' ${_destdir}/etc/ssh/sshd_config
     sed -i '' -e '/^UseDNS/d' ${_destdir}/etc/ssh/sshd_config
     sed -i '' -e '/^GatewayPorts/d' ${_destdir}/etc/ssh/sshd_config
+    sed -i '' -e '/^MaxAuthTries/d' ${_destdir}/etc/ssh/sshd_config
     sed -i '' -e '/^leapfile/d' ${_destdir}/etc/ntp.conf
 
     cat >> ${_destdir}/etc/ssh/sshd_config << EOF
 UseDNS no
 PermitRootLogin yes
 GatewayPorts yes
+MaxAuthTries 32
 EOF
 
     cat > ${_destdir}/etc/host.conf << EOF
