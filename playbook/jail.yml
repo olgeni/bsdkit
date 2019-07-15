@@ -306,6 +306,10 @@
         insertafter: "^man:"
       notify: pwd_mkdb
 
+    # Workaround for "pw: user '...' disappeared during update"
+    - name: "Flush handlers"
+      meta: flush_handlers
+
     - name: "Create /usr/local/etc/ssl/certs"
       file:
         path: /usr/local/etc/ssl/certs
@@ -366,7 +370,7 @@
 
   handlers:
     - name: pwd_mkdb
-      command: "pwd_mkdb /etc/master.passwd"
+      command: "pwd_mkdb -p /etc/master.passwd"
 
 - import_playbook: virt.yml
   when: not bsdkit_install_jail
