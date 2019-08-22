@@ -1756,8 +1756,10 @@ install_setup_runtime()
     local _pkgdir=/usr/ports/packages
 
     mkdir -p ${_destdir}/${_pkgdir}
+    mkdir -p ${_destdir}/dev
 
     {
+        mount -t devfs devfs ${_destdir}/dev
         mount -t nullfs ${_pkgpath} ${_destdir}/${_pkgdir}
 
         mkdir -p ${_destdir}/usr/local/etc/pkg/repos
@@ -1783,6 +1785,7 @@ EOF
         rm -f ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf
 
         umount -f ${_destdir}/${_pkgdir}
+        umount -f ${_destdir}/dev
     }
 
     rmdir ${_destdir}/${_pkgdir}
