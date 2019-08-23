@@ -113,7 +113,7 @@ case $1 in
         ;;
 
     stop)
-        VBoxManage controlvm bsdkit acpipowerbutton
+        VBoxManage controlvm bsdkit acpipowerbutton || :
         while VBoxManage showvminfo bsdkit --machinereadable | fgrep 'VMState="running"' >/dev/null 2>&1; do
             sleep 1
         done
