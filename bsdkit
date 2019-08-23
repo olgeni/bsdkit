@@ -1081,59 +1081,6 @@ EOF
     return 0
 }
 
-install_repo()
-{
-    local _destdir="$1"
-    local _pkgpath="$2"
-
-    if [ ${_pkgpath} = "none" ]; then
-        return 0
-    fi
-
-    valid_destdir ${_destdir}
-    valid_pkgpath ${_pkgpath}
-
-    mkdir -p ${_destdir}/usr/local/etc/pkg/repos
-
-    cat > ${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf << EOF
-FreeBSD: {
-    enabled: no
-}
-EOF
-
-    if valid_url ${_pkgpath}; then
-        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
-bsdkit: {
-    url: "${_pkgpath}"
-}
-EOF
-    fi
-}
-
-install_pkg()
-{
-    local _destdir="$1"
-    local _pkgpath="$2"
-
-    valid_destdir ${_destdir}
-    valid_pkgpath ${_pkgpath}
-
-    export BATCH="YES"
-    export PACKAGE_BUILDING="YES"
-    export UNAME_r=$(uname -r | sed -e 's/-.*//')-RELEASE
-
-    lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} update -f
-    lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} install -y pkg
-
-    if [ -d ${_destdir}/var/cache/pkg ]; then
-        lockf -k -t ${PKG_LOCKTIME} ${PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
-    fi
-
-    find ${_destdir}/etc/ \( -name "*.bak" -or -name "*.bak.*" \) -delete
-
-    return 0
-}
-
 inet_interface()
 {
     route get default | awk '/interface:/ { print $2 }'
@@ -1203,8 +1150,6 @@ install_mbr_ufs()
     fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
-    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1242,8 +1187,6 @@ install_mbr_ufs_gmirror()
     fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
-    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1271,8 +1214,6 @@ install_gpt_ufs()
     fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
-    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1305,8 +1246,6 @@ install_zfs()
     fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
-    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1339,8 +1278,6 @@ install_gpt_zfs()
     fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
-    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1373,8 +1310,6 @@ install_mbr_zfs()
     fdescfs_setup ${DESTDIR}
     format_fstab ${DESTDIR}
     customize_base ${DESTDIR}
-    install_repo ${DESTDIR} ${FREEBSD_PKG_URL}
-    install_pkg ${DESTDIR} ${FREEBSD_PKG_URL}
 
     return 0
 }
@@ -1558,8 +1493,6 @@ _do_configure_jail()
         install -m 644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
     fi
 
-    install_repo ${_destdir} ${FREEBSD_PKG_URL}
-    install_pkg ${_destdir} ${FREEBSD_PKG_URL}
 
     start_jail ${_destdir}
     pw -V ${_destdir}/etc usermod root -s /bin/sh

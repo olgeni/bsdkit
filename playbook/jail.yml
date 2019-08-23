@@ -3,6 +3,10 @@
   user: root
   gather_facts: false
   tasks:
+    - name: "Bootstrap pkgng"
+      raw: /usr/bin/env ASSUME_ALWAYS_YES=yes pkg update -f
+      changed_when: false
+
     - name: "Install Python"
       raw: /usr/bin/env http_proxy="{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
         pkg install -y python
@@ -72,6 +76,30 @@
         owner: root
         group: wheel
         mode: "0755"
+
+    - name: "Create /usr/local/etc/pkg/repos"
+      file:
+        path: /usr/local/etc/pkg/repos
+        state: directory
+        owner: root
+        group: wheel
+        mode: "0755"
+
+    - name: "Disable default FreeBSD repository"
+      copy:
+        content: |
+          FreeBSD: {
+            enabled: no
+          }
+        dest: /usr/local/etc/pkg/repos/FreeBSD.conf
+
+    - name: "Enable bsdkit repository"
+      copy:
+        content: |
+          bsdkit: {
+            url: "http://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11"
+          }
+        dest: /usr/local/etc/pkg/repos/bsdkit.conf
 
     - name: "Install kernel configuration"
       copy:
