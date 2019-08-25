@@ -89,7 +89,7 @@
       copy:
         content: |
           FreeBSD: {
-            enabled: no
+              enabled: no
           }
         dest: /usr/local/etc/pkg/repos/FreeBSD.conf
 
@@ -97,7 +97,7 @@
       copy:
         content: |
           bsdkit: {
-            url: "http://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11"
+              url: "http://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11"
           }
         dest: /usr/local/etc/pkg/repos/bsdkit.conf
 
