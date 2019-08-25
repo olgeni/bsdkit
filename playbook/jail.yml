@@ -4,7 +4,7 @@
   gather_facts: false
   tasks:
     - name: "Bootstrap pkgng"
-      raw: /usr/bin/env ASSUME_ALWAYS_YES=yes pkg update -f
+      raw: /bin/sh -c /usr/bin/env ASSUME_ALWAYS_YES=yes pkg -N || pkg update -f
       changed_when: false
 
     - name: "Install Python"
