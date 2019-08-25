@@ -33,6 +33,23 @@
         or freebsd_branch[:4] == "BETA"
         or freebsd_branch[:2] == "RC"
 
+    - name: "stat: /usr/src/sys"
+      stat:
+        path: /usr/src/sys
+      register: stat_usr_src_sys
+
+    - name: "kenv smbios.system.product"
+      command: "kenv smbios.system.product"
+      changed_when: false
+      ignore_errors: true
+      register: kenv_smbios_system_product
+
+    - name: "kenv smbios.bios.vendor"
+      command: "kenv smbios.bios.vendor"
+      changed_when: false
+      ignore_errors: true
+      register: kenv_smbios_bios_vendor
+
     - name: "set_fact: bsdkit variables"
       set_fact:
         bsdkit_ssh_public_key: "{{ lookup('env', 'BSDKIT_SSH_PUBLIC_KEY') }}"
@@ -42,10 +59,9 @@
         bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
         bsdkit_install_jail: "{{ lookup('env', 'BSDKIT_INSTALL_JAIL') }}"
 
-    - name: "stat: /usr/src/sys"
-      stat:
-        path: /usr/src/sys
-      register: stat_usr_src_sys
+    - name: "set_fact: variables"
+      set_fact:
+        install_conf: "{{ (not bsdkit_install_jail) and (not kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
     - name: "Set authorized_key"
       authorized_key:
@@ -124,21 +140,6 @@
         - periodic.conf
         - src.conf
 
-    - name: "Gather zfs_enable"
-      command: sysrc -n zfs_enable
-      register: sysrc_zfs_enable
-      when: not bsdkit_install_jail
-
-    - name: "Install /etc/rc.conf (host version)"
-      copy:
-        src: ../ansible/rc.conf
-        dest: /etc/rc.conf
-        owner: root
-        group: wheel
-        mode: "0644"
-        backup: yes
-      when: not bsdkit_install_jail
-
     - name: "Install /etc/rc.conf (jail version)"
       copy:
         src: ../ansible/rc.conf.jail
@@ -148,17 +149,45 @@
         mode: "0644"
       when: bsdkit_install_jail
 
+    - name: "Install loader.conf"
+      copy:
+        src: ../ansible/{{ item }}
+        dest: /boot/{{ item }}
+        owner: root
+        group: wheel
+        mode: "0644"
+        backup: yes
+      with_items:
+        - loader.conf
+      when: install_conf
+
+    - name: "Gather zfs_enable"
+      command: sysrc -n zfs_enable
+      register: sysrc_zfs_enable
+      changed_when: false
+      when: install_conf
+
+    - name: "Install /etc/rc.conf (host version)"
+      copy:
+        src: ../ansible/rc.conf
+        dest: /etc/rc.conf
+        owner: root
+        group: wheel
+        mode: "0644"
+        backup: yes
+      when: install_conf
+
     - name: "Set zfs_enable in rc.conf"
       command: sysrc zfs_enable="{{ sysrc_zfs_enable.stdout }}"
-      when: not bsdkit_install_jail and sysrc_zfs_enable is success
+      when: install_conf and (sysrc_zfs_enable is success)
 
     - name: "Set ifconfig in rc.conf"
       command: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
-      when: (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
+      when: install_conf and (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
 
     - name: "Set defaultrouter in rc.conf"
       command: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"
-      when: bsdkit_defaultrouter | length > 0
+      when: install_conf and (bsdkit_defaultrouter | length > 0)
 
     - name: "Set http_proxy in pkg.conf"
       lineinfile:
@@ -178,18 +207,6 @@
         backup: yes
       with_items:
         - sysctl.conf
-      when: not bsdkit_install_jail
-
-    - name: "Install loader.conf"
-      copy:
-        src: ../ansible/{{ item }}
-        dest: /boot/{{ item }}
-        owner: root
-        group: wheel
-        mode: "0644"
-        backup: yes
-      with_items:
-        - loader.conf
       when: not bsdkit_install_jail
 
     - name: "Install dotfiles in /usr/share/skel"
@@ -396,29 +413,52 @@
       ignore_errors: true
       changed_when: false
 
-  handlers:
-    - name: pwd_mkdb
-      command: "pwd_mkdb -p /etc/master.passwd"
+    - name: "VirtualBox configuration"
+      lineinfile:
+        dest: /etc/rc.conf
+        line: "{{ item }}_enable=\"YES\""
+        regexp: "^{{ item }}_enable"
+        insertafter: EOF
+      with_items:
+        - vboxguest
+        - vboxservice
+      when: kenv_smbios_system_product.stdout == "VirtualBox"
 
-- import_playbook: virt.yml
-  when: not bsdkit_install_jail
+    - name: "VMware configuration"
+      lineinfile:
+        dest: /etc/rc.conf
+        line: "{{ item }}_enable=\"YES\""
+        regexp: "^{{ item }}_enable"
+        insertafter: EOF
+      with_items:
+        - vmware_guest_vmblock
+        - vmware_guest_vmhgfs
+        - vmware_guest_vmmemctl
+        - vmware_guest_vmxnet
+        - vmware_guestd
+      when: kenv_smbios_system_product.stdout == "VMware Virtual Platform"
 
-- hosts: all
-  user: root
-  gather_facts: false
-  tasks:
     - name: "Remove ansible directory"
       file:
         path: "/root/.ansible"
         state: absent
 
-- hosts: all
-  user: root
-  gather_facts: false
-  tasks:
     - name: "Remove authorized_key"
       authorized_key:
         user: root
         key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit"
         state: absent
       when: bsdkit_ssh_public_key | length > 0
+
+  handlers:
+    - name: pwd_mkdb
+      command: "pwd_mkdb -p /etc/master.passwd"
+
+# smbios.bios.vendor="BHYVE"
+# smbios.bios.vendor="Amazon EC2"
+# smbios.bios.vendor="Google"
+
+# smbios.bios.vendor="DigitalOcean"
+# smbios.system.family="DigitalOcean_Droplet"
+# smbios.system.maker="DigitalOcean"
+# smbios.system.product="Droplet"
