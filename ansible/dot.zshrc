@@ -136,20 +136,6 @@ if [[ $HOST != "freebsd" ]]; then
     compdef _rctools rconerestart
 fi
 
-if [ -f /usr/local/google-cloud-sdk/completion.zsh.inc ]; then
-    source /usr/local/google-cloud-sdk/completion.zsh.inc
-elif [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc ]; then
-    source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
-fi
-
-if which doctl >/dev/null 2>&1; then
-    source <(doctl completion zsh)
-fi
-
-if which kubectl >/dev/null 2>&1; then
-    source <(kubectl completion zsh)
-fi
-
 if which direnv >/dev/null 2>&1; then
     source <(direnv hook zsh)
 fi
