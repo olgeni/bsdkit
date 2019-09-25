@@ -360,7 +360,7 @@ gpt_ufs_partition_large()
     gpart add -i ${_p} -s ${PART_SIZE_ROOT} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}; _p=$((${_p} + 1))
     gpart add -i ${_p} -s ${PART_SIZE_TMP}  -t freebsd-ufs -l ${LABEL_TMP}  ${_device}; _p=$((${_p} + 1))
     gpart add -i ${_p} -s ${PART_SIZE_VAR}  -t freebsd-ufs -l ${LABEL_VAR}  ${_device}; _p=$((${_p} + 1))
-    gpart add -i ${_p}                    -t freebsd-ufs -l ${LABEL_USR}  ${_device}; _p=$((${_p} + 1))
+    gpart add -i ${_p}                      -t freebsd-ufs -l ${LABEL_USR}  ${_device}; _p=$((${_p} + 1))
 
     # FIXME use -j
 
@@ -480,7 +480,7 @@ mbr_ufs_partition_large()
     # reserved partition c
     gpart add -i 4 -s ${PART_SIZE_TMP}  -t freebsd-ufs  ${_device}s1 # d
     gpart add -i 5 -s ${PART_SIZE_VAR}  -t freebsd-ufs  ${_device}s1 # e
-    gpart add -i 6                    -t freebsd-ufs  ${_device}s1 # f
+    gpart add -i 6                      -t freebsd-ufs  ${_device}s1 # f
 
     # FIXME use -j
 
@@ -785,19 +785,19 @@ zfs_create_fs()
 
     zfs mount ${ZFS_POOL}/ROOT/default
 
-    ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off      ${ZFS_POOL}/tmp
-    ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off    ${ZFS_POOL}/usr
-    ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off    ${ZFS_POOL}/var
-    ${ZFS_CREATE_CMD} -o mountpoint=/jails                  ${ZFS_POOL}/jails
-    ${ZFS_CREATE_CMD} -o compression=on                     ${ZFS_POOL}/usr/src
-    ${ZFS_CREATE_CMD} -o setuid=off                         ${ZFS_POOL}/usr/ports
-    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off             ${ZFS_POOL}/var/audit
-    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off             ${ZFS_POOL}/var/crash
-    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off             ${ZFS_POOL}/var/log
-    ${ZFS_CREATE_CMD} -o atime=on                           ${ZFS_POOL}/var/mail
-    ${ZFS_CREATE_CMD} -o setuid=off                         ${ZFS_POOL}/var/tmp
-    ${ZFS_CREATE_CMD} -o canmount=off                       ${ZFS_POOL}/usr/local
-    ${ZFS_CREATE_CMD}                                       ${ZFS_POOL}/usr/home
+    ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off   ${ZFS_POOL}/tmp
+    ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off ${ZFS_POOL}/usr
+    ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off ${ZFS_POOL}/var
+    ${ZFS_CREATE_CMD} -o mountpoint=/jails               ${ZFS_POOL}/jails
+    ${ZFS_CREATE_CMD} -o compression=on                  ${ZFS_POOL}/usr/src
+    ${ZFS_CREATE_CMD} -o setuid=off                      ${ZFS_POOL}/usr/ports
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off          ${ZFS_POOL}/var/audit
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off          ${ZFS_POOL}/var/crash
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off          ${ZFS_POOL}/var/log
+    ${ZFS_CREATE_CMD} -o atime=on                        ${ZFS_POOL}/var/mail
+    ${ZFS_CREATE_CMD} -o setuid=off                      ${ZFS_POOL}/var/tmp
+    ${ZFS_CREATE_CMD} -o canmount=off                    ${ZFS_POOL}/usr/local
+    ${ZFS_CREATE_CMD}                                    ${ZFS_POOL}/usr/home
 
     mkdir -p ${_destdir}/altroot
     mkdir -p ${_destdir}/boot
