@@ -10,3 +10,5 @@
 Defaults umask=022, umask_override
 
 root ALL = (ALL) NOPASSWD: SETENV: ALL
+
+#includedir /usr/local/etc/sudoers.d
