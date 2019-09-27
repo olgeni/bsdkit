@@ -192,7 +192,7 @@
     - name: "Set http_proxy in pkg.conf"
       lineinfile:
         dest: /usr/local/etc/pkg.conf
-        line: "pkg_env: { http_proxy: \"{{ bsdkit_jail_proxy }}\" }"
+        line: 'pkg_env: { http_proxy: "{{ bsdkit_jail_proxy }}" }'
         regexp: ^pkg_env
         insertafter: EOF
       when: bsdkit_jail_proxy | length > 0
@@ -336,7 +336,7 @@
     - name: "Set 'MAILTO' in /etc/crontab"
       lineinfile:
         dest: /etc/crontab
-        line: "MAILTO=\"\""
+        line: 'MAILTO=""'
         regexp: "^MAILTO"
         insertbefore: "^SHELL="
 
@@ -427,7 +427,7 @@
     - name: "VirtualBox configuration"
       lineinfile:
         dest: /etc/rc.conf
-        line: "{{ item }}_enable=\"YES\""
+        line: '{{ item }}_enable="YES"'
         regexp: "^{{ item }}_enable"
         insertafter: EOF
       with_items:
@@ -438,7 +438,7 @@
     - name: "VMware configuration"
       lineinfile:
         dest: /etc/rc.conf
-        line: "{{ item }}_enable=\"YES\""
+        line: '{{ item }}_enable="YES"'
         regexp: "^{{ item }}_enable"
         insertafter: EOF
       with_items:
