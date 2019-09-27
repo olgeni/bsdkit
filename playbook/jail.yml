@@ -464,12 +464,3 @@
   handlers:
     - name: pwd_mkdb
       command: "pwd_mkdb -p /etc/master.passwd"
-
-# smbios.bios.vendor="BHYVE"
-# smbios.bios.vendor="Amazon EC2"
-# smbios.bios.vendor="Google"
-
-# smbios.bios.vendor="DigitalOcean"
-# smbios.system.family="DigitalOcean_Droplet"
-# smbios.system.maker="DigitalOcean"
-# smbios.system.product="Droplet"
