@@ -2198,7 +2198,7 @@ EOF
         BSDKIT_INTERFACE="${_bsdkit_interface}"         \
         BSDKIT_IFCONFIG="${_bsdkit_ifconfig}"           \
         BSDKIT_DEFAULTROUTER="${_bsdkit_defaultrouter}" \
-        ansible-playbook ${BSDKIT_DIR}/playbook/jail.yml
+        ansible-playbook ${BSDKIT_DIR}/playbook/bsdkit.yml
 
     rm -r ${_ansible_root}
 }
