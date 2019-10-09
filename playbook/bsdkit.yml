@@ -57,7 +57,7 @@
         bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
         bsdkit_defaultrouter: "{{ lookup('env', 'BSDKIT_DEFAULTROUTER') }}"
         bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
-        bsdkit_install_jail: "{{ lookup('env', 'BSDKIT_INSTALL_JAIL') }}"
+        bsdkit_install_jail: "{{ lookup('env', 'BSDKIT_INSTALL_JAIL') | bool }}"
 
     - name: "set_fact: variables"
       set_fact:
@@ -247,16 +247,16 @@
         mode: "0440"
         backup: yes
 
-    - name: "stat: /.vagrant"
+    - name: "stat: /vagrant"
       stat:
-        path: /.vagrant
+        path: /vagrant
       register: stat_dot_vagrant
 
     - name: "Enable sudo for vagrant user"
       copy:
         content: "vagrant ALL = (ALL) NOPASSWD: SETENV: ALL"
         dest: /usr/local/etc/sudoers.d/vagrant
-      when: stat_dot_vagrant.stat.exists
+      when: stat_dot_vagrant.stat.isdir is defined and stat_dot_vagrant.stat.isdir
 
     - name: "Create /etc/newsyslog.conf.d/"
       file:
