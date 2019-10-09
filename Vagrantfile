@@ -25,8 +25,8 @@ Vagrant.configure("2") do |config|
   SHELL
 
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
-    cd /vagrant/playbook
-    ansible-playbook -i localhost, -c local -e ansible_python_interpreter=/usr/local/bin/python3 bsdkit.yml
+    cd /vagrant
+    ansible-playbook -i localhost, -c local -e ansible_python_interpreter=/usr/local/bin/python3 playbook/bsdkit.yml
     pkg upg -y
     pkg autoremove -y
     pkg clean -ay
