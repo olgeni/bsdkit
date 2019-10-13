@@ -331,12 +331,12 @@
         - ".*fuse.*"
       when: not bsdkit_install_jail
 
-    - name: "stat: /var/db/zoneinfo"
+    - name: "Run tzsetup (stat: /var/db/zoneinfo)"
       stat:
         path: /var/db/zoneinfo
       register: stat_zoneinfo
 
-    - name: "Run tzsetup"
+    - name: "Run tzsetup (exec)"
       command: tzsetup Europe/Rome
       when: not stat_zoneinfo.stat.exists
 
