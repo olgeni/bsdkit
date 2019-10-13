@@ -42,6 +42,10 @@
         path: "/usr/lib/debug"
         state: absent
 
+    - name: "Remove /usr/tests directory"
+      file:
+        path: "/usr/tests"
+        state: absent
 
     - name: "kenv smbios.system.product"
       command: "kenv smbios.system.product"
