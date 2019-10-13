@@ -406,17 +406,17 @@
         state: present
       when: not bsdkit_install_jail
 
-    - name: "stat: ca-root-nss.crt"
+    - name: "Link ca-root-nss.crt (stat: ca-root-nss.crt)"
       stat:
         path: /usr/local/share/certs/ca-root-nss.crt
       register: stat_ca_root_nss
 
-    - name: "stat: cert.pem"
+    - name: "Link ca-root-nss.crt (stat: cert.pem)"
       stat:
         path: /usr/local/etc/ssl/cert.pem
       register: stat_cert_pem
 
-    - name: "Link ca-root-nss.crt"
+    - name: "Link ca-root-nss.crt (exec)"
       file:
         src: /usr/local/share/certs/ca-root-nss.crt
         dest: /usr/local/etc/ssl/cert.pem
