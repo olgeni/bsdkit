@@ -257,16 +257,16 @@
         mode: "0440"
         backup: yes
 
-    - name: "stat: /vagrant"
+    - name: "Enable sudo for vagrant user (stat: /vagrant)"
       stat:
         path: /vagrant
-      register: stat_dot_vagrant
+      register: stat_vagrant
 
-    - name: "Enable sudo for vagrant user"
+    - name: "Enable sudo for vagrant user (exec)"
       copy:
         content: "vagrant ALL = (ALL) NOPASSWD: SETENV: ALL"
         dest: /usr/local/etc/sudoers.d/vagrant
-      when: stat_dot_vagrant.stat.isdir is defined and stat_dot_vagrant.stat.isdir
+      when: stat_vagrant.stat.isdir is defined and stat_vagrant.stat.isdir
 
     - name: "Create /etc/newsyslog.conf.d/"
       file:
