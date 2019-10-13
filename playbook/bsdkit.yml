@@ -191,13 +191,13 @@
       command: sysrc zfs_enable="{{ sysrc_zfs_enable.stdout }}"
       when: install_conf and (sysrc_zfs_enable is success)
 
-    - name: "Set ifconfig in rc.conf"
+    - name: "Set bsdkit ifconfig in rc.conf"
       command: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
-      when: install_conf and (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
+      when: (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
 
-    - name: "Set defaultrouter in rc.conf"
+    - name: "Set bsdkit defaultrouter in rc.conf"
       command: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"
-      when: install_conf and (bsdkit_defaultrouter | length > 0)
+      when: bsdkit_defaultrouter | length > 0
 
     - name: "Set http_proxy in pkg.conf"
       lineinfile:
