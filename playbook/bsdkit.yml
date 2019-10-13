@@ -460,6 +460,7 @@
       file:
         path: "/root/.ansible"
         state: absent
+      changed_when: false
 
     - name: "Remove authorized_key"
       authorized_key:
