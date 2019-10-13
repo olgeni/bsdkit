@@ -2166,6 +2166,15 @@ EOF
     # stop_jail ${_destdir}
 }
 
+ansible_local_playbook()
+{
+    ansible-playbook                                         \
+        -i localhost,                                        \
+        -c local                                             \
+        -e ansible_python_interpreter=/usr/local/bin/python3 \
+        ${BSDKIT_DIR}/playbook/bsdkit.yml
+}
+
 ansible_jail_playbook()
 {
     local _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
