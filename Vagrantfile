@@ -24,9 +24,10 @@ Vagrant.configure("2") do |config|
     pkg install -y git py36-ansible
   SHELL
 
+  config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: ".git/"
+
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
-    cd /vagrant
-    ansible-playbook -i localhost, -c local -e ansible_python_interpreter=/usr/local/bin/python3 playbook/bsdkit.yml
+    cd /vagrant && ./bsdkit ansible_local_playbook
     pkg upg -y
     pkg autoremove -y
     pkg clean -ay
