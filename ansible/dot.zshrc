@@ -101,40 +101,23 @@ chpwd()
     esac
 }
 
-if [[ $HOST != "freebsd" ]]; then
-    _rctools()
-    {
-	compadd `ls /etc/rc.d`
-	compadd `ls /usr/local/etc/rc.d`
-    }
+local _file
 
-    local _file
-
-    if [ -d ~/.zsh ] && ls ~/.zsh/ | grep -E '\.sh$' >/dev/null 2>&1; then
-        for _file in ~/.zsh/*.sh; do
-            source ${_file}
-        done
-    fi
-
-    if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
-        if [ -d ~/.zsh/completion ]; then
-            fpath=(~/.zsh/completion $fpath)
-        fi
-    fi
-
-    autoload -Uz compinit
-
-    compinit
-
-    compdef _rctools rcstart
-    compdef _rctools rcstatus
-    compdef _rctools rcstop
-    compdef _rctools rcrestart
-    compdef _rctools rconestart
-    compdef _rctools rconestatus
-    compdef _rctools rconestop
-    compdef _rctools rconerestart
+if [ -d ~/.zsh ] && ls ~/.zsh/ | grep -E '\.sh$' >/dev/null 2>&1; then
+    for _file in ~/.zsh/*.sh; do
+        source ${_file}
+    done
 fi
+
+if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
+    if [ -d ~/.zsh/completion ]; then
+        fpath=(~/.zsh/completion $fpath)
+    fi
+fi
+
+autoload -Uz compinit
+
+compinit
 
 if which direnv >/dev/null 2>&1; then
     source <(direnv hook zsh)
