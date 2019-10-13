@@ -1,6 +1,3 @@
-# This file now contains just the overrides from /etc/defaults/rc.conf
-# please make all changes to this file.
-
 cron_flags="$cron_flags -J 15"
 sendmail_enable="NO"
 sendmail_msp_queue_enable="NO"

@@ -817,14 +817,6 @@ zfs_create_fs()
     return 0
 }
 
-zfs_enable()
-{
-    local _destdir="$1"
-
-    rc_set ${_destdir}/boot/loader.conf.local zfs_load YES
-    rc_set ${_destdir}/etc/rc.conf zfs_enable YES
-}
-
 link_home()
 {
     local _destdir="$1"
@@ -1240,7 +1232,6 @@ install_zfs()
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
-    zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
     fdescfs_setup ${DESTDIR}
@@ -1272,7 +1263,6 @@ install_gpt_zfs()
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
-    zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
     fdescfs_setup ${DESTDIR}
@@ -1304,7 +1294,6 @@ install_mbr_zfs()
     zfs_create_fs ${DESTDIR}
     install_release ${FREEBSD_REL_URL} ${DESTDIR}
     install -v -m 644 -o root -g wheel ${ZPOOL_CACHE} ${DESTDIR}/boot/zfs
-    zfs_enable ${DESTDIR}
     swap_setup ${DESTDIR}
     procfs_setup ${DESTDIR}
     fdescfs_setup ${DESTDIR}
@@ -1813,7 +1802,7 @@ build_setup_staging()
 
     gzip ${_staging}/boot/kernel/kernel
 
-    install -m 644 -o root -g wheel ${_bsdkit}/ansible/loader.conf ${_staging}/boot/loader.conf
+    install -m 644 -o root -g wheel ${_bsdkit}/ansible/loader.conf.vendor ${_staging}/boot/loader.conf
 
     cat > ${_staging}/boot/loader.conf.local << EOF
 geom_uzip_load="YES"
