@@ -37,6 +37,11 @@
       stat:
         path: /usr/src/sys
       register: stat_usr_src_sys
+    - name: "Remove /usr/lib/debug directory"
+      file:
+        path: "/usr/lib/debug"
+        state: absent
+
 
     - name: "kenv smbios.system.product"
       command: "kenv smbios.system.product"
