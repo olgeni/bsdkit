@@ -292,13 +292,10 @@
         mode: "0644"
       when: not bsdkit_install_jail
 
-    - name: "Install /usr/local/etc/portmaster.rc"
-      copy:
-        src: ../ansible/portmaster.rc
-        dest: /usr/local/etc/portmaster.rc
-        owner: root
-        group: wheel
-        mode: "0644"
+    - name: "Remove /usr/local/etc/portmaster.rc"
+      file:
+        path: /usr/local/etc/portmaster.rc
+        state: absent
 
     - name: "Set 'UseDNS no' in /etc/ssh/sshd_config"
       lineinfile:
