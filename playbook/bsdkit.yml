@@ -33,10 +33,6 @@
         or freebsd_branch[:4] == "BETA"
         or freebsd_branch[:2] == "RC"
 
-    - name: "stat: /usr/src/sys"
-      stat:
-        path: /usr/src/sys
-      register: stat_usr_src_sys
     - name: "Remove /usr/lib/debug directory"
       file:
         path: "/usr/lib/debug"
@@ -126,7 +122,12 @@
           }
         dest: /usr/local/etc/pkg/repos/bsdkit.conf
 
-    - name: "Install kernel configuration"
+    - name: "Install kernel configuration (stat: /usr/src/sys)"
+      stat:
+        path: /usr/src/sys
+      register: stat_usr_src_sys
+
+    - name: "Install kernel configuration (exec)"
       copy:
         src: ../ansible/BSDKIT-{{ freebsd_version }}-{{ ansible_architecture }}
         dest: /usr/src/sys/{{ ansible_architecture }}/conf/BSDKIT
