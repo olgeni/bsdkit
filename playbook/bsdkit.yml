@@ -74,6 +74,31 @@
         key: "{{ bsdkit_ssh_public_key }}"
       when: bsdkit_ssh_public_key | length > 0
 
+    - name: "Configure login.conf (check for lang=en_US.UTF-8)"
+      command: grep -Fq ":lang=en_US.UTF-8:" /etc/login.conf
+      register: login_conf_lang
+      changed_when: no
+      check_mode: no
+      ignore_errors: yes
+
+    - name: "Configure login.conf (lang=en_US.UTF-8)"
+      lineinfile:
+        dest: /etc/login.conf
+        line: "\t:lang=en_US.UTF-8:\\"
+        insertafter: "^default:"
+        firstmatch: true
+      when: login_conf_lang.rc != 0
+      notify: cap_mkdb
+
+    - name: "Configure login.conf (charset=UTF-8)"
+      lineinfile:
+        dest: /etc/login.conf
+        line: "\t:charset=UTF-8:\\"
+        insertafter: "^default:"
+        firstmatch: true
+      when: login_conf_lang.rc != 0
+      notify: cap_mkdb
+
     - name: "Create /usr/local/etc"
       file:
         path: /usr/local/etc
@@ -466,5 +491,8 @@
       when: bsdkit_ssh_public_key | length > 0
 
   handlers:
+    - name: cap_mkdb
+      command: "cap_mkdb /etc/login.conf"
+
     - name: pwd_mkdb
       command: "pwd_mkdb -p /etc/master.passwd"
