@@ -107,7 +107,7 @@ rebuild_port()
             chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean
             pkg-static -c ${BOOTENV_MOUNT} lock -y ${_port}
 
-            umount ${BOOTENV_MOUNT}/dev
+            umount -f ${BOOTENV_MOUNT}/dev
         fi
     fi
 }
