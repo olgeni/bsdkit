@@ -268,7 +268,9 @@ if is_yes ${BOOTENV_ENABLE}; then
     DESTDIR=${BOOTENV_MOUNT}
 else
     if [ -z "${DESTDIR}" ]; then
-        umount -f /proc
+        if is_yes ${_proc_mounted}; then
+            umount -f /proc
+        fi
     fi
 fi
 
