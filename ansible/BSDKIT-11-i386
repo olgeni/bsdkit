@@ -1,8 +1,0 @@
-include		GENERIC
-
-ident		BSDKIT
-
-options		DDB		# Enable the ddb debugger backend.
-options		TCP_RFC7413	# TCP Fast Open support
-
-options		KVA_PAGES=512
