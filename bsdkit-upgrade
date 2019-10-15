@@ -43,8 +43,10 @@ cleanup()
         fi
     else
         if [ -z "${DESTDIR}" ]; then
-            if is_yes ${_proc_mounted}; then
-                mount /proc
+            if ! mount | cut -w -f 3 | fgrep -q "/proc"; then
+                if is_yes ${_proc_mounted}; then
+                    mount /proc
+                fi
             fi
         fi
     fi
@@ -269,7 +271,7 @@ if is_yes ${BOOTENV_ENABLE}; then
 else
     if [ -z "${DESTDIR}" ]; then
         if is_yes ${_proc_mounted}; then
-            umount -f /proc
+            while umount -f /proc > /dev/null 2>&1; do :; done
         fi
     fi
 fi
