@@ -63,6 +63,7 @@ bindkey '\e\e[C'  forward-word
 bindkey '\e\e[D'  backward-word
 bindkey '\eOC'    forward-word
 bindkey '\eOD'    backward-word
+bindkey "^U"      universal-argument
 
 bindkey '\eOA'    up-line-or-history
 bindkey '\eOB'    down-line-or-history
