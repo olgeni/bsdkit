@@ -1323,8 +1323,6 @@ create_iocell()
     INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
-
-    rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
 create_iocell_thin()
@@ -1349,8 +1347,6 @@ create_iocell_thin()
     iocell start ${_uuid}
     _do_configure_jail ${_destdir}
     iocell stop ${_uuid}
-
-    rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
 create_iocage()
@@ -1374,8 +1370,6 @@ create_iocage()
     INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
-
-    rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
 create_jail()
@@ -1393,8 +1387,6 @@ create_jail()
     INSTALL_KERNEL=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
-
-    rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
 configure_jail()
@@ -1411,8 +1403,6 @@ configure_jail()
     [ -f ${_destdir}/etc/rc.conf ] || error "rc.conf does not exist in jail (configure_jail)."
 
     _do_configure_jail ${_destdir}
-
-    rc_delete ${_destdir}/etc/rc.conf hostname
 }
 
 create_md()
