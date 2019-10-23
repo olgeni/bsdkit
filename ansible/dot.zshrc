@@ -104,8 +104,8 @@ chpwd()
 
 local _file
 
-if [ -d ~/.zsh ] && ls ~/.zsh/ | grep -E '\.sh$' >/dev/null 2>&1; then
-    for _file in ~/.zsh/*.sh; do
+if [ -d ~/.zsh ]; then
+    for _file in ~/.zsh/*.sh(N); do
         source ${_file}
     done
 fi
