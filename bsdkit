@@ -190,6 +190,8 @@ rc_delete()
     local _file="$1"
     local _key="$2"
 
+    [ -e ${_file} ] || return 0
+
     sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=/d" ${_file}
 }
 
