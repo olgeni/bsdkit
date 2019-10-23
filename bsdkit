@@ -334,7 +334,7 @@ gpt_ufs_partition_large()
     [ -d ${_destdir} ]
     [ -n ${_device} ]
 
-    [ -e "/dev/${_device}" ];
+    [ -e "/dev/${_device}" ]
 
     gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s gpt ${_device}
