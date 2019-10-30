@@ -116,9 +116,9 @@ if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
     fi
 fi
 
-autoload -Uz compinit
+autoload -Uz compinit && compinit
 
-compinit
+autoload -U +X bashcompinit && bashcompinit
 
 if which direnv >/dev/null 2>&1; then
     source <(direnv hook zsh)
