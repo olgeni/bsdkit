@@ -1911,7 +1911,7 @@ fi
 exit 0
 EOF
 
-    install -m 644 -o root -g wheel ${_bsdkit}/ansible/rc.conf ${_destdir}/etc/rc.conf
+    install -m 644 -o root -g wheel ${_bsdkit}/ansible/vendor.conf ${_destdir}/etc/rc.conf
 
     makefs ${_staging}/memroot.ufs ${_mfsroot}
 
