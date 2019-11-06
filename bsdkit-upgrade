@@ -204,7 +204,7 @@ mkdir -p ${_distdir}
 
 cd ${_distdir}
 
-fetch ${_release}/MANIFEST
+fetch -q ${_release}/MANIFEST
 
 # base-dbg.txz    [sha256]  [size]  base_dbg    "Base system (Debugging)"                     off
 # base.txz        [sha256]  [size]  base        "Base system (MANDATORY)"                     on
