@@ -11,6 +11,7 @@ set -e -u
 : ${BOOTENV_MOUNT:="/mnt"}
 : ${FETCH_ONLY:="no"}
 : ${SKIP_PACKAGES:="no"}
+: ${PV_UPDATE_DELAY:="0.1"}
 
 : ${_install_src:="no"}
 : ${_install_debug:="no"}
@@ -115,6 +116,12 @@ rebuild_port()
 }
 
 trap cleanup EXIT
+
+if which -s pv 2>/dev/null; then
+    CAT_CMD="pv -i ${PV_UPDATE_DELAY}"
+else
+    CAT_CMD=/bin/cat
+fi
 
 if mount | cut -w -f 3 | fgrep -q "/proc"; then
     _proc_mounted=yes
@@ -236,7 +243,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
     if [ -f "${_filename}" ]; then
         echo "Checking ${_filename}"
-        _sha256_local=$(sha256 -q "${_filename}")
+        _sha256_local=$(${CAT_CMD} "${_filename}" | sha256 -q)
     else
         _sha256_local="0"
     fi
@@ -295,7 +302,7 @@ if is_yes ${_install_src}; then
         rm -r -f  ${_file}
     done
 
-    tar -x -z -U -f ${_distdir}/src.txz -C ${DESTDIR}/
+    ${CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
 fi
 
 find ${DESTDIR}/bin       \
@@ -349,7 +356,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
     if is_yes ${_extract}; then
         echo "Extracting: ${_filename}"
-        tar -x -z -U -f ${_distdir}/${_filename} -C ${DESTDIR}/ ${_options}
+        ${CAT_CMD} ${_distdir}/${_filename} | tar -x -z -U -C ${DESTDIR}/ -f - ${_options}
     fi
 done
 
@@ -416,6 +423,8 @@ if is_yes ${BOOTENV_ENABLE}; then
 
     beadm list
 fi
+
+echo "Upgrade complete."
 
 # gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
 # gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada1
