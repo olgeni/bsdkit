@@ -99,6 +99,9 @@
       when: login_conf_lang.rc != 0
       notify: cap_mkdb
 
+    - name: "Flush handlers"
+      meta: flush_handlers
+
     - name: "Create /usr/local/etc"
       file:
         path: /usr/local/etc
