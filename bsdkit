@@ -64,6 +64,12 @@ is_efi()
 
 : ${JAIL_PROXY:=""}
 
+if which -s pv 2>/dev/null; then
+    CAT_CMD="pv -i ${PV_UPDATE_DELAY}"
+else
+    CAT_CMD=/bin/cat
+fi
+
 if [ -z "${PART_SIZE_SWAP}" ]; then
     PART_SIZE_SWAP=0
 fi
@@ -981,11 +987,7 @@ install_release()
             continue
         fi
 
-        if which bar > /dev/null 2>&1; then
-            bar -T 16 -n -t ${_relpath}/${_filename} | tar --unlink -xpJf - -C ${_destdir}
-        else
-            tar --unlink -xpJf ${_relpath}/${_filename} -C ${_destdir}
-        fi
+        ${CAT_CMD} ${_relpath}/${_filename} | tar --unlink -xpJf - -C ${_destdir}
 
         sync
     done
@@ -1609,9 +1611,9 @@ install_setup_runtime()
     local _runtime=""
 
     # required
-    _runtime="${_runtime} bar"
     _runtime="${_runtime} ca_root_nss"
     _runtime="${_runtime} pkg"
+    _runtime="${_runtime} pv"
     _runtime="${_runtime} py36-ansible"
     _runtime="${_runtime} python"
     _runtime="${_runtime} zsh"
@@ -1650,7 +1652,6 @@ install_setup_runtime()
     _runtime="${_runtime} ncdu"
     _runtime="${_runtime} openvpn"
     _runtime="${_runtime} pipemeter"
-    _runtime="${_runtime} pv"
     _runtime="${_runtime} py36-libzfs"
     _runtime="${_runtime} py36-sh"
     _runtime="${_runtime} rdate"
