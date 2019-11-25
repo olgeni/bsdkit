@@ -62,6 +62,7 @@ is_efi()
 : ${BSDKIT_TREE:=default}
 : ${BSDKIT_PKGSET:=nox11}
 
+: ${PV_UPDATE_DELAY:="0.1"}
 : ${JAIL_PROXY:=""}
 
 if which -s pv 2>/dev/null; then
