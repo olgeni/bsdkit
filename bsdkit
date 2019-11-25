@@ -1627,7 +1627,7 @@ install_setup_runtime()
     _runtime="${_runtime} buffer"
     _runtime="${_runtime} bvi"
     _runtime="${_runtime} cdialog"
-    _runtime="${_runtime} cdrkit-genisoimage"
+    # _runtime="${_runtime} cdrkit-genisoimage"
     _runtime="${_runtime} clone"
     _runtime="${_runtime} cpdup"
     _runtime="${_runtime} curl"
