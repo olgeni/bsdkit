@@ -988,6 +988,7 @@ install_release()
             continue
         fi
 
+        echo "Extracting: ${_filename}"
         ${CAT_CMD} ${_relpath}/${_filename} | tar --unlink -xpJf - -C ${_destdir}
 
         sync
