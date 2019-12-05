@@ -181,7 +181,7 @@ if ! is_yes ${FETCH_ONLY}; then
     fi
 
     if is_yes ${BOOTENV_ENABLE}; then
-        which beadm >/dev/null 2>&1 || error "missing requirement: beadm"
+        which bectl >/dev/null 2>&1 || error "missing requirement: bectl"
     fi
 fi
 
@@ -263,8 +263,8 @@ if is_yes ${BOOTENV_ENABLE}; then
         error "mount point '${BOOTENV_MOUNT}' already in use"
     fi
 
-    beadm create ${BOOTENV_NAME}
-    beadm mount ${BOOTENV_NAME} ${BOOTENV_MOUNT}
+    bectl create ${BOOTENV_NAME}
+    bectl mount ${BOOTENV_NAME} ${BOOTENV_MOUNT}
 
     if mount | cut -w -f 3 | fgrep -q "/usr/src"; then
         mount -t nullfs /usr/src ${BOOTENV_MOUNT}/usr/src
@@ -418,12 +418,12 @@ if is_yes ${BOOTENV_ENABLE}; then
         umount -f ${BOOTENV_MOUNT}/usr/ports
     fi
 
-    beadm umount -f ${BOOTENV_NAME}
-    beadm activate ${BOOTENV_NAME}
+    bectl umount -f ${BOOTENV_NAME}
+    bectl activate ${BOOTENV_NAME}
 
     bsdkit-noauto
 
-    beadm list
+    bectl list
 fi
 
 echo "Upgrade complete."
