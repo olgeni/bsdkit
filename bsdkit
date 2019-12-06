@@ -956,7 +956,7 @@ install_release()
             local _sha256_local
 
             if [ -f "${_local_relpath}/${_filename}" ]; then
-                _sha256_local=$(sha256 -q "${_local_relpath}/${_filename}")
+                _sha256_local=$(${CAT_CMD} "${_local_relpath}/${_filename}" | sha256 -q)
             else
                 _sha256_local="0"
             fi
@@ -964,7 +964,7 @@ install_release()
             while [ "${_sha256}" != "${_sha256_local}" ]; do
                 fetch -o ${_local_relpath}/${_filename} ${_relpath}/${_filename}
 
-                _sha256_local=$(sha256 -q "${_local_relpath}/${_filename}")
+                _sha256_local=$(${CAT_CMD} "${_local_relpath}/${_filename}" | sha256 -q)
             done
         done
 
