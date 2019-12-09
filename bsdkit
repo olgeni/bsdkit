@@ -1635,7 +1635,7 @@ install_setup_runtime()
     _runtime="${_runtime} dar"
     _runtime="${_runtime} ddrescue"
     _runtime="${_runtime} fusefs-exfat"
-    _runtime="${_runtime} fusefs-ext4fuse"
+    _runtime="${_runtime} fusefs-ext2"
     _runtime="${_runtime} fusefs-ntfs"
     _runtime="${_runtime} git"
     _runtime="${_runtime} gnu-watch"
