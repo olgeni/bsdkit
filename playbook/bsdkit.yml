@@ -225,6 +225,7 @@
         mode: "0644"
       with_items:
         - loader.conf.vendor
+      when: not bsdkit_install_jail
 
     - name: "Install /etc/defaults/vendor.conf (host version)"
       copy:
