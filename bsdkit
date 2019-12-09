@@ -1506,7 +1506,6 @@ _do_configure_jail()
         install -m 644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
     fi
 
-
     start_jail ${_destdir}
     pw -V ${_destdir}/etc usermod root -s /bin/sh
     INSTALL_JAIL=yes ansible_jail_playbook
