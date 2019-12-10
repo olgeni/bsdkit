@@ -198,6 +198,15 @@
         - { key: 'daily_scrub_zfs_enable', value: 'NO' }
         - { key: 'daily_scrub_zfs_default_threshold', value: '0' }
 
+    - name: "Install /etc/defaults/vendor.conf (host version)"
+      copy:
+        src: ../ansible/vendor.conf
+        dest: /etc/defaults/vendor.conf
+        owner: root
+        group: wheel
+        mode: "0644"
+      when: not bsdkit_install_jail
+
     - name: "Install /etc/defaults/vendor.conf (jail version)"
       copy:
         src: ../ansible/vendor.conf.jail
@@ -226,14 +235,6 @@
       with_items:
         - loader.conf.vendor
       when: not bsdkit_install_jail
-
-    - name: "Install /etc/defaults/vendor.conf (host version)"
-      copy:
-        src: ../ansible/vendor.conf
-        dest: /etc/defaults/vendor.conf
-        owner: root
-        group: wheel
-        mode: "0644"
 
     - name: "Set bsdkit ifconfig in rc.conf"
       command: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
