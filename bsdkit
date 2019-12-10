@@ -1326,7 +1326,7 @@ create_iocell()
 
     [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell)."
 
-    INSTALL_KERNEL=no _do_create_jail ${_destdir}
+    INSTALL_KERNEL=no INSTALL_SRC=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
 }
