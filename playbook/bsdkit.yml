@@ -66,7 +66,7 @@
 
     - name: "set_fact: variables"
       set_fact:
-        is_droplet: "{{ (not bsdkit_install_jail) and (not kenv_smbios_system_product.stdout in ['Droplet']) }}"
+        is_droplet: "{{ (not bsdkit_install_jail) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
     - name: "Set authorized_key"
       authorized_key:
