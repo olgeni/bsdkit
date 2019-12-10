@@ -433,6 +433,7 @@
           - cpdup
           - curl
           - gnu-watch
+          - jq
           - lftp
           - pv
           - rsync
