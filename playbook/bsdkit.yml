@@ -68,6 +68,29 @@
       set_fact:
         is_droplet: "{{ (not bsdkit_install_jail) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
+    - name: "Gather metadata (#1)"
+      uri:
+        url: http://169.254.169.254/metadata/v1.json
+        return_content: yes
+      register: metadata_payload
+      when: is_droplet
+
+    - name: "Gather metadata (#2)"
+      set_fact:
+        metadata: "{{ metadata_payload.content|from_json }}"
+      when: is_droplet
+
+    - name: "Configure /etc/hosts for Digital Ocean"
+      blockinfile:
+        path: /etc/hosts
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        insertafter: EOF
+        block: |
+          {{metadata.interfaces.public[0].ipv4.ip_address}} {{metadata.hostname.split(".")[0]}} {{metadata.hostname}} egress
+          {{metadata.interfaces.public[0].anchor_ipv4.ip_address}} anchor
+          {{metadata.interfaces.private[0].ipv4.ip_address}} private
+      when: is_droplet
+
     - name: "Set authorized_key"
       authorized_key:
         user: root
