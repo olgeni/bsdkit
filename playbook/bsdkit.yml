@@ -173,6 +173,17 @@
           }
         dest: /usr/local/etc/pkg/repos/bsdkit.conf
 
+    - name: "Touch rc.conf (stat: /etc/rc.conf)"
+      stat:
+        path: /etc/rc.conf
+      register: stat_etc_rc_conf
+
+    - name: "Touch rc.conf (exec)"
+      shell:
+        cmd: touch /etc/rc.conf
+      when: not stat_etc_rc_conf.stat.exists
+      failed_when: false
+
     - name: "Install kernel configuration (stat: /usr/src/sys)"
       stat:
         path: /usr/src/sys
