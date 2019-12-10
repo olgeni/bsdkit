@@ -1645,6 +1645,7 @@ install_setup_runtime()
     _runtime="${_runtime} pkg"
     _runtime="${_runtime} pv"
     _runtime="${_runtime} py37-ansible"
+    _runtime="${_runtime} py37-ansible-sysrc"
     _runtime="${_runtime} python"
     _runtime="${_runtime} zsh"
 

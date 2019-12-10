@@ -91,6 +91,10 @@
           {{metadata.interfaces.private[0].ipv4.ip_address}} private
       when: is_droplet
 
+    - name: "Configure sshd_flags for Digital Ocean"
+      command: sysrc sshd_flags+=" -oListenAddress={{metadata.interfaces.public[0].ipv4.ip_address}}"
+      when: is_droplet
+
     - name: "Set authorized_key"
       authorized_key:
         user: root
