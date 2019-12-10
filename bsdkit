@@ -1377,7 +1377,7 @@ create_iocage()
 
     [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
 
-    INSTALL_KERNEL=no _do_create_jail ${_destdir}
+    INSTALL_KERNEL=no INSTALL_SRC=no _do_create_jail ${_destdir}
 
     _do_configure_jail ${_destdir}
 }
