@@ -2365,7 +2365,7 @@ if ! which ansible-playbook > /dev/null 2>&1; then
 fi
 
 if [ $# -gt 0 ]; then
-    eval "$@"
+    "$@"
 fi
 
 # References:
