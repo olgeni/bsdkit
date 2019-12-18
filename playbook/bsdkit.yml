@@ -340,12 +340,12 @@
         mode: "0440"
         backup: true
 
-    - name: "Enable sudo for vagrant user (stat: /vagrant)"
+    - name: "Check if /vagrant exists"
       stat:
         path: /vagrant
       register: stat_vagrant
 
-    - name: "Enable sudo for vagrant user (exec)"
+    - name: "Enable sudo for vagrant user"
       copy:
         content: "vagrant ALL = (ALL) NOPASSWD: SETENV: ALL"
         dest: /usr/local/etc/sudoers.d/vagrant
