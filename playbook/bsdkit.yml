@@ -542,6 +542,11 @@
         - vmware_guestd
       when: kenv_smbios_system_product.stdout == "VMware Virtual Platform"
 
+    - name: "Clean package cache"
+      shell:
+        cmd: pkg clean -a -y
+      failed_when: false
+
     - name: "Remove ansible directory"
       file:
         path: "/root/.ansible"
