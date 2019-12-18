@@ -71,7 +71,7 @@
     - name: "Gather metadata (#1)"
       uri:
         url: http://169.254.169.254/metadata/v1.json
-        return_content: yes
+        return_content: true
       register: metadata_payload
       when: is_droplet
 
@@ -297,7 +297,7 @@
         owner: root
         group: wheel
         mode: "0644"
-        backup: yes
+        backup: true
       with_items:
         - sysctl.conf
       when: not bsdkit_install_jail
@@ -338,7 +338,7 @@
         owner: root
         group: wheel
         mode: "0440"
-        backup: yes
+        backup: true
 
     - name: "Enable sudo for vagrant user (stat: /vagrant)"
       stat:
