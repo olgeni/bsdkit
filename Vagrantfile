@@ -21,7 +21,7 @@ Vagrant.configure("2") do |config|
   config.vm.boot_timeout = 3600
 
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
-    pkg install -y git py36-ansible
+    pkg install -y git py37-ansible
   SHELL
 
   config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: ".git/"
