@@ -351,21 +351,26 @@
         dest: /usr/local/etc/sudoers.d/vagrant
       when: stat_vagrant.stat.isdir is defined and stat_vagrant.stat.isdir
 
-    - name: "Create /etc/newsyslog.conf.d/"
+    - name: "Create /usr/local/etc/newsyslog.conf.d/"
       file:
-        path: /etc/newsyslog.conf.d/
+        path: /usr/local/etc/newsyslog.conf.d/
         state: directory
         owner: root
         group: wheel
         mode: "0755"
 
-    - name: "Install newsyslog.conf"
+    - name: "Install newsyslog (bsdkit.conf)"
       copy:
-        src: ../ansible/newsyslog.conf
-        dest: /etc/newsyslog.conf.d/newsyslog.conf
+        src: ../ansible/newsyslog-bsdkit.conf
+        dest: /usr/local/etc/newsyslog.conf.d/bsdkit.conf
         owner: root
         group: wheel
         mode: "0644"
+
+    - name: "Remove obsolete newsyslog.conf"
+      file:
+        path: /etc/newsyslog.conf.d/newsyslog.conf
+        state: absent
 
     - name: "Install /etc/firewall"
       copy:
