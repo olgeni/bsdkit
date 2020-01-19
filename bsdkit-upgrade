@@ -401,7 +401,7 @@ if is_yes ${BOOTENV_ENABLE}; then
         mount -t devfs devfs ${BOOTENV_MOUNT}/dev
         if pkg-static -c ${BOOTENV_MOUNT} update -f; then
             pkg-static -c ${BOOTENV_MOUNT} upgrade -Fy
-            pkg-static -c ${BOOTENV_MOUNT} upgrade -y
+            env HANDLE_RC_SCRIPTS=NO pkg-static -c ${BOOTENV_MOUNT} upgrade -y
         fi
         umount -f ${BOOTENV_MOUNT}/dev
     fi
