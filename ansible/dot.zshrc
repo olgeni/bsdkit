@@ -34,6 +34,7 @@ if [ $(uname) != "CYGWIN_NT-10.0" ]; then
 fi
 
 zstyle ':completion:*' menu select
+zstyle ':completion:*' accept-exact '*(N)'
 
 bindkey -e
 
