@@ -143,7 +143,9 @@ case $(uname) in
 esac
 
 # rvm
-export PATH="$PATH:$HOME/.rvm/bin"
+if [ -s "$HOME/.rvm/scripts/rvm" ]; then
+    . "$HOME/.rvm/scripts/rvm"
+fi
 
 # yarn
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
