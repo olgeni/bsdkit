@@ -332,7 +332,7 @@ gpt_ufs_partition_large() {
 
     [ -e "/dev/${_device}" ]
 
-    gpart destroy -F ${_device} 2>/dev/null  || :
+    gpart destroy -F ${_device} 2>/dev/null || :
     gpart create -s gpt ${_device}
 
     gpart bootcode -b /boot/pmbr ${_device}
@@ -406,7 +406,7 @@ gpt_ufs_partition_small() {
 
     [ -e "/dev/${_device}" ]
 
-    gpart destroy -F ${_device} 2>/dev/null  || :
+    gpart destroy -F ${_device} 2>/dev/null || :
     gpart create -s gpt ${_device}
 
     gpart bootcode -b /boot/pmbr ${_device}
@@ -456,12 +456,12 @@ mbr_ufs_partition_large() {
 
     # FIXME refactor
 
-    gpart destroy -F ${_device} 2>/dev/null  || :
+    gpart destroy -F ${_device} 2>/dev/null || :
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
 
-    gpart destroy -F ${_device}s1 2>/dev/null  || :
+    gpart destroy -F ${_device}s1 2>/dev/null || :
     gpart create -s BSD ${_device}s1
 
     gpart bootcode -b /boot/mbr ${_device}
@@ -528,12 +528,12 @@ mbr_ufs_partition_small() {
 
     # FIXME refactor
 
-    gpart destroy -F ${_device} 2>/dev/null  || :
+    gpart destroy -F ${_device} 2>/dev/null || :
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
 
-    gpart destroy -F ${_device}s1 2>/dev/null  || :
+    gpart destroy -F ${_device}s1 2>/dev/null || :
     gpart create -s BSD ${_device}s1
 
     gpart bootcode -b /boot/mbr ${_device}
@@ -579,7 +579,7 @@ zfs_create_pool() {
     sysctl -q kern.geom.debugflags=0x10
 
     for _device in ${_devices}; do
-        gpart destroy -F ${_device} 2>/dev/null  || :
+        gpart destroy -F ${_device} 2>/dev/null || :
 
         dd if=/boot/zfsboot of=/dev/${_device} count=1
         dd if=/boot/zfsboot of=/dev/${_device} iseek=1 oseek=1024
@@ -594,7 +594,7 @@ zfs_create_pool() {
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device} 2>/dev/null  || :
+        zpool labelclear -f ${_device} 2>/dev/null || :
     done
 
     case $# in
@@ -645,7 +645,7 @@ zfs_create_gpt_pool() {
     local _pool_partition=0
 
     for _device in ${_devices}; do
-        gpart destroy -F ${_device} 2>/dev/null  || :
+        gpart destroy -F ${_device} 2>/dev/null || :
         gpart create -s gpt ${_device}
 
         local _p=1
@@ -681,7 +681,7 @@ zfs_create_gpt_pool() {
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device}${_suffix} 2>/dev/null  || :
+        zpool labelclear -f ${_device}${_suffix} 2>/dev/null || :
     done
 
     case $# in
@@ -718,11 +718,11 @@ zfs_create_mbr_pool() {
     for _device in ${_devices}; do
         # FIXME refactor
 
-        gpart destroy -F ${_device} 2>/dev/null  || :
+        gpart destroy -F ${_device} 2>/dev/null || :
         gpart create -s mbr ${_device}
         gpart add -i 1 -t freebsd ${_device}
         gpart set -a active -i 1 ${_device}
-        gpart destroy -F ${_device}s1 2>/dev/null  || :
+        gpart destroy -F ${_device}s1 2>/dev/null || :
         gpart create -s BSD ${_device}s1
         gpart bootcode -b /boot/mbr ${_device}
 
@@ -749,7 +749,7 @@ zfs_create_mbr_pool() {
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device}${_suffix} 2>/dev/null  || :
+        zpool labelclear -f ${_device}${_suffix} 2>/dev/null || :
     done
 
     case $# in
