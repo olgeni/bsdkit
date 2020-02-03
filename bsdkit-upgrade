@@ -157,7 +157,7 @@ while getopts "eEn:r:v:a:d:FP" OPT; do
     esac
 done
 
-shift $((${OPTIND} - 1))
+shift $((OPTIND - 1))
 
 if kenv -q zfs_be_root >/dev/null 2>&1; then
     if [ ${BOOTENV_ENABLE} = "default" ]; then

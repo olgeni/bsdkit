@@ -170,7 +170,7 @@ parse_options() {
         FREEBSD_PKG_URL=$(parse_url ${FREEBSD_PKG_URL_TEMPLATE})
     fi
 
-    PARSE_OPTIONS_SHIFT=$((${OPTIND} - 1))
+    PARSE_OPTIONS_SHIFT=$((OPTIND - 1))
 }
 
 rc_set() {
@@ -341,26 +341,26 @@ gpt_ufs_partition_large() {
 
     gpart add -i ${_p} -s ${PART_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT} ${_device}
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
 
     gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
 
     if has_swap; then
         gpart add -i ${_p} -s ${PART_SIZE_SWAP} -t freebsd-swap -l ${LABEL_SWAP} ${_device}
-        _p=$((${_p} + 1))
+        _p=$((_p + 1))
         swapon /dev/gpt/${LABEL_SWAP}
     fi
 
     gpart add -i ${_p} -s ${PART_SIZE_ROOT} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
     gpart add -i ${_p} -s ${PART_SIZE_TMP}  -t freebsd-ufs -l ${LABEL_TMP}  ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
     gpart add -i ${_p} -s ${PART_SIZE_VAR}  -t freebsd-ufs -l ${LABEL_VAR}  ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
     gpart add -i ${_p}                      -t freebsd-ufs -l ${LABEL_USR}  ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
 
     # FIXME use -j
 
@@ -415,14 +415,14 @@ gpt_ufs_partition_small() {
 
     gpart add -i ${_p} -s ${PART_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT} ${_device}
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
 
     gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI} ${_device}
     gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
 
     gpart add -i ${_p} -t freebsd-ufs -l ${LABEL_ROOT} ${_device}
-    _p=$((${_p} + 1))
+    _p=$((_p + 1))
 
     # FIXME use -j
 
@@ -652,24 +652,24 @@ zfs_create_gpt_pool() {
 
         gpart add -i ${_p} -s ${PART_SIZE_BOOT} -t freebsd-boot -l ${LABEL_BOOT}${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_p} ${_device}
-        _p=$((${_p} + 1))
+        _p=$((_p + 1))
 
         gpart add -i ${_p} -s ${PART_SIZE_EFI} -t efi -l ${LABEL_EFI}${_device_index} ${_device}
         gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
-        _p=$((${_p} + 1))
+        _p=$((_p + 1))
 
         if has_swap; then
             gpart add -i ${_p} -s ${PART_SIZE_SWAP} -t freebsd-swap -l ${LABEL_SWAP}${_device_index} ${_device}
-            _p=$((${_p} + 1))
+            _p=$((_p + 1))
             swapon /dev/gpt/${LABEL_SWAP}${_device_index}
         fi
 
         gpart add -i ${_p} -t freebsd-zfs -l pool${_device_index} ${_device}
         gpart set -a bootme -i ${_p} ${_device}
         _pool_partition=${_p}
-        _p=$((${_p} + 1))
+        _p=$((_p + 1))
 
-        _device_index=$((${_device_index} + 1))
+        _device_index=$((_device_index + 1))
     done
 
     local _options="-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir}"
@@ -726,7 +726,7 @@ zfs_create_mbr_pool() {
         gpart create -s BSD ${_device}s1
         gpart bootcode -b /boot/mbr ${_device}
 
-        local _autorootsize="$(($(diskinfo ${_device} | cut -f 3) / 1024 / 1024 - ${PART_SIZE_SWAP}))"
+        local _autorootsize="$(($(diskinfo ${_device} | cut -f 3) / 1024 / 1024 - PART_SIZE_SWAP))"
 
         # do not align partitions here
         gpart add -i 1 -s ${_autorootsize} -t freebsd-zfs  ${_device}s1 # a
@@ -2074,7 +2074,7 @@ remote_deploy() {
         esac
     done
 
-    shift $((${OPTIND} - 1))
+    shift $((OPTIND - 1))
 
     [ -n "${_remote_address}" ]
     [ -n "${_remote_port}" ]
