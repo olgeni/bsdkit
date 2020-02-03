@@ -1642,6 +1642,7 @@ install_setup_runtime()
 
     # required
     _runtime="${_runtime} lang/python"
+    _runtime="${_runtime} misc/py-tqdm"
     _runtime="${_runtime} ports-mgmt/pkg"
     _runtime="${_runtime} security/ca_root_nss"
     _runtime="${_runtime} shells/zsh"
