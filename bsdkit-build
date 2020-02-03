@@ -10,8 +10,7 @@ DEFAULT_ARCH=amd64
 
 unset POSIXLY_CORRECT
 
-error()
-{
+error() {
     echo "${SCRIPT_NAME}: $@"
     exit 1
 }
@@ -82,7 +81,7 @@ while getopts "v:a:j:PRSIUA" OPT; do
             _build_iso="YES"
             _build_usb="YES"
             ;;
-        *)
+        *) ;;
     esac
 done
 
@@ -96,8 +95,7 @@ OS_MAJOR=$(echo ${_version} | sed -e "s/\\..*//")
 
 # ===
 
-build_release()
-{
+build_release() {
     local _make_conf=${SCRIPT_PATH}/etc/make.conf
     local _src_conf=${SCRIPT_PATH}/etc/src.conf
 
@@ -133,8 +131,7 @@ build_release()
     rm -f ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 }
 
-build_staging()
-{
+build_staging() {
     local _target=${BSDKIT_PATH}/release-${_version}-${_arch}
 
     if [ -d "${OS_RELDIR}/ftp" ]; then
@@ -144,14 +141,13 @@ build_staging()
     fi
 
     ${SCRIPT_PATH}/bsdkit build_setup_staging \
-                  ${BSDKIT_PATH}/staging-${_version}-${_arch} \
-                  . \
-                  ${BSDKIT_PATH}/release-${_version}-${_arch} \
-                  ${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+        ${BSDKIT_PATH}/staging-${_version}-${_arch} \
+        . \
+        ${BSDKIT_PATH}/release-${_version}-${_arch} \
+        ${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
 }
 
-build_iso()
-{
+build_iso() {
     local _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.iso
     local _release="none"
     local _packages="none"
@@ -163,14 +159,13 @@ build_iso()
     fi
 
     ${SCRIPT_PATH}/bsdkit build_setup_iso \
-                  ${_iso} \
-                  ${BSDKIT_PATH}/staging-${_version}-${_arch} \
-                  ${_release} \
-                  ${_packages}
+        ${_iso} \
+        ${BSDKIT_PATH}/staging-${_version}-${_arch} \
+        ${_release} \
+        ${_packages}
 }
 
-build_usb()
-{
+build_usb() {
     local _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.iso
     local _usb=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.img
 

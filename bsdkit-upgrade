@@ -18,14 +18,12 @@ set -e -u
 : ${_install_tests:="no"}
 : ${_proc_mounted:="no"}
 
-error()
-{
+error() {
     echo "bsdkit-upgrade: $@"
     exit 1
 }
 
-cleanup()
-{
+cleanup() {
     if is_yes ${BOOTENV_ENABLE}; then
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/src"; then
             umount -f ${BOOTENV_MOUNT}/usr/src || :
@@ -53,8 +51,7 @@ cleanup()
     fi
 }
 
-is_yes()
-{
+is_yes() {
     case $1 in
         [Yy][Ee][Ss])
             return 0
@@ -64,41 +61,39 @@ is_yes()
             ;;
         *)
             return 2
+            ;;
     esac
 }
 
-bsdkit-noauto()
-{
+bsdkit-noauto() {
     _bootfs=$(zpool get -H -p -o value bootfs 2>/dev/null | grep -v "^-")
 
     if [ $? = 0 ]; then
         _bootenv_base=$(dirname ${_bootfs})
 
-        zfs list -H -o name -r ${_bootenv_base} \
-            | fgrep -v "${_bootenv_base}" \
-            | while read _fs; do
+        zfs list -H -o name -r ${_bootenv_base} |
+            fgrep   -v "${_bootenv_base}" |
+            while   read _fs; do
 
-            echo -n "Checking property 'canmount' on ${_fs}: "
+                echo -n "Checking property 'canmount' on ${_fs}: "
 
-            if [ "$(zfs get -H -o value canmount ${_fs})" != noauto ]; then
-                zfs set canmount=noauto ${_fs}
-                echo "changed."
-            else
-                echo "ok."
-            fi
-        done
+                if [ "$(zfs get -H -o value canmount ${_fs})" != noauto ]; then
+                    zfs set canmount=noauto ${_fs}
+                    echo "changed."
+                else
+                    echo "ok."
+                fi
+            done
     fi
 }
 
-osmajor()
-{
+osmajor() {
     local _destdir="$1"
 
     awk '/^\#define[[:blank:]]__FreeBSD_version/ { print substr($3, 1, 2); }' ${_destdir}/usr/include/sys/param.h
 }
 
-rebuild_port()
-{
+rebuild_port() {
     local _port="$1"
 
     if pkg-static info -q ${_port}; then
@@ -158,6 +153,7 @@ while getopts "eEn:r:v:a:d:FP" OPT; do
             ;;
         *)
             exit 64 # EX_USAGE
+            ;;
     esac
 done
 
@@ -278,7 +274,7 @@ if is_yes ${BOOTENV_ENABLE}; then
 else
     if [ -z "${DESTDIR}" ]; then
         if is_yes ${_proc_mounted}; then
-            while umount -f /proc > /dev/null 2>&1; do :; done
+            while umount -f /proc >/dev/null  2>&1; do :; done
         fi
     fi
 fi
@@ -305,15 +301,15 @@ if is_yes ${_install_src}; then
     ${CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
 fi
 
-find ${DESTDIR}/bin       \
-     ${DESTDIR}/lib       \
-     ${DESTDIR}/libexec   \
-     ${DESTDIR}/sbin      \
-     ${DESTDIR}/usr/bin   \
-     ${DESTDIR}/usr/lib   \
-     ${DESTDIR}/usr/lib32 \
-     -flags -schg         \
-     -exec chflags noschg {} \;
+find ${DESTDIR}/bin \
+    ${DESTDIR}/lib \
+    ${DESTDIR}/libexec \
+    ${DESTDIR}/sbin \
+    ${DESTDIR}/usr/bin \
+    ${DESTDIR}/usr/lib \
+    ${DESTDIR}/usr/lib32 \
+    -flags  -schg \
+    -exec  chflags noschg {} \;
 
 if [ -f ${_srcdir}/Makefile ]; then
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
@@ -346,12 +342,13 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             _options="${_options} --exclude ./var"
             _extract="yes"
             ;;
-        ports)
-            ;;
-        src)
-            ;;
+        ports) ;;
+
+        src) ;;
+
         *)
             _extract="yes"
+            ;;
     esac
 
     if is_yes ${_extract}; then
@@ -390,7 +387,7 @@ if [ -f ${_srcdir}/Makefile ]; then
     cd ${_srcdir}
 
     echo "Running: delete-old"
-    yes y | make delete-old DESTDIR=${DESTDIR}/ > /dev/null 2>&1
+    yes y | make delete-old DESTDIR=${DESTDIR}/ >/dev/null  2>&1
 
     # echo "Running: delete-old-libs"
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1

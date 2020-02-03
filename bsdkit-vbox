@@ -2,8 +2,7 @@
 
 set -e -u
 
-error()
-{
+error() {
     echo "$(basename $0): $@"
     exit 1
 }
@@ -13,8 +12,7 @@ error()
 : ${BSDKIT_VBOX_EFI:=""}
 : ${BSDKIT_VBOX_DISK_SIZE:="30000"}
 
-create_vm()
-{
+create_vm() {
     [ -f "${BSDKIT_VBOX_ISO}" ] || error "ISO file does not exist."
 
     if VBoxManage showvminfo bsdkit --machinereadable >/dev/null 2>&1; then
@@ -52,23 +50,27 @@ create_vm()
     VBoxManage modifyvm bsdkit --natpf1 ssh,tcp,,${BSDKIT_VBOX_PORT},,22
 
     VBoxManage storageattach bsdkit \
-               --storagectl "IDE Controller" \
-               --port 0 \
-               --device 0 \
-               --type dvddrive \
-               --medium "${BSDKIT_VBOX_ISO}"
+        --storagectl        "IDE Controller" \
+        --port        0 \
+        --device        0 \
+        --type        dvddrive \
+        --medium        "${BSDKIT_VBOX_ISO}"
 }
 
 while getopts "i:p:e" OPT; do
     case ${OPT} in
-        i) BSDKIT_VBOX_ISO="${OPTARG}"
-           ;;
-        p) BSDKIT_VBOX_PORT="${OPTARG}"
-           ;;
-        e) BSDKIT_VBOX_EFI="yes"
-           ;;
-        *) return 1
-           ;;
+        i)
+            BSDKIT_VBOX_ISO="${OPTARG}"
+            ;;
+        p)
+            BSDKIT_VBOX_PORT="${OPTARG}"
+            ;;
+        e)
+            BSDKIT_VBOX_EFI="yes"
+            ;;
+        *)
+            return 1
+            ;;
     esac
 done
 
@@ -93,21 +95,21 @@ case $1 in
 
     shell)
         _key=$(mktemp /tmp/XXXXXX)
-        ./bsdkit echo_bsdkit_private_key > ${_key}
+        ./bsdkit echo_bsdkit_private_key >${_key}
         ssh -i ${_key} -p 2200 root@localhost
         rm -f ${_key}
         ;;
 
     logcat)
         _key=$(mktemp /tmp/XXXXXX)
-        ./bsdkit echo_bsdkit_private_key > ${_key}
+        ./bsdkit echo_bsdkit_private_key >${_key}
         env -u SSH_AUTH_SOCK ssh -i ${_key} -p 2200 root@localhost cat /tmp/bsdkit.log
         rm -f ${_key}
         ;;
 
     logtail)
         _key=$(mktemp /tmp/XXXXXX)
-        ./bsdkit echo_bsdkit_private_key > ${_key}
+        ./bsdkit echo_bsdkit_private_key >${_key}
         env -u SSH_AUTH_SOCK ssh -i ${_key} -p 2200 root@localhost tail -F /tmp/bsdkit.log
         rm -f ${_key}
         ;;
@@ -123,5 +125,5 @@ case $1 in
     destroy)
         VBoxManage unregistervm --delete bsdkit
         ;;
-    *)
+    *) ;;
 esac

@@ -5,8 +5,7 @@ set -e -u
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
-error ()
-{
+error() {
     echo "${SCRIPT_NAME}: $@"
     exit 1
 }
