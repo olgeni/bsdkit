@@ -115,9 +115,9 @@ if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
     fpath=(~/.zsh/completion $fpath)
 fi
 
-autoload -Uz compinit && compinit
+autoload -Uz compinit && compinit -C -d ~/.zcompdump
 
-autoload -U +X bashcompinit && bashcompinit
+autoload -Uz bashcompinit && bashcompinit
 
 if which direnv >/dev/null 2>&1; then
     source <(direnv hook zsh)
