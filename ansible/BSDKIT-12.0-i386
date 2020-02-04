@@ -1,7 +1,0 @@
-include		GENERIC
-
-ident		BSDKIT
-
-options		DDB		# Enable the ddb debugger backend.
-
-options		KVA_PAGES=512
