@@ -1,12 +1,10 @@
-q-history-search-backward()
-{
+q-history-search-backward() {
     local cursor=$CURSOR
     zle .history-search-backward "$LBUFFER"
     CURSOR=$cursor
 }
 
-q-history-search-forward()
-{
+q-history-search-forward() {
     local cursor=$CURSOR
     zle .history-search-forward "$LBUFFER"
     CURSOR=$cursor
@@ -92,8 +90,7 @@ if [[ $TERM = screen ]]; then
     bindkey '^?' backward-delete-char
 fi
 
-chpwd()
-{
+chpwd() {
     [[ -t 1 ]] || return
 
     case ${TERM} in
@@ -131,13 +128,13 @@ fi
 
 case $(uname) in
     Darwin)
-	# PATH is taken care of in /etc/paths
+        # PATH is taken care of in /etc/paths
         export PATH=$PATH:~/bin
         ;;
     FreeBSD)
         export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/bin:/usr/local/sbin:~/bin
         ;;
-    *)
+    *) ;;
 esac
 
 export LANG=en_US.UTF-8
