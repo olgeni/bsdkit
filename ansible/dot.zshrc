@@ -112,9 +112,7 @@ if [ -d ~/.zsh ]; then
 fi
 
 if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
-    if [ -d ~/.zsh/completion ]; then
-        fpath=(~/.zsh/completion $fpath)
-    fi
+    fpath=(~/.zsh/completion $fpath)
 fi
 
 autoload -Uz compinit && compinit
