@@ -1349,7 +1349,7 @@ create_iocage() {
     _do_configure_jail ${_destdir}
 }
 
-# bsdkit create_iocage_thin tag -r 12.1-RELEASE
+# bsdkit create_iocage_thin tag -r 12.1-RELEASE ip4_addr='lo0|172.16.1.1/32'
 create_iocage_thin() {
     parse_options "$@"
 
