@@ -7,7 +7,7 @@
 ## See the sudoers man page for the details on how to write a sudoers file.
 ##
 
-Defaults umask=022, umask_override
+Defaults umask=022, umask_override, always_set_home
 
 root ALL = (ALL) NOPASSWD: SETENV: ALL
 
