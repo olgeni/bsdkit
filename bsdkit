@@ -3,7 +3,7 @@
 set -e -u
 
 error() {
-    echo "bsdkit: $@"
+    echo "bsdkit: $*"
     exit 1
 }
 
@@ -63,7 +63,7 @@ is_efi() {
 : ${PV_UPDATE_DELAY:="0.1"}
 : ${JAIL_PROXY:=""}
 
-if which -s pv 2>/dev/null; then
+if command -v pv 2>/dev/null; then
     CAT_CMD="pv -i ${PV_UPDATE_DELAY}"
 else
     CAT_CMD=/bin/cat
@@ -73,7 +73,7 @@ if [ -z "${PART_SIZE_SWAP}" ]; then
     PART_SIZE_SWAP=0
 fi
 
-if [ -z "${SSH_PUBLIC_KEY}" -a -e ~/.ssh/id_rsa.pub ]; then
+if [ -z "${SSH_PUBLIC_KEY}" ] && [ -e ~/.ssh/id_rsa.pub ]; then
     SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 fi
 
@@ -131,11 +131,12 @@ BSDKIT_DIR=$(realpath $(dirname $0))
 parse_url() {
     local _url="$1"
 
-    echo ${_url} | sed -e "s|%%ROOT_URL%%|${BSDKIT_ROOT_URL}|g" \
-        -e                "s|%%VERSION%%|${BSDKIT_VERSION}|g" \
-        -e                "s|%%ARCH%%|${BSDKIT_ARCH}|g" \
-        -e                "s|%%TREE%%|${BSDKIT_TREE}|g" \
-        -e                "s|%%PKGSET%%|${BSDKIT_PKGSET}|g"
+    echo "${_url}" | sed \
+        -e "s|%%ROOT_URL%%|${BSDKIT_ROOT_URL}|g" \
+        -e "s|%%VERSION%%|${BSDKIT_VERSION}|g" \
+        -e "s|%%ARCH%%|${BSDKIT_ARCH}|g" \
+        -e "s|%%TREE%%|${BSDKIT_TREE}|g" \
+        -e "s|%%PKGSET%%|${BSDKIT_PKGSET}|g"
 }
 
 parse_options() {
@@ -276,13 +277,13 @@ valid_staging() {
 valid_destdir() {
     local _destdir="$1"
 
-    [ -d ${_destdir} -a ${_destdir} != "/" -a -f "${_destdir}/bin/sh" ]
+    [ -d "${_destdir}" ] && [ "${_destdir}" != "/" ] && [ -f "${_destdir}"/bin/sh ]
 }
 
 valid_bsdkit() {
     local _bsdkit="$1"
 
-    [ -d ${_bsdkit} -a -f "${_bsdkit}/bsdkit" ]
+    [ -d "${_bsdkit}" ] && [ -f "${_bsdkit}"/bsdkit ]
 }
 
 valid_class() {
@@ -572,7 +573,7 @@ zfs_create_pool() {
 
     local _devices
 
-    _devices="$@"
+    _devices="$*"
 
     [ -d ${_destdir} ]
 
@@ -636,7 +637,7 @@ zfs_create_gpt_pool() {
 
     local _devices
 
-    _devices="$@"
+    _devices="$*"
 
     [ -d ${_destdir} ]
 
@@ -709,7 +710,7 @@ zfs_create_mbr_pool() {
 
     local _devices
 
-    _devices="$@"
+    _devices="$*"
 
     [ -d ${_destdir} ]
 
@@ -1004,15 +1005,15 @@ install_release() {
 }
 
 install_resolv_conf() {
-    if [ -f /etc/resolv.conf -a ! -f ${_destdir}/etc/resolv.conf ]; then
-        install -m 644 -o root -g wheel /etc/resolv.conf ${_destdir}/etc/resolv.conf
+    if [ -f /etc/resolv.conf ] && [ ! -f "${_destdir}/etc/resolv.conf" ]; then
+        install -m 644 -o root -g wheel /etc/resolv.conf "${_destdir}/etc/resolv.conf"
     fi
 }
 
 install_ca_root_nss() {
-    if [ -f /usr/local/share/certs/ca-root-nss.crt -a ! -e ${_destdir}/usr/local/etc/ssl/cert.pem ]; then
-        mkdir -p ${_destdir}/usr/local/etc/ssl
-        install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt ${_destdir}/usr/local/etc/ssl/cert.pem
+    if [ -f /usr/local/share/certs/ca-root-nss.crt ] && [ ! -e "${_destdir}/usr/local/etc/ssl/cert.pem" ]; then
+        mkdir -p "${_destdir}/usr/local/etc/ssl"
+        install -m 644 -o root -g wheel /usr/local/share/certs/ca-root-nss.crt "${_destdir}/usr/local/etc/ssl/cert.pem"
     fi
 }
 
@@ -1137,7 +1138,7 @@ install_mbr_ufs_gmirror() {
 
     local _devices
 
-    _devices="$@"
+    _devices="$*"
 
     [ -n ${_class} ]
     [ -n ${_mirror} ]
@@ -1196,7 +1197,7 @@ install_zfs() {
 
     local _devices
 
-    _devices="$@"
+    _devices="$*"
 
     [ -n "${_devices}" ]
 
@@ -1226,7 +1227,7 @@ install_gpt_zfs() {
 
     local _devices
 
-    _devices="$@"
+    _devices="$*"
 
     [ -n "${_devices}" ]
 
@@ -1256,7 +1257,7 @@ install_mbr_zfs() {
 
     local _devices
 
-    _devices="$@"
+    _devices="$*"
 
     [ -n "${_devices}" ]
 
@@ -1287,7 +1288,7 @@ create_iocell() {
 
     shift
 
-    which iocell >/dev/null  2>&1 || error "iocell not found (create_iocell)."
+    command -v iocell >/dev/null  2>&1 || error "iocell not found (create_iocell)."
 
     local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}" "$@")
     local _mountpoint=$(iocell get mountpoint "${_tag}") || error "iocell could not retrieve mountpoint"
@@ -1463,8 +1464,8 @@ _do_configure_jail() {
 
     customize_base ${_destdir}
 
-    if [ -f /etc/hosts -a ! -f ${_destdir}/etc/hosts ]; then
-        install -m 644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
+    if [ -f /etc/hosts ] && [ ! -f "${_destdir}/etc/hosts" ]; then
+        install -m 644 -o root -g wheel /etc/hosts "${_destdir}/etc/hosts"
     fi
 
     start_jail ${_destdir}
@@ -1936,7 +1937,7 @@ build_setup_iso() {
     local _relpath="$3"
     local _pkgpath="$4"
 
-    if ! which mkisofs >/dev/null  2>&1; then
+    if ! command -v mkisofs >/dev/null  2>&1; then
         error "required command missing (mkisofs)"
         # EX_UNAVAILABLE
         exit 69
@@ -2305,7 +2306,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KR
 EOF
 }
 
-if ! which ansible-playbook >/dev/null  2>&1; then
+if ! command -v ansible-playbook >/dev/null  2>&1; then
     error "required command missing (ansible-playbook)"
     # EX_UNAVAILABLE
     exit 69
