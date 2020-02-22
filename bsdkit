@@ -63,7 +63,7 @@ is_efi() {
 : ${PV_UPDATE_DELAY:="0.1"}
 : ${JAIL_PROXY:=""}
 
-if command -v pv 2>/dev/null; then
+if command -v pv >/dev/null 2>&1; then
     CAT_CMD="pv -i ${PV_UPDATE_DELAY}"
 else
     CAT_CMD=/bin/cat
