@@ -30,6 +30,6 @@ Vagrant.configure("2") do |config|
     cd /vagrant && ./bsdkit ansible_local_playbook
     pkg upg -y
     pkg autoremove -y
-    pkg clean -ay
+    pkg clean -y -a
   SHELL
 end
