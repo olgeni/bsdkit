@@ -1823,20 +1823,24 @@ EOF
     echo "IMG_PART=/dev/gpt/${IMG_DATA_LABEL}" >>${_mfsroot}/baseroot.rc
 
     cat >>${_mfsroot}/baseroot.rc  <<"EOF"
-BASEROOT_IMG=/base.ufs.uzip
+set -e -u
 
-BASEROOT_MP=/baseroot
-CDROM_MP=/cdrom
-IMG_MP=/img
-DEV_MP=/dev
-TMP_MP=/tmp
+trap '/rescue/sh' EXIT
 
-ETC_MP=/etc
-ETC_RDWR_MP=/etc.rdwr
-ROOT_MP=/root
-ROOT_RDWR_MP=/root.rdwr
+export BASEROOT_IMG=/base.ufs.uzip
 
-PATH=/rescue
+export BASEROOT_MP=/baseroot
+export CDROM_MP=/cdrom
+export IMG_MP=/img
+export DEV_MP=/dev
+export TMP_MP=/tmp
+
+export ETC_MP=/etc
+export ETC_RDWR_MP=/etc.rdwr
+export ROOT_MP=/root
+export ROOT_RDWR_MP=/root.rdwr
+
+export PATH=/rescue
 
 mount -u -w /
 
@@ -1852,19 +1856,11 @@ if [ -e ${IMG_PART} ]; then
     ISO_MD=$(mdconfig -a -t vnode -f ${IMG_MP}/*.[iI][sS][oO])
     mount -t cd9660 /dev/${ISO_MD} ${CDROM_MP}
 else
-    mount -t cd9660 /dev/cd0 ${CDROM_MP} >/dev/null 2>&1
-
-    if [ $? -ne 0 ]; then
-        mount -t cd9660 /dev/cd1 ${CDROM_MP} >/dev/null 2>&1
-    fi
-
-    if [ $? -ne 0 ]; then
-        mount -t cd9660 /dev/acd0 ${CDROM_MP} >/dev/null 2>&1
-    fi
-
-    if [ $? -ne 0 ]; then
-        mount -t cd9660 /dev/acd1 ${CDROM_MP} >/dev/null 2>&1
-    fi
+    for _device in cd0 cd1 acd0 acd1; do
+        if -e /dev/${_device}; then
+            mount -t cd9660 /dev/${_device} ${CDROM_MP} >/dev/null 2>&1
+        fi
+    done
 fi
 
 mdmfs -P -F ${CDROM_MP}${BASEROOT_IMG} -o ro md.uzip ${BASEROOT_MP}
@@ -1899,6 +1895,8 @@ if kenv bsdkit_defaultrouter >/dev/null 2>&1; then
     bsdkit_defaultrouter=$(kenv bsdkit_defaultrouter)
     echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >> /baseroot/etc/rc.conf
 fi
+
+trap '' EXIT
 
 exit 0
 EOF
