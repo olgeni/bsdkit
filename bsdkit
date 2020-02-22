@@ -1288,7 +1288,7 @@ create_iocell() {
 
     shift
 
-    command -v iocell >/dev/null  2>&1 || error "iocell not found (create_iocell)."
+    command -v iocell >/dev/null 2>&1 || error "iocell not found (create_iocell)."
 
     local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}" "$@")
     local _mountpoint=$(iocell get mountpoint "${_tag}") || error "iocell could not retrieve mountpoint"
