@@ -1803,6 +1803,8 @@ kern.cam.boot_delay="10000"
 
 kern.geom.label.disk_ident.enable="0"
 
+vfs.root_mount_always_wait="1"
+
 mfsroot_load="YES"
 mfsroot_type="md_image"
 mfsroot_name="/memroot.ufs"
