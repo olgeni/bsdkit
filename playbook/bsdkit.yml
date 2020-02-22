@@ -1,16 +1,16 @@
 ---
 - hosts: all
   user: root
-  gather_facts: false
+  gather_facts: False
   tasks:
     - name: "Bootstrap pkgng"
       raw: /bin/sh -c /usr/bin/env ASSUME_ALWAYS_YES=yes pkg -N || pkg update -f
-      changed_when: false
+      changed_when: False
 
     - name: "Install Python"
       raw: /usr/bin/env http_proxy="{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
         pkg install -y python
-      changed_when: false
+      changed_when: False
 
 - hosts: all
   user: root
@@ -44,15 +44,17 @@
         state: absent
 
     - name: "kenv smbios.system.product"
-      command: "kenv smbios.system.product"
-      changed_when: false
-      ignore_errors: true
+      command:
+        cmd: kenv smbios.system.product
+      changed_when: False
+      ignore_errors: True
       register: kenv_smbios_system_product
 
     - name: "kenv smbios.bios.vendor"
-      command: "kenv smbios.bios.vendor"
-      changed_when: false
-      ignore_errors: true
+      command:
+        cmd: kenv smbios.bios.vendor
+      changed_when: False
+      ignore_errors: True
       register: kenv_smbios_bios_vendor
 
     - name: "set_fact: bsdkit variables"
@@ -71,7 +73,7 @@
     - name: "Gather metadata (#1)"
       uri:
         url: http://169.254.169.254/metadata/v1.json
-        return_content: true
+        return_content: True
       register: metadata_payload
       when: is_droplet
 
@@ -86,14 +88,16 @@
         marker: "# {mark} ANSIBLE MANAGED BLOCK"
         insertafter: EOF
         block: |
-          {{metadata.interfaces.public[0].ipv4.ip_address}} {{metadata.hostname.split(".")[0]}} {{metadata.hostname}} egress
-          {{metadata.interfaces.public[0].anchor_ipv4.ip_address}} anchor
-          {{metadata.interfaces.private[0].ipv4.ip_address}} private
+          {{ metadata.interfaces.public[0].ipv4.ip_address }} {{ metadata.hostname.split(".")[0] }} {{ metadata.hostname }} egress
+          {{ metadata.interfaces.public[0].anchor_ipv4.ip_address }} anchor
+          {{ metadata.interfaces.private[0].ipv4.ip_address }} private
       when: is_droplet
 
     - name: "Configure sshd_flags for Digital Ocean"
-      command: sysrc sshd_flags+=" -oListenAddress={{metadata.interfaces.public[0].ipv4.ip_address}}"
+      command:
+        cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].ipv4.ip_address }}"
       when: is_droplet
+      changed_when: False
 
     - name: "Set authorized_key"
       authorized_key:
@@ -102,10 +106,11 @@
       when: bsdkit_ssh_public_key | length > 0
 
     - name: "Configure login.conf (check for lang=en_US.UTF-8)"
-      command: grep -Fq ":lang=en_US.UTF-8:" /etc/login.conf
+      command:
+        cmd: grep -Fq ':lang=en_US.UTF-8:' /etc/login.conf
       register: login_conf_lang
-      changed_when: no
-      failed_when: false
+      changed_when: False
+      failed_when: False
       check_mode: no
 
     - name: "Configure login.conf (lang=en_US.UTF-8)"
@@ -113,7 +118,7 @@
         dest: /etc/login.conf
         line: "\t:lang=en_US.UTF-8:\\"
         insertafter: "^default:"
-        firstmatch: true
+        firstmatch: True
       when: login_conf_lang.rc != 0
       notify: cap_mkdb
 
@@ -122,7 +127,7 @@
         dest: /etc/login.conf
         line: "\t:charset=UTF-8:\\"
         insertafter: "^default:"
-        firstmatch: true
+        firstmatch: True
       when: login_conf_lang.rc != 0
       notify: cap_mkdb
 
@@ -183,10 +188,10 @@
       register: stat_etc_rc_conf
 
     - name: "Touch rc.conf (exec)"
-      shell:
+      command:
         cmd: touch /etc/rc.conf
       when: not stat_etc_rc_conf.stat.exists
-      failed_when: false
+      failed_when: False
 
     - name: "Install kernel configuration (stat: /usr/src/sys)"
       stat:
@@ -201,7 +206,7 @@
         group: wheel
         mode: "0644"
       when: stat_usr_src_sys.stat.exists
-      failed_when: false
+      failed_when: False
 
     - name: "Install configuration files in /etc"
       copy:
@@ -220,7 +225,7 @@
         dest: /etc/periodic.conf
         line: "{{ item.key }}=\"{{ item.value }}\""
         regexp: "^{{ item.key }} *="
-        create: true
+        create: True
       with_items:
         - { key: 'daily_output', value: '/var/log/daily.log' }
         - { key: 'weekly_output', value: '/var/log/weekly.log' }
@@ -260,7 +265,7 @@
         line: 'loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"'
         regexp: ^loader_conf_files=
         insertbefore: BOF
-        create: true
+        create: True
       when: not bsdkit_install_jail
 
     - name: "Install loader.conf.vendor"
@@ -275,11 +280,13 @@
       when: not bsdkit_install_jail
 
     - name: "Set bsdkit ifconfig in rc.conf"
-      command: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
+      command:
+        cmd: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
       when: (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
 
     - name: "Set bsdkit defaultrouter in rc.conf"
-      command: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"
+      command:
+        cmd: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"
       when: bsdkit_defaultrouter | length > 0
 
     - name: "Set http_proxy in pkg.conf"
@@ -297,7 +304,7 @@
         owner: root
         group: wheel
         mode: "0644"
-        backup: true
+        backup: True
       with_items:
         - sysctl.conf
       when: not bsdkit_install_jail
@@ -315,7 +322,7 @@
         - login_conf
         - vimrc
         - zshrc
-      failed_when: false
+      failed_when: False
 
     - name: "Install dotfiles in /root"
       copy:
@@ -338,7 +345,7 @@
         owner: root
         group: wheel
         mode: "0440"
-        backup: true
+        backup: True
 
     - name: "Check if /vagrant exists"
       stat:
@@ -425,7 +432,8 @@
       register: stat_zoneinfo
 
     - name: "Run tzsetup (exec)"
-      command: tzsetup Europe/Rome
+      command:
+        cmd: tzsetup Europe/Rome
       when: not stat_zoneinfo.stat.exists
 
     - name: "Set 'MAILTO' in /etc/crontab"
@@ -517,11 +525,6 @@
         mode: "0644"
       when: stat_ca_root_nss.stat.exists and not stat_cert_pem.stat.exists
 
-    - name: "Run pkg clean"
-      command: "pkg clean -a -y"
-      ignore_errors: true
-      changed_when: false
-
     - name: "VirtualBox configuration"
       lineinfile:
         dest: /etc/rc.conf
@@ -548,15 +551,17 @@
       when: kenv_smbios_system_product.stdout == "VMware Virtual Platform"
 
     - name: "Clean package cache"
-      shell:
+      command:
         cmd: pkg clean -a -y
-      failed_when: false
+      changed_when: False
+      failed_when: False
+      ignore_errors: True
 
     - name: "Remove ansible directory"
       file:
-        path: "/root/.ansible"
+        path: '/root/.ansible'
         state: absent
-      changed_when: false
+      changed_when: False
 
     - name: "Remove authorized_key"
       authorized_key:
@@ -567,7 +572,9 @@
 
   handlers:
     - name: cap_mkdb
-      command: "cap_mkdb /etc/login.conf"
+      command:
+        cmd: cap_mkdb /etc/login.conf
 
     - name: pwd_mkdb
-      command: "pwd_mkdb -p /etc/master.passwd"
+      command:
+        cmd: pwd_mkdb -p /etc/master.passwd
