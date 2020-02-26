@@ -1,0 +1,17 @@
+- name: "Configure loader_conf_files"
+  lineinfile:
+    dest: /boot/loader.conf.local
+    line: 'loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"'
+    regexp: ^loader_conf_files=
+    insertbefore: BOF
+    create: True
+
+- name: "Install loader.conf.vendor"
+  copy:
+    src: ../ansible/{{ item }}
+    dest: /boot/{{ item }}
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items:
+    - loader.conf.vendor

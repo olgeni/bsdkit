@@ -1,0 +1,13 @@
+- name: "VMware configuration"
+  lineinfile:
+    dest: /etc/rc.conf
+    line: '{{ item }}_enable="YES"'
+    regexp: "^{{ item }}_enable"
+    insertafter: EOF
+  with_items:
+    - vmware_guest_vmblock
+    - vmware_guest_vmhgfs
+    - vmware_guest_vmmemctl
+    - vmware_guest_vmxnet
+    - vmware_guestd
+  when: kenv_smbios_system_product.stdout == "VMware Virtual Platform"

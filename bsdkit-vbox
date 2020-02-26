@@ -32,6 +32,9 @@ create_vm() {
     VBoxManage modifyvm bsdkit --memory 2048
     VBoxManage modifyvm bsdkit --vram 16
 
+    VBoxManage modifyvm bsdkit --keyboard usb
+    VBoxManage modifyvm bsdkit --mouse usbtablet
+
     if [ -n "${BSDKIT_VBOX_EFI}" ]; then
         # bios|efi|efi32|efi64
         VBoxManage modifyvm bsdkit --firmware efi
@@ -50,11 +53,11 @@ create_vm() {
     VBoxManage modifyvm bsdkit --natpf1 ssh,tcp,,${BSDKIT_VBOX_PORT},,22
 
     VBoxManage storageattach bsdkit \
-        --storagectl        "IDE Controller" \
-        --port        0 \
-        --device        0 \
-        --type        dvddrive \
-        --medium        "${BSDKIT_VBOX_ISO}"
+        --storagectl "IDE Controller" \
+        --port 0 \
+        --device 0 \
+        --type dvddrive \
+        --medium "${BSDKIT_VBOX_ISO}"
 }
 
 while getopts "i:p:e" OPT; do

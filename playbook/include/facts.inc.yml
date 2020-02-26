@@ -1,0 +1,96 @@
+- name: "Retrieve freebsd_major"
+  shell: |
+    set -o pipefail
+    echo "{{ ansible_distribution_release }}" | sed -E 's/([0-9]+).*/\1/;'
+  register: freebsd_major
+  changed_when: False
+
+- name: "Check sysctl: security.jail.jailed"
+  shell:
+    cmd: "[ $(sysctl -n security.jail.jailed) = '1' ]"
+  changed_when: False
+  ignore_errors: True
+  register: sysctl_security_jail_jailed
+
+- name: "Check sysctl: kern.hostuuid"
+  shell:
+    cmd: "[ $(sysctl -n kern.hostuuid) = '2e158b17-5e10-11e5-ac21-080027af0e2a' ]"
+  changed_when: False
+  ignore_errors: True
+  register: sysctl_kern_hostuuid
+
+- name: "set_fact: bsdkit defaults"
+  set_fact:
+    default_bsdkit_root_url: "https://olgeni.olgeni.com/FreeBSD"
+    default_bsdkit_version: "12.1"
+    default_bsdkit_arch: "amd64"
+    default_bsdkit_tree: "default"
+    default_bsdkit_pkgset: "nox11"
+
+- name: "set_fact: bsdkit variables"
+  set_fact:
+    bsdkit_interface: "{{ lookup('env', 'BSDKIT_INTERFACE') }}"
+    bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
+    bsdkit_defaultrouter: "{{ lookup('env', 'BSDKIT_DEFAULTROUTER') }}"
+    bsdkit_ssh_public_key: "{{ lookup('env', 'BSDKIT_SSH_PUBLIC_KEY') }}"
+    bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
+    bsdkit_install_host: "{{ lookup('env', 'BSDKIT_INSTALL_HOST') | bool }}"
+    bsdkit_root_url: "{{ lookup('env', 'BSDKIT_ROOT_URL') | default(default_bsdkit_root_url, True) }}"
+    bsdkit_version: "{{ lookup('env', 'BSDKIT_VERSION') | default(default_bsdkit_version, True) }}"
+    bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
+    bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
+    bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
+    is_jailed: sysctl_security_jail_jailed is succeeded
+    is_image: sysctl_kern_hostuuid is succeeded
+
+- name: "debug: bsdkit_interface"
+  debug:
+    var: bsdkit_interface
+
+- name: "debug: bsdkit_ifconfig"
+  debug:
+    var: bsdkit_ifconfig
+
+- name: "debug: bsdkit_defaultrouter"
+  debug:
+    var: bsdkit_defaultrouter
+
+- name: "debug: bsdkit_ssh_public_key"
+  debug:
+    var: bsdkit_ssh_public_key
+
+- name: "debug: bsdkit_jail_proxy"
+  debug:
+    var: bsdkit_jail_proxy
+
+- name: "debug: bsdkit_install_host"
+  debug:
+    var: bsdkit_install_host
+
+- name: "debug: bsdkit_root_url"
+  debug:
+    var: bsdkit_root_url
+
+- name: "debug: bsdkit_version"
+  debug:
+    var: bsdkit_version
+
+- name: "debug: bsdkit_arch"
+  debug:
+    var: bsdkit_arch
+
+- name: "debug: bsdkit_tree"
+  debug:
+    var: bsdkit_tree
+
+- name: "debug: bsdkit_pkgset"
+  debug:
+    var: bsdkit_pkgset
+
+- name: "debug: is_jailed"
+  debug:
+    var: is_jailed
+
+- name: "debug: is_image"
+  debug:
+    var: is_image

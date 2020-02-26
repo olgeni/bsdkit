@@ -1,0 +1,20 @@
+- name: "Create /usr/local/etc/newsyslog.conf.d/"
+  file:
+    path: /usr/local/etc/newsyslog.conf.d/
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: "Remove obsolete newsyslog.conf"
+  file:
+    path: /etc/newsyslog.conf.d/newsyslog.conf
+    state: absent
+
+- name: "Install newsyslog (bsdkit.conf)"
+  copy:
+    src: ../ansible/newsyslog-bsdkit.conf
+    dest: /usr/local/etc/newsyslog.conf.d/bsdkit.conf
+    owner: root
+    group: wheel
+    mode: "0644"

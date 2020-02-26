@@ -1,0 +1,27 @@
+- name: "Install dotfiles in /usr/share/skel"
+  copy:
+    src: ../ansible/dot.{{ item }}
+    dest: /usr/share/skel/dot.{{ item }}
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items:
+    - inputrc
+    - kermrc
+    - login_conf
+    - vimrc
+    - zshrc
+
+- name: "Install dotfiles in /root"
+  copy:
+    src: ../ansible/dot.{{ item }}
+    dest: /root/.{{ item }}
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items:
+    - inputrc
+    - kermrc
+    - login_conf
+    - vimrc
+    - zshrc

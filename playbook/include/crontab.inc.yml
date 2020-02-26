@@ -1,0 +1,6 @@
+- name: "Set 'MAILTO' in /etc/crontab"
+  lineinfile:
+    dest: /etc/crontab
+    line: 'MAILTO=""'
+    regexp: "^MAILTO"
+    insertbefore: "^SHELL="

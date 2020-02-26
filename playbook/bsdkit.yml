@@ -15,124 +15,22 @@
 - hosts: all
   user: root
   tasks:
-    - name: "Retrieve freebsd_branch"
-      set_fact:
-        freebsd_branch: '{{ ansible_distribution_release.split("-")[1] }}'
+    - name: "Include kenv.inc.yml"
+      include: include/kenv.inc.yml
 
-    - name: "Retrieve freebsd_version (checking for stable)"
-      set_fact:
-        freebsd_version: '{{ ansible_distribution_release.split(".")[0] }}'
-      when: freebsd_branch == "STABLE"
+    - name: "Include facts.inc.yml"
+      include: include/facts.inc.yml
 
-    - name: "Retrieve freebsd_version (checking for release)"
-      set_fact:
-        freebsd_version: '{{ ansible_distribution_release.split("-")[0] }}'
-      when: |
-        freebsd_branch == "RELEASE"
-        or freebsd_branch == "PRERELEASE"
-        or freebsd_branch[:4] == "BETA"
-        or freebsd_branch[:2] == "RC"
+    - name: "Include zpool.inc.yml"
+      include: include/zpool.inc.yml
 
-    - name: "Remove /usr/lib/debug directory"
+    - name: "Touch rc.conf (exec)"
       file:
-        path: "/usr/lib/debug"
-        state: absent
+        path: /etc/rc.conf
+        state: touch
 
-    - name: "Remove /usr/tests directory"
-      file:
-        path: "/usr/tests"
-        state: absent
-
-    - name: "kenv smbios.system.product"
-      command:
-        cmd: kenv smbios.system.product
-      changed_when: False
-      ignore_errors: True
-      register: kenv_smbios_system_product
-
-    - name: "kenv smbios.bios.vendor"
-      command:
-        cmd: kenv smbios.bios.vendor
-      changed_when: False
-      ignore_errors: True
-      register: kenv_smbios_bios_vendor
-
-    - name: "set_fact: bsdkit variables"
-      set_fact:
-        bsdkit_ssh_public_key: "{{ lookup('env', 'BSDKIT_SSH_PUBLIC_KEY') }}"
-        bsdkit_interface: "{{ lookup('env', 'BSDKIT_INTERFACE') }}"
-        bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
-        bsdkit_defaultrouter: "{{ lookup('env', 'BSDKIT_DEFAULTROUTER') }}"
-        bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
-        bsdkit_install_jail: "{{ lookup('env', 'BSDKIT_INSTALL_JAIL') | bool }}"
-
-    - name: "set_fact: variables"
-      set_fact:
-        is_droplet: "{{ (not bsdkit_install_jail) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
-
-    - name: "Gather metadata (#1)"
-      uri:
-        url: http://169.254.169.254/metadata/v1.json
-        return_content: True
-      register: metadata_payload
-      when: is_droplet
-
-    - name: "Gather metadata (#2)"
-      set_fact:
-        metadata: "{{ metadata_payload.content|from_json }}"
-      when: is_droplet
-
-    - name: "Configure /etc/hosts for Digital Ocean"
-      blockinfile:
-        path: /etc/hosts
-        marker: "# {mark} ANSIBLE MANAGED BLOCK"
-        insertafter: EOF
-        block: |
-          {{ metadata.interfaces.public[0].ipv4.ip_address }} {{ metadata.hostname.split(".")[0] }} {{ metadata.hostname }} egress
-          {{ metadata.interfaces.public[0].anchor_ipv4.ip_address }} anchor
-          {{ metadata.interfaces.private[0].ipv4.ip_address }} private
-      when: is_droplet
-
-    - name: "Configure sshd_flags for Digital Ocean"
-      command:
-        cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].ipv4.ip_address }}"
-      when: is_droplet
-      changed_when: False
-
-    - name: "Set authorized_key"
-      authorized_key:
-        user: root
-        key: "{{ bsdkit_ssh_public_key }}"
-      when: bsdkit_ssh_public_key | length > 0
-
-    - name: "Configure login.conf (check for lang=en_US.UTF-8)"
-      command:
-        cmd: grep -Fq ':lang=en_US.UTF-8:' /etc/login.conf
-      register: login_conf_lang
-      changed_when: False
-      failed_when: False
-      check_mode: no
-
-    - name: "Configure login.conf (lang=en_US.UTF-8)"
-      lineinfile:
-        dest: /etc/login.conf
-        line: "\t:lang=en_US.UTF-8:\\"
-        insertafter: "^default:"
-        firstmatch: True
-      when: login_conf_lang.rc != 0
-      notify: cap_mkdb
-
-    - name: "Configure login.conf (charset=UTF-8)"
-      lineinfile:
-        dest: /etc/login.conf
-        line: "\t:charset=UTF-8:\\"
-        insertafter: "^default:"
-        firstmatch: True
-      when: login_conf_lang.rc != 0
-      notify: cap_mkdb
-
-    - name: "Flush handlers"
-      meta: flush_handlers
+    - name: "Include remove.inc.yml"
+      include: include/remove.inc.yml
 
     - name: "Create /usr/local/etc"
       file:
@@ -142,71 +40,20 @@
         group: wheel
         mode: "0755"
 
-    - name: "Create /usr/local/etc/sv"
-      file:
-        path: /usr/local/etc/sv
-        state: directory
-        owner: root
-        group: wheel
-        mode: "0755"
+    - name: "Include login-conf.inc.yml"
+      include: include/login-conf.inc.yml
 
-    - name: "Create /var/service"
-      file:
-        path: /var/service
-        state: directory
-        owner: root
-        group: wheel
-        mode: "0755"
+    - name: "Include pkg.inc.yml"
+      include: include/pkg.inc.yml
 
-    - name: "Create /usr/local/etc/pkg/repos"
-      file:
-        path: /usr/local/etc/pkg/repos
-        state: directory
-        owner: root
-        group: wheel
-        mode: "0755"
+    - name: "Include kernconf.inc.yml"
+      include: include/kernconf.inc.yml
 
-    - name: "Disable default FreeBSD repository"
-      copy:
-        content: |
-          FreeBSD: {
-              enabled: no
-          }
-        dest: /usr/local/etc/pkg/repos/FreeBSD.conf
+    - name: "Digital Ocean"
+      include: include/digitalocean.inc.yml
 
-    - name: "Enable bsdkit repository"
-      copy:
-        content: |
-          bsdkit: {
-              url: "http://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11"
-          }
-        dest: /usr/local/etc/pkg/repos/bsdkit.conf
-
-    - name: "Touch rc.conf (stat: /etc/rc.conf)"
-      stat:
-        path: /etc/rc.conf
-      register: stat_etc_rc_conf
-
-    - name: "Touch rc.conf (exec)"
-      command:
-        cmd: touch /etc/rc.conf
-      when: not stat_etc_rc_conf.stat.exists
-      failed_when: False
-
-    - name: "Install kernel configuration (stat: /usr/src/sys)"
-      stat:
-        path: /usr/src/sys
-      register: stat_usr_src_sys
-
-    - name: "Install kernel configuration (exec)"
-      copy:
-        src: ../ansible/BSDKIT-{{ freebsd_version }}-{{ ansible_architecture }}
-        dest: /usr/src/sys/{{ ansible_architecture }}/conf/BSDKIT
-        owner: root
-        group: wheel
-        mode: "0644"
-      when: stat_usr_src_sys.stat.exists
-      failed_when: False
+    - name: "Include runit.inc.yml"
+      include: include/runit.inc.yml
 
     - name: "Install configuration files in /etc"
       copy:
@@ -220,268 +67,131 @@
         - make.conf
         - src.conf
 
-    - name: "Configure periodic.conf"
-      lineinfile:
-        dest: /etc/periodic.conf
-        line: "{{ item.key }}=\"{{ item.value }}\""
-        regexp: "^{{ item.key }} *="
-        create: True
-      with_items:
-        - { key: 'daily_output', value: '/var/log/daily.log' }
-        - { key: 'weekly_output', value: '/var/log/weekly.log' }
-        - { key: 'monthly_output', value: '/var/log/monthly.log' }
-        - { key: 'daily_status_security_output', value: '/var/log/security-daily.log' }
-        - { key: 'weekly_status_security_output', value: '/var/log/security-weekly.log' }
-        - { key: 'monthly_status_security_output', value: '/var/log/security-monthly.log' }
-        - { key: 'daily_status_security_enable', value: 'NO' }
-        - { key: 'weekly_status_security_enable', value: 'NO' }
-        - { key: 'monthly_status_security_enable', value: 'NO' }
-        - { key: 'daily_clean_tmps_enable', value: 'YES' }
-        - { key: 'daily_status_zfs_enable', value: 'NO' }
-        - { key: 'daily_scrub_zfs_enable', value: 'NO' }
-        - { key: 'daily_scrub_zfs_default_threshold', value: '0' }
+    - name: "Include periodic.inc.yml"
+      include: include/periodic.inc.yml
 
-    - name: "Install /etc/defaults/vendor.conf (host version)"
-      copy:
-        src: ../ansible/vendor.conf
-        dest: /etc/defaults/vendor.conf
-        owner: root
-        group: wheel
-        mode: "0644"
-      when: not bsdkit_install_jail
+    - name: "Block: host"
+      when: bsdkit_install_host
+      block:
+        - name: "Include zfs.inc.yml"
+          include: include/zfs.inc.yml
 
-    - name: "Install /etc/defaults/vendor.conf (jail version)"
-      copy:
-        src: ../ansible/vendor.conf.jail
-        dest: /etc/defaults/vendor.conf
-        owner: root
-        group: wheel
-        mode: "0644"
-      when: bsdkit_install_jail
+        - name: "Include loader.inc.yml"
+          include: include/loader.inc.yml
 
-    - name: "Configure loader_conf_files"
-      lineinfile:
-        dest: /boot/loader.conf.local
-        line: 'loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"'
-        regexp: ^loader_conf_files=
-        insertbefore: BOF
-        create: True
-      when: not bsdkit_install_jail
+        - name: "Include bsdenv.inc.yml"
+          include: include/bsdenv.inc.yml
 
-    - name: "Install loader.conf.vendor"
-      copy:
-        src: ../ansible/{{ item }}
-        dest: /boot/{{ item }}
-        owner: root
-        group: wheel
-        mode: "0644"
-      with_items:
-        - loader.conf.vendor
-      when: not bsdkit_install_jail
+        - name: "Install sysctl.conf"
+          copy:
+            src: ../ansible/{{ item }}
+            dest: /etc/{{ item }}
+            owner: root
+            group: wheel
+            mode: "0644"
+            backup: True
+          with_items:
+            - sysctl.conf
 
-    - name: "Set bsdkit ifconfig in rc.conf"
-      command:
-        cmd: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
-      when: (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
+        - name: "Install /etc/defaults/vendor.conf (host version)"
+          copy:
+            src: ../ansible/vendor.conf
+            dest: /etc/defaults/vendor.conf
+            owner: root
+            group: wheel
+            mode: "0644"
 
-    - name: "Set bsdkit defaultrouter in rc.conf"
-      command:
-        cmd: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"
-      when: bsdkit_defaultrouter | length > 0
+        - name: "Configure /etc/devfs.conf"
+          lineinfile:
+            dest: /etc/devfs.conf
+            regexp: "^{{ item }}"
+            state: absent
+          with_items:
+            - ".*devstat"
+            - ".*fuse.*"
 
-    - name: "Set http_proxy in pkg.conf"
-      lineinfile:
-        dest: /usr/local/etc/pkg.conf
-        line: 'pkg_env: { http_proxy: "{{ bsdkit_jail_proxy }}" }'
-        regexp: ^pkg_env
-        insertafter: EOF
-      when: bsdkit_jail_proxy | length > 0
+        - name: "Set http_proxy in pkg.conf"
+          lineinfile:
+            dest: /usr/local/etc/pkg.conf
+            line: 'pkg_env: { http_proxy: "{{ bsdkit_jail_proxy }}" }'
+            regexp: ^pkg_env
+            insertafter: EOF
+          when: bsdkit_jail_proxy | length > 0
 
-    - name: "Install sysctl.conf"
-      copy:
-        src: ../ansible/{{ item }}
-        dest: /etc/{{ item }}
-        owner: root
-        group: wheel
-        mode: "0644"
-        backup: True
-      with_items:
-        - sysctl.conf
-      when: not bsdkit_install_jail
+        - name: "Install /usr/local/etc/smartd.conf"
+          copy:
+            src: ../ansible/smartd.conf
+            dest: /usr/local/etc/smartd.conf
+            owner: root
+            group: wheel
+            mode: "0644"
 
-    - name: "Install dotfiles in /usr/share/skel"
-      copy:
-        src: ../ansible/dot.{{ item }}
-        dest: /usr/share/skel/dot.{{ item }}
-        owner: root
-        group: wheel
-        mode: "0644"
-      with_items:
-        - inputrc
-        - kermrc
-        - login_conf
-        - vimrc
-        - zshrc
-      failed_when: False
+        - name: "Install base packages (host)"
+          pkgng:
+            name:
+              - beadm
+              - smartmontools
+            state: present
 
-    - name: "Install dotfiles in /root"
-      copy:
-        src: ../ansible/dot.{{ item }}
-        dest: /root/.{{ item }}
-        owner: root
-        group: wheel
-        mode: "0644"
-      with_items:
-        - inputrc
-        - kermrc
-        - login_conf
-        - vimrc
-        - zshrc
+    - name: "Block: jail"
+      when: not bsdkit_install_host
+      block:
+        - name: "Install /etc/defaults/vendor.conf (jail version)"
+          copy:
+            src: ../ansible/vendor.conf.jail
+            dest: /etc/defaults/vendor.conf
+            owner: root
+            group: wheel
+            mode: "0644"
 
-    - name: "Install sudoers"
-      copy:
-        src: ../ansible/sudoers
-        dest: /usr/local/etc/sudoers
-        owner: root
-        group: wheel
-        mode: "0440"
-        backup: True
-
-    - name: "Check if /vagrant exists"
-      stat:
-        path: /vagrant
-      register: stat_vagrant
-
-    - name: "Enable sudo for vagrant user"
-      copy:
-        content: "vagrant ALL = (ALL) NOPASSWD: SETENV: ALL"
-        dest: /usr/local/etc/sudoers.d/vagrant
-      when: stat_vagrant.stat.isdir is defined and stat_vagrant.stat.isdir
-
-    - name: "Create /usr/local/etc/newsyslog.conf.d/"
-      file:
-        path: /usr/local/etc/newsyslog.conf.d/
-        state: directory
-        owner: root
-        group: wheel
-        mode: "0755"
-
-    - name: "Install newsyslog (bsdkit.conf)"
-      copy:
-        src: ../ansible/newsyslog-bsdkit.conf
-        dest: /usr/local/etc/newsyslog.conf.d/bsdkit.conf
-        owner: root
-        group: wheel
-        mode: "0644"
-
-    - name: "Remove obsolete newsyslog.conf"
-      file:
-        path: /etc/newsyslog.conf.d/newsyslog.conf
-        state: absent
-
-    - name: "Install /etc/firewall"
-      copy:
-        src: ../ansible/firewall
-        dest: /etc/firewall
-        owner: root
-        group: wheel
-        mode: "0644"
-      when: not bsdkit_install_jail
-
-    - name: "Install /usr/local/etc/smartd.conf"
-      copy:
-        src: ../ansible/smartd.conf
-        dest: /usr/local/etc/smartd.conf
-        owner: root
-        group: wheel
-        mode: "0644"
-      when: not bsdkit_install_jail
-
-    - name: "Remove /usr/local/etc/portmaster.rc"
+    - name: "Remove obsolete /usr/local/etc/portmaster.rc"
       file:
         path: /usr/local/etc/portmaster.rc
         state: absent
 
-    - name: "Set 'UseDNS no' in /etc/ssh/sshd_config"
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        line: "UseDNS no"
-        regexp: "^UseDNS"
-        insertafter: EOF
+    - name: "Include dotfiles.inc.yml"
+      include: include/dotfiles.inc.yml
 
-    - name: "Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config"
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        line: "PermitRootLogin without-password"
-        regexp: "^PermitRootLogin"
-        insertafter: EOF
+    - name: "Include sudo.inc.yml"
+      include: include/sudo.inc.yml
 
-    - name: "Configure /etc/devfs.conf"
-      lineinfile:
-        dest: /etc/devfs.conf
-        regexp: "^{{ item }}"
-        state: absent
-      with_items:
-        - ".*devstat"
-        - ".*fuse.*"
-      when: not bsdkit_install_jail
+    - name: "Include vagrant.inc.yml"
+      include: include/vagrant.inc.yml
 
-    - name: "Run tzsetup (stat: /var/db/zoneinfo)"
-      stat:
-        path: /var/db/zoneinfo
-      register: stat_zoneinfo
+    - name: "Include newsyslog.inc.yml"
+      include: include/newsyslog.inc.yml
 
-    - name: "Run tzsetup (exec)"
-      command:
-        cmd: tzsetup Europe/Rome
-      when: not stat_zoneinfo.stat.exists
+    - name: "Include ssh.inc.yml"
+      include: include/ssh.inc.yml
 
-    - name: "Set 'MAILTO' in /etc/crontab"
-      lineinfile:
-        dest: /etc/crontab
-        line: 'MAILTO=""'
-        regexp: "^MAILTO"
-        insertbefore: "^SHELL="
+    - name: "Include zoneinfo.inc.yml"
+      include: include/zoneinfo.inc.yml
 
-    - name: "Disable '/dev/console' in /etc/syslog.conf"
-      lineinfile:
-        dest: /etc/syslog.conf
-        regexp: "/dev/console$"
-        state: absent
+    - name: "Include crontab.inc.yml"
+      include: include/crontab.inc.yml
 
-    - name: "Create /var/ftp"
-      file:
-        path: /var/ftp
-        state: directory
-        owner: root
-        group: wheel
-        mode: "0755"
+    - name: "Include syslog.inc.yml"
+      include: include/syslog.inc.yml
 
-    - name: "Add FTP user"
-      lineinfile:
-        dest: /etc/master.passwd
-        line: "ftp:*:14:14::0:0:Anonymous FTP Admin:/var/ftp:/nonexistent"
-        regexp: "^ftp:"
-        insertafter: "^man:"
-      notify: pwd_mkdb
+    - name: "Include ftp.inc.yml"
+      include: include/ftp.inc.yml
 
-    # Workaround for "pw: user '...' disappeared during update"
-    - name: "Flush handlers"
-      meta: flush_handlers
+    - name: "Include postgres-zfs.inc.yml"
+      include: include/postgres-zfs.inc.yml
 
-    - name: "Create /usr/local/etc/ssl/certs"
-      file:
-        path: /usr/local/etc/ssl/certs
-        state: directory
-        owner: root
-        group: wheel
-        mode: "0755"
+    - name: "Include mysql-zfs.inc.yml"
+      include: include/mysql-zfs.inc.yml
+
+    - name: "Include postgres.inc.yml"
+      include: include/postgres.inc.yml
+
+    - name: "Include mysql.inc.yml"
+      include: include/mysql.inc.yml
 
     - name: "Install base packages (common)"
       pkgng:
         name:
           - align
-          - ca_root_nss
           - cpdup
           - curl
           - gnu-watch
@@ -497,78 +207,17 @@
           - zsh
         state: present
 
-    - name: "Install base packages (host)"
-      pkgng:
-        name:
-          - beadm
-          - smartmontools
-        state: present
-      when: not bsdkit_install_jail
+    - name: "Include ca-root-nss.inc.yml"
+      include: include/ca-root-nss.inc.yml
 
-    - name: "Link ca-root-nss.crt (stat: ca-root-nss.crt)"
-      stat:
-        path: /usr/local/share/certs/ca-root-nss.crt
-      register: stat_ca_root_nss
+    - name: "Include virtualbox.inc.yml"
+      include: include/virtualbox.inc.yml
 
-    - name: "Link ca-root-nss.crt (stat: cert.pem)"
-      stat:
-        path: /usr/local/etc/ssl/cert.pem
-      register: stat_cert_pem
+    - name: "Include vmware.inc.yml"
+      include: include/vmware.inc.yml
 
-    - name: "Link ca-root-nss.crt (exec)"
-      file:
-        src: /usr/local/share/certs/ca-root-nss.crt
-        dest: /usr/local/etc/ssl/cert.pem
-        state: link
-        owner: root
-        group: wheel
-        mode: "0644"
-      when: stat_ca_root_nss.stat.exists and not stat_cert_pem.stat.exists
-
-    - name: "VirtualBox configuration"
-      lineinfile:
-        dest: /etc/rc.conf
-        line: '{{ item }}_enable="YES"'
-        regexp: "^{{ item }}_enable"
-        insertafter: EOF
-      with_items:
-        - vboxguest
-        - vboxservice
-      when: kenv_smbios_system_product.stdout == "VirtualBox"
-
-    - name: "VMware configuration"
-      lineinfile:
-        dest: /etc/rc.conf
-        line: '{{ item }}_enable="YES"'
-        regexp: "^{{ item }}_enable"
-        insertafter: EOF
-      with_items:
-        - vmware_guest_vmblock
-        - vmware_guest_vmhgfs
-        - vmware_guest_vmmemctl
-        - vmware_guest_vmxnet
-        - vmware_guestd
-      when: kenv_smbios_system_product.stdout == "VMware Virtual Platform"
-
-    - name: "Clean package cache"
-      command:
-        cmd: pkg clean -a -y
-      changed_when: False
-      failed_when: False
-      ignore_errors: True
-
-    - name: "Remove ansible directory"
-      file:
-        path: '/root/.ansible'
-        state: absent
-      changed_when: False
-
-    - name: "Remove authorized_key"
-      authorized_key:
-        user: root
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit"
-        state: absent
-      when: bsdkit_ssh_public_key | length > 0
+    - name: "Include cleanup.inc.yml"
+      include: include/cleanup.inc.yml
 
   handlers:
     - name: cap_mkdb

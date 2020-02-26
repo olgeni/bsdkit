@@ -1,0 +1,23 @@
+- name: "Create /usr/local/etc/pkg/repos"
+  file:
+    path: /usr/local/etc/pkg/repos
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: "Disable default FreeBSD repository"
+  copy:
+    content: |
+      FreeBSD: {
+          enabled: no
+      }
+    dest: /usr/local/etc/pkg/repos/FreeBSD.conf
+
+- name: "Enable bsdkit repository"
+  copy:
+    content: |
+      bsdkit: {
+          url: "{{ bsdkit_root_url }}/packages-${ABI}-{{ bsdkit_tree }}-{{ bsdkit_pkgset }}"
+      }
+    dest: /usr/local/etc/pkg/repos/bsdkit.conf

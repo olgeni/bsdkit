@@ -1,0 +1,7 @@
+- name: "Create zfs dataset for /var/db"
+  zfs:
+    name: "{{ zpool }}/var/db"
+    state: present
+    extra_zfs_properties:
+      canmount: off
+  when: has_zfs

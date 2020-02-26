@@ -1,0 +1,27 @@
+- name: "Add FTP user"
+  lineinfile:
+    dest: /etc/master.passwd
+    line: "ftp:*:14:14::0:0:Anonymous FTP Admin:/var/ftp:/sbin/nologin"
+    regexp: "^ftp:"
+    insertafter: "^man:"
+  notify: pwd_mkdb
+
+- name: "Add FTP group"
+  lineinfile:
+    dest: /etc/group
+    line: "ftp:*:14:"
+    regexp: "^ftp:"
+    insertafter: "^games:"
+  notify: pwd_mkdb
+
+# Workaround for "pw: user '...' disappeared during update"
+- name: "Flush handlers"
+  meta: flush_handlers
+
+- name: "Create /var/ftp"
+  file:
+    path: /var/ftp
+    state: directory
+    owner: ftp
+    group: ftp
+    mode: "0755"

@@ -25,19 +25,20 @@ is_efi() {
     [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
 
-: ${INSTALL_JAIL:="no"}
 : ${INSTALL_KERNEL:="yes"}
 : ${INSTALL_SRC:="yes"}
 : ${INSTALL_DEBUG:="no"}
 : ${INSTALL_TESTS:="no"}
 
 : ${ZFS_POOL:="rpool"}
+
 : ${PROCFS_ENABLE:="yes"}
 : ${FDESCFS_ENABLE:="yes"}
+
 : ${DESTDIR:="/mnt"}
+
 : ${JAIL_ROOT:="/jails"}
 : ${JAIL_NAME:="bsdkit"}
-: ${SSH_PUBLIC_KEY:=""}
 
 : ${PART_SIZE_BOOT:="512K"}
 : ${PART_SIZE_EFI:="8M"}
@@ -54,14 +55,16 @@ is_efi() {
 : ${LABEL_USR:="usr"}
 : ${LABEL_VAR:="var"}
 
-: ${BSDKIT_ROOT_URL:=https://olgeni.olgeni.com/FreeBSD}
-: ${BSDKIT_VERSION:=12.1}
-: ${BSDKIT_ARCH:=amd64}
-: ${BSDKIT_TREE:=default}
-: ${BSDKIT_PKGSET:=nox11}
+: ${BSDKIT_INSTALL_HOST:="no"}
+: ${BSDKIT_ROOT_URL:="https://olgeni.olgeni.com/FreeBSD"}
+: ${BSDKIT_JAIL_PROXY:=""}
+: ${BSDKIT_VERSION:="12.1"}
+: ${BSDKIT_ARCH:="amd64"}
+: ${BSDKIT_TREE:="default"}
+: ${BSDKIT_PKGSET:="nox11"}
+: ${BSDKIT_SSH_PUBLIC_KEY:=""}
 
 : ${PV_UPDATE_DELAY:="0.1"}
-: ${JAIL_PROXY:=""}
 
 if command -v pv >/dev/null 2>&1; then
     CAT_CMD="pv -i ${PV_UPDATE_DELAY}"
@@ -73,46 +76,48 @@ if [ -z "${PART_SIZE_SWAP}" ]; then
     PART_SIZE_SWAP=0
 fi
 
-if [ -z "${SSH_PUBLIC_KEY}" ] && [ -e ~/.ssh/id_rsa.pub ]; then
-    SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
+if [ -z "${BSDKIT_SSH_PUBLIC_KEY}" ] && [ -e ~/.ssh/id_rsa.pub ]; then
+    BSDKIT_SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 fi
 
-: ${IMG_DATA_LABEL:=2e158b17-5e10-11e5-ac21-080027af0e2a}
+: ${IMG_DATA_LABEL:="2e158b17-5e10-11e5-ac21-080027af0e2a"}
 
 : ${PKG_LOCKFILE:="/tmp/pkg.lock"}
-: ${PKG_LOCKTIME:=120}
+: ${PKG_LOCKTIME:="120"}
 
 environment() {
-    echo INSTALL_JAIL=\"${INSTALL_JAIL}\" \
-        INSTALL_KERNEL=\"${INSTALL_KERNEL}\" \
-        INSTALL_SRC=\"${INSTALL_SRC}\" \
-        INSTALL_DEBUG=\"${INSTALL_DEBUG}\" \
-        INSTALL_TESTS=\"${INSTALL_TESTS}\" \
-        ZFS_POOL=\"${ZFS_POOL}\" \
-        PROCFS_ENABLE=\"${PROCFS_ENABLE}\" \
-        FDESCFS_ENABLE=\"${FDESCFS_ENABLE}\" \
-        DESTDIR=\"${DESTDIR}\" \
-        JAIL_ROOT=\"${JAIL_ROOT}\" \
-        JAIL_NAME=\"${JAIL_NAME}\" \
-        SSH_PUBLIC_KEY=\"${SSH_PUBLIC_KEY}\" \
-        PART_SIZE_EFI=\"${PART_SIZE_EFI}\" \
-        PART_SIZE_ROOT=\"${PART_SIZE_ROOT}\" \
-        PART_SIZE_SWAP=\"${PART_SIZE_SWAP}\" \
-        PART_SIZE_TMP=\"${PART_SIZE_TMP}\" \
-        PART_SIZE_VAR=\"${PART_SIZE_VAR}\" \
-        LABEL_BOOT=\"${LABEL_BOOT}\" \
-        LABEL_EFI=\"${LABEL_EFI}\" \
-        LABEL_ROOT=\"${LABEL_ROOT}\" \
-        LABEL_SWAP=\"${LABEL_SWAP}\" \
-        LABEL_TMP=\"${LABEL_TMP}\" \
-        LABEL_USR=\"${LABEL_USR}\" \
-        LABEL_VAR=\"${LABEL_VAR}\" \
-        BSDKIT_ROOT_URL=\"${BSDKIT_ROOT_URL}\" \
-        BSDKIT_VERSION=\"${BSDKIT_VERSION}\" \
-        BSDKIT_ARCH=\"${BSDKIT_ARCH}\" \
-        BSDKIT_TREE=\"${BSDKIT_TREE}\" \
-        BSDKIT_PKGSET=\"${BSDKIT_PKGSET}\" \
-        JAIL_PROXY=\"${JAIL_PROXY}\"
+    echo \
+        INSTALL_KERNEL="\"${INSTALL_KERNEL}\"" \
+        INSTALL_SRC="\"${INSTALL_SRC}\"" \
+        INSTALL_DEBUG="\"${INSTALL_DEBUG}\"" \
+        INSTALL_TESTS="\"${INSTALL_TESTS}\"" \
+        ZFS_POOL="\"${ZFS_POOL}\"" \
+        PROCFS_ENABLE="\"${PROCFS_ENABLE}\"" \
+        FDESCFS_ENABLE="\"${FDESCFS_ENABLE}\"" \
+        DESTDIR="\"${DESTDIR}\"" \
+        JAIL_ROOT="\"${JAIL_ROOT}\"" \
+        JAIL_NAME="\"${JAIL_NAME}\"" \
+        PART_SIZE_EFI="\"${PART_SIZE_EFI}\"" \
+        PART_SIZE_ROOT="\"${PART_SIZE_ROOT}\"" \
+        PART_SIZE_SWAP="\"${PART_SIZE_SWAP}\"" \
+        PART_SIZE_TMP="\"${PART_SIZE_TMP}\"" \
+        PART_SIZE_VAR="\"${PART_SIZE_VAR}\"" \
+        LABEL_BOOT="\"${LABEL_BOOT}\"" \
+        LABEL_EFI="\"${LABEL_EFI}\"" \
+        LABEL_ROOT="\"${LABEL_ROOT}\"" \
+        LABEL_SWAP="\"${LABEL_SWAP}\"" \
+        LABEL_TMP="\"${LABEL_TMP}\"" \
+        LABEL_USR="\"${LABEL_USR}\"" \
+        LABEL_VAR="\"${LABEL_VAR}\"" \
+        BSDKIT_INSTALL_HOST="\"${BSDKIT_INSTALL_HOST}\"" \
+        BSDKIT_ROOT_URL="\"${BSDKIT_ROOT_URL}\"" \
+        BSDKIT_JAIL_PROXY="\"${BSDKIT_JAIL_PROXY}\"" \
+        BSDKIT_VERSION="\"${BSDKIT_VERSION}\"" \
+        BSDKIT_ARCH="\"${BSDKIT_ARCH}\"" \
+        BSDKIT_TREE="\"${BSDKIT_TREE}\"" \
+        BSDKIT_PKGSET="\"${BSDKIT_PKGSET}\"" \
+        BSDKIT_SSH_PUBLIC_KEY="\"${BSDKIT_SSH_PUBLIC_KEY}\"" \
+        PV_UPDATE_DELAY="\"${PV_UPDATE_DELAY}\""
 }
 
 : ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
@@ -143,19 +148,19 @@ parse_options() {
     while getopts "r:v:a:p:z:" OPT; do
         case ${OPT} in
             r)
-                BSDKIT_ROOT_URL=${OPTARG%/}
+                BSDKIT_ROOT_URL="${OPTARG%/}"
                 ;;
             v)
-                BSDKIT_VERSION=${OPTARG}
+                BSDKIT_VERSION="${OPTARG}"
                 ;;
             a)
-                BSDKIT_ARCH=${OPTARG}
+                BSDKIT_ARCH="${OPTARG}"
                 ;;
             p)
-                BSDKIT_TREE=${OPTARG}
+                BSDKIT_TREE="${OPTARG}"
                 ;;
             z)
-                BSDKIT_PKGSET=${OPTARG}
+                BSDKIT_PKGSET="${OPTARG}"
                 ;;
             *)
                 return 1
@@ -207,14 +212,14 @@ rc_get() {
 
     _buffer="$(grep -E "^[[:space:]]*${_key}[[:space:]]*=" ${_file})"
 
-    local _value=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
+    local _value1=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
 
-    local _value2=$(expr "${_value}" : "\"\(.*\)\"")
+    local _value2=$(expr "${_value1}" : "\"\(.*\)\"")
 
     if [ -n "${_value2}" ]; then
         echo ${_value2}
     else
-        echo ${_value}
+        echo ${_value1}
     fi
 }
 
@@ -277,13 +282,13 @@ valid_staging() {
 valid_destdir() {
     local _destdir="$1"
 
-    [ -d "${_destdir}" ] && [ "${_destdir}" != "/" ] && [ -f "${_destdir}"/bin/sh ]
+    [ -d "${_destdir}" ] && [ "${_destdir}" != "/" ] && [ -f "${_destdir}/bin/sh" ]
 }
 
 valid_bsdkit() {
     local _bsdkit="$1"
 
-    [ -d "${_bsdkit}" ] && [ -f "${_bsdkit}"/bsdkit ]
+    [ -d "${_bsdkit}" ] && [ -f "${_bsdkit}/bsdkit" ]
 }
 
 valid_class() {
@@ -616,7 +621,7 @@ zfs_create_pool() {
     # zfs_auto_snapshot ${ZFS_POOL}
 
     if has_swap; then
-        zfs create \
+        ${ZFS_CREATE_CMD} \
             -o checksum=off \
             -o compression=off \
             -o dedup=off \
@@ -796,6 +801,10 @@ zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o setuid=off                      ${ZFS_POOL}/var/tmp
     ${ZFS_CREATE_CMD} -o canmount=off                    ${ZFS_POOL}/usr/local
     ${ZFS_CREATE_CMD}                                    ${ZFS_POOL}/usr/home
+    ${ZFS_CREATE_CMD} -o setuid=off -o canmount=off      ${ZFS_POOL}/var/db
+
+    ${ZFS_CREATE_CMD} -o canmount=on -o logbias=throughput -o recordsize=8k  ${ZFS_POOL}/var/db/postgres
+    ${ZFS_CREATE_CMD} -o canmount=on -o logbias=throughput -o recordsize=16k ${ZFS_POOL}/var/db/mysql
 
     mkdir -p ${_destdir}/altroot
     mkdir -p ${_destdir}/boot
@@ -896,25 +905,27 @@ install_release() {
     [ -d ${_destdir} ]
     [ ${_destdir} != "/" ]
 
-    local _is_remote="no"
+    local _delete="no"
 
     if valid_url ${_relpath}; then
-        _is_remote="yes"
-
         local _local_relpath_root
         local _local_relpath
 
         local _release_tag="${BSDKIT_VERSION}-${BSDKIT_ARCH}"
 
-        if is_yes ${INSTALL_JAIL}; then
-            _local_relpath_root="/usr/freebsd-dist"
-        else
-            _local_relpath_root="${_destdir}/freebsd-dist"
-        fi
-
+        _local_relpath_root="/usr/freebsd-dist"
         _local_relpath="${_local_relpath_root}/${_release_tag}"
 
-        mkdir -p ${_local_relpath}
+        if ! mkdir -p ${_local_relpath}; then
+            _delete="yes"
+
+            _local_relpath_root="${_destdir}/freebsd-dist"
+            _local_relpath="${_local_relpath_root}/${_release_tag}"
+
+            echo "Using ${_local_relpath_root}"
+
+            mkdir -p ${_local_relpath}
+        fi
 
         fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
 
@@ -977,12 +988,10 @@ install_release() {
         sync
     done
 
-    if is_yes ${_is_remote}; then
-        if ! is_yes ${INSTALL_JAIL}; then
-            rm -f ${_local_relpath}/*
-            rmdir ${_local_relpath}
-            rmdir ${_local_relpath_root}
-        fi
+    if is_yes ${_delete}; then
+        rm -f ${_local_relpath}/*
+        rmdir ${_local_relpath}
+        rmdir ${_local_relpath_root}
     fi
 
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
@@ -1452,7 +1461,7 @@ create_jail_destdir() {
 _do_create_jail() {
     local _destdir="$1"
 
-    INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} INSTALL_JAIL=yes install_release ${FREEBSD_REL_URL} ${_destdir}
+    INSTALL_KERNEL=${INSTALL_KERNEL} INSTALL_SRC=${INSTALL_SRC} install_release ${FREEBSD_REL_URL} ${_destdir}
 }
 
 _do_configure_jail() {
@@ -1470,7 +1479,7 @@ _do_configure_jail() {
 
     start_jail ${_destdir}
     pw -V ${_destdir}/etc usermod root -s /bin/sh
-    INSTALL_JAIL=yes ansible_jail_playbook
+    ansible_jail_playbook
     pw -V ${_destdir}/etc usermod root -s /bin/csh
     stop_jail ${_destdir}
 
@@ -1855,7 +1864,7 @@ if [ -e ${IMG_PART} ]; then
     mkdir -p ${IMG_MP}
     fsck -y -t ufs ${IMG_PART}
     mount -r -t ufs ${IMG_PART} ${IMG_MP}
-    ISO_MD=$(mdconfig -a -t vnode -f ${IMG_MP}/*.[iI][sS][oO])
+    ISO_MD=$(mdconfig -f ${IMG_MP}/*.[iI][sS][oO])
     mount -t cd9660 /dev/${ISO_MD} ${CDROM_MP}
 else
     for _device in cd0 cd1 acd0 acd1; do
@@ -1970,7 +1979,7 @@ build_setup_iso() {
     # From src/release/amd64/mkisoimages.sh
 
     dd if=/dev/zero of=${_iso_path}/efiboot.img bs=4k count=200
-    _efiboot_md_device=$(mdconfig -a -t vnode -f ${_iso_path}/efiboot.img)
+    _efiboot_md_device=$(mdconfig -f ${_iso_path}/efiboot.img)
 
     {
         newfs_msdos -F 12 -m 0xF8 /dev/${_efiboot_md_device}
@@ -1989,10 +1998,19 @@ build_setup_iso() {
 
     mdconfig -d -u ${_efiboot_md_device}
 
-    mkisofs -rational-rock -follow-links -J -V FreeBSD -publisher olgeni.com \
-        -eltorito-boot     boot/cdboot -no-emul-boot \
-        -eltorito-platform     efi -eltorito-boot efiboot.img -no-emul-boot \
-        -o     ${_iso} ${_iso_path}
+    mkisofs \
+        -rational-rock \
+        -follow-links \
+        -J \
+        -V FreeBSD \
+        -publisher olgeni.com \
+        -eltorito-boot boot/cdboot \
+        -no-emul-boot \
+        -eltorito-platform efi \
+        -eltorito-boot efiboot.img \
+        -no-emul-boot \
+        -o ${_iso} \
+        ${_iso_path}
 
     for _entry in $(etdump --format shell ${_iso}); do
         eval ${_entry}
@@ -2006,12 +2024,13 @@ build_setup_iso() {
 
     _hybrid_img=$(mktemp /tmp/XXXXXX)
 
-    mkimg -s gpt \
-        --capacity   $(stat -f %z ${_iso}) \
-        -b   ${_iso_path}/boot/pmbr \
+    mkimg \
+        -s gpt \
+        --capacity $(stat -f %z ${_iso}) \
+        -b ${_iso_path}/boot/pmbr \
         ${_esp_param} \
-        -p   freebsd-boot:=${_iso_path}/boot/isoboot \
-        -o   ${_hybrid_img}
+        -p freebsd-boot:=${_iso_path}/boot/isoboot \
+        -o ${_hybrid_img}
 
     dd if=${_hybrid_img} of=${_iso} bs=32k count=1 conv=notrunc
 
@@ -2041,12 +2060,12 @@ build_setup_img() {
     rm -r -f ${_staging}/memroot.ufs.gz ${_staging}
 
     mkimg -v \
-        -s   gpt \
-        -b   /boot/pmbr \
-        -p   efi:=/boot/boot1.efifat \
-        -p   freebsd-boot:=/boot/gptboot \
-        -p   freebsd-ufs/${IMG_DATA_LABEL}:=${_ufs} \
-        -o   ${_img}
+        -s gpt \
+        -b /boot/pmbr \
+        -p efi:=/boot/boot1.efifat \
+        -p freebsd-boot:=/boot/gptboot \
+        -p freebsd-ufs/${IMG_DATA_LABEL}:=${_ufs} \
+        -o ${_img}
 
     rm -f ${_ufs}
 }
@@ -2054,9 +2073,10 @@ build_setup_img() {
 deploy() {
     echo "Running: $@"
 
-    ${BSDKIT_DIR}/bsdkit "$@"
-    ${BSDKIT_DIR}/bsdkit start_jail ${DESTDIR}
-    ${BSDKIT_DIR}/bsdkit ansible_jail_playbook
+    $@
+
+    start_jail ${DESTDIR}
+    BSDKIT_INSTALL_HOST=yes ansible_jail_playbook
 }
 
 remote_deploy() {
@@ -2125,9 +2145,10 @@ EOF
       file: path=/root/bsdkit state=absent
 EOF
 
-    env ANSIBLE_CONFIG=${_ansible_cfg} \
+    eval env \
+        ANSIBLE_CONFIG=${_ansible_cfg} \
         SSH_AUTH_SOCK="" \
-        BSDKIT_SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
+        $(environment) \
         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
@@ -2166,11 +2187,10 @@ EOF
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2>/dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2>/dev/null || :)"
 
-    env ANSIBLE_CONFIG=${_ansible_cfg} \
+    eval env \
+        ANSIBLE_CONFIG=${_ansible_cfg} \
         SSH_AUTH_SOCK="" \
-        BSDKIT_SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY}" \
-        BSDKIT_JAIL_PROXY="${JAIL_PROXY}" \
-        BSDKIT_INSTALL_JAIL="${INSTALL_JAIL}" \
+        $(environment) \
         BSDKIT_INTERFACE="${_bsdkit_interface}" \
         BSDKIT_IFCONFIG="${_bsdkit_ifconfig}" \
         BSDKIT_DEFAULTROUTER="${_bsdkit_defaultrouter}" \
@@ -2254,6 +2274,7 @@ ${JAIL_NAME} {
 
 	path = "${_destdir%/}";
 	host.hostname = "${JAIL_NAME}";
+	host.hostuuid = "${IMG_DATA_LABEL}";
 	host.domainname = "local";
 	ip4.addr = "$(inet_address)";
 }

@@ -1,0 +1,10 @@
+- name: "VirtualBox configuration"
+  lineinfile:
+    dest: /etc/rc.conf
+    line: '{{ item }}_enable="YES"'
+    regexp: "^{{ item }}_enable"
+    insertafter: EOF
+  with_items:
+    - vboxguest
+    - vboxservice
+  when: kenv_smbios_system_product.stdout == "VirtualBox"

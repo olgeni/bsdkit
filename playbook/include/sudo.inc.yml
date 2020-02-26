@@ -1,0 +1,8 @@
+- name: "Install sudoers"
+  copy:
+    src: ../ansible/sudoers
+    dest: /usr/local/etc/sudoers
+    owner: root
+    group: wheel
+    mode: "0440"
+    backup: True

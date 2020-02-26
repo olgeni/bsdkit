@@ -1,0 +1,17 @@
+- name: "mysql-zfs"
+  when: has_zfs
+  block:
+    - name: "Check contents of MySQL home directory"
+      find:
+        paths: "/var/db/mysql"
+      register: find_var_db_mysql
+
+    - name: "Create zfs dataset for MySQL"
+      zfs:
+        name: "{{ zpool_list.stdout }}/var/db/mysql"
+        state: present
+        extra_zfs_properties:
+          canmount: on
+          recordsize: 16K
+          logbias: throughput
+      when: find_var_db_mysql.matched == 0

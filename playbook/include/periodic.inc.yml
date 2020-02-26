@@ -1,0 +1,45 @@
+- name: "Configure periodic.conf"
+  lineinfile:
+    dest: /etc/periodic.conf
+    line: "{{ item.key }}=\"{{ item.value }}\""
+    regexp: "^{{ item.key }} *="
+    create: True
+  with_items:
+    - key: 'daily_output'
+      value: '/var/log/daily.log'
+
+    - key: 'weekly_output'
+      value: '/var/log/weekly.log'
+
+    - key: 'monthly_output'
+      value: '/var/log/monthly.log'
+
+    - key: 'daily_status_security_output'
+      value: '/var/log/security-daily.log'
+
+    - key: 'weekly_status_security_output'
+      value: '/var/log/security-weekly.log'
+
+    - key: 'monthly_status_security_output'
+      value: '/var/log/security-monthly.log'
+
+    - key: 'daily_status_security_enable'
+      value: 'NO'
+
+    - key: 'weekly_status_security_enable'
+      value: 'NO'
+
+    - key: 'monthly_status_security_enable'
+      value: 'NO'
+
+    - key: 'daily_clean_tmps_enable'
+      value: 'YES'
+
+    - key: 'daily_status_zfs_enable'
+      value: 'NO'
+
+    - key: 'daily_scrub_zfs_enable'
+      value: 'NO'
+
+    - key: 'daily_scrub_zfs_default_threshold'
+      value: '0'
