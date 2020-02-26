@@ -56,7 +56,7 @@ cd /root
 rm /var/log/messages
 newsyslog -C -v
 
-pkg delete -y net/cloud-init || :
+pkg delete -y net/cloud-init python2 python27 || :
 pkg delete -y -g py27\* || :
 pkg autoremove -y || :
 
