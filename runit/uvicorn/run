@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e -u
+
+[ -f config ] && . $(realpath config)
+
+: ${CHPST_FLAGS:=""}
+
+: ${UVICORN_USER:="nobody"}
+: ${UVICORN_PATH:="/tmp"}
+: ${UVICORN_FLAGS:=""}
+: ${UVICORN_APP:="app:app"}
+: ${UVICORN_VENV:="${UVICORN_PATH}/.venv"}
+
+if [ -d env ]; then
+    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
+fi
+
+cd ${UVICORN_PATH}
+
+. ${UVICORN_VENV}/bin/activate
+
+exec chpst -u ${UVICORN_USER} ${CHPST_FLAGS} uvicorn ${UVICORN_FLAGS} ${UVICORN_APP}

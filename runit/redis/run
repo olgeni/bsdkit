@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e -u
+
+[ -f config ] && . $(realpath config)
+
+: ${CHPST_FLAGS:=""}
+
+: ${REDIS_USER:="redis"}
+: ${REDIS_CMD_ARGS:="redis.conf"}
+
+if [ -d env ]; then
+    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
+fi
+
+mkdir -p data
+
+chown ${REDIS_USER}:${REDIS_USER} data
+
+exec chpst -u ${REDIS_USER} ${CHPST_FLAGS} /usr/local/bin/redis-server ${REDIS_CMD_ARGS}

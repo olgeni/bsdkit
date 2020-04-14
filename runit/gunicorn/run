@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e -u
+
+[ -f config ] && . $(realpath config)
+
+: ${CHPST_FLAGS:=""}
+
+: ${GUNICORN_USER:="nobody"}
+: ${GUNICORN_PATH:="/tmp"}
+: ${GUNICORN_CMD_ARGS:=""}
+: ${GUNICORN_APP:="app:app"}
+: ${GUNICORN_VENV:="${GUNICORN_PATH}/.venv"}
+
+if [ -d env ]; then
+    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
+fi
+
+cd ${GUNICORN_PATH}
+
+. ${GUNICORN_VENV}/bin/activate
+
+exec chpst -u ${GUNICORN_USER} ${CHPST_FLAGS} gunicorn ${GUNICORN_FLAGS} ${GUNICORN_APP}
+
+# For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"

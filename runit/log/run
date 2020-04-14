@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e -u
+
+mkdir -p main
+
+exec chpst svlogd -ttt ./main
