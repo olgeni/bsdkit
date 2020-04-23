@@ -8,9 +8,9 @@
 
 - name: "set_fact: has_zfs"
   set_fact:
-    has_zfs: ((zpool_list is succeeded) and (zpool_list.stdout | length > 0)) | bool
+    has_zfs: "{{ ((zpool_list is succeeded) and (zpool_list.stdout | length > 0)) | bool }}"
 
 - name: "set_fact: zpool"
   set_fact:
-    zpool: zpool_list.stdout
+    zpool: "{{ zpool_list.stdout }}"
     when: has_zfs
