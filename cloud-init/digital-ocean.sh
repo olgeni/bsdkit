@@ -38,7 +38,7 @@ pkg install -y git pv py37-ansible
 git clone https://github.com/olgeni/bsdkit.git
 cd bsdkit
 git checkout ${BSDKIT_BRANCH}
-ansible-playbook --connection=local --inventory 127.0.0.1, -e ansible_python_interpreter=/usr/local/bin/python3 playbook/bsdkit.yml
+env BSDKIT_INSTALL_HOST=yes ansible-playbook --connection=local --inventory 127.0.0.1, -e ansible_python_interpreter=/usr/local/bin/python3 playbook/bsdkit.yml
 pkg autoremove -y
 
 if route get default | grep "interface:" >/dev/null 2>&1; then
