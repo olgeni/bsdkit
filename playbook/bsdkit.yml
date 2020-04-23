@@ -194,6 +194,7 @@
           - align
           - cpdup
           - curl
+          - direnv
           - gnu-watch
           - jq
           - lftp
