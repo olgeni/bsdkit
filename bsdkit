@@ -2068,7 +2068,7 @@ deploy() {
     $@
 
     start_jail ${BSDKIT_DESTDIR}
-    BSDKIT_INSTALL_HOST=yes ansible_jail_playbook
+    env BSDKIT_INSTALL_HOST=yes ansible_jail_playbook
 }
 
 remote_deploy() {
