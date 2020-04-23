@@ -54,3 +54,4 @@ vm.pmap.pg_ps_enabled="1"
 # vfs.zfs.prefetch_disable="1"
 # vfs.zfs.spa_slop_shift="5"
 # vfs.zfs.vdev.cache.size="16M"
+# kern.maxproc=131072		# mongodb
