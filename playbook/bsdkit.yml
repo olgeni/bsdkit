@@ -198,6 +198,7 @@
           - gnu-watch
           - jq
           - lftp
+          - ncdu
           - pv
           - rsync
           - socat
