@@ -49,15 +49,23 @@ if route get default | grep "interface:" >/dev/null 2>&1; then
 fi
 
 ./bsdkit-upgrade -v${BSDKIT_VERSION} -F
-./bsdkit-upgrade -v${BSDKIT_VERSION}
+./bsdkit-upgrade -v${BSDKIT_VERSION} -n bsdkit
 rm -r -f /usr/freebsd-dist/
 cd /root
 
 rm /var/log/messages
 newsyslog -C -v
 
-pkg delete -y net/cloud-init python2 python27 || :
-pkg delete -y -g py27\* || :
-pkg autoremove -y || :
+_mnt=$(mktemp -d)
+
+bectl jail -b -o name=bsdkit -o mount.devfs=1 bsdkit ${_mnt}
+
+pkg -j bsdkit delete -y net/cloud-init python2 python27 || :
+pkg -j bsdkit delete -y -g py27\* || :
+pkg -j bsdkit autoremove -y || :
+
+bectl ujail bsdkit
+
+rmdir ${_mnt}
 
 exec >/dev/tty 2>&1
