@@ -8,7 +8,7 @@
 
     - name: "Create zfs dataset for PostgreSQL"
       zfs:
-        name: "{{ zpool_list.stdout }}/var/db/postgres"
+        name: "{{ boot_pool.stdout }}/var/db/postgres"
         state: present
         extra_zfs_properties:
           canmount: on

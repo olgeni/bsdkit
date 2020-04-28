@@ -8,7 +8,7 @@
 
     - name: "Create zfs dataset for MySQL"
       zfs:
-        name: "{{ zpool_list.stdout }}/var/db/mysql"
+        name: "{{ boot_pool.stdout }}/var/db/mysql"
         state: present
         extra_zfs_properties:
           canmount: on
