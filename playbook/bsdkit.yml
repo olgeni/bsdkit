@@ -192,6 +192,7 @@
       pkgng:
         name:
           - align
+          - bash
           - cpdup
           - curl
           - direnv
