@@ -48,6 +48,25 @@ if route get default | grep "interface:" >/dev/null 2>&1; then
     service pf start
 fi
 
+sysrc -x cloudinit_enable
+sysrc -x digitaloceanpre
+sysrc -x digitalocean
+sysrc -x ipv6_activate_all_interfaces
+sysrc -x ipv6_defaultrouter
+sysrc -x ifconfig_vtnet0_ipv6
+
+_rc_conf=$(mktemp)
+
+grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort > ${_rc_conf}
+
+cat ${_rc_conf} > /etc/rc.conf
+
+rm -f ${_rc_conf}
+
+pkg delete -y net/cloud-init python2 python27 || :
+pkg delete -y -g py27\* || :
+pkg autoremove -y || :
+
 ./bsdkit-upgrade -v${BSDKIT_VERSION} -F
 ./bsdkit-upgrade -v${BSDKIT_VERSION} -n bsdkit
 rm -r -f /usr/freebsd-dist/
@@ -56,16 +75,9 @@ cd /root
 rm /var/log/messages
 newsyslog -C -v
 
-_mnt=$(mktemp -d)
-
-bectl jail -b -o name=bsdkit -o mount.devfs=1 bsdkit ${_mnt}
-
-pkg -j bsdkit delete -y net/cloud-init python2 python27 || :
-pkg -j bsdkit delete -y -g py27\* || :
-pkg -j bsdkit autoremove -y || :
-
-bectl ujail bsdkit
-
-rmdir ${_mnt}
+# _mnt=$(mktemp -d)
+# bectl jail -b -o name=bsdkit -o mount.devfs=1 bsdkit ${_mnt}
+# bectl ujail bsdkit
+# rmdir ${_mnt}
 
 exec >/dev/tty 2>&1
