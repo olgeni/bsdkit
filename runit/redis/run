@@ -1,17 +1,25 @@
 #!/bin/sh
 
+# C7563ECC-B82D-4632-8E95-946223A55DCE
+
 set -e -u
 
 [ -f config ] && . $(realpath config)
 
 : ${CHPST_FLAGS:=""}
 
-: ${REDIS_USER:="redis"}
-: ${REDIS_CMD_ARGS:="redis.conf"}
-
 if [ -d env ]; then
     CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
 fi
+
+ENVRC=""
+
+if [ -f envrc ]; then
+    ENVRC="$(cat envrc)"
+fi
+
+: ${REDIS_USER:="redis"}
+: ${REDIS_CMD_ARGS:="redis.conf"}
 
 mkdir -p data
 

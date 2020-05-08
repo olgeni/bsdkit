@@ -1,20 +1,28 @@
 #!/bin/sh
 
+# 0E60835E-64B2-40C8-8865-3B5601EAC028
+
 set -e -u
 
 [ -f config ] && . $(realpath config)
 
 : ${CHPST_FLAGS:=""}
 
+if [ -d env ]; then
+    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
+fi
+
+ENVRC=""
+
+if [ -f envrc ]; then
+    ENVRC="$(cat envrc)"
+fi
+
 : ${UVICORN_USER:="nobody"}
 : ${UVICORN_PATH:="/tmp"}
 : ${UVICORN_FLAGS:=""}
 : ${UVICORN_APP:="app:app"}
 : ${UVICORN_VENV:="${UVICORN_PATH}/.venv"}
-
-if [ -d env ]; then
-    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
-fi
 
 cd ${UVICORN_PATH}
 

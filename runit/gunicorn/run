@@ -1,20 +1,28 @@
 #!/bin/sh
 
+# E41C5C63-185F-43E8-A8E9-BF89A0BF0256
+
 set -e -u
 
 [ -f config ] && . $(realpath config)
 
 : ${CHPST_FLAGS:=""}
 
+if [ -d env ]; then
+    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
+fi
+
+ENVRC=""
+
+if [ -f envrc ]; then
+    ENVRC="$(cat envrc)"
+fi
+
 : ${GUNICORN_USER:="nobody"}
 : ${GUNICORN_PATH:="/tmp"}
 : ${GUNICORN_CMD_ARGS:=""}
 : ${GUNICORN_APP:="app:app"}
 : ${GUNICORN_VENV:="${GUNICORN_PATH}/.venv"}
-
-if [ -d env ]; then
-    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
-fi
 
 cd ${GUNICORN_PATH}
 
