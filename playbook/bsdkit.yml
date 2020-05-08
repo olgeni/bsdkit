@@ -197,6 +197,7 @@
           - curl
           - direnv
           - gnu-watch
+          - htop
           - jq
           - lftp
           - ncdu
