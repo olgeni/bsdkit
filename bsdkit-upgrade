@@ -374,6 +374,12 @@ else
     mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
 fi
 
+if [ -f ${DESTDIR}/etc/mtree/BSD.lib32.dist ]; then
+    if [ -d ${DESTDIR}/usr/lib32 ]; then
+        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.lib32.dist -p ${DESTDIR}/usr
+    fi
+fi
+
 if [ -f ${DESTDIR}/etc/mtree/BSD.include.dist ]; then
     mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
 fi
