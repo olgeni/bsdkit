@@ -366,8 +366,13 @@ fi
 echo "Running: mtree"
 
 mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
-mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist  -p ${DESTDIR}/var
 mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
+
+if is_yes ${BOOTENV_ENABLE}; then
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p /var
+else
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
+fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.include.dist ]; then
     mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
