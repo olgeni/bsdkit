@@ -82,6 +82,12 @@
         - name: "Include bsdenv.inc.yml"
           include: include/bsdenv.inc.yml
 
+        - name: "Include postgres-zfs.inc.yml"
+          include: include/postgres-zfs.inc.yml
+
+        - name: "Include mysql-zfs.inc.yml"
+          include: include/mysql-zfs.inc.yml
+
         - name: "Install sysctl.conf"
           copy:
             src: ../ansible/{{ item }}
@@ -175,12 +181,6 @@
 
     - name: "Include ftp.inc.yml"
       include: include/ftp.inc.yml
-
-    - name: "Include postgres-zfs.inc.yml"
-      include: include/postgres-zfs.inc.yml
-
-    - name: "Include mysql-zfs.inc.yml"
-      include: include/mysql-zfs.inc.yml
 
     - name: "Include postgres.inc.yml"
       include: include/postgres.inc.yml
