@@ -196,6 +196,7 @@
           - cpdup
           - curl
           - direnv
+          - fzf
           - gnu-watch
           - htop
           - jq
