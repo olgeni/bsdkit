@@ -128,6 +128,10 @@ if which vim >/dev/null 2>&1; then
     export VISUAL=vim
 fi
 
+if [ -d /var/service ]; then
+    export SVDIR=/var/service
+fi
+
 case $(uname) in
     Darwin)
         # PATH is taken care of in /etc/paths
