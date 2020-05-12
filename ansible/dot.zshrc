@@ -136,6 +136,10 @@ if which interactive-rebase-tool >/dev/null 2>&1; then
     export GIT_SEQUENCE_EDITOR=interactive-rebase-tool
 fi
 
+if which diff-so-fancy >/dev/null 2>&1; then
+    export GIT_PAGER="diff-so-fancy | less -R"
+fi
+
 case $(uname) in
     Darwin)
         # PATH is taken care of in /etc/paths
