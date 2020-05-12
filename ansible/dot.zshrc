@@ -132,6 +132,10 @@ if [ -d /var/service ]; then
     export SVDIR=/var/service
 fi
 
+if which interactive-rebase-tool >/dev/null 2>&1; then
+    export GIT_SEQUENCE_EDITOR=interactive-rebase-tool
+fi
+
 case $(uname) in
     Darwin)
         # PATH is taken care of in /etc/paths
