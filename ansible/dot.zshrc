@@ -49,6 +49,8 @@ WORDCHARS=""
 
 prompt="[%l:%n@%m %2~]%# "
 
+cdpath=()
+
 bindkey "^N"      q-history-search-forward
 bindkey "^P"      q-history-search-backward
 
@@ -149,7 +151,6 @@ if [ -n "${INSIDE_EMACS}" ]; then
     bindkey -r "^[x"
 fi
 
-cdpath=()
 
 if [ -e ${HOME}/.zshrc.local ]; then
     source ${HOME}/.zshrc.local
