@@ -1279,7 +1279,6 @@ install_mbr_zfs() {
     return 0
 }
 
-# bsdkit create_iocell tag -v12.1
 create_iocell() {
     parse_options "$@"
 
@@ -1302,7 +1301,6 @@ create_iocell() {
     _do_configure_jail ${_destdir}
 }
 
-# bsdkit create_iocell_thin tag release=12.1-RELEASE
 create_iocell_thin() {
     parse_options "$@"
 
@@ -1325,7 +1323,6 @@ create_iocell_thin() {
     _do_configure_jail ${_destdir}
 }
 
-# bsdkit create_iocage -v12.1 tag
 create_iocage() {
     parse_options "$@"
 
@@ -1351,7 +1348,6 @@ create_iocage() {
     _do_configure_jail ${_destdir}
 }
 
-# bsdkit create_iocage_thin tag -r 12.1-RELEASE ip4_addr='lo0|172.16.1.1/32'
 create_iocage_thin() {
     parse_options "$@"
 
