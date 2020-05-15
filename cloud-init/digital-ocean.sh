@@ -2,7 +2,7 @@
 
 set -e -u -x
 
-exec >/tmp/cloud-init.log 2>&1
+exec >/root/cloud-init.log 2>&1
 
 : ${BSDKIT_BRANCH:="master"}
 : ${BSDKIT_VERSION:="12.1"}
