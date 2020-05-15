@@ -16,7 +16,7 @@ sed -i -e "/vfs\.root\.mountfrom/d;"        /boot/.loader.conf
 sed -i -e "/vfs\.zfs\.vdev\.cache\.size/d;" /boot/.loader.conf
 sed -i -e "/vfs\.zfs\.arc_max/d;"           /boot/.loader.conf
 
-cat -s /boot/.loader.conf > /boot/loader.conf
+cat -s /boot/.loader.conf >/boot/loader.conf
 rm -f -v /boot/.loader.conf
 
 if kenv zfs_be_root >/dev/null 2>&1; then
@@ -31,7 +31,7 @@ zfs destroy -r ${_zfs_pool}@digitalocean_installation || :
 
 mkdir -p /usr/local/etc/pkg/repos
 pkg install -y pkg
-echo 'bsdkit: { url: "https://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' > /usr/local/etc/pkg/repos/bsdkit.conf
+echo 'bsdkit: { url: "https://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' >/usr/local/etc/pkg/repos/bsdkit.conf
 pkg update -f
 pkg upgrade -y
 pkg install -y git pv py37-ansible
@@ -43,7 +43,7 @@ pkg autoremove -y
 
 if route get default | grep "interface:" >/dev/null 2>&1; then
     _iface=$(route get default | awk '/interface:/ { print $2 }')
-    echo "nat on ${_iface} from ${BSDKIT_JAIL_NETWORK} to any -> egress" > /etc/pf.conf
+    echo "nat on ${_iface} from ${BSDKIT_JAIL_NETWORK} to any -> egress" >/etc/pf.conf
     service pf enable
     service pf start
 fi
@@ -57,9 +57,9 @@ sysrc -x ifconfig_vtnet0_ipv6
 
 _rc_conf=$(mktemp)
 
-grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort > ${_rc_conf}
+grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort >${_rc_conf}
 
-cat ${_rc_conf} > /etc/rc.conf
+cat ${_rc_conf} >/etc/rc.conf
 
 rm -f ${_rc_conf}
 
