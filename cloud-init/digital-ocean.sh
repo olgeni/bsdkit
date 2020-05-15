@@ -48,9 +48,10 @@ if route get default | grep "interface:" >/dev/null 2>&1; then
     service pf start
 fi
 
-sysrc -x cloudinit_enable
-sysrc -x digitaloceanpre
-sysrc -x digitalocean
+sysrc cloudinit_enable=NO
+sysrc digitaloceanpre=NO
+sysrc digitalocean=NO
+
 sysrc -x ipv6_activate_all_interfaces
 sysrc -x ipv6_defaultrouter
 sysrc -x ifconfig_vtnet0_ipv6
