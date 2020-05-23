@@ -71,19 +71,16 @@ bsdkit-noauto() {
     if [ $? = 0 ]; then
         _bootenv_base=$(dirname ${_bootfs})
 
-        zfs list -H -o name -r ${_bootenv_base} |
-            fgrep   -v "${_bootenv_base}" |
-            while   read _fs; do
+        zfs list -H -o name -r ${_bootenv_base} | fgrep -v "${_bootenv_base}" | while read _fs; do
+            echo -n "Checking property 'canmount' on ${_fs}: "
 
-                echo -n "Checking property 'canmount' on ${_fs}: "
-
-                if [ "$(zfs get -H -o value canmount ${_fs})" != noauto ]; then
-                    zfs set canmount=noauto ${_fs}
-                    echo "changed."
-                else
-                    echo "ok."
-                fi
-            done
+            if [ "$(zfs get -H -o value canmount ${_fs})" != noauto ]; then
+                zfs set canmount=noauto ${_fs}
+                echo "changed."
+            else
+                echo "ok."
+            fi
+        done
     fi
 }
 
