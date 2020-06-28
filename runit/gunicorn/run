@@ -32,4 +32,5 @@ cd ${GUNICORN_PATH}
 
 exec chpst -u ${GUNICORN_USER} ${CHPST_FLAGS} gunicorn ${GUNICORN_FLAGS} ${GUNICORN_APP}
 
+# For logs: "--log-level debug"
 # For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"
