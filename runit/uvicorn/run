@@ -4,6 +4,8 @@
 
 set -e -u
 
+exec 2>&1
+
 [ -f config ] && . $(realpath config)
 
 : ${CHPST_FLAGS:=""}
