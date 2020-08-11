@@ -193,6 +193,7 @@
         name:
           - align
           - bash
+          - ca_root_nss
           - cpdup
           - curl
           - direnv
@@ -213,8 +214,8 @@
           - zsh
         state: present
 
-    - name: "Include ca-root-nss.inc.yml"
-      include: include/ca-root-nss.inc.yml
+    # - name: "Include ca-root-nss.inc.yml"
+    #   include: include/ca-root-nss.inc.yml
 
     - name: "Include virtualbox.inc.yml"
       include: include/virtualbox.inc.yml
