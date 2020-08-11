@@ -208,6 +208,7 @@
           - sudo
           - the_silver_searcher
           - tmux
+          - ts
           - vim
           - zsh
         state: present
