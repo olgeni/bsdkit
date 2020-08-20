@@ -4,9 +4,9 @@ set -e -u -x
 
 exec >/var/log/bsdkit-cloud-init.log 2>&1
 
-: ${BSDKIT_BRANCH:="master"}
-: ${BSDKIT_VERSION:="12.1"}
-: ${BSDKIT_JAIL_NETWORK:="172.16.1.0/24"}
+: "${BSDKIT_BRANCH:=master}"
+: "${BSDKIT_VERSION:=12.1}"
+: "${BSDKIT_JAIL_NETWORK:=172.16.1.0/24}"
 
 cd /root
 
@@ -22,15 +22,16 @@ rm -f -v /boot/.loader.conf
 if kenv zfs_be_root >/dev/null 2>&1; then
     _zfs_pool=$(kenv zfs_be_root | sed "s@/.*@@")
 
-    zfs create -o mountpoint=/jails ${_zfs_pool}/jails
-    zfs create -o canmount=off      ${_zfs_pool}/usr/local
+    zfs create -o mountpoint=/jails "${_zfs_pool}"/jails
+    zfs create -o canmount=off      "${_zfs_pool}"/usr/local
 fi
 
-zfs destroy -r ${_zfs_pool}@base_installation || :
-zfs destroy -r ${_zfs_pool}@digitalocean_installation || :
+zfs destroy -r "${_zfs_pool}"@base_installation || :
+zfs destroy -r "${_zfs_pool}"@digitalocean_installation || :
 
 mkdir -p /usr/local/etc/pkg/repos
 pkg install -y pkg
+# shellcheck disable=SC2016
 echo 'bsdkit: { url: "https://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' >/usr/local/etc/pkg/repos/bsdkit.conf
 pkg update -f
 pkg upgrade -y
@@ -60,11 +61,11 @@ rm -f /usr/local/etc/rc.d/digitaloceanpre
 
 _rc_conf=$(mktemp)
 
-grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort | uniq >${_rc_conf}
+grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort | uniq >"${_rc_conf}"
 
-cat ${_rc_conf} >/etc/rc.conf
+cat "${_rc_conf}" >/etc/rc.conf
 
-rm -f ${_rc_conf}
+rm -f "${_rc_conf}"
 
 pkg delete -y net/cloud-init python2 python27 || :
 pkg delete -y -g py27\* || :
