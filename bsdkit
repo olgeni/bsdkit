@@ -1843,58 +1843,59 @@ export PATH=/rescue
 
 mount -u -w /
 
-mkdir -p ${BASEROOT_MP}
-mkdir -p ${CDROM_MP}
-mkdir -p ${ETC_RDWR_MP}
-mkdir -p ${ROOT_RDWR_MP}
+mkdir -p "${BASEROOT_MP}"
+mkdir -p "${CDROM_MP}"
+mkdir -p "${ETC_RDWR_MP}"
+mkdir -p "${ROOT_RDWR_MP}"
 
-if [ -e ${IMG_PART} ]; then
-    mkdir -p ${IMG_MP}
-    fsck -y -t ufs ${IMG_PART}
-    mount -r -t ufs ${IMG_PART} ${IMG_MP}
-    ISO_MD=$(mdconfig -f ${IMG_MP}/*.[iI][sS][oO])
-    mount -t cd9660 /dev/${ISO_MD} ${CDROM_MP}
+if [ -e "${IMG_PART}" ]; then
+    mkdir -p "${IMG_MP}"
+    fsck -y -t ufs "${IMG_PART}"
+    mount -r -t ufs "${IMG_PART}" "${IMG_MP}"
+    ISO_MD=$(mdconfig -f "${IMG_MP}"/*.[iI][sS][oO])
+    mount -t cd9660 "/dev/${ISO_MD}" "${CDROM_MP}"
 else
     for _device in cd0 cd1 acd0 acd1; do
-        if [ -e /dev/${_device} ]; then
-            if mount -t cd9660 /dev/${_device} ${CDROM_MP} >/dev/null 2>&1; then
+        if [ -e "/dev/${_device}" ]; then
+            if mount -t cd9660 "/dev/${_device}" "${CDROM_MP}" >/dev/null 2>&1; then
                 break
             fi
         fi
     done
 fi
 
-mdmfs -P -F ${CDROM_MP}${BASEROOT_IMG} -o ro md.uzip ${BASEROOT_MP}
+mdmfs -P -F "${CDROM_MP}${BASEROOT_IMG}" -o ro md.uzip "${BASEROOT_MP}"
 
-mount -t devfs devfs ${BASEROOT_MP}${DEV_MP}
+mount -t devfs devfs "${BASEROOT_MP}${DEV_MP}"
 
-mount -t nullfs -o ro ${CDROM_MP} ${BASEROOT_MP}${CDROM_MP}
+mount -t nullfs -o ro "${CDROM_MP}" "${BASEROOT_MP}${CDROM_MP}"
 
-mdmfs -s 8m  md ${ETC_RDWR_MP}
-mdmfs -s 64m md ${ROOT_RDWR_MP}
+mdmfs -s 8m  md "${ETC_RDWR_MP}"
+mdmfs -s 64m md "${ROOT_RDWR_MP}"
 
-mount -t unionfs ${ETC_RDWR_MP}  ${BASEROOT_MP}${ETC_MP}
-mount -t unionfs ${ROOT_RDWR_MP} ${BASEROOT_MP}${ROOT_MP}
+mount -t unionfs "${ETC_RDWR_MP}"  "${BASEROOT_MP}${ETC_MP}"
+mount -t unionfs "${ROOT_RDWR_MP}" "${BASEROOT_MP}${ROOT_MP}"
 
-if [ -d ${IMG_MP} ]; then
-    mkdir -p ${BASEROOT_MP}${IMG_MP}
-    mount -t nullfs -o rw ${IMG_MP} ${BASEROOT_MP}${IMG_MP}
+if [ -d "${IMG_MP}" ]; then
+    mkdir -p "${BASEROOT_MP}${IMG_MP}"
+    mount -t nullfs -o rw "${IMG_MP}" "${BASEROOT_MP}${IMG_MP}"
 fi
 
 kenv init_shell="/bin/sh"
 
 if kenv bsdkit_ifconfig >/dev/null 2>&1; then
     bsdkit_ifconfig=$(kenv bsdkit_ifconfig)
+    # shellcheck disable=SC2046
     set $(ifconfig -l ether)
     _interface=$1
     if [ -n "${_interface}" ]; then
-        echo "ifconfig_${_interface}=\"${bsdkit_ifconfig}\"" >> /baseroot/etc/rc.conf
+        echo "ifconfig_${_interface}=\"${bsdkit_ifconfig}\"" >>/baseroot/etc/rc.conf
     fi
 fi
 
 if kenv bsdkit_defaultrouter >/dev/null 2>&1; then
     bsdkit_defaultrouter=$(kenv bsdkit_defaultrouter)
-    echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >> /baseroot/etc/rc.conf
+    echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >>/baseroot/etc/rc.conf
 fi
 
 trap '' EXIT
