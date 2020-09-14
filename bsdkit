@@ -1821,7 +1821,7 @@ EOF
     echo "#!/bin/sh" >${_mfsroot}/baseroot.rc
     echo "IMG_PART=/dev/gpt/${BSDKIT_IMG_DATA_LABEL}" >>${_mfsroot}/baseroot.rc
 
-    cat >>${_mfsroot}/baseroot.rc  <<"EOF"
+    cat >>${_mfsroot}/baseroot.rc <<"EOF"
 set -e -u
 
 trap '/rescue/sh' EXIT
