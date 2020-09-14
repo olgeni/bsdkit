@@ -1024,7 +1024,7 @@ customize_base() {
 
     valid_destdir ${_destdir}
 
-    chroot ${_destdir} chpass -p '$1$El8jLO2w$KX9lQ3ScWeZF6SqG267w9.' root
+    chroot ${_destdir} chpass -p '$1$Kk8uqtid$UZr4tpkPw6388O6xDSFLt1' root
 
     mkdir -p ${_destdir}/root/.ssh
 
