@@ -125,6 +125,14 @@ case $1 in
         VBoxManage storageattach bsdkit --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive
         ;;
 
+    poweroff)
+        VBoxManage controlvm bsdkit poweroff || :
+        while VBoxManage showvminfo bsdkit --machinereadable | fgrep 'VMState="running"' >/dev/null 2>&1; do
+            sleep 1
+        done
+        VBoxManage storageattach bsdkit --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive
+        ;;
+
     destroy)
         VBoxManage unregistervm --delete bsdkit
         ;;
