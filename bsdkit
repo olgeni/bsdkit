@@ -1856,8 +1856,10 @@ if [ -e ${IMG_PART} ]; then
     mount -t cd9660 /dev/${ISO_MD} ${CDROM_MP}
 else
     for _device in cd0 cd1 acd0 acd1; do
-        if -e /dev/${_device}; then
-            mount -t cd9660 /dev/${_device} ${CDROM_MP} >/dev/null 2>&1
+        if [ -e /dev/${_device} ]; then
+            if mount -t cd9660 /dev/${_device} ${CDROM_MP} >/dev/null 2>&1; then
+                break
+            fi
         fi
     done
 fi
