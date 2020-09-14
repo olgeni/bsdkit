@@ -5,6 +5,7 @@
       kenv zfs_be_root | cut -d/ -f1
   register: boot_pool
   changed_when: False
+  ignore_errors: True
 
 - name: "set_fact: has_zfs"
   set_fact:
