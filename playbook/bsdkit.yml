@@ -29,6 +29,11 @@
         path: /etc/rc.conf
         state: touch
 
+    - name: "Touch loader.conf (exec)"
+      file:
+        path: /boot/loader.conf
+        state: touch
+
     - name: "Include remove.inc.yml"
       include: include/remove.inc.yml
 
