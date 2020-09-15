@@ -13,6 +13,9 @@ restart-vm:
 	@$(CURDIR)/bsdkit-vbox stop || :
 	@$(CURDIR)/bsdkit-vbox start
 
+destroy-vm:
+	@$(CURDIR)/bsdkit-vbox destroy || :
+
 test-install-gpt-zfs-1:
 	@$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://192.168.0.1:8080 -z nox11 -v 12.1 ada0
 
