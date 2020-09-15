@@ -117,8 +117,10 @@ environment() {
 }
 
 : ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
+: ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
 
 # FREEBSD_REL_URL: initialized by parse_options
+# FREEBSD_PKG_URL: initialized by parse_options
 
 : ${PARSE_OPTIONS_SHIFT:=0}
 
@@ -164,6 +166,7 @@ parse_options() {
     done
 
     FREEBSD_REL_URL=$(parse_url ${FREEBSD_REL_URL_TEMPLATE})
+    FREEBSD_PKG_URL=$(parse_url ${FREEBSD_PKG_URL_TEMPLATE})
 
     PARSE_OPTIONS_SHIFT=$((OPTIND - 1))
 }
@@ -1056,6 +1059,14 @@ EOF
 	:lang=en_US.UTF-8:\\\' ${_destdir}/etc/login.conf
 
     cap_mkdb ${_destdir}/etc/login.conf
+
+    mkdir -p ${_destdir}/usr/local/etc/pkg/repos
+
+    cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
+bsdkit: {
+    url: "${FREEBSD_PKG_URL}"
+}
+EOF
 
     return 0
 }
