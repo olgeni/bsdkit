@@ -21,7 +21,7 @@ if [ $(whoami) != "root" ]; then
 fi
 
 if [ $# -eq 0 ]; then
-    cat <<EOF
+    cat << EOF
 
 usage: ${SCRIPT_NAME} [option] ...
 Options and arguments:

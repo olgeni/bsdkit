@@ -63,7 +63,7 @@ is_efi() {
 : ${BSDKIT_PKGSET:="nox11"}
 : ${BSDKIT_SSH_PUBLIC_KEY:=""}
 
-if command -v pv >/dev/null 2>&1; then
+if command -v pv > /dev/null 2>&1; then
     CAT_CMD="pv -i ${BSDKIT_PV_UPDATE_DELAY}"
 else
     CAT_CMD=/bin/cat
@@ -173,14 +173,14 @@ rc_set() {
     local _key="$2"
     local _value="$3"
 
-    if grep -E "^[[:space:]]*${_key}|#[[:space:]]*${_key}" ${_file} >/dev/null  2>&1; then
+    if grep -E "^[[:space:]]*${_key}|#[[:space:]]*${_key}" ${_file} > /dev/null 2>&1; then
         sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*/ c\\
 ${_key}=\"${_value}\"
 /^[[:space:]]*#[[:space:]]*${_key}/ c\\
 ${_key}=\"${_value}\"
 " ${_file}
     else
-        echo "${_key}=\"${_value}\"" >>${_file}
+        echo "${_key}=\"${_value}\"" >> ${_file}
     fi
 }
 
@@ -234,7 +234,7 @@ valid_url() {
 }
 
 check_bsdkit_runtime() {
-    mount -p | grep "/baseroot" >/dev/null  2>&1
+    mount -p | grep "/baseroot" > /dev/null 2>&1
 }
 
 valid_relpath() {
@@ -326,7 +326,7 @@ gpt_ufs_partition_large() {
 
     [ -e "/dev/${_device}" ]
 
-    gpart destroy -F ${_device} 2>/dev/null || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s gpt ${_device}
 
     gpart bootcode -b /boot/pmbr ${_device}
@@ -386,7 +386,7 @@ gpt_ufs_partition_large() {
         echo "/dev/ufs/${BSDKIT_LABEL_VAR}  /var ufs rw 2 2"
         echo "/dev/ufs/${BSDKIT_LABEL_TMP}  /tmp ufs rw 2 2"
         echo "/dev/ufs/${BSDKIT_LABEL_USR}  /usr ufs rw 2 2"
-    } >>${_destdir}/etc/fstab
+    } >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -402,7 +402,7 @@ gpt_ufs_partition_small() {
 
     [ -e "/dev/${_device}" ]
 
-    gpart destroy -F ${_device} 2>/dev/null || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s gpt ${_device}
 
     gpart bootcode -b /boot/pmbr ${_device}
@@ -435,7 +435,7 @@ gpt_ufs_partition_small() {
 
     touch ${_destdir}/etc/fstab
 
-    echo "/dev/ufs/${BSDKIT_LABEL_ROOT} / ufs rw 1 1" >>${_destdir}/etc/fstab
+    echo "/dev/ufs/${BSDKIT_LABEL_ROOT} / ufs rw 1 1" >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -452,12 +452,12 @@ mbr_ufs_partition_large() {
 
     # FIXME refactor
 
-    gpart destroy -F ${_device} 2>/dev/null || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
 
-    gpart destroy -F ${_device}s1 2>/dev/null || :
+    gpart destroy -F ${_device}s1 2> /dev/null || :
     gpart create -s BSD ${_device}s1
 
     gpart bootcode -b /boot/mbr ${_device}
@@ -509,7 +509,7 @@ mbr_ufs_partition_large() {
         echo "/dev/ufs/${BSDKIT_LABEL_VAR}  /var ufs rw 2 2"
         echo "/dev/ufs/${BSDKIT_LABEL_TMP}  /tmp ufs rw 2 2"
         echo "/dev/ufs/${BSDKIT_LABEL_USR}  /usr ufs rw 2 2"
-    } >>${_destdir}/etc/fstab
+    } >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -526,12 +526,12 @@ mbr_ufs_partition_small() {
 
     # FIXME refactor
 
-    gpart destroy -F ${_device} 2>/dev/null || :
+    gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s mbr ${_device}
     gpart add -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
 
-    gpart destroy -F ${_device}s1 2>/dev/null || :
+    gpart destroy -F ${_device}s1 2> /dev/null || :
     gpart create -s BSD ${_device}s1
 
     gpart bootcode -b /boot/mbr ${_device}
@@ -558,7 +558,7 @@ mbr_ufs_partition_small() {
 
     {
         echo "/dev/ufs/${BSDKIT_LABEL_ROOT} / ufs rw 1 1"
-    } >>${_destdir}/etc/fstab
+    } >> ${_destdir}/etc/fstab
 
     link_home ${_destdir}
 
@@ -579,7 +579,7 @@ zfs_create_pool() {
     sysctl -q kern.geom.debugflags=0x10
 
     for _device in ${_devices}; do
-        gpart destroy -F ${_device} 2>/dev/null || :
+        gpart destroy -F ${_device} 2> /dev/null || :
 
         dd if=/boot/zfsboot of=/dev/${_device} count=1
         dd if=/boot/zfsboot of=/dev/${_device} iseek=1 oseek=1024
@@ -594,7 +594,7 @@ zfs_create_pool() {
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device} 2>/dev/null || :
+        zpool labelclear -f ${_device} 2> /dev/null || :
     done
 
     case $# in
@@ -643,7 +643,7 @@ zfs_create_gpt_pool() {
     local _pool_partition=0
 
     for _device in ${_devices}; do
-        gpart destroy -F ${_device} 2>/dev/null || :
+        gpart destroy -F ${_device} 2> /dev/null || :
         gpart create -s gpt ${_device}
 
         local _p=1
@@ -679,7 +679,7 @@ zfs_create_gpt_pool() {
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device}${_suffix} 2>/dev/null || :
+        zpool labelclear -f ${_device}${_suffix} 2> /dev/null || :
     done
 
     case $# in
@@ -716,11 +716,11 @@ zfs_create_mbr_pool() {
     for _device in ${_devices}; do
         # FIXME refactor
 
-        gpart destroy -F ${_device} 2>/dev/null || :
+        gpart destroy -F ${_device} 2> /dev/null || :
         gpart create -s mbr ${_device}
         gpart add -i 1 -t freebsd ${_device}
         gpart set -a active -i 1 ${_device}
-        gpart destroy -F ${_device}s1 2>/dev/null || :
+        gpart destroy -F ${_device}s1 2> /dev/null || :
         gpart create -s BSD ${_device}s1
         gpart bootcode -b /boot/mbr ${_device}
 
@@ -747,7 +747,7 @@ zfs_create_mbr_pool() {
     local _device
 
     for _device in ${_device}; do
-        zpool labelclear -f ${_device}${_suffix} 2>/dev/null || :
+        zpool labelclear -f ${_device}${_suffix} 2> /dev/null || :
     done
 
     case $# in
@@ -831,7 +831,7 @@ swap_setup() {
     local _swap
 
     for _swap in $(find /dev | grep -E "(gpt|label)/swap" | rs 1 0); do
-        echo "${_swap} none swap sw 0 0" >>${_destdir}/etc/fstab
+        echo "${_swap} none swap sw 0 0" >> ${_destdir}/etc/fstab
     done
 
     return 0
@@ -846,7 +846,7 @@ procfs_setup() {
 
     [ -d ${_destdir} ]
 
-    echo "proc /proc procfs rw 0 0" >>${_destdir}/etc/fstab
+    echo "proc /proc procfs rw 0 0" >> ${_destdir}/etc/fstab
 
     return 0
 }
@@ -860,7 +860,7 @@ fdescfs_setup() {
 
     [ -d ${_destdir} ]
 
-    echo "fdescfs /dev/fd fdescfs rw 0 0" >>${_destdir}/etc/fstab
+    echo "fdescfs /dev/fd fdescfs rw 0 0" >> ${_destdir}/etc/fstab
 
     return 0
 }
@@ -878,10 +878,10 @@ format_fstab() {
 
     local _fstab="${_destdir}/etc/fstab"
 
-    echo "#linprocfs /compat/linux/proc linprocfs rw 0 0"      >>${_destdir}/etc/fstab
-    echo "#tmpfs /compat/linux/dev/shm tmpfs rw,mode=1777 0 0" >>${_destdir}/etc/fstab
+    echo "#linprocfs /compat/linux/proc linprocfs rw 0 0"      >> ${_destdir}/etc/fstab
+    echo "#tmpfs /compat/linux/dev/shm tmpfs rw,mode=1777 0 0" >> ${_destdir}/etc/fstab
 
-    column -t <${_fstab} | sort >${_fstab}.0
+    column -t < ${_fstab} | sort > ${_fstab}.0
 
     install -m 644 -o root -g wheel ${_fstab}.0 ${_fstab}
 
@@ -1027,7 +1027,7 @@ customize_base() {
 
     mkdir -p ${_destdir}/root/.ssh
 
-    echo_bsdkit_public_key >${_destdir}/root/.ssh/authorized_keys
+    echo_bsdkit_public_key > ${_destdir}/root/.ssh/authorized_keys
 
     chown -R root:wheel ${_destdir}/root
 
@@ -1036,7 +1036,7 @@ customize_base() {
     sed -i '' -e '/^PermitRootLogin/d' ${_destdir}/etc/ssh/sshd_config
     sed -i '' -e '/^UseDNS/d' ${_destdir}/etc/ssh/sshd_config
 
-    cat >>${_destdir}/etc/ssh/sshd_config  <<EOF
+    cat >> ${_destdir}/etc/ssh/sshd_config << EOF
 UseDNS no
 PermitRootLogin yes
 EOF
@@ -1072,7 +1072,7 @@ start_jail() {
     local _destdir="$1"
     valid_destdir ${_destdir}
     local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
-    echo_runtime_jail_conf ${_destdir} >${_jail_conf}
+    echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -c ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
 }
@@ -1081,7 +1081,7 @@ stop_jail() {
     local _destdir="$1"
     valid_destdir ${_destdir}
     local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
-    echo_runtime_jail_conf ${_destdir} >${_jail_conf}
+    echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -r ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
 }
@@ -1288,7 +1288,7 @@ create_iocell() {
 
     shift
 
-    command -v iocell >/dev/null 2>&1 || error "iocell not found (create_iocell)."
+    command -v iocell > /dev/null 2>&1 || error "iocell not found (create_iocell)."
 
     local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}" "$@")
     local _mountpoint=$(iocell get mountpoint "${_tag}") || error "iocell could not retrieve mountpoint"
@@ -1310,7 +1310,7 @@ create_iocell_thin() {
 
     shift 1
 
-    command -v iocell >/dev/null  2>&1 || error "iocell not found (create_iocell_thin)."
+    command -v iocell > /dev/null 2>&1 || error "iocell not found (create_iocell_thin)."
 
     iocell create tag="${_tag}" host_hostname="${_tag}" "$@" || error "iocell could not create jail"
 
@@ -1334,8 +1334,8 @@ create_iocage() {
 
     unset IOCAGE_COLOR
 
-    command -v iocage >/dev/null  2>&1 || error "iocage not found (create_iocage)."
-    iocage get -p >/dev/null  2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
+    command -v iocage > /dev/null 2>&1 || error "iocage not found (create_iocage)."
+    iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
     local _iocage_root=$(iocage get -p)
     local _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
     iocage create -e --name "${_jail_name}" "$@"
@@ -1359,8 +1359,8 @@ create_iocage_thin() {
 
     unset IOCAGE_COLOR
 
-    command -v iocage >/dev/null  2>&1 || error "iocage not found (create_iocage)."
-    iocage get -p >/dev/null  2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
+    command -v iocage > /dev/null 2>&1 || error "iocage not found (create_iocage)."
+    iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
     local _iocage_root=$(iocage get -p)
     local _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
     iocage create --name "${_jail_name}" "$@"
@@ -1414,7 +1414,7 @@ create_md() {
 
     sed -i '' -e '/^PermitRootLogin/d' ${BSDKIT_DESTDIR}/etc/ssh/sshd_config
 
-    cat >>${BSDKIT_DESTDIR}/etc/ssh/sshd_config  <<EOF
+    cat >> ${BSDKIT_DESTDIR}/etc/ssh/sshd_config << EOF
 PermitRootLogin yes
 EOF
 
@@ -1437,7 +1437,7 @@ create_jail_destdir() {
     local _zfs="NO"
 
     if [ -n "${_parent_fs}" ]; then
-        if ! zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" >/dev/null  2>&1; then
+        if ! zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" > /dev/null 2>&1; then
             ${ZFS_CREATE_CMD} -o compression=on "${_parent_fs}/${_jail_name}"
             _zfs="YES"
         fi
@@ -1494,7 +1494,7 @@ remove_jail() {
     done
 
     if [ -n "${_parent_fs}" ]; then
-        if zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" >/dev/null  2>&1; then
+        if zfs get -H -o value mountpoint "${_parent_fs}/${_jail_name}" > /dev/null 2>&1; then
             _zfs="YES"
         fi
     fi
@@ -1502,8 +1502,8 @@ remove_jail() {
     if [ "${_zfs}" = "YES" ]; then
         zfs destroy "${_parent_fs}/${_jail_name}"
     else
-        rm -r -f ${_destdir} >/dev/null  2>&1 || :
-        chflags -R noschg ${_destdir} >/dev/null  2>&1 || :
+        rm -r -f ${_destdir} > /dev/null 2>&1 || :
+        chflags -R noschg ${_destdir} > /dev/null 2>&1 || :
         rm -r -f ${_destdir}
     fi
 }
@@ -1523,7 +1523,7 @@ root:$1$PkLp4/DM$/3D/umXPR0XIb0HsPHByU/:0:0::0:0:System Administrator:/root:/bin
 
     # newsyslog -v -C -f ${_destdir}/etc/newsyslog.conf -d ${_destdir}
 
-    cat >${_destdir}/etc/ttys  <<EOF
+    cat > ${_destdir}/etc/ttys << EOF
 ttyv0 "/usr/libexec/getty autologin" xterm onifexists  secure
 ttyv1 "/usr/libexec/getty autologin" xterm onifexists  secure
 ttyv2 "/usr/libexec/getty autologin" xterm onifexists  secure
@@ -1531,7 +1531,7 @@ ttyv3 "/usr/libexec/getty autologin" xterm onifexists  secure
 ttyu0 "/usr/libexec/getty autologin" vt100 onifconsole secure
 EOF
 
-    cat >${_destdir}/etc/rc.conf.local  <<EOF
+    cat > ${_destdir}/etc/rc.conf.local << EOF
 background_dhclient="YES"
 background_fsck="NO"
 cleanvar_enable="NO"
@@ -1568,14 +1568,14 @@ EOF
     sed -i '' -e '/^MaxAuthTries/d' ${_destdir}/etc/ssh/sshd_config
     sed -i '' -e '/^leapfile/d' ${_destdir}/etc/ntp.conf
 
-    cat >>${_destdir}/etc/ssh/sshd_config  <<EOF
+    cat >> ${_destdir}/etc/ssh/sshd_config << EOF
 UseDNS no
 PermitRootLogin yes
 GatewayPorts yes
 MaxAuthTries 32
 EOF
 
-    cat >${_destdir}/etc/host.conf  <<EOF
+    cat > ${_destdir}/etc/host.conf << EOF
 # Auto-generated from nsswitch.conf
 hosts
 dns
@@ -1668,13 +1668,13 @@ install_setup_runtime() {
 
         mkdir -p ${_destdir}/usr/local/etc/pkg/repos
 
-        cat >${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf  <<EOF
+        cat > ${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf << EOF
 FreeBSD: {
     enabled: no
 }
 EOF
 
-        cat >${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf  <<EOF
+        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 bsdkit: {
     url: "file://${_pkgdir}"
 }
@@ -1706,7 +1706,7 @@ EOF
 
     install -m 644 -o root -g wheel ${_bsdkit}/ansible/dot.zshrc ${_destdir}/root/.zshrc
 
-    cat >>${_destdir}/root/.zshrc  <<EOF
+    cat >> ${_destdir}/root/.zshrc << EOF
 echo -n "Available disks: "
 sysctl -n kern.disks | rs 0 1 | sort | grep -v -E "^cd|^acd" | rs 1 0 | sed -E -e "s/ +/ /g"
 echo
@@ -1758,7 +1758,7 @@ build_setup_staging() {
 
     mkdir ${_destdir}/root/.ssh
 
-    echo_bsdkit_public_key >${_destdir}/root/.ssh/authorized_keys
+    echo_bsdkit_public_key > ${_destdir}/root/.ssh/authorized_keys
 
     local _mfsroot="${_tmp}/mfsroot"
 
@@ -1785,7 +1785,7 @@ build_setup_staging() {
 
     install -m 644 -o root -g wheel ${_bsdkit}/ansible/loader.conf.vendor ${_staging}/boot/loader.conf
 
-    cat >${_staging}/boot/loader.conf.local  <<EOF
+    cat > ${_staging}/boot/loader.conf.local << EOF
 geom_uzip_load="YES"
 
 nullfs_load="YES"
@@ -1818,10 +1818,10 @@ EOF
 
     install -m 600 -o root -g wheel ${_destdir}/etc/login.conf ${_mfsroot}/etc
 
-    echo "#!/bin/sh" >${_mfsroot}/baseroot.rc
-    echo "IMG_PART=/dev/gpt/${BSDKIT_IMG_DATA_LABEL}" >>${_mfsroot}/baseroot.rc
+    echo "#!/bin/sh" > ${_mfsroot}/baseroot.rc
+    echo "IMG_PART=/dev/gpt/${BSDKIT_IMG_DATA_LABEL}" >> ${_mfsroot}/baseroot.rc
 
-    cat >>${_mfsroot}/baseroot.rc <<"EOF"
+    cat >> ${_mfsroot}/baseroot.rc << "EOF"
 set -e -u
 
 trap '/rescue/sh' EXIT
@@ -1937,7 +1937,7 @@ build_setup_iso() {
     local _relpath="$3"
     local _pkgpath="$4"
 
-    if ! command -v mkisofs >/dev/null  2>&1; then
+    if ! command -v mkisofs > /dev/null 2>&1; then
         error "required command missing (mkisofs)"
         # EX_UNAVAILABLE
         exit 69
@@ -2099,10 +2099,10 @@ remote_deploy() {
     local _ansible_yml=${_ansible_root}/ansible.yml
     local _ansible_key=${_ansible_root}/ansible.key
 
-    echo_bsdkit_private_key >${_ansible_key}
+    echo_bsdkit_private_key > ${_ansible_key}
     chmod 600 ${_ansible_key}
 
-    cat >${_ansible_cfg}  <<EOF
+    cat > ${_ansible_cfg} << EOF
 [defaults]
 inventory = ${_ansible_hosts}
 host_key_checking = False
@@ -2112,11 +2112,11 @@ pipelining = True
 ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
 EOF
 
-    cat >${_ansible_hosts}  <<EOF
+    cat > ${_ansible_hosts} << EOF
 install connection=ssh ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python ansible_ssh_host=${_remote_address} ansible_ssh_port=${_remote_port} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
-    cat >${_ansible_yml}  <<EOF
+    cat > ${_ansible_yml} << EOF
 ---
 - hosts: install
   connection: ssh
@@ -2160,7 +2160,7 @@ ansible_jail_playbook() {
     local _ansible_cfg=${_ansible_root}/ansible.cfg
     local _ansible_hosts=${_ansible_root}/ansible_hosts
 
-    cat >${_ansible_cfg}  <<EOF
+    cat > ${_ansible_cfg} << EOF
 [defaults]
 inventory = ${_ansible_hosts}
 host_key_checking = False
@@ -2170,13 +2170,13 @@ pipelining = True
 ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
 EOF
 
-    cat >${_ansible_hosts}  <<EOF
+    cat > ${_ansible_hosts} << EOF
 ${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
 EOF
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
-    _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2>/dev/null || :)"
-    _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2>/dev/null || :)"
+    _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
+    _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
 
     eval env \
         ANSIBLE_CONFIG=${_ansible_cfg} \
@@ -2212,7 +2212,7 @@ echo_jail_conf() {
 
     valid_destdir ${_destdir}
 
-    cat <<EOF
+    cat << EOF
 exec.start = "/bin/sh /etc/rc";
 exec.stop = "/bin/sh /etc/rc.shutdown";
 exec.clean;
@@ -2246,7 +2246,7 @@ echo_runtime_jail_conf() {
 
     valid_destdir ${_destdir}
 
-    cat >${_jail_conf}  <<EOF
+    cat > ${_jail_conf} << EOF
 exec.clean;
 
 mount.devfs;
@@ -2281,7 +2281,7 @@ shell() {
 }
 
 echo_bsdkit_private_key() {
-    cat <<EOF
+    cat << EOF
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA1HXtR02wnKZhLILRVCWSmJqyMSvjDAAGRK9JQmNSkWTiMRu+
 eeta+/JMR6a1PdeOKzLaf9hoySY3w6CMHl4fmCp0SlY9wAz8OVh0vd3SVSubxxhr
@@ -2313,12 +2313,12 @@ EOF
 }
 
 echo_bsdkit_public_key() {
-    cat <<EOF
+    cat << EOF
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KRZOIxG75561r78kxHprU9144rMtp/2GjJJjfDoIweXh+YKnRKVj3ADPw5WHS93dJVK5vHGGv+fF1tdXlbyO29gQwwqrWbPmqvshbc9F2AOPWHmV0CuqYpZ6Sk0EzvBCVmx52uZE9Nbr19dBBk885xWVNH4U4NHuEYUhbxgcaaCtGjsJy/+wgUqCTJp6xavB73Pf207yI8ZnMzfaje0EMN2vDrupntDon3lgtpc2VFntF1DQwn0BSGD1IW1xyokdbEIPt2hCt03cbi3G/7Pl7oaVZLfctNYE7j9ooruZEZ/ovN bsdkit
 EOF
 }
 
-if ! command -v ansible-playbook >/dev/null  2>&1; then
+if ! command -v ansible-playbook > /dev/null 2>&1; then
     error "required command missing (ansible-playbook)"
     # EX_UNAVAILABLE
     exit 69

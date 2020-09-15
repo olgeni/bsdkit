@@ -66,7 +66,7 @@ is_yes() {
 }
 
 bsdkit-noauto() {
-    _bootfs=$(zpool get -H -p -o value bootfs 2>/dev/null | grep -v "^-")
+    _bootfs=$(zpool get -H -p -o value bootfs 2> /dev/null | grep -v "^-")
 
     if [ $? = 0 ]; then
         _bootenv_base=$(dirname ${_bootfs})
@@ -109,7 +109,7 @@ rebuild_port() {
 
 trap cleanup EXIT
 
-if which -s pv 2>/dev/null; then
+if which -s pv 2> /dev/null; then
     CAT_CMD="pv -i ${PV_UPDATE_DELAY}"
 else
     CAT_CMD=/bin/cat
@@ -156,7 +156,7 @@ done
 
 shift $((OPTIND - 1))
 
-if kenv -q zfs_be_root >/dev/null 2>&1; then
+if kenv -q zfs_be_root > /dev/null 2>&1; then
     if [ ${BOOTENV_ENABLE} = "default" ]; then
         if [ -z "${DESTDIR}" ]; then
             BOOTENV_ENABLE="yes"
@@ -174,7 +174,7 @@ if ! is_yes ${FETCH_ONLY}; then
     fi
 
     if is_yes ${BOOTENV_ENABLE}; then
-        which bectl >/dev/null 2>&1 || error "missing requirement: bectl"
+        which bectl > /dev/null 2>&1 || error "missing requirement: bectl"
     fi
 fi
 
@@ -271,7 +271,7 @@ if is_yes ${BOOTENV_ENABLE}; then
 else
     if [ -z "${DESTDIR}" ]; then
         if is_yes ${_proc_mounted}; then
-            while umount -f /proc >/dev/null  2>&1; do :; done
+            while umount -f /proc > /dev/null 2>&1; do :; done
         fi
     fi
 fi
@@ -395,7 +395,7 @@ if [ -f ${_srcdir}/Makefile ]; then
     cd ${_srcdir}
 
     echo "Running: delete-old"
-    yes y | make delete-old DESTDIR=${DESTDIR}/ >/dev/null  2>&1
+    yes y | make delete-old DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 
     # echo "Running: delete-old-libs"
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1

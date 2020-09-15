@@ -2,7 +2,7 @@
 
 set -e -u
 
-_bootfs=$(zpool get -H -p -o value bootfs 2>/dev/null | grep -v "^-")
+_bootfs=$(zpool get -H -p -o value bootfs 2> /dev/null | grep -v "^-")
 
 if [ $? = 0 ]; then
     _bootenv_base=$(dirname ${_bootfs})

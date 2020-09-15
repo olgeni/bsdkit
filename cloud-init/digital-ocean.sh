@@ -2,7 +2,7 @@
 
 set -e -u -x
 
-exec >/var/log/bsdkit-cloud-init.log 2>&1
+exec > /var/log/bsdkit-cloud-init.log 2>&1
 
 : "${BSDKIT_BRANCH:=master}"
 : "${BSDKIT_VERSION:=12.1}"
@@ -16,10 +16,10 @@ sed -i -e "/vfs\.root\.mountfrom/d;"        /boot/.loader.conf
 sed -i -e "/vfs\.zfs\.vdev\.cache\.size/d;" /boot/.loader.conf
 sed -i -e "/vfs\.zfs\.arc_max/d;"           /boot/.loader.conf
 
-cat -s /boot/.loader.conf >/boot/loader.conf
+cat -s /boot/.loader.conf > /boot/loader.conf
 rm -f -v /boot/.loader.conf
 
-if kenv zfs_be_root >/dev/null 2>&1; then
+if kenv zfs_be_root > /dev/null 2>&1; then
     _zfs_pool=$(kenv zfs_be_root | sed "s@/.*@@")
 
     zfs create -o mountpoint=/jails "${_zfs_pool}"/jails
@@ -32,7 +32,7 @@ zfs destroy -r "${_zfs_pool}"@digitalocean_installation || :
 mkdir -p /usr/local/etc/pkg/repos
 pkg install -y pkg
 # shellcheck disable=SC2016
-echo 'bsdkit: { url: "https://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' >/usr/local/etc/pkg/repos/bsdkit.conf
+echo 'bsdkit: { url: "https://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' > /usr/local/etc/pkg/repos/bsdkit.conf
 pkg update -f
 pkg upgrade -y
 pkg install -y git pv py37-ansible
@@ -42,9 +42,9 @@ git checkout ${BSDKIT_BRANCH}
 env BSDKIT_INSTALL_HOST=yes ansible-playbook --connection=local --inventory 127.0.0.1, -e ansible_python_interpreter=/usr/local/bin/python3 playbook/bsdkit.yml
 pkg autoremove -y
 
-if route get default | grep "interface:" >/dev/null 2>&1; then
+if route get default | grep "interface:" > /dev/null 2>&1; then
     _iface=$(route get default | awk '/interface:/ { print $2 }')
-    echo "nat on ${_iface} from ${BSDKIT_JAIL_NETWORK} to any -> egress" >/etc/pf.conf
+    echo "nat on ${_iface} from ${BSDKIT_JAIL_NETWORK} to any -> egress" > /etc/pf.conf
     service pf enable
     service pf start
 fi
@@ -61,9 +61,9 @@ rm -f /usr/local/etc/rc.d/digitaloceanpre
 
 _rc_conf=$(mktemp)
 
-grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort | uniq >"${_rc_conf}"
+grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort | uniq > "${_rc_conf}"
 
-cat "${_rc_conf}" >/etc/rc.conf
+cat "${_rc_conf}" > /etc/rc.conf
 
 rm -f "${_rc_conf}"
 
@@ -84,4 +84,4 @@ newsyslog -C -v
 # bectl ujail bsdkit
 # rmdir ${_mnt}
 
-exec >/dev/tty 2>&1
+exec > /dev/tty 2>&1

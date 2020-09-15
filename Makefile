@@ -1,7 +1,7 @@
 all:
 
 format:
-	@inplace "shfmt -ci -kp -s -i 4" bsdkit* *.sh cloud-init/*.sh
+	@inplace "shfmt -ci -kp -sr -s -i 4" bsdkit* *.sh cloud-init/*.sh
 
 reset-vm:
 	@$(CURDIR)/bsdkit-vbox poweroff || :
