@@ -10,6 +10,9 @@ exec > /var/log/bsdkit-cloud-init.log 2>&1
 
 cd /root
 
+# shellcheck disable=SC2016
+chpass -p '$1$Kk8uqtid$UZr4tpkPw6388O6xDSFLt1' root
+
 mv -v /boot/loader.conf.local /boot/.loader.conf
 
 sed -i -e "/vfs\.root\.mountfrom/d;"        /boot/.loader.conf
