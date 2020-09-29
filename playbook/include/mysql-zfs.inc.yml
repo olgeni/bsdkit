@@ -12,6 +12,4 @@
         state: present
         extra_zfs_properties:
           canmount: on
-          recordsize: 16K
-          logbias: throughput
       when: find_var_db_mysql.matched == 0

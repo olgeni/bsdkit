@@ -12,6 +12,4 @@
         state: present
         extra_zfs_properties:
           canmount: on
-          recordsize: 8K
-          logbias: throughput
       when: find_var_db_postgres.matched == 0
