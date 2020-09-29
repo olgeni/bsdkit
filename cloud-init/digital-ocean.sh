@@ -49,23 +49,23 @@ if route get default | grep "interface:" > /dev/null 2>&1; then
     service pf start
 fi
 
-sysrc -x cloudinit_enable
-sysrc -x digitalocean
-sysrc -x digitaloceanpre
-sysrc -x ifconfig_vtnet0_ipv6
-sysrc -x ipv6_activate_all_interfaces
-sysrc -x ipv6_defaultrouter
+sysrc -a -e > /etc/.rc.conf
+cat /etc/.rc.conf > /etc/rc.conf
+rm -f /etc/.rc.conf
+
+sysrc -x cloudinit_enable || :
+sysrc -x digitalocean || :
+sysrc -x digitaloceanpre || :
+sysrc -x ifconfig_vtnet0_ipv6 || :
+sysrc -x ipv6_activate_all_interfaces || :
+sysrc -x ipv6_defaultrouter || :
+
+if sysrc -c route_net0; then
+    sysrc -x route_net0
+fi
 
 rm -f /usr/local/etc/rc.d/digitalocean
 rm -f /usr/local/etc/rc.d/digitaloceanpre
-
-_rc_conf=$(mktemp)
-
-grep -v -e '^ *#' -e '^$' /etc/rc.conf | sort | uniq > "${_rc_conf}"
-
-cat "${_rc_conf}" > /etc/rc.conf
-
-rm -f "${_rc_conf}"
 
 pkg delete -y net/cloud-init python2 python27 || :
 pkg delete -y -g py27\* || :
