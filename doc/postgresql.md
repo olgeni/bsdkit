@@ -1,4 +1,5 @@
 # PostgreSQL settings for ZFS
 
-    wal_recycle = 'off'
+    full_page_writes = 'off'
     wal_init_zero = 'off'
+    wal_recycle = 'off'
