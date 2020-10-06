@@ -63,7 +63,7 @@ sysrc -x ifconfig_vtnet0_ipv6 || :
 sysrc -x ipv6_activate_all_interfaces || :
 sysrc -x ipv6_defaultrouter || :
 
-if sysrc -c route_net0; then
+if sysrc -c route_net0 > /dev/null 2>&1; then
     sysrc -x route_net0
 fi
 
