@@ -1,3 +1,5 @@
+HOST=192.168.0.1
+
 all:
 
 format:
@@ -16,8 +18,50 @@ restart-vm:
 destroy-vm:
 	@$(CURDIR)/bsdkit-vbox destroy || :
 
-test-install-gpt-zfs-1:
-	@$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://192.168.0.1:8080 -z nox11 -v 12.1 ada0
-
 logcat:
 	@$(CURDIR)/bsdkit-vbox logcat >/tmp/bsdkit.log
+
+test-install-gpt-zfs-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0
+
+test-install-gpt-zfs-2:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0 ada1
+
+test-install-gpt-zfs-3:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0 ada1 ada2
+
+test-install-mbr-zfs-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0
+
+test-install-mbr-zfs-2:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0 ada1
+
+test-install-mbr-zfs-3:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0 ada1 ada2
+
+test-install-zfs-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0
+
+test-install-zfs-2:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0 ada1
+
+test-install-zfs-3:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0 ada1 ada2
+
+test-install-mbr-ufs-small-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 small ada0
+
+test-install-gpt-ufs-small-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 small ada0
+
+test-install-gpt-ufs-large-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 large ada0
+
+test-install-mbr-ufs-large-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 large ada0
+
+test-install-mbr-ufs-gmirror-small-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:8080 -z nox11 -v 12.1 small gm0 ada0 ada1 ada2
+
+test-install-mbr-ufs-gmirror-large-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:8080 -z nox11 -v 12.1 large gm0 ada0 ada1 ada2
