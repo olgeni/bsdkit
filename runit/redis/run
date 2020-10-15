@@ -27,4 +27,4 @@ mkdir -p data
 
 chown ${REDIS_USER}:${REDIS_USER} data
 
-exec chpst -u ${REDIS_USER} ${CHPST_FLAGS} /usr/local/bin/redis-server ${REDIS_CMD_ARGS}
+exec env -S "${ENVRC}" chpst -u ${REDIS_USER} ${CHPST_FLAGS} /usr/local/bin/redis-server ${REDIS_CMD_ARGS}

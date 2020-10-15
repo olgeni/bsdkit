@@ -30,4 +30,4 @@ cd ${UVICORN_PATH}
 
 . ${UVICORN_VENV}/bin/activate
 
-exec chpst -u ${UVICORN_USER} ${CHPST_FLAGS} uvicorn ${UVICORN_FLAGS} ${UVICORN_APP}
+exec env -S "${ENVRC}" chpst -u ${UVICORN_USER} ${CHPST_FLAGS} uvicorn ${UVICORN_FLAGS} ${UVICORN_APP}

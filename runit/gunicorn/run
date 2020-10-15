@@ -30,7 +30,7 @@ cd ${GUNICORN_PATH}
 
 . ${GUNICORN_VENV}/bin/activate
 
-exec chpst -u ${GUNICORN_USER} ${CHPST_FLAGS} gunicorn ${GUNICORN_FLAGS} ${GUNICORN_APP}
+exec env -S "${ENVRC}" chpst -u ${GUNICORN_USER} ${CHPST_FLAGS} gunicorn ${GUNICORN_FLAGS} ${GUNICORN_APP}
 
 # For logs: "--log-level debug"
 # For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"
