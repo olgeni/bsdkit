@@ -8,7 +8,7 @@ exec 2>&1
 
 [ -f config ] && . $(realpath config)
 
-: ${CHPST_FLAGS:=""}
+: ${CHPST_FLAGS=""}
 
 if [ -d env ]; then
     CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
@@ -22,7 +22,7 @@ fi
 
 : ${UVICORN_USER:="nobody"}
 : ${UVICORN_PATH:="/tmp"}
-: ${UVICORN_FLAGS:=""}
+: ${UVICORN_FLAGS=""}
 : ${UVICORN_APP:="app:app"}
 : ${UVICORN_VENV:="${UVICORN_PATH}/.venv"}
 

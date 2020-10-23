@@ -8,7 +8,7 @@ exec 2>&1
 
 [ -f config ] && . $(realpath config)
 
-: ${CHPST_FLAGS:=""}
+: ${CHPST_FLAGS=""}
 
 if [ -d env ]; then
     CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
@@ -22,7 +22,7 @@ fi
 
 : ${GUNICORN_USER:="nobody"}
 : ${GUNICORN_PATH:="/tmp"}
-: ${GUNICORN_CMD_ARGS:=""}
+: ${GUNICORN_FLAGS=""}
 : ${GUNICORN_APP:="app:app"}
 : ${GUNICORN_VENV:="${GUNICORN_PATH}/.venv"}
 

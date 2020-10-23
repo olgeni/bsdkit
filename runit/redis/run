@@ -8,7 +8,7 @@ exec 2>&1
 
 [ -f config ] && . $(realpath config)
 
-: ${CHPST_FLAGS:=""}
+: ${CHPST_FLAGS=""}
 
 if [ -d env ]; then
     CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
@@ -21,10 +21,10 @@ if [ -f envrc ]; then
 fi
 
 : ${REDIS_USER:="redis"}
-: ${REDIS_CMD_ARGS:="redis.conf"}
+: ${REDIS_FLAGS="redis.conf"}
 
 mkdir -p data
 
 chown ${REDIS_USER}:${REDIS_USER} data
 
-exec env -S "${ENVRC}" chpst -u ${REDIS_USER} ${CHPST_FLAGS} /usr/local/bin/redis-server ${REDIS_CMD_ARGS}
+exec env -S "${ENVRC}" chpst -u ${REDIS_USER} ${CHPST_FLAGS} /usr/local/bin/redis-server ${REDIS_FLAGS}
