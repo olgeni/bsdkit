@@ -8,10 +8,10 @@ exec 2>&1
 
 [ -f config ] && . $(realpath config)
 
-: ${CHPST_FLAGS=""}
+: ${CHPST_ARGS=""}
 
 if [ -d env ]; then
-    CHPST_FLAGS="${CHPST_FLAGS} -e ${PWD}/env"
+    CHPST_ARGS="${CHPST_ARGS} -e ${PWD}/env"
 fi
 
 ENVRC=""
@@ -22,7 +22,7 @@ fi
 
 : ${UVICORN_USER:="nobody"}
 : ${UVICORN_PATH:="/tmp"}
-: ${UVICORN_FLAGS=""}
+: ${UVICORN_ARGS=""}
 : ${UVICORN_APP:="app:app"}
 : ${UVICORN_VENV:="${UVICORN_PATH}/.venv"}
 
@@ -30,4 +30,4 @@ cd ${UVICORN_PATH}
 
 . ${UVICORN_VENV}/bin/activate
 
-exec env -S "${ENVRC}" chpst -u ${UVICORN_USER} ${CHPST_FLAGS} uvicorn ${UVICORN_FLAGS} ${UVICORN_APP}
+exec env -S "${ENVRC}" chpst -u ${UVICORN_USER} ${CHPST_ARGS} uvicorn ${UVICORN_ARGS} ${UVICORN_APP}
