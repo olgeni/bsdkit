@@ -26,6 +26,6 @@ fi
 
 mkdir -p data
 
-chown ${REDIS_USER}:${REDIS_GROUP} data
+chown -R ${REDIS_USER}:${REDIS_GROUP} data
 
 exec env -S "${ENVRC}" chpst -u ${REDIS_USER}:${REDIS_GROUP} ${CHPST_ARGS} /usr/local/bin/redis-server ${REDIS_ARGS}
