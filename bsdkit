@@ -352,19 +352,19 @@ gpt_ufs_partition_large() {
 
     gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs -l ${BSDKIT_LABEL_ROOT} ${_device}
     _p=$((_p + 1))
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_TMP}  -t freebsd-ufs -l ${BSDKIT_LABEL_TMP}  ${_device}
+    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_TMP} -t freebsd-ufs -l ${BSDKIT_LABEL_TMP} ${_device}
     _p=$((_p + 1))
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_VAR}  -t freebsd-ufs -l ${BSDKIT_LABEL_VAR}  ${_device}
+    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_VAR} -t freebsd-ufs -l ${BSDKIT_LABEL_VAR} ${_device}
     _p=$((_p + 1))
-    gpart add -i ${_p}                             -t freebsd-ufs -l ${BSDKIT_LABEL_USR}  ${_device}
+    gpart add -i ${_p} -t freebsd-ufs -l ${BSDKIT_LABEL_USR} ${_device}
     _p=$((_p + 1))
 
     # FIXME use -j
 
-    newfs    -L ${BSDKIT_LABEL_ROOT}    /dev/gpt/${BSDKIT_LABEL_ROOT}
-    newfs -U -L ${BSDKIT_LABEL_TMP}  -n /dev/gpt/${BSDKIT_LABEL_TMP}
-    newfs -U -L ${BSDKIT_LABEL_VAR}     /dev/gpt/${BSDKIT_LABEL_VAR}
-    newfs -U -L ${BSDKIT_LABEL_USR}     /dev/gpt/${BSDKIT_LABEL_USR}
+    newfs -L ${BSDKIT_LABEL_ROOT} /dev/gpt/${BSDKIT_LABEL_ROOT}
+    newfs -U -L ${BSDKIT_LABEL_TMP} -n /dev/gpt/${BSDKIT_LABEL_TMP}
+    newfs -U -L ${BSDKIT_LABEL_VAR} /dev/gpt/${BSDKIT_LABEL_VAR}
+    newfs -U -L ${BSDKIT_LABEL_USR} /dev/gpt/${BSDKIT_LABEL_USR}
 
     mount -o async,noatime /dev/gpt/${BSDKIT_LABEL_ROOT} ${_destdir}
 
@@ -468,7 +468,7 @@ mbr_ufs_partition_large() {
 
     # FIXME refactor (end)
 
-    gpart add -i 1 -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs  ${_device}s1 # a
+    gpart add -i 1 -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs ${_device}s1 # a
 
     if has_swap; then
         gpart add -i 2 -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap ${_device}s1 # b
@@ -476,16 +476,16 @@ mbr_ufs_partition_large() {
     fi
 
     # reserved partition c
-    gpart add -i 4 -s ${BSDKIT_PART_SIZE_TMP}  -t freebsd-ufs ${_device}s1 # d
-    gpart add -i 5 -s ${BSDKIT_PART_SIZE_VAR}  -t freebsd-ufs ${_device}s1 # e
-    gpart add -i 6                             -t freebsd-ufs ${_device}s1 # f
+    gpart add -i 4 -s ${BSDKIT_PART_SIZE_TMP} -t freebsd-ufs ${_device}s1 # d
+    gpart add -i 5 -s ${BSDKIT_PART_SIZE_VAR} -t freebsd-ufs ${_device}s1 # e
+    gpart add -i 6 -t freebsd-ufs ${_device}s1                            # f
 
     # FIXME use -j
 
-    newfs    -L ${BSDKIT_LABEL_ROOT} -n /dev/${_device}s1a
-    newfs -U -L ${BSDKIT_LABEL_TMP}  -n /dev/${_device}s1e
-    newfs -U -L ${BSDKIT_LABEL_VAR}     /dev/${_device}s1d
-    newfs -U -L ${BSDKIT_LABEL_USR}     /dev/${_device}s1f
+    newfs -L ${BSDKIT_LABEL_ROOT} -n /dev/${_device}s1a
+    newfs -U -L ${BSDKIT_LABEL_TMP} -n /dev/${_device}s1e
+    newfs -U -L ${BSDKIT_LABEL_VAR} /dev/${_device}s1d
+    newfs -U -L ${BSDKIT_LABEL_USR} /dev/${_device}s1f
 
     glabel label -v swap /dev/${_device}s1b
 
@@ -542,7 +542,7 @@ mbr_ufs_partition_small() {
 
     # FIXME refactor (end)
 
-    gpart add -i 1 -t freebsd-ufs  ${_device}s1 # a
+    gpart add -i 1 -t freebsd-ufs ${_device}s1 # a
 
     # FIXME use -j
 
@@ -779,24 +779,24 @@ zfs_create_fs() {
     zfs set atime=off ${BSDKIT_ZFS_POOL}
 
     ${ZFS_CREATE_CMD} -o mountpoint=none -o canmount=noauto ${BSDKIT_ZFS_POOL}/ROOT
-    ${ZFS_CREATE_CMD} -o mountpoint=/    -o canmount=noauto ${BSDKIT_ZFS_POOL}/ROOT/default
+    ${ZFS_CREATE_CMD} -o mountpoint=/ -o canmount=noauto ${BSDKIT_ZFS_POOL}/ROOT/default
 
     zfs mount ${BSDKIT_ZFS_POOL}/ROOT/default
 
-    ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off   ${BSDKIT_ZFS_POOL}/tmp
+    ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off ${BSDKIT_ZFS_POOL}/tmp
     ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off ${BSDKIT_ZFS_POOL}/usr
     ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off ${BSDKIT_ZFS_POOL}/var
-    ${ZFS_CREATE_CMD} -o compression=on                  ${BSDKIT_ZFS_POOL}/usr/src
-    ${ZFS_CREATE_CMD} -o setuid=off                      ${BSDKIT_ZFS_POOL}/usr/ports
-    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off          ${BSDKIT_ZFS_POOL}/var/audit
-    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off          ${BSDKIT_ZFS_POOL}/var/crash
-    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off          ${BSDKIT_ZFS_POOL}/var/log
-    ${ZFS_CREATE_CMD} -o atime=on                        ${BSDKIT_ZFS_POOL}/var/mail
-    ${ZFS_CREATE_CMD} -o setuid=off                      ${BSDKIT_ZFS_POOL}/var/tmp
-    ${ZFS_CREATE_CMD} -o canmount=off                    ${BSDKIT_ZFS_POOL}/usr/local
-    ${ZFS_CREATE_CMD}                                    ${BSDKIT_ZFS_POOL}/usr/home
-    ${ZFS_CREATE_CMD} -o setuid=off -o canmount=off      ${BSDKIT_ZFS_POOL}/var/db
-    ${ZFS_CREATE_CMD} -o mountpoint=/jails               ${BSDKIT_ZFS_POOL}/jails
+    ${ZFS_CREATE_CMD} -o compression=on ${BSDKIT_ZFS_POOL}/usr/src
+    ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/usr/ports
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/audit
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/crash
+    ${ZFS_CREATE_CMD} -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/log
+    ${ZFS_CREATE_CMD} -o atime=on ${BSDKIT_ZFS_POOL}/var/mail
+    ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/var/tmp
+    ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/usr/local
+    ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/usr/home
+    ${ZFS_CREATE_CMD} -o setuid=off -o canmount=off ${BSDKIT_ZFS_POOL}/var/db
+    ${ZFS_CREATE_CMD} -o mountpoint=/jails ${BSDKIT_ZFS_POOL}/jails
 
     ${ZFS_CREATE_CMD} -o canmount=on ${BSDKIT_ZFS_POOL}/var/db/postgres
     ${ZFS_CREATE_CMD} -o canmount=on ${BSDKIT_ZFS_POOL}/var/db/mysql
@@ -881,7 +881,7 @@ format_fstab() {
 
     local _fstab="${_destdir}/etc/fstab"
 
-    echo "#linprocfs /compat/linux/proc linprocfs rw 0 0"      >> ${_destdir}/etc/fstab
+    echo "#linprocfs /compat/linux/proc linprocfs rw 0 0" >> ${_destdir}/etc/fstab
     echo "#tmpfs /compat/linux/dev/shm tmpfs rw,mode=1777 0 0" >> ${_destdir}/etc/fstab
 
     column -t < ${_fstab} | sort > ${_fstab}.0
@@ -990,8 +990,8 @@ install_release() {
     fi
 
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
-    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.var.dist  -p ${_destdir}/var
-    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.usr.dist  -p ${_destdir}/usr
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.var.dist -p ${_destdir}/var
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.usr.dist -p ${_destdir}/usr
 
     if [ -f ${_destdir}/etc/mtree/BSD.include.dist ]; then
         mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.include.dist -p ${_destdir}/usr/include
@@ -1101,10 +1101,10 @@ reset_state() {
     jail -R '*'
 
     mount -p |
-        cut   -w -f 2 |
-        grep   /baseroot${BSDKIT_DESTDIR} |
-        sort   -r |
-        xargs   umount -f
+        cut -w -f 2 |
+        grep /baseroot${BSDKIT_DESTDIR} |
+        sort -r |
+        xargs umount -f
 
     swapctl -l | grep "^/" | cut -f 1 -d' ' | xargs swapoff
 

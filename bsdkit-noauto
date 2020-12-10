@@ -8,8 +8,8 @@ if [ $? = 0 ]; then
     _bootenv_base=$(dirname ${_bootfs})
 
     zfs list -H -o name -r ${_bootenv_base} |
-        grep   -v "^${_bootenv_base}$" |
-        while   read _fs; do
+        grep -v "^${_bootenv_base}$" |
+        while read _fs; do
 
             echo -n "Checking property 'canmount' on ${_fs}: "
 

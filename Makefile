@@ -3,7 +3,7 @@ HOST=192.168.0.1
 all:
 
 format:
-	@inplace "shfmt -ci -kp -sr -s -i 4" bsdkit* *.sh cloud-init/*.sh
+	@inplace "shfmt -ci -sr -s -i 4" bsdkit* *.sh cloud-init/*.sh
 
 reset-vm:
 	@$(CURDIR)/bsdkit-vbox poweroff || :

@@ -15,9 +15,9 @@ chpass -p '$1$Kk8uqtid$UZr4tpkPw6388O6xDSFLt1' root
 
 mv -v /boot/loader.conf.local /boot/.loader.conf
 
-sed -i -e "/vfs\.root\.mountfrom/d;"        /boot/.loader.conf
+sed -i -e "/vfs\.root\.mountfrom/d;" /boot/.loader.conf
 sed -i -e "/vfs\.zfs\.vdev\.cache\.size/d;" /boot/.loader.conf
-sed -i -e "/vfs\.zfs\.arc_max/d;"           /boot/.loader.conf
+sed -i -e "/vfs\.zfs\.arc_max/d;" /boot/.loader.conf
 
 cat -s /boot/.loader.conf > /boot/loader.conf
 rm -f -v /boot/.loader.conf
@@ -26,7 +26,7 @@ if kenv zfs_be_root > /dev/null 2>&1; then
     _zfs_pool=$(kenv zfs_be_root | sed "s@/.*@@")
 
     zfs create -o mountpoint=/jails "${_zfs_pool}"/jails
-    zfs create -o canmount=off      "${_zfs_pool}"/usr/local
+    zfs create -o canmount=off "${_zfs_pool}"/usr/local
 fi
 
 zfs destroy -r "${_zfs_pool}"@base_installation || :

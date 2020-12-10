@@ -292,7 +292,7 @@ if is_yes ${_install_src}; then
     echo "Extracting: src.txz"
 
     for _file in ${DESTDIR}/usr/src/*; do
-        rm -r -f  ${_file}
+        rm -r -f ${_file}
     done
 
     ${CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
@@ -305,8 +305,8 @@ find ${DESTDIR}/bin \
     ${DESTDIR}/usr/bin \
     ${DESTDIR}/usr/lib \
     ${DESTDIR}/usr/lib32 \
-    -flags  -schg \
-    -exec  chflags noschg {} \;
+    -flags -schg \
+    -exec chflags noschg {} \;
 
 if [ -f ${_srcdir}/Makefile ]; then
     etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
@@ -363,7 +363,7 @@ fi
 echo "Running: mtree"
 
 mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
-mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist  -p ${DESTDIR}/usr
+mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist -p ${DESTDIR}/usr
 
 if is_yes ${BOOTENV_ENABLE}; then
     mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p /var
