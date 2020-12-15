@@ -204,8 +204,11 @@ rc_get() {
 
     _buffer="$(grep -E "^[[:space:]]*${_key}[[:space:]]*=" ${_file})"
 
-    local _value1=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
-    local _value2=$(expr "${_value1}" : "\"\(.*\)\"")
+    local _value1
+    _value1=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
+
+    local _value2
+    _value2=$(expr "${_value1}" : "\"\(.*\)\"")
 
     if [ -n "${_value2}" ]; then
         echo ${_value2}
@@ -1082,7 +1085,10 @@ inet_address() {
 start_jail() {
     local _destdir="$1"
     valid_destdir ${_destdir}
-    local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
+
+    local _jail_conf
+    _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
+
     echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -c ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
@@ -1091,7 +1097,10 @@ start_jail() {
 stop_jail() {
     local _destdir="$1"
     valid_destdir ${_destdir}
-    local _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
+
+    local _jail_conf
+    _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
+
     echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -r ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
@@ -1301,8 +1310,12 @@ create_iocell() {
 
     command -v iocell > /dev/null 2>&1 || error "iocell not found (create_iocell)."
 
-    local _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}" "$@")
-    local _mountpoint=$(iocell get mountpoint "${_tag}") || error "iocell could not retrieve mountpoint"
+    local _uuid
+    _uuid=$(iocell create -e tag="${_tag}" host_hostname="${_tag}" "$@")
+
+    local _mountpoint
+    _mountpoint=$(iocell get mountpoint "${_tag}") || error "iocell could not retrieve mountpoint"
+
     local _destdir=${_mountpoint}/root
 
     [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell)."
@@ -1325,8 +1338,12 @@ create_iocell_thin() {
 
     iocell create tag="${_tag}" host_hostname="${_tag}" "$@" || error "iocell could not create jail"
 
-    local _uuid=$(iocell get host_hostuuid "${_tag}") || error "iocell could not retrieve host_hostuuid"
-    local _mountpoint=$(iocell get mountpoint "${_tag}") || error "iocell could not retrieve mountpoint"
+    # local _uuid
+    # _uuid=$(iocell get host_hostuuid "${_tag}") || error "iocell could not retrieve host_hostuuid"
+
+    local _mountpoint
+    _mountpoint=$(iocell get mountpoint "${_tag}") || error "iocell could not retrieve mountpoint"
+
     local _destdir=${_mountpoint}/root
 
     [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell_thin)."
@@ -1347,8 +1364,13 @@ create_iocage() {
 
     command -v iocage > /dev/null 2>&1 || error "iocage not found (create_iocage)."
     iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
-    local _iocage_root=$(iocage get -p)
-    local _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
+
+    local _iocage_root
+    _iocage_root=$(iocage get -p)
+
+    local _iocage_jails
+    _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
+
     iocage create -e --name "${_jail_name}" "$@"
     local _destdir=${_iocage_jails}/${_jail_name}/root
 
@@ -1372,8 +1394,13 @@ create_iocage_thin() {
 
     command -v iocage > /dev/null 2>&1 || error "iocage not found (create_iocage)."
     iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
-    local _iocage_root=$(iocage get -p)
-    local _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
+
+    local _iocage_root
+    _iocage_root=$(iocage get -p)
+
+    local _iocage_jails
+    _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
+
     iocage create --name "${_jail_name}" "$@"
     local _destdir=${_iocage_jails}/${_jail_name}/root
 
@@ -1414,7 +1441,8 @@ configure_jail() {
 }
 
 create_md() {
-    local _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
+    local _md_device
+    _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
     env BSDKIT_INSTALL_SRC=no FS_SWAP_SIZE=0 BSDKIT_LABEL_ROOT=mdroot "$0" deploy install_gpt_ufs "$@" small "${_md_device}"
 
@@ -1444,7 +1472,9 @@ create_jail_destdir() {
     fi
 
     local _dirname="$(dirname ${_destdir})"
-    local _parent_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${_dirname}\" { print \$3; }")
+    local _parent_fs
+    _parent_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${_dirname}\" { print \$3; }")
+
     local _zfs="NO"
 
     if [ -n "${_parent_fs}" ]; then
@@ -1493,7 +1523,9 @@ remove_jail() {
     valid_destdir ${_destdir}
 
     local _dirname="$(dirname ${_destdir})"
-    local _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
+    local _parent_fs
+    _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
+
     local _zfs="NO"
 
     local _devfs
@@ -1707,7 +1739,8 @@ EOF
 
     rmdir ${_destdir}/${_pkgdir}
 
-    local _master_passwd=$(mktemp ${_destdir}/tmp/master.passwd.XXXXXX)
+    local _master_passwd
+    _master_passwd=$(mktemp ${_destdir}/tmp/master.passwd.XXXXXX)
 
     cp -p ${_destdir}/etc/master.passwd ${_master_passwd}
 
@@ -2051,13 +2084,15 @@ build_setup_img() {
     local _iso="$1"
     local _img="$2"
 
-    local _staging=$(mktemp -d /tmp/staging.XXXXXX)
+    local _staging
+    _staging=$(mktemp -d /tmp/staging.XXXXXX)
 
     tar -x -f ${_iso} -C ${_staging} boot memroot.ufs.gz
 
     cp ${_iso} ${_staging}
 
-    local _ufs=$(mktemp /tmp/ufs.XXXXXX)
+    local _ufs
+    _ufs=$(mktemp /tmp/ufs.XXXXXX)
 
     makefs ${_ufs} ${_staging}
 
@@ -2075,7 +2110,7 @@ build_setup_img() {
 }
 
 deploy() {
-    echo "Running: $@"
+    echo "Running: $*"
 
     $@
 
@@ -2104,9 +2139,11 @@ remote_deploy() {
     [ -n "${_remote_address}" ]
     [ -n "${_remote_port}" ]
 
-    echo "Running: $@"
+    echo "Running: $*"
 
-    local _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
+    local _ansible_root
+    _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
+
     local _ansible_cfg=${_ansible_root}/ansible.cfg
     local _ansible_hosts=${_ansible_root}/ansible_hosts
     local _ansible_yml=${_ansible_root}/ansible.yml
@@ -2169,7 +2206,9 @@ ansible_local_playbook() {
 }
 
 ansible_jail_playbook() {
-    local _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
+    local _ansible_root
+    _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
+
     local _ansible_cfg=${_ansible_root}/ansible.cfg
     local _ansible_hosts=${_ansible_root}/ansible_hosts
 
@@ -2286,7 +2325,8 @@ EOF
 }
 
 shell() {
-    local _private_key=$(mktemp /tmp/key.XXXXXX)
+    local _private_key
+    _private_key=$(mktemp /tmp/key.XXXXXX)
 
     ssh -v -i ${_private_key} "$@" || :
 
