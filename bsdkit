@@ -249,7 +249,6 @@ valid_relpath() {
     valid_url ${_relpath} && return 0
 
     [ -d ${_relpath} ]
-
     [ -f ${_relpath}/base.txz ]
 
     return 0
@@ -261,7 +260,6 @@ valid_pkgpath() {
     valid_url ${_pkgpath} && return 0
 
     [ -d ${_pkgpath} ]
-
     [ -f ${_pkgpath}/packagesite.txz ]
 }
 
