@@ -576,6 +576,7 @@ zfs_create_pool() {
 
     shift 1
 
+    local _device
     local _devices
 
     _devices="$*"
@@ -589,6 +590,7 @@ zfs_create_pool() {
 
         dd if=/boot/zfsboot of=/dev/${_device} count=1
         dd if=/boot/zfsboot of=/dev/${_device} iseek=1 oseek=1024
+        zpool labelclear -f ${_device} 2> /dev/null || :
     done
 
     sysctl -q kern.geom.debugflags=0x00
@@ -596,12 +598,6 @@ zfs_create_pool() {
     local _options="-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir}"
 
     set ${_devices}
-
-    local _device
-
-    for _device in ${_device}; do
-        zpool labelclear -f ${_device} 2> /dev/null || :
-    done
 
     case $# in
         1)
