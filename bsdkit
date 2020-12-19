@@ -1063,16 +1063,15 @@ EOF
     install_resolv_conf ${_destdir}
     install_ca_root_nss ${_destdir}
 
-    local _login_env=",LC_ALL=en_US.UTF-8"
-    # _login_env="${_login_env},..."
+    # local _login_env=",LC_ALL=en_US.UTF-8"
 
-    sed -i '' -e "s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
+    # sed -i '' -e "s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
 
-    sed -i '' -e '/^	:umask=022:/i\
-	:charset=UTF-8:\\\
-	:lang=en_US.UTF-8:\\\' ${_destdir}/etc/login.conf
+    # sed -i '' -e '/^	:umask=022:/i\
+    #     :charset=UTF-8:\\\
+    #     :lang=en_US.UTF-8:\\\' ${_destdir}/etc/login.conf
 
-    cap_mkdb ${_destdir}/etc/login.conf
+    # cap_mkdb ${_destdir}/etc/login.conf
 
     mkdir -p ${_destdir}/usr/local/etc/pkg/repos
 
