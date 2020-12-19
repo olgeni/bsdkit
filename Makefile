@@ -48,20 +48,20 @@ test-install-zfs-2:
 test-install-zfs-3:
 	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:8080 -z nox11 -v 12.1 ada0 ada1 ada2
 
-test-install-mbr-ufs-small-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 small ada0
+test-install-mbr-ufs-single-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 single ada0
 
-test-install-gpt-ufs-small-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 small ada0
+test-install-gpt-ufs-single-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 single ada0
 
-test-install-gpt-ufs-large-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 large ada0
+test-install-gpt-ufs-multi-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 multi ada0
 
-test-install-mbr-ufs-large-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 large ada0
+test-install-mbr-ufs-multi-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:8080 -z nox11 -v 12.1 multi ada0
 
-test-install-mbr-ufs-gmirror-small-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:8080 -z nox11 -v 12.1 small gm0 ada0 ada1 ada2
+test-install-mbr-ufs-gmirror-single-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:8080 -z nox11 -v 12.1 single gm0 ada0 ada1 ada2
 
-test-install-mbr-ufs-gmirror-large-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:8080 -z nox11 -v 12.1 large gm0 ada0 ada1 ada2
+test-install-mbr-ufs-gmirror-multi-1:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:8080 -z nox11 -v 12.1 multi gm0 ada0 ada1 ada2

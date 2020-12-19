@@ -289,10 +289,10 @@ valid_class() {
     local _class=$1
 
     case ${_class} in
-        small)
+        single)
             return 0
             ;;
-        large)
+        multi)
             return 0
             ;;
         *)
@@ -323,7 +323,7 @@ gmirror_configure() {
     return 0
 }
 
-gpt_ufs_partition_large() {
+gpt_ufs_partition_multi() {
     local _destdir=$1
     local _device=$2
 
@@ -398,7 +398,7 @@ gpt_ufs_partition_large() {
     return 0
 }
 
-gpt_ufs_partition_small() {
+gpt_ufs_partition_single() {
     local _destdir=$1
     local _device=$2
 
@@ -446,7 +446,7 @@ gpt_ufs_partition_small() {
     return 0
 }
 
-mbr_ufs_partition_large() {
+mbr_ufs_partition_multi() {
     local _destdir=$1
     local _device=$2
 
@@ -520,7 +520,7 @@ mbr_ufs_partition_large() {
     return 0
 }
 
-mbr_ufs_partition_small() {
+mbr_ufs_partition_single() {
     local _destdir=$1
     local _device=$2
 
@@ -1454,7 +1454,7 @@ create_md() {
     local _md_device
     _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
-    env BSDKIT_INSTALL_SRC=no FS_SWAP_SIZE=0 BSDKIT_LABEL_ROOT=mdroot "$0" deploy install_gpt_ufs "$@" small ${_md_device}
+    env BSDKIT_INSTALL_SRC=no FS_SWAP_SIZE=0 BSDKIT_LABEL_ROOT=mdroot "$0" deploy install_gpt_ufs "$@" single ${_md_device}
 
     rm -f ${BSDKIT_DESTDIR}/etc/rc.conf
 
