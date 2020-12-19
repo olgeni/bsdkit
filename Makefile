@@ -5,7 +5,7 @@ all:
 format:
 	@inplace "shfmt -ci -sr -s -i 4" bsdkit* *.sh cloud-init/*.sh
 
-reset-vm:
+rebuild-vm:
 	@$(CURDIR)/bsdkit-vbox poweroff || :
 	@$(CURDIR)/bsdkit-vbox destroy || :
 	@$(CURDIR)/bsdkit-vbox create
