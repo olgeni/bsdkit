@@ -484,8 +484,8 @@ mbr_ufs_partition_large() {
     # FIXME use -j
 
     newfs -L ${BSDKIT_LABEL_ROOT} -n /dev/${_device}s1a
-    newfs -U -L ${BSDKIT_LABEL_TMP} -n /dev/${_device}s1e
-    newfs -U -L ${BSDKIT_LABEL_VAR} /dev/${_device}s1d
+    newfs -U -L ${BSDKIT_LABEL_TMP} -n /dev/${_device}s1d
+    newfs -U -L ${BSDKIT_LABEL_VAR} /dev/${_device}s1e
     newfs -U -L ${BSDKIT_LABEL_USR} /dev/${_device}s1f
 
     glabel label -v swap /dev/${_device}s1b
