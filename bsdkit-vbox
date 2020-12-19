@@ -53,8 +53,8 @@ create_vm() {
     VBoxManage modifyvm bsdkit --natpf1 ssh,tcp,,${BSDKIT_VBOX_PORT},,22
 
     VBoxManage storageattach bsdkit \
-        --storagectl "IDE Controller" \
-        --port 0 \
+        --storagectl "SATA Controller" \
+        --port 4 \
         --device 0 \
         --type dvddrive \
         --medium "${BSDKIT_VBOX_ISO}"
@@ -122,7 +122,7 @@ case $1 in
         while VBoxManage showvminfo bsdkit --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
             sleep 1
         done
-        while ! VBoxManage storageattach bsdkit --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive > /dev/null 2>&1; do
+        while ! VBoxManage storageattach bsdkit --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
             sleep 1
         done
         ;;
