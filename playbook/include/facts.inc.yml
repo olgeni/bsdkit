@@ -12,7 +12,7 @@
   ignore_errors: True
   register: sysctl_security_jail_jailed
 
-- name: "Check sysctl: kern.hostuuid"
+- name: "Check sysctl: kern.hostuuid match with bsdkit"
   shell:
     cmd: "[ $(sysctl -n kern.hostuuid) = '2e158b17-5e10-11e5-ac21-080027af0e2a' ]"
   changed_when: False
