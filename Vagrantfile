@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: ".git/"
 
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
+    pkg info zsh || pkg install -y zsh
     cd /vagrant && ./bsdkit ansible_local_playbook
     pkg upg -y
     pkg autoremove -y
