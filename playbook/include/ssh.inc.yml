@@ -12,6 +12,13 @@
     regexp: "^PermitRootLogin"
     insertafter: EOF
 
+- name: "Create ssh directory for root"
+  file:
+    path: /root/.ssh
+    state: directory
+    owner: root
+    group: wheel
+
 - name: "Create ssh identity for root"
   openssh_keypair:
     path: /root/.ssh/id_ed25519
