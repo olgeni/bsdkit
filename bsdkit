@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-set -e -u -x
+set -e -u
 
 autoload throw catch
 
