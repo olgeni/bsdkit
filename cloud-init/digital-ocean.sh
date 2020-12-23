@@ -38,7 +38,7 @@ pkg install -y pkg
 echo 'bsdkit: { url: "https://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' > /usr/local/etc/pkg/repos/bsdkit.conf
 pkg update -f
 pkg upgrade -y
-pkg install -y git pv py37-ansible
+pkg install -y git pv py37-ansible zsh
 git clone https://github.com/olgeni/bsdkit.git
 cd bsdkit
 git checkout ${BSDKIT_BRANCH}
