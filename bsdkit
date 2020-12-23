@@ -2208,8 +2208,8 @@ EOF
 
 ansible_local_playbook() {
     ansible-playbook \
-        -i localhost, \
-        -c local \
+        --inventory localhost, \
+        --connection local \
         -e ansible_python_interpreter=/usr/local/bin/python3 \
         ${BSDKIT_SRCDIR}/playbook/bsdkit.yml
 }
