@@ -99,21 +99,21 @@ case $1 in
     shell)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        ssh -i ${_key} -p 2200 root@localhost
+        ssh -i ${_key} -p ${BSDKIT_VBOX_PORT} root@localhost
         rm -f ${_key}
         ;;
 
     logcat)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        env -u SSH_AUTH_SOCK ssh -i ${_key} -p 2200 root@localhost cat /tmp/bsdkit.log
+        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_PORT} root@localhost cat /tmp/bsdkit.log
         rm -f ${_key}
         ;;
 
     logtail)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        env -u SSH_AUTH_SOCK ssh -i ${_key} -p 2200 root@localhost tail -F /tmp/bsdkit.log
+        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_PORT} root@localhost tail -F /tmp/bsdkit.log
         rm -f ${_key}
         ;;
 
