@@ -10,6 +10,7 @@ error() {
 : ${BSDKIT_VBOX_NAME:="bsdkit"}
 : ${BSDKIT_VBOX_PORT:="2200"}
 : ${BSDKIT_VBOX_MEMORY:="2048"}
+: ${BSDKIT_VBOX_VRAM:="16"}
 : ${BSDKIT_VBOX_ISO:=""}
 : ${BSDKIT_VBOX_EFI:=""}
 : ${BSDKIT_VBOX_DISK_SIZE:="30000"}
@@ -31,8 +32,8 @@ create_vm() {
 
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vrdeproperty "TCP/Ports=5900" --vrdeproperty "VNCPassword=bsd" --vrde on
 
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vram 16
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --memory ${BSDKIT_VBOX_MEMORY}
+    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vram ${BSDKIT_VBOX_VRAM}
 
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --keyboard usb
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --mouse usbtablet
