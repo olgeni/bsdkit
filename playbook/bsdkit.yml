@@ -198,17 +198,21 @@
         name:
           - align
           - bash
+          - buffer
           - ca_root_nss
           - cpdup
           - curl
           - direnv
           - fzf
+          - git
           - gnu-watch
           - htop
           - jq
           - lftp
+          - mbuffer
           - ncdu
           - pv
+          - renameutils
           - rsync
           - socat
           - the_silver_searcher
