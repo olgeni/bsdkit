@@ -24,9 +24,9 @@ create_vm() {
 
     _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
-    VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}0.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
-    VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}1.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
-    VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}2.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
+    VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-0.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
+    VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-1.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
+    VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-2.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
 
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vrdeproperty "TCP/Ports=5900" --vrdeproperty "VNCPassword=bsd" --vrde on
 
@@ -44,9 +44,9 @@ create_vm() {
     VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name "SATA Controller" --add sata --hostiocache on
     VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name "IDE Controller" --add ide --hostiocache on
 
-    VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "${_vm_path}/${BSDKIT_VBOX_NAME}0.vdi"
-    VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 1 --device 0 --type hdd --medium "${_vm_path}/${BSDKIT_VBOX_NAME}1.vdi"
-    VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 2 --device 0 --type hdd --medium "${_vm_path}/${BSDKIT_VBOX_NAME}2.vdi"
+    VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-0.vdi"
+    VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 1 --device 0 --type hdd --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-1.vdi"
+    VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 2 --device 0 --type hdd --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-2.vdi"
 
     # VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --nic1 bridged --bridgeadapter1 re0
     # VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 delete ssh
