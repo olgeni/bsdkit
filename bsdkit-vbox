@@ -130,9 +130,11 @@ case $1 in
     stop)
         if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
             VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
+
             while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
                 sleep 1
             done
+
             while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
                 sleep 1
             done
@@ -142,9 +144,11 @@ case $1 in
     poweroff)
         if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
             VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
+
             while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
                 sleep 1
             done
+
             while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
                 sleep 1
             done
