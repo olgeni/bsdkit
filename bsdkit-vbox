@@ -128,27 +128,41 @@ case $1 in
         ;;
 
     stop)
-        VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
-        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
-            sleep 1
-        done
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
-            sleep 1
-        done
+        if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+            VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
+            while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+                sleep 1
+            done
+            while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
+                sleep 1
+            done
+        fi
         ;;
 
     poweroff)
-        VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
-        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
-            sleep 1
-        done
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
-            sleep 1
-        done
+        if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+            VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
+            while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+                sleep 1
+            done
+            while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
+                sleep 1
+            done
+        fi
         ;;
 
     destroy)
-        VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
+        if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+            _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
+
+            VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
+
+            for _i in $(seq 0 2); do
+                rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+            done
+
+            rm -r -f "${_vm_path}/Logs"
+        fi
         ;;
     *) ;;
 esac
