@@ -8,9 +8,9 @@ error() {
 }
 
 : ${BSDKIT_VBOX_NAME:="bsdkit"}
-: ${BSDKIT_VBOX_PORT:="2200"}
 : ${BSDKIT_VBOX_MEMORY:="2048"}
 : ${BSDKIT_VBOX_VRAM:="16"}
+: ${BSDKIT_VBOX_SSH_PORT:="2200"}
 : ${BSDKIT_VBOX_ISO:=""}
 : ${BSDKIT_VBOX_EFI:=""}
 : ${BSDKIT_VBOX_DISK_SIZE:="30000"}
@@ -53,7 +53,7 @@ create_vm() {
     # VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --nic1 bridged --bridgeadapter1 re0
     # VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 delete ssh
 
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 ssh,tcp,,${BSDKIT_VBOX_PORT},,22
+    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 ssh,tcp,,${BSDKIT_VBOX_SSH_PORT},,22
 
     VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
         --storagectl "SATA Controller" \
@@ -69,7 +69,7 @@ while getopts "i:p:e" OPT; do
             BSDKIT_VBOX_ISO="${OPTARG}"
             ;;
         p)
-            BSDKIT_VBOX_PORT="${OPTARG}"
+            BSDKIT_VBOX_SSH_PORT="${OPTARG}"
             ;;
         e)
             BSDKIT_VBOX_EFI="yes"
@@ -89,34 +89,34 @@ case $1 in
 
     start)
         VBoxManage startvm --type gui ${BSDKIT_VBOX_NAME}
-        while ! nc -w 1 localhost ${BSDKIT_VBOX_PORT} | grep SSH > /dev/null 2>&1; do
+        while ! nc -w 1 localhost ${BSDKIT_VBOX_SSH_PORT} | grep SSH > /dev/null 2>&1; do
             sleep 1
         done
         ;;
 
     remote_deploy)
         shift
-        eval ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_PORT} $@
+        eval ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
         ;;
 
     shell)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        ssh -i ${_key} -p ${BSDKIT_VBOX_PORT} root@localhost
+        ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost
         rm -f ${_key}
         ;;
 
     logcat)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_PORT} root@localhost cat /tmp/bsdkit.log
+        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost cat /tmp/bsdkit.log
         rm -f ${_key}
         ;;
 
     logtail)
         _key=$(mktemp /tmp/XXXXXX)
         ./bsdkit echo_bsdkit_private_key > ${_key}
-        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_PORT} root@localhost tail -F /tmp/bsdkit.log
+        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost tail -F /tmp/bsdkit.log
         rm -f ${_key}
         ;;
 
