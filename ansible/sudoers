@@ -1,15 +1,4 @@
-## sudoers file.
-##
-## This file MUST be edited with the 'visudo' command as root.
-## Failure to use 'visudo' may result in syntax or file permission errors
-## that prevent sudo from running.
-##
-## See the sudoers man page for the details on how to write a sudoers file.
-##
-
 Defaults umask=022, umask_override, always_set_home
 
 root   ALL = (ALL) NOPASSWD: SETENV: ALL
 %wheel ALL = (ALL) NOPASSWD: SETENV: ALL
-
-#includedir /usr/local/etc/sudoers.d

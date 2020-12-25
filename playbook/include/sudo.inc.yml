@@ -1,8 +1,22 @@
-- name: "Install sudoers"
+- name: "Install 'sudo' package"
+  pkgng:
+    name:
+      - sudo
+    state: present
+
+- name: "Install default sudoers"
   copy:
-    src: ../ansible/sudoers
+    src: /usr/local/etc/sudoers.dist
     dest: /usr/local/etc/sudoers
     owner: root
     group: wheel
     mode: "0440"
-    backup: True
+    remote_src: True
+
+- name: "Install sudoers.d (bsdkit)"
+  copy:
+    src: ../ansible/sudoers
+    dest: /usr/local/etc/sudoers.d/bsdkit
+    owner: root
+    group: wheel
+    mode: "0440"

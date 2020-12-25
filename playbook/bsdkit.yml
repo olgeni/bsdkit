@@ -211,7 +211,6 @@
           - pv
           - rsync
           - socat
-          - sudo
           - the_silver_searcher
           - tmux
           - ts
