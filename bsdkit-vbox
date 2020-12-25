@@ -13,6 +13,7 @@ error() {
 : ${BSDKIT_VBOX_SSH_PORT:="2200"}
 : ${BSDKIT_VBOX_VNC_PORT:="5910"}
 : ${BSDKIT_VBOX_VNC_PASSWORD:="bsdkit"}
+: ${BSDKIT_VBOX_GUI_TYPE:="separate"}
 : ${BSDKIT_VBOX_ISO:=""}
 : ${BSDKIT_VBOX_EFI:=""}
 : ${BSDKIT_VBOX_DISK_SIZE:="30000"}
@@ -94,7 +95,7 @@ case $1 in
         ;;
 
     start)
-        VBoxManage startvm --type gui ${BSDKIT_VBOX_NAME}
+        VBoxManage startvm --type ${BSDKIT_VBOX_GUI_TYPE} ${BSDKIT_VBOX_NAME}
         while ! nc -w 1 localhost ${BSDKIT_VBOX_SSH_PORT} | grep SSH > /dev/null 2>&1; do
             sleep 1
         done
