@@ -102,7 +102,7 @@ case $1 in
 
     remote_deploy)
         shift
-        eval ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
+        ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
         ;;
 
     shell)
