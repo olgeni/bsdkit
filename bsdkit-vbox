@@ -20,7 +20,7 @@ which nc > /dev/null 2>&1 || error 'nc not found'
 : ${BSDKIT_VBOX_EFI:=""}
 : ${BSDKIT_VBOX_DISK_SIZE:="30000"}
 
-create_vm() {
+perform_create() {
     [ -f "${BSDKIT_VBOX_ISO}" ] || error "ISO file does not exist."
 
     if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable > /dev/null 2>&1; then
@@ -72,6 +72,81 @@ create_vm() {
         --medium "${BSDKIT_VBOX_ISO}"
 }
 
+perform_start() {
+    VBoxManage startvm --type ${BSDKIT_VBOX_GUI_TYPE} ${BSDKIT_VBOX_NAME}
+
+    while ! nc -w 1 localhost ${BSDKIT_VBOX_SSH_PORT} | grep SSH > /dev/null 2>&1; do
+        sleep 1
+    done
+}
+
+perform_stop() {
+    if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+        VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
+
+        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+            sleep 1
+        done
+
+        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
+            sleep 1
+        done
+    fi
+}
+
+perform_poweroff() {
+    if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+        VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
+
+        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+            sleep 1
+        done
+
+        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
+            sleep 1
+        done
+    fi
+}
+
+perform_destroy() {
+    if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+        _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
+
+        VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
+
+        for _i in $(seq 0 2); do
+            rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+        done
+
+        rm -r -f "${_vm_path}/Logs"
+    fi
+}
+
+perform_remote_deploy() {
+    ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
+}
+
+perform_shell() {
+    _key=$(mktemp /tmp/XXXXXX)
+    ./bsdkit echo_bsdkit_private_key > ${_key}
+    ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost
+    rm -f ${_key}
+}
+
+perform_logcat() {
+    _key=$(mktemp /tmp/XXXXXX)
+    ./bsdkit echo_bsdkit_private_key > ${_key}
+    env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost cat /tmp/bsdkit.log
+    rm -f ${_key}
+}
+
+perform_logtail() {
+    _key=$(mktemp /tmp/XXXXXX)
+    ./bsdkit echo_bsdkit_private_key > ${_key}
+    env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost tail -F /tmp/bsdkit.log
+    rm -f ${_key}
+}
+
 while getopts "i:p:e" OPT; do
     case ${OPT} in
         i)
@@ -91,84 +166,48 @@ done
 
 shift $((OPTIND - 1))
 
-case $1 in
+[ $# -ge 1 ] || error 'nothing to do'
+
+_command=$1
+
+shift
+
+case ${_command} in
     create)
-        create_vm
+        perform_create
         ;;
 
     start)
-        VBoxManage startvm --type ${BSDKIT_VBOX_GUI_TYPE} ${BSDKIT_VBOX_NAME}
-        while ! nc -w 1 localhost ${BSDKIT_VBOX_SSH_PORT} | grep SSH > /dev/null 2>&1; do
-            sleep 1
-        done
-        ;;
-
-    remote_deploy)
-        shift
-        ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
-        ;;
-
-    shell)
-        _key=$(mktemp /tmp/XXXXXX)
-        ./bsdkit echo_bsdkit_private_key > ${_key}
-        ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost
-        rm -f ${_key}
-        ;;
-
-    logcat)
-        _key=$(mktemp /tmp/XXXXXX)
-        ./bsdkit echo_bsdkit_private_key > ${_key}
-        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost cat /tmp/bsdkit.log
-        rm -f ${_key}
-        ;;
-
-    logtail)
-        _key=$(mktemp /tmp/XXXXXX)
-        ./bsdkit echo_bsdkit_private_key > ${_key}
-        env -u SSH_AUTH_SOCK ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT} root@localhost tail -F /tmp/bsdkit.log
-        rm -f ${_key}
+        perform_start
         ;;
 
     stop)
-        if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
-            VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
-
-            while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
-                sleep 1
-            done
-
-            while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
-                sleep 1
-            done
-        fi
+        perform_stop
         ;;
 
     poweroff)
-        if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
-            VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
-
-            while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
-                sleep 1
-            done
-
-            while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 4 --device 0 --medium emptydrive > /dev/null 2>&1; do
-                sleep 1
-            done
-        fi
+        perform_poweroff
         ;;
 
     destroy)
-        if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
-            _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
-
-            VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
-
-            for _i in $(seq 0 2); do
-                rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
-            done
-
-            rm -r -f "${_vm_path}/Logs"
-        fi
+        perform_destroy
         ;;
+
+    remote_deploy)
+        perform_remote_deploy $@
+        ;;
+
+    shell)
+        perform_shell
+        ;;
+
+    logcat)
+        perform_logcat
+        ;;
+
+    logtail)
+        perform_logtail
+        ;;
+
     *) ;;
 esac
