@@ -32,7 +32,10 @@ create_vm() {
     VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-1.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
     VBoxManage createhd --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-2.vdi" --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI
 
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vrdeproperty "TCP/Ports=${BSDKIT_VBOX_VNC_PORT}" --vrdeproperty "VNCPassword=${BSDKIT_VBOX_VNC_PASSWORD}" --vrde on
+    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} \
+               --vrdeproperty "TCP/Ports=${BSDKIT_VBOX_VNC_PORT}" \
+               --vrdeproperty "VNCPassword=${BSDKIT_VBOX_VNC_PASSWORD}" \
+               --vrde on
 
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --memory ${BSDKIT_VBOX_MEMORY}
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vram ${BSDKIT_VBOX_VRAM}
