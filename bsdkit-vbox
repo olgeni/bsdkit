@@ -7,6 +7,8 @@ error() {
     exit 1
 }
 
+which nc > /dev/null 2>&1 || error 'nc not found'
+
 : ${BSDKIT_VBOX_NAME:="bsdkit"}
 : ${BSDKIT_VBOX_MEMORY:="2048"}
 : ${BSDKIT_VBOX_VRAM:="16"}
