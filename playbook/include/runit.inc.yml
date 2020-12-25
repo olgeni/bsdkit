@@ -13,3 +13,11 @@
     owner: root
     group: wheel
     mode: "0755"
+
+- name: "Create /var/db/runit"
+  file:
+    path: /var/db/runit
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
