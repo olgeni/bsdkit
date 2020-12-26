@@ -1,5 +1,7 @@
 HOST?=192.168.0.1
 PORT?=8080
+BSDKIT_VERSION?=12.2
+BSDKIT_PKGSET?=nox11
 
 all:
 
@@ -23,46 +25,46 @@ logcat:
 	@$(CURDIR)/bsdkit-vbox logcat >/tmp/bsdkit.log
 
 test-install-gpt-zfs-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0
 
 test-install-gpt-zfs-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0 ada1
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0 ada1
 
 test-install-gpt-zfs-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0 ada1 ada2
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0 ada1 ada2
 
 test-install-mbr-zfs-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0
 
 test-install-mbr-zfs-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0 ada1
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0 ada1
 
 test-install-mbr-zfs-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0 ada1 ada2
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0 ada1 ada2
 
 test-install-zfs-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0
+	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0
 
 test-install-zfs-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0 ada1
+	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0 ada1
 
 test-install-zfs-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:${PORT} -z nox11 -v 12.1 ada0 ada1 ada2
+	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0 ada1 ada2
 
 test-install-mbr-ufs-single-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:${PORT} -z nox11 -v 12.1 single ada0
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single ada0
 
 test-install-gpt-ufs-single-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:${PORT} -z nox11 -v 12.1 single ada0
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single ada0
 
 test-install-gpt-ufs-multi-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:${PORT} -z nox11 -v 12.1 multi ada0
+	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi ada0
 
 test-install-mbr-ufs-multi-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:${PORT} -z nox11 -v 12.1 multi ada0
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi ada0
 
 test-install-mbr-ufs-gmirror-single-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} -z nox11 -v 12.1 single gm0 ada0 ada1 ada2
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single gm0 ada0 ada1 ada2
 
 test-install-mbr-ufs-gmirror-multi-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} -z nox11 -v 12.1 multi gm0 ada0 ada1 ada2
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} -z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi gm0 ada0 ada1 ada2
