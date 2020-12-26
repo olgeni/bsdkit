@@ -209,6 +209,7 @@
           - git
           - gnu-watch
           - htop
+          - inplace
           - jq
           - lftp
           - mbuffer
