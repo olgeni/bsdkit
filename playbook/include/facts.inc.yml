@@ -15,16 +15,6 @@
   ignore_errors: True
   register: sysctl_security_jail_jailed
 
-- name: "Check sysctl: kern.hostuuid matches with bsdkit"
-  shell:
-    cmd: |
-      set -o pipefail
-      echo "sysctl -n kern.hostuuid: $(sysctl -n kern.hostuuid)"
-      [ $(sysctl -n kern.hostuuid) = '2e158b17-5e10-11e5-ac21-080027af0e2a' ]
-  changed_when: False
-  ignore_errors: True
-  register: sysctl_kern_hostuuid
-
 - name: "set_fact: bsdkit defaults"
   set_fact:
     default_bsdkit_root_url: "https://olgeni.olgeni.com/FreeBSD"
@@ -45,7 +35,7 @@
     bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
     bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
-    is_host_install: "{{ sysctl_security_jail_jailed is failed or sysctl_kern_hostuuid is succeeded }}"
+    is_host_install: "{{ sysctl_security_jail_jailed is failed }}"
 
 - name: "debug: bsdkit_interface"
   debug:
@@ -86,10 +76,6 @@
 - name: "debug: bsdkit_pkgset"
   debug:
     var: bsdkit_pkgset
-
-- name: "debug: sysctl_kern_hostuuid"
-  debug:
-    var: sysctl_kern_hostuuid
 
 - name: "debug: sysctl_security_jail_jailed"
   debug:

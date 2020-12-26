@@ -2353,7 +2353,6 @@ ${BSDKIT_JAIL_NAME} {
 
 	path = "${_destdir%/}";
 	host.hostname = "${BSDKIT_JAIL_NAME}";
-	host.hostuuid = "${BSDKIT_IMG_DATA_LABEL}";
 	host.domainname = "local";
 	ip4.addr = "$(inet_address)";
 }
