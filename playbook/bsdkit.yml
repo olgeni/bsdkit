@@ -218,6 +218,7 @@
           - pv
           - renameutils
           - rsync
+          - runit
           - socat
           - the_silver_searcher
           - tmux
