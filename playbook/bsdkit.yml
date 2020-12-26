@@ -9,7 +9,7 @@
 
     - name: "Install Python"
       raw: /usr/bin/env http_proxy="{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
-        pkg install -y python
+        pkg install -y lang/python
       changed_when: False
 
 - hosts: all
@@ -142,8 +142,8 @@
         - name: "Install base packages (host)"
           pkgng:
             name:
-              - beadm
-              - smartmontools
+              - sysutils/beadm
+              - sysutils/smartmontools
             state: present
 
     - name: "Block: jail"
@@ -198,33 +198,33 @@
     - name: "Install base packages (common)"
       pkgng:
         name:
-          - align
-          - bash
-          - buffer
-          - ca_root_nss
-          - cpdup
-          - curl
-          - direnv
-          - fzf
-          - git
-          - gnu-watch
-          - gnupg
-          - htop
-          - inplace
-          - jq
-          - lftp
-          - mbuffer
-          - ncdu
-          - pv
-          - renameutils
-          - rsync
-          - runit
-          - socat
-          - the_silver_searcher
-          - tmux
-          - ts
-          - vim
-          - zsh
+          - devel/git
+          - editors/vim
+          - ftp/curl
+          - ftp/lftp
+          - misc/buffer
+          - misc/gnu-watch
+          - misc/inplace
+          - misc/mbuffer
+          - net/rsync
+          - net/socat
+          - security/ca_root_nss
+          - security/gnupg
+          - shells/bash
+          - shells/zsh
+          - sysutils/cpdup
+          - sysutils/direnv
+          - sysutils/htop
+          - sysutils/ncdu
+          - sysutils/pv
+          - sysutils/renameutils
+          - sysutils/runit
+          - sysutils/tmux
+          - sysutils/ts
+          - textproc/align
+          - textproc/fzf
+          - textproc/jq
+          - textproc/the_silver_searcher
         state: present
 
     # - name: "Include ca-root-nss.inc.yml"

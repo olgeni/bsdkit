@@ -1,7 +1,7 @@
 - name: "Install 'sudo' package"
   pkgng:
     name:
-      - sudo
+      - security/sudo
     state: present
 
 - name: "Install default sudoers"

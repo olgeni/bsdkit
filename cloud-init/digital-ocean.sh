@@ -33,12 +33,12 @@ zfs destroy -r "${_zfs_pool}"@base_installation || :
 zfs destroy -r "${_zfs_pool}"@digitalocean_installation || :
 
 mkdir -p /usr/local/etc/pkg/repos
-pkg install -y pkg
+pkg install -y ports-mgmt/pkg
 # shellcheck disable=SC2016
 echo 'bsdkit: { url: "https://olgeni.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' > /usr/local/etc/pkg/repos/bsdkit.conf
 pkg update -f
 pkg upgrade -y
-pkg install -y git pv py37-ansible zsh
+pkg install -y devel/git sysutils/pv sysutils/ansible shells/zsh
 git clone https://github.com/olgeni/bsdkit.git
 cd bsdkit
 git checkout ${BSDKIT_BRANCH}
