@@ -5,7 +5,7 @@ set -e -u -x
 exec > /var/log/bsdkit-cloud-init.log 2>&1
 
 : "${BSDKIT_BRANCH:=master}"
-: "${BSDKIT_VERSION:=12.1}"
+: "${BSDKIT_VERSION:=12.2}"
 : "${BSDKIT_JAIL_NETWORK:=172.16.1.0/24}"
 
 cd /root

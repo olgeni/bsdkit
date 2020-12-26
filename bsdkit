@@ -58,7 +58,7 @@ is_efi() {
 
 : ${BSDKIT_ROOT_URL:="https://olgeni.olgeni.com/FreeBSD"}
 : ${BSDKIT_JAIL_PROXY:=""}
-: ${BSDKIT_VERSION:="12.1"}
+: ${BSDKIT_VERSION:="12.2"}
 : ${BSDKIT_ARCH:="amd64"}
 : ${BSDKIT_TREE:="default"}
 : ${BSDKIT_PKGSET:="nox11"}
