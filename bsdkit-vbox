@@ -55,7 +55,7 @@ perform_create() {
                    --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
         VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-                   --storagectl "SATA Controller" --port 0 --device 0 --type hdd \
+                   --storagectl "SATA Controller" --port ${_i} --device 0 --type hdd \
                    --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
     done
 
