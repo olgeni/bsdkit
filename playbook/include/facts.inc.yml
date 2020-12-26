@@ -28,7 +28,7 @@
 - name: "set_fact: bsdkit defaults"
   set_fact:
     default_bsdkit_root_url: "https://olgeni.olgeni.com/FreeBSD"
-    default_bsdkit_version: "12.1"
+    default_bsdkit_version: "12.2"
     default_bsdkit_arch: "amd64"
     default_bsdkit_tree: "default"
     default_bsdkit_pkgset: "nox11"
