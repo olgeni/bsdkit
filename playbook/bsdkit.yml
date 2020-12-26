@@ -208,6 +208,7 @@
           - fzf
           - git
           - gnu-watch
+          - gnupg
           - htop
           - inplace
           - jq
