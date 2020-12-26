@@ -1,5 +1,5 @@
 - name: "postgres-zfs"
-  when: has_zfs
+  when: has_zfs | bool
   block:
     - name: "Check contents of PostgreSQL home directory"
       find:

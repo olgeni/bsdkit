@@ -7,14 +7,20 @@
 
 - name: "Check sysctl: security.jail.jailed"
   shell:
-    cmd: "[ $(sysctl -n security.jail.jailed) = '1' ]"
+    cmd: |
+      set -o pipefail
+      echo "sysctl -n security.jail.jailed: $(sysctl -n security.jail.jailed)"
+      [ $(sysctl -n security.jail.jailed) = '1' ]
   changed_when: False
   ignore_errors: True
   register: sysctl_security_jail_jailed
 
-- name: "Check sysctl: kern.hostuuid match with bsdkit"
+- name: "Check sysctl: kern.hostuuid matches with bsdkit"
   shell:
-    cmd: "[ $(sysctl -n kern.hostuuid) = '2e158b17-5e10-11e5-ac21-080027af0e2a' ]"
+    cmd: |
+      set -o pipefail
+      echo "sysctl -n kern.hostuuid: $(sysctl -n kern.hostuuid)"
+      [ $(sysctl -n kern.hostuuid) = '2e158b17-5e10-11e5-ac21-080027af0e2a' ]
   changed_when: False
   ignore_errors: True
   register: sysctl_kern_hostuuid
@@ -34,14 +40,12 @@
     bsdkit_defaultrouter: "{{ lookup('env', 'BSDKIT_DEFAULTROUTER') }}"
     bsdkit_ssh_public_key: "{{ lookup('env', 'BSDKIT_SSH_PUBLIC_KEY') }}"
     bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
-    bsdkit_install_host: "{{ lookup('env', 'BSDKIT_INSTALL_HOST') | bool }}"
     bsdkit_root_url: "{{ lookup('env', 'BSDKIT_ROOT_URL') | default(default_bsdkit_root_url, True) }}"
     bsdkit_version: "{{ lookup('env', 'BSDKIT_VERSION') | default(default_bsdkit_version, True) }}"
     bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
     bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
-    is_jailed: sysctl_security_jail_jailed is succeeded
-    is_image: sysctl_kern_hostuuid is succeeded
+    is_host_install: "{{ sysctl_security_jail_jailed is failed or sysctl_kern_hostuuid is succeeded }}"
 
 - name: "debug: bsdkit_interface"
   debug:
@@ -63,10 +67,6 @@
   debug:
     var: bsdkit_jail_proxy
 
-- name: "debug: bsdkit_install_host"
-  debug:
-    var: bsdkit_install_host
-
 - name: "debug: bsdkit_root_url"
   debug:
     var: bsdkit_root_url
@@ -87,10 +87,14 @@
   debug:
     var: bsdkit_pkgset
 
-- name: "debug: is_jailed"
+- name: "debug: sysctl_kern_hostuuid"
   debug:
-    var: is_jailed
+    var: sysctl_kern_hostuuid
 
-- name: "debug: is_image"
+- name: "debug: sysctl_security_jail_jailed"
   debug:
-    var: is_image
+    var: sysctl_security_jail_jailed
+
+- name: "debug: is_host_install"
+  debug:
+    var: is_host_install

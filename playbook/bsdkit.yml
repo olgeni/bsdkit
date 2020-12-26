@@ -28,11 +28,13 @@
       file:
         path: /etc/rc.conf
         state: touch
+      changed_when: False
 
     - name: "Touch loader.conf (exec)"
       file:
         path: /boot/loader.conf
         state: touch
+      changed_when: False
 
     - name: "Include remove.inc.yml"
       include: include/remove.inc.yml
@@ -76,7 +78,7 @@
       include: include/periodic.inc.yml
 
     - name: "Block: host"
-      when: bsdkit_install_host
+      when: is_host_install | bool
       block:
         - name: "Include zfs.inc.yml"
           include: include/zfs.inc.yml
@@ -145,7 +147,7 @@
             state: present
 
     - name: "Block: jail"
-      when: not bsdkit_install_host
+      when: not is_host_install | bool
       block:
         - name: "Install /etc/defaults/vendor.conf (jail version)"
           copy:

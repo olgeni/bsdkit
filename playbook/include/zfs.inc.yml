@@ -4,4 +4,4 @@
     state: present
     extra_zfs_properties:
       canmount: off
-  when: has_zfs
+  when: has_zfs | bool

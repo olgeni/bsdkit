@@ -2,7 +2,7 @@
   shell:
     cmd: |
       set -o pipefail
-      kenv zfs_be_root | cut -d/ -f1
+      zpool get -H -o name bootfs | head -n1
   register: boot_pool
   changed_when: False
   ignore_errors: True
@@ -14,4 +14,16 @@
 - name: "set_fact: zpool"
   set_fact:
     zpool: "{{ boot_pool.stdout }}"
-    when: has_zfs
+    when: has_zfs | bool
+
+- name: "debug: boot_pool"
+  debug:
+    var: boot_pool
+
+- name: "debug: has_zfs"
+  debug:
+    var: has_zfs
+
+- name: "debug: zpool"
+  debug:
+    var: zpool

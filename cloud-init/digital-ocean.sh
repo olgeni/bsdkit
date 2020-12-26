@@ -42,7 +42,7 @@ pkg install -y git pv py37-ansible zsh
 git clone https://github.com/olgeni/bsdkit.git
 cd bsdkit
 git checkout ${BSDKIT_BRANCH}
-env BSDKIT_INSTALL_HOST=yes ./bsdkit ansible_local_playbook
+./bsdkit ansible_local_playbook
 
 if route get default | grep "interface:" > /dev/null 2>&1; then
     _iface=$(route get default | awk '/interface:/ { print $2 }')

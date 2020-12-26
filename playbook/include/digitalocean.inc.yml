@@ -1,6 +1,6 @@
 - name: "set_fact: is_droplet"
   set_fact:
-    is_droplet: "{{ (bsdkit_install_host) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
+    is_droplet: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
 - name: "Gather metadata (#1)"
   uri:

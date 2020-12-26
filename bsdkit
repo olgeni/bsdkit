@@ -56,7 +56,6 @@ is_efi() {
 : ${BSDKIT_PKG_LOCKFILE:="/tmp/pkg.lock"}
 : ${BSDKIT_PKG_LOCKTIME:="120"}
 
-: ${BSDKIT_INSTALL_HOST:="no"}
 : ${BSDKIT_ROOT_URL:="https://olgeni.olgeni.com/FreeBSD"}
 : ${BSDKIT_JAIL_PROXY:=""}
 : ${BSDKIT_VERSION:="12.1"}
@@ -108,7 +107,6 @@ environment() {
         BSDKIT_IMG_DATA_LABEL=\"${BSDKIT_IMG_DATA_LABEL}\" \
         BSDKIT_PKG_LOCKFILE=\"${BSDKIT_PKG_LOCKFILE}\" \
         BSDKIT_PKG_LOCKTIME=\"${BSDKIT_PKG_LOCKTIME}\" \
-        BSDKIT_INSTALL_HOST=\"${BSDKIT_INSTALL_HOST}\" \
         BSDKIT_ROOT_URL=\"${BSDKIT_ROOT_URL}\" \
         BSDKIT_JAIL_PROXY=\"${BSDKIT_JAIL_PROXY}\" \
         BSDKIT_VERSION=\"${BSDKIT_VERSION}\" \
@@ -2121,7 +2119,7 @@ deploy() {
     ${(@s/ /)@}
 
     start_jail ${BSDKIT_DESTDIR}
-    BSDKIT_INSTALL_HOST=yes ansible_jail_playbook
+    ansible_chroot_playbook
 }
 
 remote_deploy() {
@@ -2209,6 +2207,38 @@ ansible_local_playbook() {
         --connection local \
         -e ansible_python_interpreter=/usr/local/bin/python3 \
         ${BSDKIT_SRCDIR}/playbook/bsdkit.yml
+}
+
+ansible_chroot_playbook() {
+    local _ansible_root
+    _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
+
+    local _ansible_cfg=${_ansible_root}/ansible.cfg
+    local _ansible_hosts=${_ansible_root}/ansible_hosts
+
+    cat > ${_ansible_cfg} << EOF
+[defaults]
+inventory = ${_ansible_hosts}
+EOF
+
+    cat > ${_ansible_hosts} << EOF
+${BSDKIT_DESTDIR} ansible_connection=chroot ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
+EOF
+
+    _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
+    _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
+    _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
+
+    eval env \
+        ANSIBLE_CONFIG=${_ansible_cfg} \
+        SSH_AUTH_SOCK="" \
+        $(environment) \
+        BSDKIT_INTERFACE=${_bsdkit_interface} \
+        BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
+        BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
+        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml
+
+    rm -r ${_ansible_root}
 }
 
 ansible_jail_playbook() {

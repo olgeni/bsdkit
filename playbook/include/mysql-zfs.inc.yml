@@ -1,5 +1,5 @@
 - name: "mysql-zfs"
-  when: has_zfs
+  when: has_zfs | bool
   block:
     - name: "Check contents of MySQL home directory"
       find:
