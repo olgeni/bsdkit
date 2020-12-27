@@ -1,4 +1,4 @@
-- name: "Check zpool list"
+- name: "Check ZFS boot pool"
   shell:
     cmd: |
       set -o pipefail
