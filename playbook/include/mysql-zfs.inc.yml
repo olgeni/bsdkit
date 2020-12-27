@@ -1,5 +1,5 @@
 - name: "mysql-zfs"
-  when: has_zfs | bool
+  when: zfs_enabled | bool
   block:
     - name: "Check contents of MySQL home directory"
       find:
@@ -8,7 +8,7 @@
 
     - name: "Create zfs dataset for MySQL"
       zfs:
-        name: "{{ boot_pool.stdout }}/var/db/mysql"
+        name: "{{ boot_pool }}/var/db/mysql"
         state: present
         extra_zfs_properties:
           canmount: on

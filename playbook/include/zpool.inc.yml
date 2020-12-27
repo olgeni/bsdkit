@@ -3,27 +3,27 @@
     cmd: |
       set -o pipefail
       zpool get -H -o name bootfs | head -n1
-  register: boot_pool
+  register: zpool_get_bootfs
   changed_when: False
   ignore_errors: True
 
-- name: "set_fact: has_zfs"
+- name: "set_fact: zfs_enabled"
   set_fact:
-    has_zfs: "{{ ((boot_pool is succeeded) and (boot_pool.stdout | length > 0)) | bool }}"
+    zfs_enabled: "{{ ((zpool_get_bootfs is succeeded) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
 
-- name: "set_fact: zpool"
+- name: "set_fact: boot_pool"
   set_fact:
-    zpool: "{{ boot_pool.stdout }}"
-    when: has_zfs | bool
+    boot_pool: "{{ zpool_get_bootfs.stdout }}"
+    when: zfs_enabled | bool
+
+- name: "debug: zpool_get_bootfs"
+  debug:
+    var: zpool_get_bootfs
+
+- name: "debug: zfs_enabled"
+  debug:
+    var: zfs_enabled
 
 - name: "debug: boot_pool"
   debug:
     var: boot_pool
-
-- name: "debug: has_zfs"
-  debug:
-    var: has_zfs
-
-- name: "debug: zpool"
-  debug:
-    var: zpool
