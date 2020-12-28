@@ -1,14 +1,14 @@
-- name: "Add PostgreSQL user"
-  lineinfile:
-    dest: /etc/master.passwd
-    line: "postgres:*:770:770::0:0:PostgreSQL Daemon:/var/db/postgres:/bin/sh"
-    regexp: "^postgres:"
-  notify: pwd_mkdb
-
 - name: "Add PostgreSQL group"
   lineinfile:
     dest: /etc/group
     line: "postgres:*:770:"
+    regexp: "^postgres:"
+  notify: pwd_mkdb
+
+- name: "Add PostgreSQL user"
+  lineinfile:
+    dest: /etc/master.passwd
+    line: "postgres:*:770:770::0:0:PostgreSQL Daemon:/var/db/postgres:/bin/sh"
     regexp: "^postgres:"
   notify: pwd_mkdb
 
