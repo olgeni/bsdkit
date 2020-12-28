@@ -1692,6 +1692,7 @@ install_setup_runtime() {
         sysutils/rdate
         sysutils/renameutils
         sysutils/smartmontools
+        sysutils/spiped
         sysutils/tmux
         sysutils/xe
         textproc/align

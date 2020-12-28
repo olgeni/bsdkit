@@ -171,6 +171,9 @@
     - name: "Include vagrant.inc.yml"
       include: include/vagrant.inc.yml
 
+    - name: "Include spiped.inc.yml"
+      include: include/spiped.inc.yml
+
     - name: "Include newsyslog.inc.yml"
       include: include/newsyslog.inc.yml
 
@@ -219,6 +222,7 @@
           - sysutils/pv
           - sysutils/renameutils
           - sysutils/runit
+          - sysutils/spiped
           - sysutils/tmux
           - sysutils/ts
           - textproc/align

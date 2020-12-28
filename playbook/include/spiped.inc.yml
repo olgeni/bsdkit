@@ -1,0 +1,7 @@
+- name: "Create /usr/local/etc/spiped/"
+  file:
+    path: /usr/local/etc/spiped/
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0700"
