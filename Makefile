@@ -24,6 +24,9 @@ destroy-vm:
 logcat:
 	@$(CURDIR)/bsdkit-vbox logcat >/tmp/bsdkit.log
 
+shell:
+	@$(CURDIR)/bsdkit-vbox shell
+
 test-install-gpt-zfs-1:
 	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r http://${HOST}:${PORT} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ada0
