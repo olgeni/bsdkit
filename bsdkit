@@ -810,6 +810,7 @@ zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o setuid=off -o canmount=off ${BSDKIT_ZFS_POOL}/var/db
     ${ZFS_CREATE_CMD} -o mountpoint=/jails ${BSDKIT_ZFS_POOL}/jails
 
+    # These cannot be created from within the chroot (wrong mountpoint)
     ${ZFS_CREATE_CMD} -o canmount=on ${BSDKIT_ZFS_POOL}/var/db/postgres
     ${ZFS_CREATE_CMD} -o canmount=on ${BSDKIT_ZFS_POOL}/var/db/mysql
 
