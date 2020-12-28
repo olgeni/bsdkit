@@ -12,6 +12,7 @@
     regexp: "^postgres:"
   notify: pwd_mkdb
 
+# Workaround for "pw: user '...' disappeared during update"
 - name: "Flush handlers"
   meta: flush_handlers
 
