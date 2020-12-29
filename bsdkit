@@ -2411,6 +2411,40 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KR
 EOF
 }
 
+purge_libdir() {
+    local _directory=$1
+
+    for _item in ${_directory}/*(/N); do
+        case $(basename ${_item}) in
+            site_*) ;;
+
+            vendor_*) ;;
+
+            *)
+                if [ $(find ${_item} -type f | wc -l) -eq 1 ]; then
+                    case $(find ${_item} -type f) in
+                        */mandoc.db)
+                            echo "removing ${_item} (mandoc)"
+                            rm -r -f ${_item}
+                            ;;
+                        *) ;;
+                    esac
+                elif [ $(find ${_item} -type f | wc -l) -eq 0 ]; then
+                    echo "removing ${_item} (empty)"
+                    rm -r -f ${_item}
+                fi
+                ;;
+        esac
+    done
+}
+
+purge_local_libdirs() {
+    purge_libdir /usr/local/lib/ruby
+    purge_libdir /usr/local/lib/ruby/site_ruby
+    purge_libdir /usr/local/lib/ruby/vendor_ruby
+    purge_libdir /usr/local/lib/perl5
+}
+
 if ! command -v ansible-playbook > /dev/null 2>&1; then
     error "required command missing (ansible-playbook)"
     # EX_UNAVAILABLE
