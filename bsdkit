@@ -2417,6 +2417,11 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUde1HTbCcpmEsgtFUJZKYmrIxK+MMAAZEr0lCY1KR
 EOF
 }
 
+get_boot_pool() {
+    # zpool get -H -p -o value bootfs | cut -d'/' -f1 | head -n1
+    kenv zfs_be_root | cut -d'/' -f1
+}
+
 purge_libdir() {
     local _directory=$1
 
