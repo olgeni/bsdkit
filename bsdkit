@@ -129,6 +129,7 @@ ZFS_CREATE_CMD=(zfs create)
 ZPOOL_CACHE=/tmp/zpool.cache
 
 BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
+BSDKIT_SCRIPT=$(realpath $0)
 
 parse_url() {
     local _url=$1
@@ -1453,7 +1454,11 @@ create_md() {
     local _md_device
     _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
-    env BSDKIT_INSTALL_SRC=no FS_SWAP_SIZE=0 BSDKIT_LABEL_ROOT=mdroot "$0" deploy install_gpt_ufs "$@" single ${_md_device}
+    env BSDKIT_INSTALL_SRC=no \
+        BSDKIT_INSTALL_KERNEL=no \
+        BSDKIT_PART_SIZE_SWAP=0 \
+        BSDKIT_LABEL_ROOT=mdroot \
+        ${BSDKIT_SCRIPT} install_gpt_ufs $* single ${_md_device}
 
     rm -f ${BSDKIT_DESTDIR}/etc/rc.conf
 
