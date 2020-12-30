@@ -28,6 +28,7 @@
       file:
         path: "{{ item }}"
         state: touch
+        mode: "0644"
       changed_when: False
       loop:
         - /boot/loader.conf

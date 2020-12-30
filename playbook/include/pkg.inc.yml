@@ -13,6 +13,7 @@
           enabled: no
       }
     dest: /usr/local/etc/pkg/repos/FreeBSD.conf
+    mode: "0644"
 
 - name: "Enable bsdkit repository"
   copy:
@@ -21,3 +22,4 @@
           url: "{{ bsdkit_root_url }}/packages-${ABI}-{{ bsdkit_tree }}-{{ bsdkit_pkgset }}"
       }
     dest: /usr/local/etc/pkg/repos/bsdkit.conf
+    mode: "0644"

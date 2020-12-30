@@ -18,6 +18,7 @@
     state: directory
     owner: root
     group: wheel
+    mode: "0755"
 
 - name: "Create ssh identity for root"
   openssh_keypair:

@@ -4,6 +4,7 @@
     line: "{{ item.key }}=\"{{ item.value }}\""
     regexp: "^{{ item.key }} *="
     create: True
+    mode: "0644"
   with_items:
     - key: 'daily_output'
       value: '/var/log/daily.log'

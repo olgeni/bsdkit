@@ -5,6 +5,7 @@
     regexp: ^loader_conf_files=
     insertbefore: BOF
     create: True
+    mode: "0644"
 
 - name: "Install loader.conf.vendor"
   copy:
