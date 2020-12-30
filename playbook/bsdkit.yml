@@ -24,17 +24,17 @@
     - name: "Include zpool.inc.yml"
       include: include/zpool.inc.yml
 
-    - name: "Touch rc.conf (exec)"
+    - name: "Touch files"
       file:
-        path: /etc/rc.conf
+        path: "{{ item }}"
         state: touch
       changed_when: False
-
-    - name: "Touch loader.conf (exec)"
-      file:
-        path: /boot/loader.conf
-        state: touch
-      changed_when: False
+      loop:
+        - /boot/loader.conf
+        - /etc/rc.conf
+        - /etc/rc.conf.local
+        - /etc/sysctl.conf
+        - /etc/sysctl.conf.local
 
     - name: "Include remove.inc.yml"
       include: include/remove.inc.yml
