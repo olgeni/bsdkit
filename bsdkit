@@ -2132,7 +2132,6 @@ deploy() {
 
     ${(@s/ /)@}
 
-    start_jail ${BSDKIT_DESTDIR}
     ansible_chroot_playbook
 }
 
