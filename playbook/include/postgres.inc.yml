@@ -30,7 +30,7 @@
 - name: "Create ssh identity for PostgreSQL"
   openssh_keypair:
     path: /var/db/postgres/.ssh/id_ed25519
-    comment: "postgresql@{{ ansible_hostname }}"
+    comment: "postgres@{{ ansible_hostname }}"
     type: ed25519
     owner: postgres
     group: postgres
