@@ -2132,6 +2132,7 @@ deploy() {
 
     ${(@s/ /)@}
 
+    chroot ${BSDKIT_DESTDIR} /etc/rc.d/ldconfig start
     ansible_chroot_playbook
 }
 
