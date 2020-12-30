@@ -4,7 +4,15 @@
     - name: "Check contents of PostgreSQL home directory"
       find:
         paths: "/var/db/postgres"
+        recurse: True
+        hidden: True
       register: find_var_db_postgres
+
+    - name: Gather facts about PostgreSQL ZFS dataset
+      zfs_facts:
+        dataset: "{{ boot_pool }}/var/db/postgres"
+      ignore_errors: True
+      register: postgres_zfs_facts
 
     - name: "Create ZFS dataset for PostgreSQL"
       zfs:
@@ -12,4 +20,7 @@
         state: present
         extra_zfs_properties:
           canmount: on
-      when: find_var_db_postgres.matched == 0
+          compression: lz4
+          atime: off
+          redundant_metadata: most
+      when: find_var_db_postgres.matched == 0 or postgres_zfs_facts is successful

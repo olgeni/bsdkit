@@ -4,7 +4,15 @@
     - name: "Check contents of MySQL home directory"
       find:
         paths: "/var/db/mysql"
+        recurse: True
+        hidden: True
       register: find_var_db_mysql
+
+    - name: Gather facts about MySQL ZFS dataset
+      zfs_facts:
+        dataset: "{{ boot_pool }}/var/db/mysql"
+      ignore_errors: True
+      register: mysql_zfs_facts
 
     - name: "Create ZFS dataset for MySQL"
       zfs:
@@ -12,4 +20,7 @@
         state: present
         extra_zfs_properties:
           canmount: on
-      when: find_var_db_mysql.matched == 0
+          compression: lz4
+          atime: off
+          redundant_metadata: most
+      when: find_var_db_mysql.matched == 0 or mysql_zfs_facts is successful
