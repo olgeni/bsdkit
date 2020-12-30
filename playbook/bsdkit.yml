@@ -102,7 +102,6 @@
             owner: root
             group: wheel
             mode: "0644"
-            backup: True
           with_items:
             - sysctl.conf
 
