@@ -2210,8 +2210,6 @@ EOF
         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
-
-    # stop_jail ${_destdir}
 }
 
 ansible_local_playbook() {
