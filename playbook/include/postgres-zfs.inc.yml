@@ -6,7 +6,7 @@
         paths: "/var/db/postgres"
       register: find_var_db_postgres
 
-    - name: "Create zfs dataset for PostgreSQL"
+    - name: "Create ZFS dataset for PostgreSQL"
       zfs:
         name: "{{ boot_pool }}/var/db/postgres"
         state: present

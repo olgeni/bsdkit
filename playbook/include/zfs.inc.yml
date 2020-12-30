@@ -1,4 +1,4 @@
-- name: "Create zfs dataset for /var/db"
+- name: "Create ZFS dataset for /var/db"
   zfs:
     name: "{{ boot_pool }}/var/db"
     state: present

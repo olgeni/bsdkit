@@ -6,7 +6,7 @@
         paths: "/var/db/mysql"
       register: find_var_db_mysql
 
-    - name: "Create zfs dataset for MySQL"
+    - name: "Create ZFS dataset for MySQL"
       zfs:
         name: "{{ boot_pool }}/var/db/mysql"
         state: present
