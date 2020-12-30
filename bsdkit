@@ -1752,7 +1752,7 @@ EOF
     local _master_passwd
     _master_passwd=$(mktemp ${_destdir}/tmp/master.passwd.XXXXXX)
 
-    cp -p ${_destdir}/etc/master.passwd ${_master_passwd}
+    install -m 600 ${_destdir}/etc/master.passwd ${_master_passwd}
 
     sed -i '' -e '/^root/s@/bin/csh@/usr/local/bin/zsh@' ${_master_passwd}
 
