@@ -1467,6 +1467,10 @@ create_md() {
 
     sed -i '' -e '/^PermitRootLogin/d' ${BSDKIT_DESTDIR}/etc/ssh/sshd_config
 
+    if [ -e ~root/.ssh/authorized_keys ]; then
+        install -m 644 ~root/.ssh/authorized_keys ${BSDKIT_DESTDIR}/root/.ssh/authorized_keys
+    fi
+
     cat >> ${BSDKIT_DESTDIR}/etc/ssh/sshd_config << EOF
 PermitRootLogin yes
 EOF
