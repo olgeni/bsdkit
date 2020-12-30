@@ -2,15 +2,15 @@
   command:
     cmd: grep -Fq ':lang=en_US.UTF-8:' /etc/login.conf
   register: login_conf_lang
-  changed_when: False
-  failed_when: False
+  changed_when: no
+  failed_when: no
 
 - name: "Configure login.conf (lang=en_US.UTF-8)"
   lineinfile:
     dest: /etc/login.conf
     line: "\t:lang=en_US.UTF-8:\\"
     insertafter: "^default:"
-    firstmatch: True
+    firstmatch: yes
   when: login_conf_lang.rc != 0
   notify: cap_mkdb
 
@@ -19,7 +19,7 @@
     dest: /etc/login.conf
     line: "\t:charset=UTF-8:\\"
     insertafter: "^default:"
-    firstmatch: True
+    firstmatch: yes
   when: login_conf_lang.rc != 0
   notify: cap_mkdb
 

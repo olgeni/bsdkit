@@ -5,7 +5,7 @@
 - name: "Gather metadata (#1)"
   uri:
     url: http://169.254.169.254/metadata/v1.json
-    return_content: True
+    return_content: yes
   register: metadata_payload
   when: is_droplet
 
@@ -29,4 +29,4 @@
   command:
     cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].ipv4.ip_address }}"
   when: is_droplet
-  changed_when: False
+  changed_when: no

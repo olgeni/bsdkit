@@ -1,13 +1,13 @@
 - name: "kenv smbios.system.product"
   command:
     cmd: kenv smbios.system.product
-  changed_when: False
-  ignore_errors: True
+  changed_when: no
+  ignore_errors: yes
   register: kenv_smbios_system_product
 
 - name: "kenv smbios.bios.vendor"
   command:
     cmd: kenv smbios.bios.vendor
-  changed_when: False
-  ignore_errors: True
+  changed_when: no
+  ignore_errors: yes
   register: kenv_smbios_bios_vendor

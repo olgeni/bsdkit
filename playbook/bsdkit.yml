@@ -1,16 +1,16 @@
 ---
 - hosts: all
   user: root
-  gather_facts: False
+  gather_facts: no
   tasks:
     - name: "Bootstrap pkgng"
       raw: /bin/sh -c /usr/bin/env ASSUME_ALWAYS_YES=yes pkg -N || pkg update -f
-      changed_when: False
+      changed_when: no
 
     - name: "Install Python"
       raw: /usr/bin/env http_proxy="{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
         pkg install -y lang/python
-      changed_when: False
+      changed_when: no
 
 - hosts: all
   user: root
@@ -29,7 +29,7 @@
         path: "{{ item }}"
         state: touch
         mode: "0644"
-      changed_when: False
+      changed_when: no
       loop:
         - /boot/loader.conf
         - /etc/rc.conf

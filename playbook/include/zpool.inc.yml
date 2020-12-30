@@ -4,8 +4,8 @@
       set -o pipefail
       zpool get -H -o name bootfs | head -n1
   register: zpool_get_bootfs
-  changed_when: False
-  ignore_errors: True
+  changed_when: no
+  ignore_errors: yes
 
 - name: "set_fact: zfs_enabled"
   set_fact:

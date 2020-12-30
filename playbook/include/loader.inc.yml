@@ -4,7 +4,7 @@
     line: 'loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"'
     regexp: ^loader_conf_files=
     insertbefore: BOF
-    create: True
+    create: yes
     mode: "0644"
 
 - name: "Install loader.conf.vendor"

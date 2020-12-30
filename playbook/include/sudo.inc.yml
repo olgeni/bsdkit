@@ -11,7 +11,7 @@
     owner: root
     group: wheel
     mode: "0440"
-    remote_src: True
+    remote_src: yes
 
 - name: "Install sudoers.d (bsdkit)"
   copy:

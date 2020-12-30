@@ -3,7 +3,7 @@
     set -o pipefail
     echo "{{ ansible_distribution_release }}" | sed -E 's/([0-9]+).*/\1/;'
   register: freebsd_major
-  changed_when: False
+  changed_when: no
 
 - name: "Check sysctl: security.jail.jailed"
   shell:
@@ -11,8 +11,8 @@
       set -o pipefail
       echo "sysctl -n security.jail.jailed: $(sysctl -n security.jail.jailed)"
       [ $(sysctl -n security.jail.jailed) = '1' ]
-  changed_when: False
-  ignore_errors: True
+  changed_when: no
+  ignore_errors: yes
   register: sysctl_security_jail_jailed
 
 - name: "set_fact: bsdkit defaults"

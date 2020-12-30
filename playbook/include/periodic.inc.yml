@@ -3,7 +3,7 @@
     dest: /etc/periodic.conf
     line: "{{ item.key }}=\"{{ item.value }}\""
     regexp: "^{{ item.key }} *="
-    create: True
+    create: yes
     mode: "0644"
   with_items:
     - key: 'daily_output'
