@@ -12,3 +12,10 @@
     state: present
   when: zfs_enabled | bool
 
+- name: "Create ZFS dataset for /usr/local"
+  zfs:
+    name: "{{ boot_pool }}/usr/local"
+    state: present
+    extra_zfs_properties:
+      canmount: off
+  when: zfs_enabled | bool
