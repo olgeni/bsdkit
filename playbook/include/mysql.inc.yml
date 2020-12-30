@@ -25,3 +25,12 @@
     group: mysql
   with_items:
     - /var/db/mysql
+    - /var/db/mysql/.ssh
+
+- name: "Create ssh identity for MySQL"
+  openssh_keypair:
+    path: /var/db/mysql/.ssh/id_ed25519
+    comment: "mysql@{{ ansible_hostname }}"
+    type: ed25519
+    owner: mysql
+    group: mysql
