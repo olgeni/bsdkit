@@ -23,7 +23,7 @@ cat -s /boot/.loader.conf > /boot/loader.conf
 rm -f -v /boot/.loader.conf
 
 if kenv zfs_be_root > /dev/null 2>&1; then
-    _zfs_pool=$(kenv zfs_be_root | sed "s@/.*@@")
+    _zfs_pool=$(kenv zfs_be_root | cut -d'/' -f1)
 
     zfs create -o mountpoint=/jails "${_zfs_pool}"/jails
     zfs create -o canmount=off "${_zfs_pool}"/usr/local
