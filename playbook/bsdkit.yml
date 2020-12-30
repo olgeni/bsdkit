@@ -215,6 +215,7 @@
           - security/gnupg
           - shells/bash
           - shells/zsh
+          - sysutils/checkrestart
           - sysutils/cpdup
           - sysutils/direnv
           - sysutils/htop
