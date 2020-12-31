@@ -98,6 +98,8 @@ perform_poweroff() {
     if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
         VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
 
+        sleep 1
+
         while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
             sleep 1
         done
