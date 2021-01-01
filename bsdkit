@@ -1576,6 +1576,12 @@ make_read_only() {
 
     valid_destdir ${_destdir}
 
+    local _entropy
+
+    for _entropy in /entropy /boot/entropy; do
+        [ -e ${_file} ] && install -m 0600 -o root -g wheel ${_file} ${_destdir}${_file}
+    done
+
     sed -i '' -e '/^root:/ c\
 root:$1$PkLp4/DM$/3D/umXPR0XIb0HsPHByU/:0:0::0:0:System Administrator:/root:/bin/csh' \
         ${_destdir}/etc/master.passwd
