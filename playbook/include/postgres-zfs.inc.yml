@@ -1,4 +1,4 @@
-- name: "postgres-zfs"
+- name: "Block: ZFS (PostgreSQL)"
   when: zfs_enabled | bool
   block:
     - name: "Check contents of PostgreSQL home directory"

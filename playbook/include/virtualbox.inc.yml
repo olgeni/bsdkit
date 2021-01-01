@@ -7,4 +7,4 @@
   with_items:
     - vboxguest
     - vboxservice
-  when: kenv_smbios_system_product.stdout == "VirtualBox"
+  when: platform_is_virtualbox | bool

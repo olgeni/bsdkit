@@ -1,4 +1,4 @@
-- name: "mysql-zfs"
+- name: "Block: ZFS (MySQL)"
   when: zfs_enabled | bool
   block:
     - name: "Check contents of MySQL home directory"

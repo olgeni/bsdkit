@@ -22,7 +22,7 @@
 
 - name: "Retrieve freebsd_major"
   shell:
-    cmd:
+    cmd: |
       set -o pipefail
       echo "{{ ansible_distribution_release }}" | sed -E 's/([0-9]+).*/\1/;'
   register: freebsd_major
@@ -142,10 +142,18 @@
   debug:
     var: boot_pool
 
-- name: "set_fact: is_droplet"
+- name: "set_fact: platform_is_digitalocean"
   set_fact:
-    is_droplet: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
+    platform_is_digitalocean: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
-- name: "debug: is_droplet"
+- name: "debug: platform_is_digitalocean"
   debug:
-    var: is_droplet
+    var: platform_is_digitalocean
+
+- name: "set_fact: platform_is_virtualbox"
+  set_fact:
+    platform_is_virtualbox: "{{ kenv_smbios_system_product.stdout == 'VirtualBox' }}"
+
+- name: "set_fact: platform_is_vmware"
+  set_fact:
+    platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"

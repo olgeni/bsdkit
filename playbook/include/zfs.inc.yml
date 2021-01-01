@@ -1,21 +1,21 @@
-- name: "Create ZFS dataset for /var/db"
-  zfs:
-    name: "{{ boot_pool }}/var/db"
-    state: present
-    extra_zfs_properties:
-      canmount: off
+- name: "Block: ZFS (misc)"
   when: zfs_enabled | bool
+  block:
+    - name: "Create ZFS dataset for /var/db"
+      zfs:
+        name: "{{ boot_pool }}/var/db"
+        state: present
+        extra_zfs_properties:
+          canmount: off
 
-- name: "Create ZFS dataset for /jails"
-  zfs:
-    name: "{{ boot_pool }}/jails"
-    state: present
-  when: zfs_enabled | bool
+    - name: "Create ZFS dataset for /jails"
+      zfs:
+        name: "{{ boot_pool }}/jails"
+        state: present
 
-- name: "Create ZFS dataset for /usr/local"
-  zfs:
-    name: "{{ boot_pool }}/usr/local"
-    state: present
-    extra_zfs_properties:
-      canmount: off
-  when: zfs_enabled | bool
+    - name: "Create ZFS dataset for /usr/local"
+      zfs:
+        name: "{{ boot_pool }}/usr/local"
+        state: present
+        extra_zfs_properties:
+          canmount: off
