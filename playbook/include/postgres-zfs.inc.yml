@@ -8,7 +8,7 @@
         hidden: yes
       register: find_var_db_postgres
 
-    - name: Gather facts about PostgreSQL ZFS dataset
+    - name: "Gather facts about PostgreSQL ZFS dataset"
       zfs_facts:
         dataset: "{{ boot_pool }}/var/db/postgres"
       ignore_errors: yes
