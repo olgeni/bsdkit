@@ -15,14 +15,9 @@
 - hosts: all
   user: root
   tasks:
-    - name: "Include kenv.inc.yml"
-      include: include/kenv.inc.yml
-
     - name: "Include facts.inc.yml"
+      tags: always
       include: include/facts.inc.yml
-
-    - name: "Include zpool.inc.yml"
-      include: include/zpool.inc.yml
 
     - name: "Touch files"
       file:

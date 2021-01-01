@@ -1,7 +1,3 @@
-- name: "set_fact: is_droplet"
-  set_fact:
-    is_droplet: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
-
 - name: "Gather metadata (#1)"
   uri:
     url: http://169.254.169.254/metadata/v1.json

@@ -1,3 +1,17 @@
+- name: "kenv smbios.system.product"
+  command:
+    cmd: kenv smbios.system.product
+  changed_when: no
+  ignore_errors: yes
+  register: kenv_smbios_system_product
+
+- name: "kenv smbios.bios.vendor"
+  command:
+    cmd: kenv smbios.bios.vendor
+  changed_when: no
+  ignore_errors: yes
+  register: kenv_smbios_bios_vendor
+
 - name: "Retrieve freebsd_major"
   shell: |
     set -o pipefail
@@ -36,6 +50,28 @@
     bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
     is_host_install: "{{ sysctl_security_jail_jailed is failed }}"
+
+- name: "Check ZFS boot pool"
+  shell:
+    cmd: |
+      set -o pipefail
+      zpool get -H -o name bootfs | head -n1
+  register: zpool_get_bootfs
+  changed_when: no
+  ignore_errors: yes
+
+- name: "set_fact: zfs_enabled"
+  set_fact:
+    zfs_enabled: "{{ ((zpool_get_bootfs is succeeded) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
+
+- name: "set_fact: boot_pool"
+  set_fact:
+    boot_pool: "{{ zpool_get_bootfs.stdout }}"
+    when: zfs_enabled | bool
+
+- name: "set_fact: is_droplet"
+  set_fact:
+    is_droplet: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
 - name: "debug: bsdkit_interface"
   debug:
@@ -84,3 +120,19 @@
 - name: "debug: is_host_install"
   debug:
     var: is_host_install
+
+- name: "debug: zpool_get_bootfs"
+  debug:
+    var: zpool_get_bootfs
+
+- name: "debug: zfs_enabled"
+  debug:
+    var: zfs_enabled
+
+- name: "debug: boot_pool"
+  debug:
+    var: boot_pool
+
+- name: "debug: is_droplet"
+  debug:
+    var: is_droplet
