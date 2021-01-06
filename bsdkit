@@ -4,29 +4,6 @@ set -e -u
 
 autoload throw catch
 
-error() {
-    echo "bsdkit: $*"
-    exit 1
-}
-
-is_yes() {
-    case $1 in
-        [Yy][Ee][Ss])
-            return 0
-            ;;
-        [Nn][Oo])
-            return 1
-            ;;
-        *)
-            return 2
-            ;;
-    esac
-}
-
-is_efi() {
-    [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
-}
-
 : ${BSDKIT_DESTDIR:="/mnt"}
 : ${BSDKIT_PV_UPDATE_DELAY:="0.1"}
 : ${BSDKIT_JAIL_ROOT:="/jails"}
@@ -77,6 +54,29 @@ fi
 if [ -z ${BSDKIT_SSH_PUBLIC_KEY} ] && [ -e ~/.ssh/id_rsa.pub ]; then
     BSDKIT_SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 fi
+
+error() {
+    echo "bsdkit: $*"
+    exit 1
+}
+
+is_yes() {
+    case $1 in
+        [Yy][Ee][Ss])
+            return 0
+            ;;
+        [Nn][Oo])
+            return 1
+            ;;
+        *)
+            return 2
+            ;;
+    esac
+}
+
+is_efi() {
+    [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
+}
 
 environment() {
     echo \
