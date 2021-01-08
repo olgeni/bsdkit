@@ -1592,9 +1592,9 @@ make_read_only() {
 
     valid_destdir ${_destdir}
 
-    local _entropy
+    local _file
 
-    for _entropy in /entropy /boot/entropy; do
+    for _file in /entropy /boot/entropy; do
         [ -e ${_file} ] && install -m 0600 -o root -g wheel ${_file} ${_destdir}${_file}
     done
 
