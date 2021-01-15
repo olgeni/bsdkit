@@ -1,4 +1,4 @@
-# $FreeBSD: head/etc/csh.cshrc 50472 1999-08-27 23:37:10Z peter $
+# $FreeBSD: head/bin/csh/csh.cshrc 337849 2018-08-15 14:41:24Z brd $
 #
 # System-wide .cshrc file for csh(1).
 
