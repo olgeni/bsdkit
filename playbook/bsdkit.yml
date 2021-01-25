@@ -54,6 +54,7 @@
 
     - name: "Digital Ocean"
       include: include/digitalocean.inc.yml
+      when: platform_is_digitalocean | bool
 
     - name: "Include runit.inc.yml"
       include: include/runit.inc.yml
@@ -232,9 +233,11 @@
 
     - name: "Include virtualbox.inc.yml"
       include: include/virtualbox.inc.yml
+      when: platform_is_virtualbox | bool
 
     - name: "Include vmware.inc.yml"
       include: include/vmware.inc.yml
+      when: platform_is_vmware | bool
 
     - name: "Include cleanup.inc.yml"
       include: include/cleanup.inc.yml

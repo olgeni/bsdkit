@@ -10,4 +10,3 @@
     - vmware_guest_vmmemctl
     - vmware_guest_vmxnet
     - vmware_guestd
-  when: platform_is_vmware | bool

@@ -7,4 +7,3 @@
   with_items:
     - vboxguest
     - vboxservice
-  when: platform_is_virtualbox | bool
