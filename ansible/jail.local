@@ -1,10 +1,6 @@
 [DEFAULT]
 bantime = 86400
 
-[ssh-pf]
-enabled  = true
-filter   = sshd
-action   = pf
-#          sendmail-whois[name=SSH, dest=nobody@example.com, sender=fail2ban@example.com]
-logpath  = /var/log/auth.log
-maxretry = 5
+[sshd]
+enabled = true
+banaction = pf[actiontype=<allports>]
