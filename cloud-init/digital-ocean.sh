@@ -46,6 +46,7 @@ git checkout ${BSDKIT_BRANCH}
 if route get default | grep "interface:" > /dev/null 2>&1; then
     _iface=$(route get default | awk '/interface:/ { print $2 }')
     echo "nat on ${_iface} from ${BSDKIT_JAIL_NETWORK} to any -> egress" > /etc/pf.conf
+    echo 'anchor "f2b/*"' >> /etc/pf.conf
     service pf enable
     service pf start
 fi
