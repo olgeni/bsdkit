@@ -53,6 +53,7 @@
       include: include/kernconf.inc.yml
 
     - name: "Digital Ocean"
+      tags: digitalocean
       include: include/digitalocean.inc.yml
       when: platform_is_digitalocean | bool
 
