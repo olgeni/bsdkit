@@ -18,7 +18,12 @@
       {{ metadata.interfaces.public[0].anchor_ipv4.ip_address }} anchor
       {{ metadata.interfaces.private[0].ipv4.ip_address }} private
 
-- name: "Configure sshd_flags for Digital Ocean"
+- name: "Configure sshd_flags for Digital Ocean (ipv4)"
   command:
     cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].ipv4.ip_address }}"
+  changed_when: no
+
+- name: "Configure sshd_flags for Digital Ocean (anchor_ipv4)"
+  command:
+    cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
   changed_when: no
