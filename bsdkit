@@ -2245,7 +2245,7 @@ ansible_local_playbook() {
         --inventory localhost, \
         --connection local \
         -e ansible_python_interpreter=/usr/local/bin/python3 \
-        ${BSDKIT_SRCDIR}/playbook/bsdkit.yml
+        ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
 }
 
 ansible_chroot_playbook() {
@@ -2277,7 +2277,7 @@ EOF
         BSDKIT_INTERFACE=${_bsdkit_interface} \
         BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
         BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml
+        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
 
     rm -r ${_ansible_root}
 }
@@ -2316,7 +2316,7 @@ EOF
         BSDKIT_INTERFACE=${_bsdkit_interface} \
         BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
         BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml
+        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
 
     rm -r ${_ansible_root}
 }
