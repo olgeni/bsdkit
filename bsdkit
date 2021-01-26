@@ -74,6 +74,10 @@ is_yes() {
     esac
 }
 
+is_bios() {
+    [ "$(sysctl -n machdep.bootmethod)" = "BIOS" ]
+}
+
 is_efi() {
     [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
