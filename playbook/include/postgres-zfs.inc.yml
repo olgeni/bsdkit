@@ -12,7 +12,7 @@
       zfs_facts:
         dataset: "{{ boot_pool }}/var/db/postgres"
       ignore_errors: yes
-      register: postgres_zfs_facts
+      register: var_db_postgres_zfs_facts
 
     - name: "Create ZFS dataset for PostgreSQL"
       zfs:
@@ -23,4 +23,4 @@
           compression: lz4
           atime: off
           redundant_metadata: most
-      when: find_var_db_postgres.matched == 0 or postgres_zfs_facts is successful
+      when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is successful
