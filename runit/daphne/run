@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# 8F1C5926-23B8-4389-AAFE-9FB5AC30EA44
+
+set -e -u
+
+exec 2>&1
+
+[ -f config ] && . $(realpath config)
+
+: ${CHPST_ARGS=""}
+
+if [ -d env ]; then
+    CHPST_ARGS="${CHPST_ARGS} -e ${PWD}/env"
+fi
+
+ENVRC=""
+
+if [ -f envrc ]; then
+    ENVRC="$(cat envrc)"
+fi
+
+: ${DAPHNE_USER:="nobody"}
+: ${DAPHNE_PATH:="/tmp"}
+: ${DAPHNE_ARGS=""}
+: ${DAPHNE_APP:="module.asgi:application"}
+: ${DAPHNE_VENV:="${DAPHNE_PATH}/.venv"}
+
+cd ${DAPHNE_PATH}
+
+. ${DAPHNE_VENV}/bin/activate
+
+exec env -S "${ENVRC}" chpst -u ${DAPHNE_USER} ${CHPST_ARGS} daphne ${DAPHNE_ARGS} ${DAPHNE_APP}
