@@ -116,7 +116,7 @@
   shell:
     cmd: |
       set -o pipefail
-      zpool get -H -o name bootfs | head -n1
+      zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
   register: zpool_get_bootfs
   changed_when: no
   ignore_errors: yes
