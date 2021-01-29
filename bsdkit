@@ -2491,6 +2491,43 @@ purge_local_libdirs() {
     purge_libdir /usr/local/lib/perl5
 }
 
+zfs_create_postgresql() {
+    local _pool
+
+    _pool=$(get_boot_pool)
+
+    local _exists="NO"
+
+    zfs get -H -o value name ${_pool}/var/db/postgres > /dev/null 2>&1 && _exists="YES"
+
+    if ! is_yes ${_exists}; then
+        if [ -d /var/db/postgres.orig ]; then
+            return 1
+        fi
+
+        mkdir /var/db/postgres.orig
+
+        cd /var/db/postgres
+        find . | cpio -p -d -u -v /var/db/postgres.orig
+
+        zfs create \
+            -o canmount=on \
+            -o compression=lz4 \
+            -o atime=off \
+            -o redundant_metadata=most \
+            ${_pool}/var/db/postgres
+
+        install -o postgres -g postgres -m 755 -d /var/db/postgres
+
+        cd /var/db/postgres.orig
+        find . | cpio -p -d -u -v /var/db/postgres
+
+        cd /var/db
+
+        rm -r -f /var/db/postgres.orig
+    fi
+}
+
 if [ $# -gt 0 ]; then
     ${(@s/ /)@}
 fi
