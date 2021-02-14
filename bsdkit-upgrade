@@ -178,7 +178,7 @@ if ! is_yes ${FETCH_ONLY}; then
     fi
 fi
 
-if [ -f ${DESTDIR}/usr/src/Makefile -a ! -d ${DESTDIR}/usr/src/.svn ]; then
+if [ -f ${DESTDIR}/usr/src/Makefile ]; then
     _install_src=yes
 fi
 
