@@ -1685,7 +1685,6 @@ install_setup_runtime() {
     local _runtime=(
         # required
         lang/python
-        misc/py-tqdm
         ports-mgmt/pkg
         security/ca_root_nss
         shells/zsh
@@ -1694,26 +1693,16 @@ install_setup_runtime() {
         # optional
         archivers/zip
         comms/kermit
-        comms/tio
         devel/cdialog
         devel/git
-        devel/py-libzfs
-        devel/py-sh
         editors/bvi
         editors/nano
         editors/vim
         ftp/curl
         ftp/lftp
-        misc/buffer
         misc/gnu-watch
-        misc/inplace
-        misc/mbuffer
-        net/go-cs
-        net/redir
         net/rsync
-        security/bcwipe
         security/openvpn
-        sysutils/beadm
         sysutils/clone
         sysutils/cpdup
         sysutils/dar
@@ -1724,21 +1713,11 @@ install_setup_runtime() {
         sysutils/hextools
         sysutils/hfsutils
         sysutils/ipmitool
-        sysutils/megacli
         sysutils/memtester
         sysutils/ncdu
-        sysutils/pipemeter
-        sysutils/rdate
         sysutils/renameutils
         sysutils/smartmontools
-        sysutils/spiped
         sysutils/tmux
-        sysutils/xe
-        textproc/align
-        textproc/augeas
-        textproc/jq
-        textproc/py-python-augeas
-        textproc/yq
         www/go-www
         www/tinyproxy
         # disabled
