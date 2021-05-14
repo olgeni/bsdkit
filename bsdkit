@@ -1713,6 +1713,7 @@ install_setup_runtime() {
         sysutils/hextools
         sysutils/hfsutils
         sysutils/ipmitool
+        sysutils/lsblk
         sysutils/memtester
         sysutils/ncdu
         sysutils/renameutils
