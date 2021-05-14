@@ -1079,6 +1079,7 @@ EOF
 
     # sed -i '' -e "s/:\(setenv.*\):/:\1${_login_env}:/" ${_destdir}/etc/login.conf
 
+    # literal tab is required
     # sed -i '' -e '/^	:umask=022:/i\
     #     :charset=UTF-8:\\\
     #     :lang=en_US.UTF-8:\\\' ${_destdir}/etc/login.conf
@@ -2080,7 +2081,7 @@ build_setup_iso() {
         if [ ${et_platform} = "efi" ]; then
             _esp_start=$(expr ${et_lba} \* 2048)
             _esp_size=$(expr ${et_sectors} \* 512)
-	    _esp_param=(-p efi::${_esp_size}:${_esp_start})
+            _esp_param=(-p efi::${_esp_size}:${_esp_start})
             break
         fi
     done
@@ -2340,18 +2341,18 @@ sysvshm = new;
 sysvmsg = new;
 
 ${_jail_name} {
-	allow.raw_sockets;
-	allow.sysvipc;
+        allow.raw_sockets;
+        allow.sysvipc;
 
-	osrelease = "$(osrelease ${_destdir})";
-	osreldate = "$(osreldate ${_destdir})";
+        osrelease = "$(osrelease ${_destdir})";
+        osreldate = "$(osreldate ${_destdir})";
 
-	path = "${_destdir%/}";
-	host.hostname = "\$name";
-	host.domainname = "local";
-	interface = "$(inet_interface)";
-	# ip4.addr = "";
-	# mount.fstab = "${_destdir%/}/\$name.fstab";
+        path = "${_destdir%/}";
+        host.hostname = "\$name";
+        host.domainname = "local";
+        interface = "$(inet_interface)";
+        # ip4.addr = "";
+        # mount.fstab = "${_destdir%/}/\$name.fstab";
 }
 EOF
 }
@@ -2372,16 +2373,16 @@ sysvshm = new;
 sysvmsg = new;
 
 ${BSDKIT_JAIL_NAME} {
-	allow.raw_sockets;
-	allow.sysvipc;
+        allow.raw_sockets;
+        allow.sysvipc;
 
-	osrelease = "$(osrelease ${_destdir})";
-	osreldate = "$(osreldate ${_destdir})";
+        osrelease = "$(osrelease ${_destdir})";
+        osreldate = "$(osreldate ${_destdir})";
 
-	path = "${_destdir%/}";
-	host.hostname = "${BSDKIT_JAIL_NAME}";
-	host.domainname = "local";
-	ip4.addr = "$(inet_address)";
+        path = "${_destdir%/}";
+        host.hostname = "${BSDKIT_JAIL_NAME}";
+        host.domainname = "local";
+        ip4.addr = "$(inet_address)";
 }
 EOF
 }
