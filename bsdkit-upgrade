@@ -2,7 +2,7 @@
 
 set -e -u
 
-: ${BSDKIT_ROOT_URL:="http://olgeni.olgeni.com/FreeBSD"}
+: ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:="12.2"}
 : ${BSDKIT_ARCH:="amd64"}
 : ${DESTDIR:=""}
