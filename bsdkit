@@ -967,7 +967,7 @@ install_release() {
                 continue
             fi
 
-            local _sha256_local
+            local _sha256_local=""
 
             if [ -f ${_local_relpath}/${_filename} ]; then
                 echo "Checking: ${_filename}"
