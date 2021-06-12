@@ -1088,6 +1088,12 @@ EOF
 
     mkdir -p ${_destdir}/usr/local/etc/pkg/repos
 
+    cat > ${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf << EOF
+FreeBSD: {
+    enabled: no
+}
+EOF
+
     cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
 bsdkit: {
     url: "${FREEBSD_PKG_URL}"
