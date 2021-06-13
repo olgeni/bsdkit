@@ -334,6 +334,19 @@ gmirror_configure() {
     return 0
 }
 
+install_efi_loader() {
+    local _device=$1
+
+    # FreeBSD < 13.0: gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
+
+    /sbin/newfs_msdos ${_device}
+    mkdir -p /tmp/efi
+    mount -t msdos ${_device} /tmp/efi
+    mkdir -p /tmp/efi/efi/boot
+    install /boot/loader.efi /tmp/efi/efi/boot/bootx64.efi
+    umount /tmp/efi
+}
+
 gpt_ufs_partition_multi() {
     local _destdir=$1
     local _device=$2
@@ -354,7 +367,7 @@ gpt_ufs_partition_multi() {
     _p=$((_p + 1))
 
     gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
-    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
+    install_efi_loader /dev/${_device}p${_p}
     _p=$((_p + 1))
 
     if has_swap; then
@@ -429,7 +442,7 @@ gpt_ufs_partition_single() {
     _p=$((_p + 1))
 
     gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
-    gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
+    install_efi_loader /dev/${_device}p${_p}
     _p=$((_p + 1))
 
     gpart add -i ${_p} -t freebsd-ufs -l ${BSDKIT_LABEL_ROOT} ${_device}
@@ -673,7 +686,7 @@ zfs_create_gpt_pool() {
         _p=$((_p + 1))
 
         gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI}${_device_index} ${_device}
-        gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
+        install_efi_loader /dev/${_device}p${_p}
         _p=$((_p + 1))
 
         if has_swap; then
@@ -2129,6 +2142,7 @@ build_setup_img() {
 
     rm -r -f ${_staging}/memroot.ufs.gz ${_staging}
 
+    # FIXME: add support for FreeBSD > 13.0
     mkimg -v \
         -s gpt \
         -b /boot/pmbr \
