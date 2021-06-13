@@ -1632,6 +1632,8 @@ root:$1$PkLp4/DM$/3D/umXPR0XIb0HsPHByU/:0:0::0:0:System Administrator:/root:/bin
 
     # newsyslog -v -C -f ${_destdir}/etc/newsyslog.conf -d ${_destdir}
 
+    uuidgen > ${_destdir}/etc/hostid
+
     cat > ${_destdir}/etc/ttys << EOF
 ttyv0 "/usr/libexec/getty al.Pc" xterm onifexists  secure
 ttyv1 "/usr/libexec/getty al.Pc" xterm onifexists  secure
