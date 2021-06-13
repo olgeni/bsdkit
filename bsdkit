@@ -968,11 +968,11 @@ install_release() {
                 continue
             fi
 
-            if ! is_yes ${BSDKIT_INSTALL_KERNEL} && [ ${_package} != ${_package#kernel} ]; then
+            if ! is_yes ${BSDKIT_INSTALL_KERNEL} && [[ ${_package} =~ "kernel" ]]; then
                 continue
             fi
 
-            if ! is_yes ${BSDKIT_INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
+            if ! is_yes ${BSDKIT_INSTALL_DEBUG} && [[ ${_package} =~ "_dbg" ]]; then
                 continue
             fi
 
@@ -1004,11 +1004,11 @@ install_release() {
             continue
         fi
 
-        if ! is_yes ${BSDKIT_INSTALL_KERNEL} && [ ${_package} != ${_package#kernel} ]; then
+        if ! is_yes ${BSDKIT_INSTALL_KERNEL} && [[ ${_package} =~ "kernel" ]]; then
             continue
         fi
 
-        if ! is_yes ${BSDKIT_INSTALL_DEBUG} && [ ${_package} != ${_package%_dbg} ]; then
+        if ! is_yes ${BSDKIT_INSTALL_DEBUG} && [[ ${_package} =~ "_dbg" ]]; then
             continue
         fi
 
