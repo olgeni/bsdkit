@@ -1713,6 +1713,7 @@ install_setup_runtime() {
         sysutils/ansible
         sysutils/pv
         # optional
+	sysutils/htop
 	sysutils/smenu
 	sysutils/vcp
 	textproc/fzf
