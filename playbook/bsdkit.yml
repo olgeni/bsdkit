@@ -219,6 +219,7 @@
           - sysutils/pv
           - sysutils/renameutils
           - sysutils/runit
+          - sysutils/smenu
           - sysutils/spiped
           - sysutils/tmux
           - sysutils/ts
