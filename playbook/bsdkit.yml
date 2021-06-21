@@ -223,7 +223,6 @@
           - sysutils/spiped
           - sysutils/tmux
           - sysutils/ts
-          - sysutils/vcp
           - textproc/align
           - textproc/fzf
           - textproc/jq

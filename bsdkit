@@ -1715,7 +1715,6 @@ install_setup_runtime() {
         # optional
 	sysutils/htop
 	sysutils/smenu
-	sysutils/vcp
 	textproc/fzf
         archivers/zip
         comms/kermit
