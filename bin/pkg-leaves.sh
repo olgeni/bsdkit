@@ -2,6 +2,12 @@
 
 set -e -u
 
+if ! command -v fzf > /dev/null 2>&1; then
+    error "required command missing (fzf)"
+    # EX_UNAVAILABLE
+    exit 69
+fi
+
 _f1=$(mktemp /tmp/XXXXXX)
 
 pkg query -e "%?r == 0" "%o" | sort -u > ${_f1}
