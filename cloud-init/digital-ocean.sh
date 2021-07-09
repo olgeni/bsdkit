@@ -31,6 +31,8 @@ fi
 zfs destroy -r "${_zfs_pool}"@base_installation || :
 zfs destroy -r "${_zfs_pool}"@digitalocean_installation || :
 
+pw userdel freebsd -r || :
+
 mkdir -p /usr/local/etc/pkg/repos
 pkg install -y ports-mgmt/pkg
 # shellcheck disable=SC2016
