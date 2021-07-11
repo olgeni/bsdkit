@@ -3,7 +3,7 @@
 set -e -u
 
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
-: ${BSDKIT_VERSION:="12.2"}
+: ${BSDKIT_VERSION:="13.0"}
 : ${BSDKIT_ARCH:="amd64"}
 : ${DESTDIR:=""}
 : ${BOOTENV_ENABLE:="default"}

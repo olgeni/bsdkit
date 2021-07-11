@@ -35,7 +35,7 @@ autoload throw catch
 
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_JAIL_PROXY:=""}
-: ${BSDKIT_VERSION:="12.2"}
+: ${BSDKIT_VERSION:="13.0"}
 : ${BSDKIT_ARCH:="amd64"}
 : ${BSDKIT_TREE:="default"}
 : ${BSDKIT_PKGSET:="nox11"}
