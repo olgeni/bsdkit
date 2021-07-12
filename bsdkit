@@ -1515,9 +1515,7 @@ prepare_md_boot_device() {
 PermitRootLogin yes
 EOF
 
-    echo "Previous value of vfs.root.mountfrom: \"$(kenv vfs.root.mountfrom)\""
-
-    kenv vfs.root.mountfrom="ufs:/dev/${_md_device}p3"
+    echo "Use \"reboot -r\" after kenv vfs.root.mountfrom=\"ufs:/dev/${_md_device}p3\""
 }
 
 create_jail_destdir() {
