@@ -1494,7 +1494,7 @@ configure_jail() {
     _do_configure_jail ${_destdir}
 }
 
-create_md() {
+prepare_md_boot_device() {
     local _md_device
     _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
