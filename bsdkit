@@ -339,7 +339,7 @@ install_efi_loader() {
 
     # FreeBSD < 13.0: gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
 
-    /sbin/newfs_msdos ${_device}
+    /sbin/newfs_msdos -F 16 -c 2 ${_device}
     mkdir -p /tmp/efi
     mount -t msdos ${_device} /tmp/efi
     mkdir -p /tmp/efi/efi/boot
@@ -1501,6 +1501,7 @@ prepare_md_boot_device() {
     BSDKIT_INSTALL_SRC=no BSDKIT_INSTALL_KERNEL=no BSDKIT_PART_SIZE_SWAP=0 BSDKIT_LABEL_ROOT=mdroot ${BSDKIT_SCRIPT} install_gpt_ufs $* single ${_md_device}
 
     rm -f ${BSDKIT_DESTDIR}/etc/rc.conf
+    touch ${BSDKIT_DESTDIR}/etc/rc.conf
 
     sysrc -f ${BSDKIT_DESTDIR}/etc/rc.conf hostname=localhost
     sysrc -f ${BSDKIT_DESTDIR}/etc/rc.conf sshd_enable=YES
@@ -2127,33 +2128,63 @@ build_setup_iso() {
 }
 
 build_setup_img() {
-    local _iso=$1
-    local _img=$2
+    local _iso_file=$1
+    local _img_file=$2
 
-    local _staging
-    _staging=$(mktemp -d /tmp/staging.XXXXXX)
+    #
+    # EFI partition
+    #
 
-    tar -x -f ${_iso} -C ${_staging} boot memroot.ufs.gz
+    local _efi_dir
+    _efi_dir=$(mktemp -d /tmp/efi.XXXXXX)
 
-    cp ${_iso} ${_staging}
+    tar -x -f ${_iso_file} -C ${_efi_dir} boot/loader.efi
 
-    local _ufs
-    _ufs=$(mktemp /tmp/ufs.XXXXXX)
+    mkdir -p ${_efi_dir}/efi/boot
+    mv ${_efi_dir}/boot/loader.efi ${_efi_dir}/efi/boot/bootx64.efi
+    rmdir ${_efi_dir}/boot
 
-    makefs ${_ufs} ${_staging}
+    local _efi_img
+    _efi_img=$(mktemp /tmp/ufs.XXXXXX)
 
-    rm -r -f ${_staging}/memroot.ufs.gz ${_staging}
+    makefs -b 50% ${_efi_img} ${_efi_dir}
 
-    # FIXME: add support for FreeBSD > 13.0
+    rm -r -f ${_efi_dir}
+
+    #
+    # UFS partition
+    #
+
+    local _ufs_dir
+    _ufs_dir=$(mktemp -d /tmp/staging.XXXXXX)
+
+    tar -x -f ${_iso_file} -C ${_ufs_dir} boot memroot.ufs.gz
+
+    cp ${_iso_file} ${_ufs_dir}
+
+    local _ufs_img
+    _ufs_img=$(mktemp /tmp/ufs.XXXXXX)
+
+    makefs ${_ufs_img} ${_ufs_dir}
+
+    rm -r -f ${_ufs_dir}
+
+    #
+    # Image
+    #
+
+    rm -f ${_img_file}
+
     mkimg -v \
         -s gpt \
         -b /boot/pmbr \
-        -p efi:=/boot/boot1.efifat \
+        -p efi:=${_efi_img} \
         -p freebsd-boot:=/boot/gptboot \
-        -p freebsd-ufs/${BSDKIT_IMG_DATA_LABEL}:=${_ufs} \
-        -o ${_img}
+        -p freebsd-ufs/${BSDKIT_IMG_DATA_LABEL}:=${_ufs_img} \
+        -o ${_img_file}
 
-    rm -f ${_ufs}
+    rm -f ${_efi_img}
+    rm -f ${_ufs_img}
 }
 
 deploy() {
