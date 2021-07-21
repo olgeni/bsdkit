@@ -25,7 +25,9 @@ rm -f -v /boot/.loader.conf
 if kenv zfs_be_root > /dev/null 2>&1; then
     _zfs_pool=$(kenv zfs_be_root | cut -d'/' -f1)
 
-    zfs create -o canmount=off "${_zfs_pool}"/usr/local
+    zfs create \
+        -o canmount=off \
+        "${_zfs_pool}"/usr/local
 fi
 
 zfs destroy -r "${_zfs_pool}"@base_installation || :
