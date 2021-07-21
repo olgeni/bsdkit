@@ -7,6 +7,7 @@ exec > /var/log/bsdkit-cloud-init.log 2>&1
 : "${BSDKIT_BRANCH:=master}"
 : "${BSDKIT_VERSION:=12.2}"
 : "${BSDKIT_JAIL_NETWORK:=172.16.1.0/24}"
+: "${ZFS_SWAP_SIZE:=4G}"
 
 cd /root
 
@@ -28,6 +29,16 @@ if kenv zfs_be_root > /dev/null 2>&1; then
     zfs create \
         -o canmount=off \
         "${_zfs_pool}"/usr/local
+
+    zfs create \
+        -o checksum=off \
+        -o compression=off \
+        -o dedup=off \
+        -o sync=disabled \
+        -o primarycache=none \
+        -o org.freebsd:swap=on \
+        -V "${ZFS_SWAP_SIZE}" \
+        "${_zfs_pool}"/swap
 fi
 
 zfs destroy -r "${_zfs_pool}"@base_installation || :
