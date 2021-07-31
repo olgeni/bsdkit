@@ -1712,9 +1712,9 @@ install_setup_runtime() {
         sysutils/ansible
         sysutils/pv
         # optional
-	sysutils/htop
-	sysutils/smenu
-	textproc/fzf
+        sysutils/htop
+        sysutils/smenu
+        textproc/fzf
         archivers/zip
         comms/kermit
         devel/cdialog
