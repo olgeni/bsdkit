@@ -50,6 +50,9 @@ mkdir -p /usr/local/etc/pkg/repos
 pkg install -y ports-mgmt/pkg
 # shellcheck disable=SC2016
 echo 'bsdkit: { url: "https://hub.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' > /usr/local/etc/pkg/repos/bsdkit.conf
+
+for i in $(pkg query -g %n 'py37-*'); do pkg set -yn ${i}:py38-${i#py37-}; done
+
 pkg update -f
 pkg upgrade -y
 pkg install -y devel/git sysutils/pv sysutils/ansible shells/zsh
