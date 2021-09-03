@@ -1,0 +1,110 @@
+#!/bin/sh
+
+# shellcheck disable=SC3043
+
+set -e -u
+
+error() {
+    echo "bsdkit: $*"
+    exit 1
+}
+
+rewrite_pool() {
+    local OPT
+
+    local _source_pool
+    local _target_pool
+    local _source_device
+    local _target_device
+
+    _target_pool=""
+
+    while getopts "p:n:s:t:" OPT; do
+        case "${OPT}" in
+            p)
+                _source_pool="${OPTARG}"
+                ;;
+            n)
+                _target_pool="${OPTARG}"
+                ;;
+            s)
+                _source_device="${OPTARG}"
+                ;;
+            t)
+                _target_device="${OPTARG}"
+                ;;
+            *)
+                error "unrecognized option."
+                ;;
+        esac
+    done
+
+    if [ -z "${_target_pool}" ]; then
+        _target_pool="${_source_pool}"
+    fi
+
+    [ -n "${_source_pool}" ] || error "_source_pool required."
+    [ -n "${_source_device}" ] || error "_source_device required."
+    [ -n "${_target_device}" ] || error "_target_device required."
+
+    local _snapshot_name
+    local _target_pool_alias
+
+    _snapshot_name=$(uuidgen | cut -d - -f 1)
+    _target_pool_alias="${_target_pool}"-"${_snapshot_name}"
+
+    zpool detach "${_source_pool}" "${_target_device}"
+    mkdir -p /altroot
+    zpool create -R /altroot -t "${_target_pool_alias}" "${_target_pool}" "${_target_device}"
+    zfs destroy -r "${_source_pool}"@"${_snapshot_name}" || :
+    zfs snapshot -r "${_source_pool}"@"${_snapshot_name}"
+    zfs send -v -R --props "${_source_pool}"@"${_snapshot_name}" \
+        | zfs receive -v -u -d -F "${_target_pool_alias}"
+    zfs destroy -rv "${_source_pool}"@"${_snapshot_name}"
+    zfs destroy -rv "${_target_pool_alias}"@"${_snapshot_name}"
+
+    local _filesystem
+
+    for _filesystem in $(zfs list -H -o name -t filesystem -r "${_target_pool_alias}"); do
+        zfs get -H -o property all "${_filesystem}" \
+            | sort \
+            | uniq \
+            | xargs -n1 -J % echo zfs inherit -S % "${_filesystem}" \
+            | sh -x
+    done
+
+    zfs get -s received -H -r all "${_target_pool_alias}" \
+        | awk '
+$2 != "mountpoint" {
+    print "zfs set " $2 "=" $3 " " $1;
+ }
+
+$2 == "mountpoint" {
+    gsub("/altroot", "", $3);
+
+    if ($3 == "") {
+        $3 = "/";
+    }
+
+    print "zfs set " $2 "=" $3 " " $1
+}' | sh -x
+
+    local _source_bootfs
+    local _target_bootfs
+
+    if [ "$(zpool get -H -o source bootfs "${_source_pool}")" = "local" ]; then
+        _source_bootfs=$(zpool get -H -o value bootfs "${_source_pool}")
+        _target_bootfs=$(echo "${_source_bootfs}" | sed -e "s/${_source_pool}/${_target_pool_alias}/")
+
+        zpool set bootfs="${_target_bootfs}" "${_target_pool_alias}"
+        zpool set bootfs="" "${_source_pool}"
+    fi
+
+    zpool destroy -f "${_source_pool}"
+
+    zpool labelclear -f "${_source_device}"
+
+    zpool attach "${_target_pool_alias}" "${_target_device}" "${_source_device}"
+}
+
+rewrite_pool "$@"
