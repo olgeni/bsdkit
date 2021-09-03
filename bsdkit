@@ -138,7 +138,6 @@ environment() {
 
 ZPOOL_CREATE_CMD=(zpool create)
 ZFS_CREATE_CMD=(zfs create)
-ZPOOL_CACHE=/tmp/zpool.cache
 
 BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
@@ -616,7 +615,7 @@ zfs_create_pool() {
 
     sysctl -q kern.geom.debugflags=0x00
 
-    local _options=(-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir})
+    local _options=(-f -m none -o altroot=${_destdir})
 
     local _device
 
@@ -703,7 +702,7 @@ zfs_create_gpt_pool() {
         _device_index=$((_device_index + 1))
     done
 
-    local _options=(-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir})
+    local _options=(-f -m none -o altroot=${_destdir})
 
     local _suffix="p${_pool_partition}"
 
@@ -775,7 +774,7 @@ zfs_create_mbr_pool() {
         dd if=/boot/zfsboot of=/dev/${_device}s1a iseek=1 oseek=1024
     done
 
-    local _options=(-f -m none -o cachefile=${ZPOOL_CACHE} -o altroot=${_destdir})
+    local _options=(-f -m none -o altroot=${_destdir})
 
     local _suffix="s1a"
 
@@ -1271,7 +1270,6 @@ install_zfs() {
     zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    install -m 0644 -o root -g wheel ${ZPOOL_CACHE} ${BSDKIT_DESTDIR}/boot/zfs
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1301,7 +1299,6 @@ install_gpt_zfs() {
     zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    install -m 0644 -o root -g wheel ${ZPOOL_CACHE} ${BSDKIT_DESTDIR}/boot/zfs
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1331,7 +1328,6 @@ install_mbr_zfs() {
     zfs_create_mbr_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    install -m 0644 -o root -g wheel ${ZPOOL_CACHE} ${BSDKIT_DESTDIR}/boot/zfs
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
