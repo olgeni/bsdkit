@@ -2159,6 +2159,9 @@ build_setup_img() {
 
     tar -x -f ${_iso_file} -C ${_ufs_dir} boot memroot.ufs.gz
 
+    mkdir -p ${_ufs_dir}/etc
+    uuidgen > ${_ufs_dir}/etc/hostid
+
     cp ${_iso_file} ${_ufs_dir}
 
     local _ufs_img
