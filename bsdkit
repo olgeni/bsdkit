@@ -1512,6 +1512,9 @@ prepare_md_boot_device() {
 PermitRootLogin yes
 EOF
 
+    mkdir -p ${BSDKIT_DESTDIR}/root/bin/
+    install -m 0755 -o root -g wheel bsdkit-rewrite-pool ${BSDKIT_DESTDIR}/root/bin/
+
     echo "Use \"reboot -r\" after:"
     echo
     echo "    kenv vfs.root.mountfrom=\"ufs:/dev/${_md_device}p3\""
