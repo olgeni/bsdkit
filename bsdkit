@@ -154,8 +154,10 @@ parse_url() {
 }
 
 parse_options() {
-    while getopts "r:v:a:p:z:" OPT; do
-        case ${OPT} in
+    local _option
+
+    while getopts "r:v:a:p:z:" _option; do
+        case ${_option} in
             r)
                 BSDKIT_ROOT_URL=${OPTARG%/}
                 ;;
@@ -2207,9 +2209,10 @@ remote_deploy() {
 
     local _remote_address=""
     local _remote_port="22"
+    local _option
 
-    while getopts "h:p:" OPT; do
-        case $OPT in
+    while getopts "h:p:" _option; do
+        case ${_option} in
             h)
                 _remote_address=${OPTARG}
                 ;;
