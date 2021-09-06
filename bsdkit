@@ -1492,7 +1492,21 @@ configure_jail() {
     _do_configure_jail ${_destdir}
 }
 
-prepare_md_boot_device() {
+build_md_root_device() {
+    local _reboot
+    local _option
+
+    while getopts "r" _option; do
+        case ${_option} in
+            r)
+                _reboot=YES
+                ;;
+            *) ;;
+        esac
+    done
+
+    shift $((OPTIND - 1))
+
     local _md_device
     _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
@@ -1517,9 +1531,14 @@ EOF
     mkdir -p ${BSDKIT_DESTDIR}/root/bin/
     install -m 0755 -o root -g wheel bsdkit-rewrite-pool ${BSDKIT_DESTDIR}/root/bin/
 
-    echo "Use \"reboot -r\" after:"
-    echo
-    echo "    kenv vfs.root.mountfrom=\"ufs:/dev/${_md_device}p3\""
+    if is_yes ${_reboot}; then
+        kenv vfs.root.mountfrom="ufs:/dev/${_md_device}p3"
+        reboot -r
+    else
+        echo "Use \"reboot -r\" after:"
+        echo
+        echo "    kenv vfs.root.mountfrom=\"ufs:/dev/${_md_device}p3\""
+    fi
 }
 
 create_jail_destdir() {
