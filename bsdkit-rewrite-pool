@@ -58,7 +58,7 @@ rewrite_pool() {
     zpool create -R /altroot -t "${_target_pool_alias}" "${_target_pool}" "${_target_device}"
     zfs destroy -r "${_source_pool}"@"${_snapshot_name}" || :
     zfs snapshot -r "${_source_pool}"@"${_snapshot_name}"
-    zfs send -v -R --props "${_source_pool}"@"${_snapshot_name}" \
+    zfs send --verbose --replicate --props --large-block --embed "${_source_pool}"@"${_snapshot_name}" \
         | zfs receive -v -u -d -F "${_target_pool_alias}"
     zfs destroy -rv "${_source_pool}"@"${_snapshot_name}"
     zfs destroy -rv "${_target_pool_alias}"@"${_snapshot_name}"
