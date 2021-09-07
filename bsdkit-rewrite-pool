@@ -5,12 +5,12 @@
 set -e -u
 
 error() {
-    echo "bsdkit: $*"
+    echo "bsdkit-rewrite-pool: $*"
     exit 1
 }
 
 rewrite_pool() {
-    local OPT
+    local _option
 
     local _source_pool
     local _target_pool
@@ -19,8 +19,8 @@ rewrite_pool() {
 
     _target_pool=""
 
-    while getopts "p:n:s:t:" OPT; do
-        case "${OPT}" in
+    while getopts "p:n:s:t:" _option; do
+        case "${_option}" in
             p)
                 _source_pool="${OPTARG}"
                 ;;
@@ -60,8 +60,8 @@ rewrite_pool() {
     zfs snapshot -r "${_source_pool}"@"${_snapshot_name}"
     zfs send --verbose --replicate --props --large-block --embed "${_source_pool}"@"${_snapshot_name}" \
         | zfs receive -v -u -F -d "${_target_pool_alias}"
-    zfs destroy -rv "${_source_pool}"@"${_snapshot_name}"
-    zfs destroy -rv "${_target_pool_alias}"@"${_snapshot_name}"
+    zfs destroy -r -f "${_source_pool}"@"${_snapshot_name}"
+    zfs destroy -r -f "${_target_pool_alias}"@"${_snapshot_name}"
 
     local _filesystem
 
