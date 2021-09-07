@@ -66,6 +66,7 @@ rewrite_pool() {
     local _filesystem
 
     for _filesystem in $(zfs list -H -o name -t filesystem -r "${_target_pool_alias}"); do
+        # BD584E0F-28D6-4409-956D-F9B1468C2DD9
         zfs get -H -o property all "${_filesystem}" \
             | sort \
             | uniq \
@@ -73,6 +74,7 @@ rewrite_pool() {
             | sh -x
     done
 
+    # 8E95F488-BE4B-48F6-9FEE-C58CBBFD25BC
     zfs get -s received -H -r all "${_target_pool_alias}" \
         | awk '
 $2 != "mountpoint" {
