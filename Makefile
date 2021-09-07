@@ -8,6 +8,12 @@ all:
 format:
 	@inplace "shfmt -ci -sr -s -i 4" bsdkit* *.sh cloud-init/*.sh
 
+start-vm:
+	@$(CURDIR)/bsdkit-vbox start
+
+stop-vm:
+	@$(CURDIR)/bsdkit-vbox stop
+
 rebuild-vm:
 	@$(CURDIR)/bsdkit-vbox poweroff || :
 	@$(CURDIR)/bsdkit-vbox destroy || :
