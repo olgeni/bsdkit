@@ -33,7 +33,7 @@ rewrite_filesystem() {
     _snapshot_name=$(uuidgen | cut -d - -f 1)
     _target_filesystem=${_source_filesystem}.${_snapshot_name}
 
-    zfs destroy -r "${_source_filesystem}"@"${_snapshot_name}" || :
+    zfs destroy -r "${_source_filesystem}"@"${_snapshot_name}" >/dev/null 2>&1 || :
     zfs snapshot -r "${_source_filesystem}"@"${_snapshot_name}"
     zfs send --verbose --replicate --props --large-block --embed "${_source_filesystem}"@"${_snapshot_name}" \
         | zfs receive -v -u -F "${_target_filesystem}"

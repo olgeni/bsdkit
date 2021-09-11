@@ -56,7 +56,7 @@ rewrite_pool() {
     zpool detach "${_source_pool}" "${_target_device}"
     mkdir -p /altroot
     zpool create -R /altroot -t "${_target_pool_alias}" "${_target_pool}" "${_target_device}"
-    zfs destroy -r "${_source_pool}"@"${_snapshot_name}" || :
+    zfs destroy -r "${_source_pool}"@"${_snapshot_name}" >/dev/null 2>&1 || :
     zfs snapshot -r "${_source_pool}"@"${_snapshot_name}"
     zfs send --verbose --replicate --props --large-block --embed "${_source_pool}"@"${_snapshot_name}" \
         | zfs receive -v -u -F -d "${_target_pool_alias}"
