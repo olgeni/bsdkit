@@ -31,7 +31,7 @@ sync-vm:
 	@rsync -av -e "ssh -p 2200" . root@localhost:/root/bsdkit/
 
 logcat:
-	@$(CURDIR)/bsdkit-vbox logcat >/tmp/bsdkit.log
+	@$(CURDIR)/bsdkit-vbox logcat > /tmp/bsdkit.log
 
 shell:
 	@$(CURDIR)/bsdkit-vbox shell

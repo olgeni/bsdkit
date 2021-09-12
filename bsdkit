@@ -1974,7 +1974,7 @@ if [ -e "${IMG_PART}" ]; then
 else
     for _device in cd0 cd1 acd0 acd1; do
         if [ -e "/dev/${_device}" ]; then
-            if mount -t cd9660 "/dev/${_device}" "${CDROM_MP}" >/dev/null 2>&1; then
+            if mount -t cd9660 "/dev/${_device}" "${CDROM_MP}" > /dev/null 2>&1; then
                 break
             fi
         fi
@@ -2000,19 +2000,19 @@ fi
 
 kenv init_shell="/bin/sh"
 
-if kenv bsdkit_ifconfig >/dev/null 2>&1; then
+if kenv bsdkit_ifconfig > /dev/null 2>&1; then
     bsdkit_ifconfig=$(kenv bsdkit_ifconfig)
     # shellcheck disable=SC2046
     set $(ifconfig -l ether)
     _interface=$1
     if [ -n "${_interface}" ]; then
-        echo "ifconfig_${_interface}=\"${bsdkit_ifconfig}\"" >>/baseroot/etc/rc.conf
+        echo "ifconfig_${_interface}=\"${bsdkit_ifconfig}\"" >> /baseroot/etc/rc.conf
     fi
 fi
 
-if kenv bsdkit_defaultrouter >/dev/null 2>&1; then
+if kenv bsdkit_defaultrouter > /dev/null 2>&1; then
     bsdkit_defaultrouter=$(kenv bsdkit_defaultrouter)
-    echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >>/baseroot/etc/rc.conf
+    echo "defaultrouter=\"${bsdkit_defaultrouter}\"" >> /baseroot/etc/rc.conf
 fi
 
 trap '' EXIT

@@ -118,11 +118,11 @@ autoload -Uz compinit && compinit -C -d ~/.zcompdump
 
 autoload -Uz bashcompinit && bashcompinit
 
-if which direnv >/dev/null 2>&1; then
+if which direnv > /dev/null 2>&1; then
     source <(direnv hook zsh)
 fi
 
-if which vim >/dev/null 2>&1; then
+if which vim > /dev/null 2>&1; then
     export ALTERNATE_EDITOR=vim
     export EDITOR=vim
     export VISUAL=vim
@@ -132,11 +132,11 @@ if [ -d /var/service ]; then
     export SVDIR=/var/service
 fi
 
-if which interactive-rebase-tool >/dev/null 2>&1; then
+if which interactive-rebase-tool > /dev/null 2>&1; then
     export GIT_SEQUENCE_EDITOR=interactive-rebase-tool
 fi
 
-if which diff-so-fancy >/dev/null 2>&1; then
+if which diff-so-fancy > /dev/null 2>&1; then
     export GIT_PAGER="diff-so-fancy | less -R"
 fi
 
