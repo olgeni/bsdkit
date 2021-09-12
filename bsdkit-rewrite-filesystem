@@ -9,6 +9,48 @@ error() {
     exit 1
 }
 
+filter_properties() {
+    awk '
+BEGIN {
+  read_only["available"] = 1;
+  read_only["casesensitivity"] = 1;
+  read_only["compressratio"] = 1;
+  read_only["createtxg"] = 1;
+  read_only["creation"] = 1;
+  read_only["encryption"] = 1;
+  read_only["filesystem_count"] = 1;
+  read_only["guid"] = 1;
+  read_only["keyformat"] = 1;
+  read_only["keylocation"] = 1;
+  read_only["logicalreferenced"] = 1;
+  read_only["logicalused"] = 1;
+  read_only["mlslabel"] = 1;
+  read_only["mounted"] = 1;
+  read_only["normalization"] = 1;
+  read_only["objsetid"] = 1;
+  read_only["pbkdf2iters"] = 1;
+  read_only["refcompressratio"] = 1;
+  read_only["referenced"] = 1;
+  read_only["snapshot_count"] = 1;
+  read_only["type"] = 1;
+  read_only["used"] = 1;
+  read_only["usedbychildren"] = 1;
+  read_only["usedbydataset"] = 1;
+  read_only["usedbyrefreservation"] = 1;
+  read_only["usedbysnapshots"] = 1;
+  read_only["utf8only"] = 1;
+  read_only["version"] = 1;
+  read_only["written"] = 1;
+}
+
+{
+  if (!read_only[$2]) {
+    print;
+  }
+}
+'
+}
+
 rewrite_filesystem() {
     local _option
 
@@ -44,7 +86,9 @@ rewrite_filesystem() {
 
     for _filesystem in $(zfs list -H -o name -t filesystem -r "${_source_filesystem}"); do
         # BD584E0F-28D6-4409-956D-F9B1468C2DD9
-        zfs get -H -o property all "${_filesystem}" \
+        zfs get -H all "${_filesystem}" \
+            | filter_properties \
+            | cut -s -f 2 \
             | sort \
             | uniq \
             | xargs -n1 -J % echo zfs inherit -S % "${_filesystem}" \
@@ -53,20 +97,22 @@ rewrite_filesystem() {
 
     # 8E95F488-BE4B-48F6-9FEE-C58CBBFD25BC
     zfs get -s received -H -r all "${_source_filesystem}" \
+        | filter_properties \
         | awk '
 $2 != "mountpoint" {
-    print "zfs set " $2 "=" $3 " " $1;
- }
+  print "zfs set " $2 "=" $3 " " $1;
+}
 
 $2 == "mountpoint" {
-    gsub("/altroot", "", $3);
+  gsub("/altroot", "", $3);
 
-    if ($3 == "") {
-        $3 = "/";
-    }
+  if ($3 == "") {
+    $3 = "/";
+  }
 
-    print "zfs set " $2 "=" $3 " " $1
-}' | sh -x
+  print "zfs set " $2 "=" $3 " " $1
+}
+' | sh -x
 }
 
 rewrite_filesystem "$@"
