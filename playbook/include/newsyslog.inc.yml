@@ -6,17 +6,20 @@
     group: wheel
     mode: "0755"
 
-- name: "Remove obsolete newsyslog.conf"
+- name: "Remove obsolete newsyslogs file (newsyslog.conf)"
   file:
-    path: /etc/newsyslog.conf.d/newsyslog.conf
+    path: "{{ item }}"
     state: absent
+  loop:
+    - /etc/newsyslog.conf.d/newsyslog.conf
+    - /usr/local/etc/newsyslog.conf.d/bsdkit.conf
 
 - name: "Install newsyslog files"
   copy:
-    src: ../ansible/newsyslog.conf.d/{{ item }}
-    dest: /usr/local/etc/newsyslog.conf.d/bsdkit.conf
+    src: "{{ item }}"
+    dest: /usr/local/etc/newsyslog.conf.d/
     owner: root
     group: wheel
     mode: "0644"
-  loop:
-    - bsdkit.conf
+  with_fileglob:
+    - ../ansible/newsyslog.conf.d/*.conf

@@ -8,13 +8,13 @@
 
 - name: "Install syslog.d files"
   copy:
-    src: ../ansible/syslog.d/{{ item }}
-    dest: /usr/local/etc/syslog.d/{{ item }}
+    src: "{{ item }}"
+    dest: /usr/local/etc/syslog.d/
     owner: root
     group: wheel
     mode: "0644"
-  with_items:
-    - console.conf
+  with_fileglob:
+    - ../ansible/syslog.d/*.conf
 
 - name: "Touch log files"
   file:
