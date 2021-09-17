@@ -25,6 +25,7 @@ restart-vm:
 	@$(CURDIR)/bsdkit-vbox start
 
 destroy-vm:
+	@$(CURDIR)/bsdkit-vbox poweroff || :
 	@$(CURDIR)/bsdkit-vbox destroy || :
 
 sync-vm:
