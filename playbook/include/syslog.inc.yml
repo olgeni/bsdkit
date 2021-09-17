@@ -1,3 +1,30 @@
+- name: "Create /usr/local/etc/syslog.d/"
+  file:
+    path: /usr/local/etc/syslog.d/
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: "Install syslog.d files"
+  copy:
+    src: ../ansible/syslog.d/{{ item }}
+    dest: /usr/local/etc/syslog.d/{{ item }}
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items:
+    - console.conf
+
+- name: "Touch log files"
+  file:
+    path: "/var/log/{{ item }}"
+    state: touch
+    mode: "0600"
+  changed_when: no
+  loop:
+    - console.log
+
 - name: "Disable '/dev/console' target in /etc/syslog.conf"
   replace:
     path: /etc/syslog.conf
