@@ -1,5 +1,5 @@
-- name: "Disable '/dev/console' in /etc/syslog.conf"
-  lineinfile:
-    dest: /etc/syslog.conf
-    regexp: "/dev/console$"
-    state: absent
+- name: "Disable '/dev/console' target in /etc/syslog.conf"
+  replace:
+    path: /etc/syslog.conf
+    regexp: '(.*/dev/console$)'
+    replace: '#\1'
