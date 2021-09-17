@@ -11,10 +11,12 @@
     path: /etc/newsyslog.conf.d/newsyslog.conf
     state: absent
 
-- name: "Install newsyslog (bsdkit.conf)"
+- name: "Install newsyslog files"
   copy:
-    src: ../ansible/newsyslog-bsdkit.conf
+    src: ../ansible/newsyslog.conf.d/{{ item }}
     dest: /usr/local/etc/newsyslog.conf.d/bsdkit.conf
     owner: root
     group: wheel
     mode: "0644"
+  loop:
+    - bsdkit.conf
