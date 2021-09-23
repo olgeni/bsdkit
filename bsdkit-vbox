@@ -149,6 +149,7 @@ perform_logtail() {
     rm -f ${_key}
 }
 
+OPTIND=1
 while getopts "i:p:e" OPT; do
     case ${OPT} in
         i)

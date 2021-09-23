@@ -49,6 +49,7 @@ _build_staging=""
 _build_iso=""
 _build_usb=""
 
+OPTIND=1
 while getopts "v:a:j:PRSIUA" OPT; do
     case ${OPT} in
         v)

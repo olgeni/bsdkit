@@ -156,6 +156,7 @@ parse_url() {
 parse_options() {
     local _option
 
+    OPTIND=1
     while getopts "r:v:a:p:z:" _option; do
         case ${_option} in
             r)
@@ -1496,6 +1497,7 @@ build_md_root_device() {
     local _reboot
     local _option
 
+    OPTIND=1
     while getopts "r" _option; do
         case ${_option} in
             r)
@@ -2230,6 +2232,7 @@ remote_deploy() {
     local _remote_port="22"
     local _option
 
+    OPTIND=1
     while getopts "h:p:" _option; do
         case ${_option} in
             h)

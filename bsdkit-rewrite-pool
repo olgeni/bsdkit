@@ -61,6 +61,7 @@ rewrite_pool() {
 
     _target_pool=""
 
+    OPTIND=1
     while getopts "p:n:s:t:" _option; do
         case "${_option}" in
             p)

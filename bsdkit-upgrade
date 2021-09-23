@@ -119,6 +119,7 @@ if mount | cut -w -f 3 | fgrep -q "/proc"; then
     _proc_mounted=yes
 fi
 
+OPTIND=1
 while getopts "eEn:r:v:a:d:FP" OPT; do
     case ${OPT} in
         e)

@@ -56,6 +56,7 @@ rewrite_filesystem() {
 
     local _source_filesystem
 
+    OPTIND=1
     while getopts "s:" _option; do
         case "${_option}" in
             s)
