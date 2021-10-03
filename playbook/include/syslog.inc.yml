@@ -6,6 +6,13 @@
     group: wheel
     mode: "0755"
 
+- name: "Remove obsolete syslog files"
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/etc/syslog.d/console.conf
+
 - name: "Install syslog.d files"
   copy:
     src: "{{ item }}"

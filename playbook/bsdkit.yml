@@ -171,6 +171,9 @@
       include: include/spiped.inc.yml
 
     - name: "Include newsyslog.inc.yml"
+      tags:
+        - configure
+        - include-newsyslog
       include: include/newsyslog.inc.yml
 
     - name: "Include ssh.inc.yml"
@@ -183,6 +186,9 @@
       include: include/crontab.inc.yml
 
     - name: "Include syslog.inc.yml"
+      tags:
+        - configure
+        - include-syslog
       include: include/syslog.inc.yml
 
     - name: "Include ftp.inc.yml"

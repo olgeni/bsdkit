@@ -12,7 +12,10 @@
     state: absent
   loop:
     - /etc/newsyslog.conf.d/newsyslog.conf
+    - /usr/local/etc/newsyslog.conf.d/apache.conf
     - /usr/local/etc/newsyslog.conf.d/bsdkit.conf
+    - /usr/local/etc/newsyslog.conf.d/varnish.conf
+    - /usr/local/etc/newsyslog.conf.d/webmin.conf
 
 - name: "Install newsyslog files"
   copy:
