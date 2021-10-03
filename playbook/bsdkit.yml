@@ -57,6 +57,9 @@
       when: platform_is_digitalocean | bool
 
     - name: "Include runit.inc.yml"
+      tags:
+        - configure
+        - include-runit
       include: include/runit.inc.yml
 
     - name: "Install configuration files in /etc"
@@ -168,6 +171,9 @@
       include: include/vagrant.inc.yml
 
     - name: "Include spiped.inc.yml"
+      tags:
+        - configure
+        - include-spiped
       include: include/spiped.inc.yml
 
     - name: "Include newsyslog.inc.yml"
@@ -177,9 +183,15 @@
       include: include/newsyslog.inc.yml
 
     - name: "Include ssh.inc.yml"
+      tags:
+        - configure
+        - include-ssh
       include: include/ssh.inc.yml
 
     - name: "Include zoneinfo.inc.yml"
+      tags:
+        - configure
+        - include-zoneinfo
       include: include/zoneinfo.inc.yml
 
     - name: "Include crontab.inc.yml"
@@ -192,6 +204,9 @@
       include: include/syslog.inc.yml
 
     - name: "Include ftp.inc.yml"
+      tags:
+        - configure
+        - include-ftp
       include: include/ftp.inc.yml
 
     - name: "Include postgres.inc.yml"
