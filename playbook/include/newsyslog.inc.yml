@@ -6,7 +6,7 @@
     group: wheel
     mode: "0755"
 
-- name: "Remove obsolete newsyslogs file (newsyslog.conf)"
+- name: "Remove obsolete newsyslog files (newsyslog.conf)"
   file:
     path: "{{ item }}"
     state: absent
