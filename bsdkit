@@ -82,6 +82,12 @@ is_efi() {
     [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
 
+check_freebsd() {
+    if [ $(uname) != "FreeBSD" ]; then
+        error "only works on FreeBSD."
+    fi
+}
+
 check_ansible() {
     if ! command -v ansible-playbook > /dev/null 2>&1; then
         error "required command missing (ansible-playbook)"
