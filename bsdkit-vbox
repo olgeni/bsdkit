@@ -116,7 +116,7 @@ perform_destroy() {
 
         VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
 
-        for _i in $(seq 0 2); do
+        for _i in $(seq 0 3); do
             rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
         done
 
