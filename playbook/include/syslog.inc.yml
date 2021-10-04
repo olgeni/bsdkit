@@ -37,6 +37,6 @@
 - name: "Disable '/dev/console' target in /etc/syslog.conf"
   replace:
     path: /etc/syslog.conf
-    regexp: '(.*/dev/console$)'
+    regexp: '([^#].*/dev/console$)'
     replace: '#\1'
   notify: restart_syslogd
