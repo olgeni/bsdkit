@@ -12,6 +12,7 @@
     state: absent
   loop:
     - /usr/local/etc/syslog.d/console.conf
+  notify: restart_syslogd
 
 - name: "Install syslog.d files"
   copy:
@@ -22,6 +23,7 @@
     mode: "0644"
   with_fileglob:
     - ../ansible/syslog.d/*.conf
+  notify: restart_syslogd
 
 - name: "Touch log files"
   file:
@@ -37,3 +39,4 @@
     path: /etc/syslog.conf
     regexp: '(.*/dev/console$)'
     replace: '#\1'
+  notify: restart_syslogd

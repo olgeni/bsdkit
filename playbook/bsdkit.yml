@@ -272,3 +272,8 @@
     - name: pwd_mkdb
       command:
         cmd: pwd_mkdb -p /etc/master.passwd
+
+    - name: restart_syslogd
+      service:
+        name: syslogd
+        state: restarted
