@@ -2391,6 +2391,10 @@ EOF
     rm -r ${_ansible_root}
 }
 
+configure() {
+    ansible_local_playbook -t configure
+}
+
 osrelease() {
     local _destdir=$1
     ${_destdir}/bin/freebsd-version -u
