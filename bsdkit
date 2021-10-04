@@ -41,6 +41,20 @@ autoload throw catch
 : ${BSDKIT_PKGSET:="nox11"}
 : ${BSDKIT_SSH_PUBLIC_KEY:=""}
 
+: ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
+: ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
+
+# FREEBSD_REL_URL: initialized by parse_options
+# FREEBSD_PKG_URL: initialized by parse_options
+
+: ${PARSE_OPTIONS_SHIFT:=0}
+
+ZPOOL_CREATE_CMD=(zpool create)
+ZFS_CREATE_CMD=(zfs create)
+
+BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
+BSDKIT_SCRIPT=$(realpath $0)
+
 if command -v pv > /dev/null 2>&1; then
     CAT_CMD=(pv -i ${BSDKIT_PV_UPDATE_DELAY})
 else
@@ -133,20 +147,6 @@ environment() {
         BSDKIT_PKGSET=\"${BSDKIT_PKGSET}\" \
         BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\"
 }
-
-: ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
-: ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
-
-# FREEBSD_REL_URL: initialized by parse_options
-# FREEBSD_PKG_URL: initialized by parse_options
-
-: ${PARSE_OPTIONS_SHIFT:=0}
-
-ZPOOL_CREATE_CMD=(zpool create)
-ZFS_CREATE_CMD=(zfs create)
-
-BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
-BSDKIT_SCRIPT=$(realpath $0)
 
 parse_url() {
     local _url=$1
