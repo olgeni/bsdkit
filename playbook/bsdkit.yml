@@ -234,6 +234,7 @@
           - shells/bash
           - shells/zsh
           - sysutils/checkrestart
+          - sysutils/clone
           - sysutils/cpdup
           - sysutils/direnv
           - sysutils/htop
