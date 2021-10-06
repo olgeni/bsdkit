@@ -51,6 +51,7 @@ autoload throw catch
 
 ZPOOL_CREATE_CMD=(zpool create)
 ZFS_CREATE_CMD=(zfs create)
+ZFS_CMD=(zfs)
 
 BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
@@ -665,6 +666,10 @@ zfs_create_pool() {
             ${BSDKIT_ZFS_POOL}/swap
     fi
 
+    if [ $(uname -K) > 1300000 ]; then
+        ${ZFS_CMD} set xattr=sa ${BSDKIT_ZFS_POOL}
+    fi
+
     return 0
 }
 
@@ -741,6 +746,10 @@ zfs_create_gpt_pool() {
             error "unsupported number of devices in pool (zfs_create_gpt_pool)."
             ;;
     esac
+
+    if [ $(uname -K) > 1300000 ]; then
+        ${ZFS_CMD} set xattr=sa ${BSDKIT_ZFS_POOL}
+    fi
 
     return 0
 }
