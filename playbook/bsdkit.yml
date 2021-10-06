@@ -229,6 +229,7 @@
           - net/rsync
           - net/socat
           - security/ca_root_nss
+          - security/doas
           - security/gnupg
           - shells/bash
           - shells/zsh
