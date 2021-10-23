@@ -1765,7 +1765,6 @@ install_setup_runtime() {
         security/openvpn
         sysutils/clone
         sysutils/cpdup
-        sysutils/dar
         sysutils/ddrescue
         sysutils/fusefs-exfat
         sysutils/fusefs-ext2
