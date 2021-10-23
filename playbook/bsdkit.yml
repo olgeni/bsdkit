@@ -220,6 +220,7 @@
         name:
           - archivers/zip
           - devel/git
+          - editors/bvi
           - editors/vim
           - ftp/curl
           - ftp/lftp
