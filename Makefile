@@ -18,7 +18,6 @@ rebuild-vm:
 	@$(CURDIR)/bsdkit-vbox poweroff || :
 	@$(CURDIR)/bsdkit-vbox destroy || :
 	@$(CURDIR)/bsdkit-vbox create
-	@sleep 1
 	@$(CURDIR)/bsdkit-vbox start
 
 restart-vm:
