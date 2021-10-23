@@ -114,11 +114,15 @@ perform_destroy() {
     if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
         _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
-        VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
-
         for _i in $(seq 0 3); do
+	    VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
+		       --storagectl "SATA Controller" --port ${_i} --device 0 --type hdd \
+		       --medium none
+	    VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete
             rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
         done
+
+        VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
 
         rm -r -f "${_vm_path}/Logs"
     fi
