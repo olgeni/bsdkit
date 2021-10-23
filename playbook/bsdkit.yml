@@ -243,6 +243,7 @@
           - sysutils/cpdup
           - sysutils/direnv
           - sysutils/htop
+          - sysutils/lsblk
           - sysutils/ncdu
           - sysutils/pv
           - sysutils/renameutils
