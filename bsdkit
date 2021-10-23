@@ -1761,6 +1761,7 @@ install_setup_runtime() {
         ftp/lftp
         misc/gnu-watch
         misc/mc
+        net/croc
         net/rsync
         security/openvpn
         sysutils/clone
