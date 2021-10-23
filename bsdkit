@@ -1751,9 +1751,6 @@ install_setup_runtime() {
         sysutils/ansible
         sysutils/pv
         # optional
-        sysutils/htop
-        sysutils/smenu
-        textproc/fzf
         archivers/zip
         comms/kermit
         devel/cdialog
@@ -1774,6 +1771,9 @@ install_setup_runtime() {
         sysutils/fusefs-exfat
         sysutils/fusefs-ext2
         sysutils/fusefs-ntfs
+        sysutils/htop
+        sysutils/smenu
+        textproc/fzf
         sysutils/hextools
         sysutils/hfsutils
         sysutils/ipmitool
