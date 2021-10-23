@@ -221,6 +221,7 @@
           - archivers/zip
           - devel/git
           - editors/bvi
+          - editors/nano
           - editors/vim
           - ftp/curl
           - ftp/lftp
