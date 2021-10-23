@@ -230,6 +230,7 @@
           - misc/inplace
           - misc/mbuffer
           - misc/mc
+          - net/croc
           - net/rsync
           - net/socat
           - security/ca_root_nss
