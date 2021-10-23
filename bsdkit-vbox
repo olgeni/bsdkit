@@ -51,7 +51,7 @@ perform_create() {
     _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
     for _i in $(seq 0 3); do
-        VBoxManage createhd --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI \
+        VBoxManage createmedium disk --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI \
                    --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
         VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
