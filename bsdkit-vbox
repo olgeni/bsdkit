@@ -65,11 +65,11 @@ perform_create() {
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 ssh,tcp,,${BSDKIT_VBOX_SSH_PORT},,22
 
     VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-        --storagectl "SATA Controller" \
-        --port 3 \
-        --device 0 \
-        --type dvddrive \
-        --medium "${BSDKIT_VBOX_ISO}"
+               --storagectl "SATA Controller" \
+               --port 3 \
+               --device 0 \
+               --type dvddrive \
+               --medium "${BSDKIT_VBOX_ISO}"
 }
 
 perform_start() {
