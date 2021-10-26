@@ -13,3 +13,22 @@
     owner: root
     group: wheel
     mode: "0755"
+
+- name: "Check if /usr/local/etc/sv exists"
+  stat:
+    path: /usr/local/etc/sv
+  register: stat_usr_local_etc_sv
+
+- name: "Migrate /usr/local/etc/sv"
+  shell:
+    cmd: |
+      set -e -u -o pipefail
+
+      for _file in /usr/local/etc/sv/*(N); do
+          sv stop ${_file} || :
+          mv -v ${_file} /var/db/runit/
+      done
+
+      rmdir /usr/local/etc/sv/
+    executable: /usr/local/bin/zsh
+  when: stat_usr_local_etc_sv.stat.isdir is defined and stat_usr_local_etc_sv.stat.isdir
