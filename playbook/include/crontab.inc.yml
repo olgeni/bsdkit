@@ -4,3 +4,4 @@
     line: 'MAILTO=""'
     regexp: "^MAILTO"
     insertbefore: "^SHELL="
+  notify: restart_cron

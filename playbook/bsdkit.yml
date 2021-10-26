@@ -285,3 +285,8 @@
       service:
         name: syslogd
         state: restarted
+
+    - name: restart_cron
+      service:
+        name: cron
+        state: restarted
