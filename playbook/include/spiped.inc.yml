@@ -1,4 +1,4 @@
-- name: "Create /usr/local/etc/spiped/"
+- name: "spiped: create /usr/local/etc/spiped/"
   file:
     path: /usr/local/etc/spiped/
     state: directory

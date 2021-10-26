@@ -1,10 +1,10 @@
-- name: "Install ca_root_nss"
+- name: "ca-root-nss: install ca_root_nss"
   pkgng:
     name:
       - security/ca_root_nss
     state: present
 
-- name: "Create /usr/local/etc/ssl/certs"
+- name: "ca-root-nss: create /usr/local/etc/ssl/certs"
   file:
     path: /usr/local/etc/ssl/certs
     state: directory
@@ -12,17 +12,17 @@
     group: wheel
     mode: "0755"
 
-- name: "Link ca-root-nss.crt (stat: ca-root-nss.crt)"
+- name: "ca-root-nss: link ca-root-nss.crt (stat: ca-root-nss.crt)"
   stat:
     path: /usr/local/share/certs/ca-root-nss.crt
   register: stat_ca_root_nss
 
-- name: "Link ca-root-nss.crt (stat: cert.pem)"
+- name: "ca-root-nss: link ca-root-nss.crt (stat: cert.pem)"
   stat:
     path: /usr/local/etc/ssl/cert.pem
   register: stat_cert_pem
 
-- name: "Link ca-root-nss.crt (exec)"
+- name: "ca-root-nss: link ca-root-nss.crt (exec)"
   file:
     src: /usr/local/share/certs/ca-root-nss.crt
     dest: /usr/local/etc/ssl/cert.pem

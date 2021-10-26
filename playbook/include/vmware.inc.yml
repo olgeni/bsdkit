@@ -1,4 +1,4 @@
-- name: "VMware configuration"
+- name: "vmware: configuration"
   lineinfile:
     dest: /etc/rc.conf
     line: '{{ item }}_enable="YES"'

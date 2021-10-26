@@ -1,11 +1,11 @@
-- name: "Add PostgreSQL group"
+- name: "postgres: add PostgreSQL group"
   lineinfile:
     dest: /etc/group
     line: "postgres:*:770:"
     regexp: "^postgres:"
   notify: pwd_mkdb
 
-- name: "Add PostgreSQL user"
+- name: "postgres: add PostgreSQL user"
   lineinfile:
     dest: /etc/master.passwd
     line: "postgres:*:770:770::0:0:PostgreSQL Daemon:/var/db/postgres:/bin/sh"
@@ -13,10 +13,10 @@
   notify: pwd_mkdb
 
 # Workaround for "pw: user '...' disappeared during update"
-- name: "Flush handlers"
+- name: "postgres: flush handlers"
   meta: flush_handlers
 
-- name: "Create home directory for PostgreSQL"
+- name: "postgres: create home directory for PostgreSQL"
   file:
     path: "{{ item }}"
     state: directory
@@ -27,7 +27,7 @@
     - /var/db/postgres
     - /var/db/postgres/.ssh
 
-- name: "Create ssh identity for PostgreSQL"
+- name: "postgres: create ssh identity for PostgreSQL"
   openssh_keypair:
     path: /var/db/postgres/.ssh/id_ed25519
     comment: "postgres@{{ ansible_hostname }}"

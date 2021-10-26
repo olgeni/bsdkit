@@ -1,4 +1,4 @@
-- name: "Configure loader_conf_files"
+- name: "loader: configure loader_conf_files"
   lineinfile:
     dest: /boot/loader.conf.local
     line: 'loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"'
@@ -7,7 +7,7 @@
     create: yes
     mode: "0644"
 
-- name: "Install loader.conf.vendor"
+- name: "loader: install loader.conf.vendor"
   copy:
     src: ../ansible/{{ item }}
     dest: /boot/{{ item }}

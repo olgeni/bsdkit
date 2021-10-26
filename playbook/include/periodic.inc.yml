@@ -1,4 +1,4 @@
-- name: "Configure periodic.conf"
+- name: "periodic: configure periodic.conf"
   lineinfile:
     dest: /etc/periodic.conf
     line: "{{ item.key }}=\"{{ item.value }}\""

@@ -1,11 +1,11 @@
-- name: "Configure login.conf (check for lang=en_US.UTF-8)"
+- name: "login-conf: configure login.conf (check for lang=en_US.UTF-8)"
   command:
     cmd: grep -Fq ':lang=en_US.UTF-8:' /etc/login.conf
   register: login_conf_lang
   changed_when: no
   failed_when: no
 
-- name: "Configure login.conf (lang=en_US.UTF-8)"
+- name: "login-conf: configure login.conf (lang=en_US.UTF-8)"
   lineinfile:
     dest: /etc/login.conf
     line: "\t:lang=en_US.UTF-8:\\"
@@ -14,7 +14,7 @@
   when: login_conf_lang.rc != 0
   notify: cap_mkdb
 
-- name: "Configure login.conf (charset=UTF-8)"
+- name: "login-conf: configure login.conf (charset=UTF-8)"
   lineinfile:
     dest: /etc/login.conf
     line: "\t:charset=UTF-8:\\"
@@ -23,5 +23,5 @@
   when: login_conf_lang.rc != 0
   notify: cap_mkdb
 
-- name: "Flush handlers"
+- name: "login-conf: flush handlers"
   meta: flush_handlers

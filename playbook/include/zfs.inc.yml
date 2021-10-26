@@ -1,19 +1,19 @@
-- name: "Block: ZFS (misc)"
+- name: "zfs: block"
   when: zfs_enabled | bool
   block:
-    - name: "Create ZFS dataset for /var/db"
+    - name: "zfs: create ZFS dataset for /var/db"
       zfs:
         name: "{{ boot_pool }}/var/db"
         state: present
         extra_zfs_properties:
           canmount: off
 
-    - name: "Create ZFS dataset for /jails"
+    - name: "zfs: create ZFS dataset for /jails"
       zfs:
         name: "{{ boot_pool }}/jails"
         state: present
 
-    - name: "Create ZFS dataset for /usr/local"
+    - name: "zfs: create ZFS dataset for /usr/local"
       zfs:
         name: "{{ boot_pool }}/usr/local"
         state: present

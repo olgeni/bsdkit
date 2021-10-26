@@ -1,4 +1,4 @@
-- name: "Install dotfiles in /usr/share/skel"
+- name: "dotfiles: install dotfiles in /usr/share/skel"
   copy:
     src: ../ansible/dot.{{ item }}
     dest: /usr/share/skel/dot.{{ item }}
@@ -12,7 +12,7 @@
     - vimrc
     - zshrc
 
-- name: "Install dotfiles in /root"
+- name: "dotfiles: install dotfiles in /root"
   copy:
     src: ../ansible/dot.{{ item }}
     dest: /root/.{{ item }}

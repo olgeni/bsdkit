@@ -1,20 +1,20 @@
-- name: "Block: ZFS (PostgreSQL)"
+- name: "postgres-zfs: block ZFS"
   when: zfs_enabled | bool
   block:
-    - name: "Check contents of PostgreSQL home directory"
+    - name: "postgres-zfs: check contents of PostgreSQL home directory"
       find:
         paths: "/var/db/postgres"
         recurse: yes
         hidden: yes
       register: find_var_db_postgres
 
-    - name: "Gather facts about PostgreSQL ZFS dataset"
+    - name: "postgres-zfs: gather facts about PostgreSQL ZFS dataset"
       zfs_facts:
         dataset: "{{ boot_pool }}/var/db/postgres"
       ignore_errors: yes
       register: var_db_postgres_zfs_facts
 
-    - name: "Create ZFS dataset for PostgreSQL"
+    - name: "postgres-zfs: create ZFS dataset for PostgreSQL"
       zfs:
         name: "{{ boot_pool }}/var/db/postgres"
         state: present

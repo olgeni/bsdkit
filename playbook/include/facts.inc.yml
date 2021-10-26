@@ -1,26 +1,26 @@
-- name: "kenv smbios.system.product"
+- name: "facts: kenv smbios.system.product"
   command:
     cmd: kenv smbios.system.product
   changed_when: no
   ignore_errors: yes
   register: kenv_smbios_system_product
 
-- name: "debug: kenv_smbios_system_product"
+- name: "facts: debug kenv_smbios_system_product"
   debug:
     var: kenv_smbios_system_product
 
-- name: "kenv smbios.bios.vendor"
+- name: "facts: kenv smbios.bios.vendor"
   command:
     cmd: kenv smbios.bios.vendor
   changed_when: no
   ignore_errors: yes
   register: kenv_smbios_bios_vendor
 
-- name: "debug: kenv_smbios_bios_vendor"
+- name: "facts: debug kenv_smbios_bios_vendor"
   debug:
     var: kenv_smbios_bios_vendor
 
-- name: "Retrieve freebsd_major"
+- name: "facts: retrieve freebsd_major"
   shell:
     cmd: |
       set -o pipefail
@@ -28,11 +28,11 @@
   register: freebsd_major
   changed_when: no
 
-- name: "debug: freebsd_major"
+- name: "facts: debug freebsd_major"
   debug:
     var: freebsd_major
 
-- name: "Check sysctl: security.jail.jailed"
+- name: "facts: check sysctl: security.jail.jailed"
   shell:
     cmd: |
       set -o pipefail
@@ -42,11 +42,11 @@
   ignore_errors: yes
   register: sysctl_security_jail_jailed
 
-- name: "debug: sysctl_security_jail_jailed"
+- name: "facts: debug sysctl_security_jail_jailed"
   debug:
     var: sysctl_security_jail_jailed
 
-- name: "set_fact: bsdkit defaults"
+- name: "facts: set_fact bsdkit defaults"
   set_fact:
     default_bsdkit_root_url: "https://hub.olgeni.com/FreeBSD"
     default_bsdkit_version: "12.2"
@@ -54,7 +54,7 @@
     default_bsdkit_tree: "default"
     default_bsdkit_pkgset: "nox11"
 
-- name: "set_fact: bsdkit variables"
+- name: "facts: set_fact bsdkit variables"
   set_fact:
     bsdkit_interface: "{{ lookup('env', 'BSDKIT_INTERFACE') }}"
     bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
@@ -68,51 +68,51 @@
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
     is_host_install: "{{ sysctl_security_jail_jailed is failed }}"
 
-- name: "debug: bsdkit_interface"
+- name: "facts: debug bsdkit_interface"
   debug:
     var: bsdkit_interface
 
-- name: "debug: bsdkit_ifconfig"
+- name: "facts: debug bsdkit_ifconfig"
   debug:
     var: bsdkit_ifconfig
 
-- name: "debug: bsdkit_defaultrouter"
+- name: "facts: debug bsdkit_defaultrouter"
   debug:
     var: bsdkit_defaultrouter
 
-- name: "debug: bsdkit_ssh_public_key"
+- name: "facts: debug bsdkit_ssh_public_key"
   debug:
     var: bsdkit_ssh_public_key
 
-- name: "debug: bsdkit_jail_proxy"
+- name: "facts: debug bsdkit_jail_proxy"
   debug:
     var: bsdkit_jail_proxy
 
-- name: "debug: bsdkit_root_url"
+- name: "facts: debug bsdkit_root_url"
   debug:
     var: bsdkit_root_url
 
-- name: "debug: bsdkit_version"
+- name: "facts: debug bsdkit_version"
   debug:
     var: bsdkit_version
 
-- name: "debug: bsdkit_arch"
+- name: "facts: debug bsdkit_arch"
   debug:
     var: bsdkit_arch
 
-- name: "debug: bsdkit_tree"
+- name: "facts: debug bsdkit_tree"
   debug:
     var: bsdkit_tree
 
-- name: "debug: bsdkit_pkgset"
+- name: "facts: debug bsdkit_pkgset"
   debug:
     var: bsdkit_pkgset
 
-- name: "debug: is_host_install"
+- name: "facts: debug is_host_install"
   debug:
     var: is_host_install
 
-- name: "Check ZFS boot pool"
+- name: "facts: check ZFS boot pool"
   shell:
     cmd: |
       set -o pipefail
@@ -121,39 +121,39 @@
   changed_when: no
   ignore_errors: yes
 
-- name: "debug: zpool_get_bootfs"
+- name: "facts: debug zpool_get_bootfs"
   debug:
     var: zpool_get_bootfs
 
-- name: "set_fact: zfs_enabled"
+- name: "facts: set_fact zfs_enabled"
   set_fact:
     zfs_enabled: "{{ ((zpool_get_bootfs is succeeded) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
 
-- name: "debug: zfs_enabled"
+- name: "facts: debug zfs_enabled"
   debug:
     var: zfs_enabled
 
-- name: "set_fact: boot_pool"
+- name: "facts: set_fact boot_pool"
   set_fact:
     boot_pool: "{{ zpool_get_bootfs.stdout }}"
     when: zfs_enabled | bool
 
-- name: "debug: boot_pool"
+- name: "facts: debug boot_pool"
   debug:
     var: boot_pool
 
-- name: "set_fact: platform_is_digitalocean"
+- name: "facts: set_fact platform_is_digitalocean"
   set_fact:
     platform_is_digitalocean: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
-- name: "debug: platform_is_digitalocean"
+- name: "facts: debug platform_is_digitalocean"
   debug:
     var: platform_is_digitalocean
 
-- name: "set_fact: platform_is_virtualbox"
+- name: "facts: set_fact platform_is_virtualbox"
   set_fact:
     platform_is_virtualbox: "{{ kenv_smbios_system_product.stdout == 'VirtualBox' }}"
 
-- name: "set_fact: platform_is_vmware"
+- name: "facts: set_fact platform_is_vmware"
   set_fact:
     platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"

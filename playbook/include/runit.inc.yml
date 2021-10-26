@@ -1,4 +1,4 @@
-- name: "Create /var/service"
+- name: "runit: create /var/service"
   file:
     path: /var/service
     state: directory
@@ -6,7 +6,7 @@
     group: wheel
     mode: "0755"
 
-- name: "Create /var/db/runit"
+- name: "runit: create /var/db/runit"
   file:
     path: /var/db/runit
     state: directory
@@ -14,12 +14,12 @@
     group: wheel
     mode: "0755"
 
-- name: "Check if /usr/local/etc/sv exists"
+- name: "runit: check if /usr/local/etc/sv exists"
   stat:
     path: /usr/local/etc/sv
   register: stat_usr_local_etc_sv
 
-- name: "Migrate /usr/local/etc/sv"
+- name: "runit: migrate /usr/local/etc/sv"
   shell:
     cmd: |
       set -e -u -o pipefail
