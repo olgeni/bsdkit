@@ -1,11 +1,3 @@
-- name: "Create /usr/local/etc/sv"
-  file:
-    path: /usr/local/etc/sv
-    state: directory
-    owner: root
-    group: wheel
-    mode: "0755"
-
 - name: "Create /var/service"
   file:
     path: /var/service
