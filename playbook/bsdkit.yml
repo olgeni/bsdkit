@@ -64,6 +64,9 @@
       include: include/pkg.inc.yml
 
     - name: "Include kernconf.inc.yml"
+      tags:
+        - configure
+        - include-kernconf
       include: include/kernconf.inc.yml
 
     - name: "Digital Ocean"
