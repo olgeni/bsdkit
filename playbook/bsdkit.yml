@@ -42,6 +42,8 @@
       include: include/remove.inc.yml
 
     - name: "Create /usr/local/etc"
+      tags:
+        - configure
       file:
         path: /usr/local/etc
         state: directory
@@ -70,6 +72,8 @@
       include: include/runit.inc.yml
 
     - name: "Install configuration files in /etc"
+      tags:
+        - configure
       copy:
         src: ../ansible/{{ item }}
         dest: /etc/{{ item }}
@@ -223,6 +227,8 @@
       include: include/mysql.inc.yml
 
     - name: "Install base packages (common)"
+      tags:
+        - configure
       pkgng:
         name:
           - archivers/zip
