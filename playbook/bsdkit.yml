@@ -95,6 +95,9 @@
         - src.conf
 
     - name: "Include periodic.inc.yml"
+      tags:
+        - configure
+        - include-periodic
       include: include/periodic.inc.yml
 
     - name: "Block: host"
