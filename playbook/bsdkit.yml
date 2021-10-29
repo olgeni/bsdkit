@@ -218,6 +218,9 @@
       include: include/zoneinfo.inc.yml
 
     - name: "Include crontab.inc.yml"
+      tags:
+        - configure
+        - include-crontab
       include: include/crontab.inc.yml
 
     - name: "Include syslog.inc.yml"
