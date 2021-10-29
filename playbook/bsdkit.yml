@@ -18,6 +18,13 @@
       tags: always
       include: include/facts.inc.yml
 
+    - name: "Set root shell"
+      tags:
+        - configure
+      user:
+        name: root
+        shell: /bin/sh
+
     - name: "Touch files"
       file:
         path: "{{ item }}"
