@@ -272,6 +272,7 @@
           - security/gnupg
           - shells/bash
           - shells/zsh
+          - sysutils/ansible
           - sysutils/checkrestart
           - sysutils/clone
           - sysutils/cpdup
