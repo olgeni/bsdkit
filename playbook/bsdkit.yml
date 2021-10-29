@@ -58,6 +58,9 @@
     #   include: include/login-conf.inc.yml
 
     - name: "Include pkg.inc.yml"
+      tags:
+        - configure
+        - include-pkg
       include: include/pkg.inc.yml
 
     - name: "Include kernconf.inc.yml"
