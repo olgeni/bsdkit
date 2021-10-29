@@ -39,6 +39,9 @@
         - /etc/sysctl.conf.local
 
     - name: "Include remove.inc.yml"
+      tags:
+        - configure
+        - include-remove
       include: include/remove.inc.yml
 
     - name: "Create /usr/local/etc"
