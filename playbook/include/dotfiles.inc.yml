@@ -9,6 +9,7 @@
     - inputrc
     - kermrc
     - login_conf
+    - shrc
     - vimrc
     - zshrc
 
@@ -23,5 +24,6 @@
     - inputrc
     - kermrc
     - login_conf
+    - shrc
     - vimrc
     - zshrc
