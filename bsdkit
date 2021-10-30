@@ -2409,6 +2409,10 @@ configure() {
     ansible_local_playbook -t configure
 }
 
+digitalocean() {
+    ansible_local_playbook -t digitalocean
+}
+
 osrelease() {
     local _destdir=$1
     ${_destdir}/bin/freebsd-version -u

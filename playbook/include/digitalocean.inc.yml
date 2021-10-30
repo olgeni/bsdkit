@@ -1,12 +1,26 @@
 - name: "digitalocean: gather metadata (#1)"
-  uri:
-    url: http://169.254.169.254/metadata/v1.json
-    return_content: yes
+  shell:
+    cmd: |
+      set -e -u -o pipefail
+
+      for _device in $(sysctl -n kern.disks); do
+          if [ "$(fstyp /dev/${_device} 2> /dev/null)" = "cd9660" ]; then
+              mount -t cd9660 /dev/${_device} /mnt
+              if [ -f /mnt/digitalocean_meta_data.json ]; then
+                  cat /mnt/digitalocean_meta_data.json
+                  umount /mnt
+                  exit 0
+              else
+                  umount /mnt
+              fi
+          fi
+      done
+      exit 1
   register: metadata_payload
 
 - name: "digitalocean: gather metadata (#2)"
   set_fact:
-    metadata: "{{ metadata_payload.content|from_json }}"
+    metadata: "{{ metadata_payload.stdout | from_json }}"
 
 - name: "digitalocean: configure /etc/hosts for Digital Ocean"
   blockinfile:
@@ -18,17 +32,22 @@
       {{ metadata.interfaces.public[0].anchor_ipv4.ip_address }} anchor
       {{ metadata.interfaces.private[0].ipv4.ip_address }} private
 
-- name: "digitalocean: configure sshd_flags for Digital Ocean (public ipv4)"
-  command:
-    cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].ipv4.ip_address }}"
-  changed_when: no
+- name: "digitalocean: rc.conf"
+  shell:
+    cmd: |
+      set -e -u -o pipefail
 
-- name: "digitalocean: configure sshd_flags for Digital Ocean (public anchor_ipv4)"
-  command:
-    cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
-  changed_when: no
+      sysrc ifconfig_vtnet0="inet {{ metadata.interfaces.public[0].ipv4.ip_address }} netmask {{ metadata.interfaces.public[0].ipv4.netmask }}"
+      sysrc ifconfig_vtnet0_alias0="inet {{ metadata.interfaces.public[0].anchor_ipv4.ip_address }} netmask {{ metadata.interfaces.public[0].anchor_ipv4.netmask }}"
+      sysrc ifconfig_vtnet1="inet {{ metadata.interfaces.private[0].ipv4.ip_address }} netmask {{ metadata.interfaces.private[0].ipv4.netmask }}"
+      sysrc defaultrouter="{{ metadata.interfaces.public[0].ipv4.gateway }}"
 
-- name: "digitalocean: configure sshd_flags for Digital Ocean (private ipv4)"
-  command:
-    cmd: sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.private[0].ipv4.ip_address }}"
+      sysrc sshd_flags="$(echo $(sysrc -n sshd_flags | rs 0 1 | grep -v -- -oListenAddress))"
+      sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].ipv4.ip_address }}"
+      sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
+      sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.private[0].ipv4.ip_address }}"
+
+      sysrc hostname="{{ metadata.hostname.split(".")[0] }}"
+
+      service sshd configtest
   changed_when: no
