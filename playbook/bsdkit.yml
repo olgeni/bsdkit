@@ -185,6 +185,9 @@
         state: absent
 
     - name: "Include dotfiles.inc.yml"
+      tags:
+        - configure
+        - include-dotfiles
       include: include/dotfiles.inc.yml
 
     - name: "Include sudo.inc.yml"
