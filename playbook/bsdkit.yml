@@ -188,6 +188,9 @@
       include: include/dotfiles.inc.yml
 
     - name: "Include sudo.inc.yml"
+      tags:
+        - configure
+        - include-sudo
       include: include/sudo.inc.yml
 
     - name: "Include vagrant.inc.yml"
