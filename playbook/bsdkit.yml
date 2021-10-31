@@ -278,6 +278,7 @@
           - sysutils/clone
           - sysutils/cpdup
           - sysutils/direnv
+          - sysutils/fsc
           - sysutils/htop
           - sysutils/lsblk
           - sysutils/ncdu
