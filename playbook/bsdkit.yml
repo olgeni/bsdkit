@@ -270,6 +270,7 @@
           - security/ca_root_nss
           - security/doas
           - security/gnupg
+          - security/sudo
           - shells/bash
           - shells/zsh
           - sysutils/ansible
