@@ -217,6 +217,12 @@
         - include-ssh
       include: include/ssh.inc.yml
 
+    - name: "Include fscd.inc.yml"
+      tags:
+        - configure
+        - include-fscd
+      include: include/fscd.inc.yml
+
     - name: "Include zoneinfo.inc.yml"
       tags:
         - configure
@@ -325,6 +331,11 @@
     - name: restart_cron
       service:
         name: cron
+        state: restarted
+
+    - name: restart_fscd
+      service:
+        name: fscd
         state: restarted
 
     - name: restart_sshd
