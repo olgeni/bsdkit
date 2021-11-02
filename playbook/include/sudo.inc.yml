@@ -1,3 +1,9 @@
+- name: "sudo: install 'sudo' package"
+  pkgng:
+    name:
+      - security/sudo
+    state: present
+
 - name: "sudo: install default sudoers"
   copy:
     src: /usr/local/etc/sudoers.dist
