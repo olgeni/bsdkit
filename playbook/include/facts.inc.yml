@@ -36,8 +36,7 @@
   shell:
     cmd: |
       set -o pipefail
-      echo "sysctl -n security.jail.jailed: $(sysctl -n security.jail.jailed)"
-      [ $(sysctl -n security.jail.jailed) = '1' ]
+      sysctl -n security.jail.jailed
   changed_when: no
   ignore_errors: yes
   register: sysctl_security_jail_jailed
@@ -46,7 +45,11 @@
   debug:
     var: sysctl_security_jail_jailed
 
-- name: "facts: set_fact bsdkit defaults"
+- name: "facts: set_fact (security_jail_jailed)"
+  set_fact:
+    security_jail_jailed: "{{ sysctl_security_jail_jailed.stdout == '0' }}"
+
+- name: "facts: set_fact (bsdkit defaults)"
   set_fact:
     default_bsdkit_root_url: "https://hub.olgeni.com/FreeBSD"
     default_bsdkit_version: "12.2"
@@ -54,7 +57,7 @@
     default_bsdkit_tree: "default"
     default_bsdkit_pkgset: "nox11"
 
-- name: "facts: set_fact bsdkit variables"
+- name: "facts: set_fact (bsdkit variables)"
   set_fact:
     bsdkit_interface: "{{ lookup('env', 'BSDKIT_INTERFACE') }}"
     bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
@@ -66,7 +69,7 @@
     bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
     bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
-    is_host_install: "{{ sysctl_security_jail_jailed is failed }}"
+    is_host_install: "{{ security_jail_jailed }}"
 
 - name: "facts: debug bsdkit_interface"
   debug:
