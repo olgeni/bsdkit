@@ -326,3 +326,8 @@
       service:
         name: cron
         state: restarted
+
+    - name: restart_sshd
+      service:
+        name: sshd
+        state: restarted
