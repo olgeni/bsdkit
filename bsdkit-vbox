@@ -45,8 +45,8 @@ perform_create() {
         VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --firmware efi
     fi
 
-    VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name "SATA Controller" --add sata --hostiocache on
     VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name "IDE Controller" --add ide --hostiocache on
+    VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name "SATA Controller" --add sata --hostiocache on
 
     _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
@@ -70,8 +70,8 @@ perform_create() {
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 ssh,tcp,,${BSDKIT_VBOX_SSH_PORT},,22
 
     VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-               --storagectl "SATA Controller" \
-               --port ${_sata_port} \
+               --storagectl "IDE Controller" \
+               --port 0 \
                --device 0 \
                --type dvddrive \
                --medium "${BSDKIT_VBOX_ISO}"
@@ -93,7 +93,7 @@ perform_stop() {
             sleep 1
         done
 
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 3 --device 0 --medium emptydrive > /dev/null 2>&1; do
+        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive > /dev/null 2>&1; do
             sleep 1
         done
     fi
@@ -109,7 +109,7 @@ perform_poweroff() {
             sleep 1
         done
 
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "SATA Controller" --port 3 --device 0 --medium emptydrive > /dev/null 2>&1; do
+        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive > /dev/null 2>&1; do
             sleep 1
         done
     fi
