@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e -u
+set -e -u -o pipefail
 
 error() {
     echo "$(basename $0): $@"
