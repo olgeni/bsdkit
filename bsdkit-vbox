@@ -50,13 +50,18 @@ perform_create() {
 
     _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
+    local _sata_port
+    _sata_port=0
+
     for _i in $(seq 0 3); do
         VBoxManage createmedium disk --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI \
                    --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
         VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-                   --storagectl "SATA Controller" --port ${_i} --device 0 --type hdd \
+                   --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
                    --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+
+        _sata_port=$((_sata_port + 1))
     done
 
     # VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --nic1 bridged --bridgeadapter1 re0
@@ -66,7 +71,7 @@ perform_create() {
 
     VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
                --storagectl "SATA Controller" \
-               --port 3 \
+               --port ${_sata_port} \
                --device 0 \
                --type dvddrive \
                --medium "${BSDKIT_VBOX_ISO}"
@@ -114,12 +119,17 @@ perform_destroy() {
     if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
         _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
+        local _sata_port
+        _sata_port=0
+
         for _i in $(seq 0 3); do
 	    VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-		       --storagectl "SATA Controller" --port ${_i} --device 0 --type hdd \
+		       --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
 		       --medium none
 	    VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete
             rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+
+            _sata_port=$((_sata_port + 1))
         done
 
         VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
