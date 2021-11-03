@@ -4,7 +4,7 @@
     line: "UseDNS no"
     regexp: "^UseDNS"
     insertafter: EOF
-  notify: restart_sshd
+  # notify: restart_sshd
 
 - name: "ssh: set 'PermitRootLogin without-password' in /etc/ssh/sshd_config"
   lineinfile:
@@ -12,7 +12,7 @@
     line: "PermitRootLogin without-password"
     regexp: "^PermitRootLogin"
     insertafter: EOF
-  notify: restart_sshd
+  # notify: restart_sshd
 
 - name: "ssh: create ssh directory for root"
   file:
