@@ -1,5 +1,5 @@
 #!/bin/sh
 
-set -e -u
+set -e -u -o pipefail
 mkdir -p main
 exec chpst svlogd -ttt ./main

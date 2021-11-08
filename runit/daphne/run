@@ -2,7 +2,7 @@
 
 # 8F1C5926-23B8-4389-AAFE-9FB5AC30EA44
 
-set -e -u
+set -e -u -o pipefail
 
 exec 2>&1
 
