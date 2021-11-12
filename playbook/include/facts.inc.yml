@@ -47,7 +47,11 @@
 
 - name: "facts: set_fact (security_jail_jailed)"
   set_fact:
-    security_jail_jailed: "{{ sysctl_security_jail_jailed.stdout == '0' }}"
+    security_jail_jailed: "{{ sysctl_security_jail_jailed.stdout == '1' }}"
+
+- name: "facts: debug security_jail_jailed"
+  debug:
+    var: security_jail_jailed
 
 - name: "facts: set_fact (bsdkit defaults)"
   set_fact:
@@ -69,7 +73,7 @@
     bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
     bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
-    is_host_install: "{{ security_jail_jailed }}"
+    is_host_install: "{{ not security_jail_jailed }}"
 
 - name: "facts: debug bsdkit_interface"
   debug:
