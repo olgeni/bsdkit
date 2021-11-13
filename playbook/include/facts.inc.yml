@@ -60,6 +60,7 @@
     default_bsdkit_arch: "amd64"
     default_bsdkit_tree: "default"
     default_bsdkit_pkgset: "nox11"
+    default_bsdkit_chroot: False
 
 - name: "facts: set_fact (bsdkit variables)"
   set_fact:
@@ -73,7 +74,7 @@
     bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
     bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
-    is_host_install: "{{ not security_jail_jailed }}"
+    bsdkit_chroot: "{{ (lookup('env', 'BSDKIT_CHROOT') | default(default_bsdkit_chroot, False)) | bool }}"
 
 - name: "facts: debug bsdkit_interface"
   debug:
@@ -115,9 +116,33 @@
   debug:
     var: bsdkit_pkgset
 
+- name: "facts: debug bsdkit_chroot"
+  debug:
+    var: bsdkit_chroot
+
+- name: "facts: set_fact (is_host_install)"
+  set_fact:
+    is_host_install: "{{ not security_jail_jailed }}"
+
 - name: "facts: debug is_host_install"
   debug:
     var: is_host_install
+
+- name: "facts: set_fact (is_jail_install)"
+  set_fact:
+    is_jail_install: "{{ security_jail_jailed }}"
+
+- name: "facts: debug is_jail_install"
+  debug:
+    var: is_jail_install
+
+- name: "facts: set_fact (is_chroot_install)"
+  set_fact:
+    is_chroot_install: "{{ bsdkit_chroot }}"
+
+- name: "facts: debug is_chroot_install"
+  debug:
+    var: is_chroot_install
 
 - name: "facts: check ZFS boot pool"
   shell:

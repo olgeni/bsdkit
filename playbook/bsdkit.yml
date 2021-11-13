@@ -98,10 +98,11 @@
       include: include/periodic.inc.yml
 
     - name: "Block: host"
-      when: is_host_install | bool
+      when: is_host_install
       block:
         - name: "Include zfs.inc.yml"
           include: include/zfs.inc.yml
+          when: not is_chroot_install
 
         - name: "Include loader.inc.yml"
           include: include/loader.inc.yml
@@ -111,9 +112,11 @@
 
         - name: "Include postgres-zfs.inc.yml"
           include: include/postgres-zfs.inc.yml
+          when: not is_chroot_install
 
         - name: "Include mysql-zfs.inc.yml"
           include: include/mysql-zfs.inc.yml
+          when: not is_chroot_install
 
         - name: "Install sysctl.conf"
           copy:
@@ -166,7 +169,7 @@
             state: present
 
     - name: "Block: jail"
-      when: not is_host_install | bool
+      when: is_jail_install
       block:
         - name: "Install /etc/defaults/vendor.conf (jail version)"
           copy:
