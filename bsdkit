@@ -826,6 +826,14 @@ zfs_create_mbr_pool() {
     return 0
 }
 
+zfs_compression() {
+    if [ $(uname -K) -ge 1300000 ]; then
+        echo zstd
+    else
+        echo lz4
+    fi
+}
+
 zfs_create_fs() {
     local _destdir=$1
 
@@ -841,8 +849,8 @@ zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o mountpoint=/tmp -o setuid=off ${BSDKIT_ZFS_POOL}/tmp
     ${ZFS_CREATE_CMD} -o mountpoint=/usr -o canmount=off ${BSDKIT_ZFS_POOL}/usr
     ${ZFS_CREATE_CMD} -o mountpoint=/var -o canmount=off ${BSDKIT_ZFS_POOL}/var
-    ${ZFS_CREATE_CMD} -o compression=lz4 ${BSDKIT_ZFS_POOL}/usr/src
-    ${ZFS_CREATE_CMD} -o compression=lz4 -o setuid=off ${BSDKIT_ZFS_POOL}/usr/ports
+    ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/src
+    ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) -o setuid=off ${BSDKIT_ZFS_POOL}/usr/ports
     ${ZFS_CREATE_CMD} -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/audit
     ${ZFS_CREATE_CMD} -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/crash
     ${ZFS_CREATE_CMD} -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/log
@@ -1575,7 +1583,7 @@ create_jail_destdir() {
 
     if [ -n ${_parent_fs} ]; then
         if ! zfs get -H -o value mountpoint ${_parent_fs}/${_jail_name} > /dev/null 2>&1; then
-            ${ZFS_CREATE_CMD} -o compression=lz4 ${_parent_fs}/${_jail_name}
+            ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${_parent_fs}/${_jail_name}
             _zfs="YES"
         fi
     else
@@ -2614,7 +2622,7 @@ zfs_create_postgresql() {
 
         zfs create \
             -o canmount=on \
-            -o compression=lz4 \
+            -o compression=$(zfs_compression) \
             -o atime=off \
             -o redundant_metadata=most \
             ${_pool}/var/db/postgres

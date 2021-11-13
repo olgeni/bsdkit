@@ -144,6 +144,38 @@
   debug:
     var: is_chroot_install
 
+- name: "facts: register uname -K"
+  command:
+    cmd: |
+      uname -K
+  register: uname_k_output
+  changed_when: no
+
+- name: "facts: debug uname_k_output"
+  debug:
+    var: uname_k_output
+
+- name: "facts: set_fact (uname_k)"
+  set_fact:
+    uname_k: "{{ uname_k_output.stdout }}"
+
+- name: "facts: debug uname_k"
+  debug:
+    var: uname_k
+
+- name: "facts: set_fact (zfs_compression, default)"
+  set_fact:
+    zfs_compression: lz4
+
+- name: "facts: set_fact (zfs_compression, zstd)"
+  set_fact:
+    zfs_compression: zstd
+  when: uname_k | int > 1300000
+
+- name: "facts: debug zfs_compression"
+  debug:
+    var: zfs_compression
+
 - name: "facts: check ZFS boot pool"
   shell:
     cmd: |

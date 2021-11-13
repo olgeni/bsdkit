@@ -20,7 +20,7 @@
         state: present
         extra_zfs_properties:
           canmount: on
-          compression: lz4
+          compression: "{{ zfs_compression }}"
           atime: off
           redundant_metadata: most
       when: find_var_db_mysql.matched == 0 or mysql_zfs_facts is successful
