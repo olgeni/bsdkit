@@ -29,7 +29,7 @@ destroy-vm:
 	@$(CURDIR)/bsdkit-vbox destroy || :
 
 sync-vm:
-	@rsync -av -e "ssh -p 2200" . root@localhost:/root/bsdkit/
+	@$(CURDIR)/bsdkit-vbox sync_vm
 
 logcat:
 	@$(CURDIR)/bsdkit-vbox logcat > /tmp/bsdkit.log

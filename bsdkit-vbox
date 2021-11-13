@@ -149,6 +149,13 @@ perform_shell() {
     rm -f ${_key}
 }
 
+perform_sync_vm() {
+    _key=$(mktemp /tmp/XXXXXX)
+    ./bsdkit echo_bsdkit_private_key > ${_key}
+    rsync -av -e "ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT}" . root@localhost:/root/bsdkit/
+    rm -f ${_key}
+}
+
 perform_logcat() {
     _key=$(mktemp /tmp/XXXXXX)
     ./bsdkit echo_bsdkit_private_key > ${_key}
@@ -216,6 +223,10 @@ case ${_command} in
 
     shell)
         perform_shell
+        ;;
+
+    sync_vm)
+        perform_sync_vm
         ;;
 
     logcat)
