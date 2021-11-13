@@ -38,7 +38,6 @@
       set -o pipefail
       sysctl -n security.jail.jailed
   changed_when: no
-  ignore_errors: yes
   register: sysctl_security_jail_jailed
 
 - name: "facts: debug sysctl_security_jail_jailed"
