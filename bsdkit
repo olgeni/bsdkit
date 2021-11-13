@@ -2354,14 +2354,21 @@ EOF
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
 
-    eval env \
-        ANSIBLE_CONFIG=${_ansible_cfg} \
-        SSH_AUTH_SOCK="" \
-        $(environment) \
-        BSDKIT_INTERFACE=${_bsdkit_interface} \
-        BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
-        BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
+    mount -t devfs devfs ${BSDKIT_DESTDIR}/dev
+
+    {
+        eval env \
+             ANSIBLE_CONFIG=${_ansible_cfg} \
+             SSH_AUTH_SOCK="" \
+             $(environment) \
+             BSDKIT_INTERFACE=${_bsdkit_interface} \
+             BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
+             BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
+             BSDKIT_CHROOT=1 \
+             ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
+    } always {
+        umount -f ${BSDKIT_DESTDIR}/dev
+    }
 
     rm -r ${_ansible_root}
 }
