@@ -852,9 +852,9 @@ zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/src
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) -o setuid=off ${BSDKIT_ZFS_POOL}/usr/ports
     ${ZFS_CREATE_CMD} -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/audit
-    ${ZFS_CREATE_CMD} -o atime=on ${BSDKIT_ZFS_POOL}/var/mail
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/crash
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) -o setuid=off -o exec=off ${BSDKIT_ZFS_POOL}/var/log
+    ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) -o atime=on ${BSDKIT_ZFS_POOL}/var/mail
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/var/tmp
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/usr/local
     ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/usr/home
