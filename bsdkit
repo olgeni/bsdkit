@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-set -e -u
+set -e -u -o pipefail
 
 autoload throw catch
 

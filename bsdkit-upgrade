@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e -u
+set -e -u -o pipefail
 
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:="13.0"}

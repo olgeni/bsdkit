@@ -2,7 +2,7 @@
 
 # shellcheck disable=SC3043
 
-set -e -u
+set -e -u -o pipefail
 
 error() {
     echo "bsdkit-rewrite-pool: $*"

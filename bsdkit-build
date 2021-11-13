@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e -u
+set -e -u -o pipefail
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"

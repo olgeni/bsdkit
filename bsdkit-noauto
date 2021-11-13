@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e -u
+set -e -u -o pipefail
 
 _bootfs=$(zpool get -H -p -o value bootfs 2> /dev/null | grep -v "^-")
 
