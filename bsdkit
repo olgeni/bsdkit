@@ -1602,11 +1602,18 @@ _do_configure_jail() {
         install -m 0644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
     fi
 
+    local _shell
+    _shell=$(cat ${_destdir}/etc/passwd | grep ^root | cut -d : -f 7)
+
     start_jail ${_destdir}
     pw -V ${_destdir}/etc usermod root -s /bin/sh
-    ansible_jail_playbook
-    pw -V ${_destdir}/etc usermod root -s /bin/csh
-    stop_jail ${_destdir}
+
+    {
+        ansible_jail_playbook
+    } always {
+        pw -V ${_destdir}/etc usermod root -s ${_shell}
+        stop_jail ${_destdir}
+    }
 
     return 0
 }
