@@ -1,4 +1,4 @@
-- name: "facts: kenv smbios.system.product"
+- name: "facts: register kenv smbios.system.product"
   command:
     cmd: kenv smbios.system.product
   changed_when: no
@@ -9,7 +9,7 @@
   debug:
     var: kenv_smbios_system_product
 
-- name: "facts: kenv smbios.bios.vendor"
+- name: "facts: register kenv smbios.bios.vendor"
   command:
     cmd: kenv smbios.bios.vendor
   changed_when: no
@@ -20,7 +20,7 @@
   debug:
     var: kenv_smbios_bios_vendor
 
-- name: "facts: retrieve freebsd_major"
+- name: "facts: register freebsd_major"
   shell:
     cmd: |
       set -o pipefail
@@ -32,7 +32,7 @@
   debug:
     var: freebsd_major
 
-- name: "facts: check sysctl: security.jail.jailed"
+- name: "facts: register security.jail.jailed"
   shell:
     cmd: |
       set -o pipefail
