@@ -49,15 +49,20 @@ zfs destroy -r "${_zfs_pool}"@digitalocean_installation || :
 pw userdel freebsd -r || :
 
 mkdir -p /usr/local/etc/pkg/repos
-pkg install -y ports-mgmt/pkg
+
+while ! pkg install -y ports-mgmt/pkg; do :; done
+
 # shellcheck disable=SC2016
 echo 'bsdkit: { url: "https://hub.olgeni.com/FreeBSD/packages-${ABI}-default-nox11" }' > /usr/local/etc/pkg/repos/bsdkit.conf
 
 for i in $(pkg query -g %n 'py37-*'); do pkg set -yn ${i}:py38-${i#py37-}; done
 
 pkg update -f
-pkg upgrade -y
-pkg install -y devel/git sysutils/pv sysutils/ansible shells/zsh
+
+while ! pkg upgrade -y; do :; done
+
+while ! pkg install -y devel/git sysutils/pv sysutils/ansible shells/zsh; do :; done
+
 git clone https://github.com/olgeni/bsdkit.git
 cd bsdkit
 git checkout ${BSDKIT_BRANCH}
