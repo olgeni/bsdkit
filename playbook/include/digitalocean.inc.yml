@@ -3,20 +3,26 @@
     cmd: |
       set -e -u -o pipefail
 
-      if [ -e /var/lib/cloud/seed/config_drive/digitalocean_meta_data.json ]; then
-          cat /var/lib/cloud/seed/config_drive/digitalocean_meta_data.json
+      metadata_mountpoint=/var/lib/cloud/seed/config_drive
+
+      if [ ! -d ${metadata_mountpoint} ]; then
+          mkdir -p ${metadata_mountpoint}
+      fi
+
+      if [ -e ${metadata_mountpoint}/digitalocean_meta_data.json ]; then
+          cat ${metadata_mountpoint}/digitalocean_meta_data.json
           exit 0
       fi
 
       for _device in $(sysctl -n kern.disks); do
           if [ "$(fstyp /dev/${_device} 2> /dev/null)" = "cd9660" ]; then
-              mount -t cd9660 /dev/${_device} /mnt
-              if [ -f /mnt/digitalocean_meta_data.json ]; then
-                  cat /mnt/digitalocean_meta_data.json
-                  umount /mnt
+              mount -t cd9660 /dev/${_device} ${metadata_mountpoint}
+              if [ -f ${metadata_mountpoint}/digitalocean_meta_data.json ]; then
+                  cat ${metadata_mountpoint}/digitalocean_meta_data.json
+                  umount ${metadata_mountpoint}
                   exit 0
               else
-                  umount /mnt
+                  umount ${metadata_mountpoint}
               fi
           fi
       done
