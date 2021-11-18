@@ -17,10 +17,27 @@
       done
       exit 1
   register: metadata_payload
+  changed_when: no
 
 - name: "digitalocean: gather metadata (#2)"
   set_fact:
     metadata: "{{ metadata_payload.stdout | from_json }}"
+
+- name: "digitalocean: debug metadata"
+  debug:
+    var: metadata
+
+- name: "digitalocean: set facts"
+  set_fact:
+    metadata_public_ipv4_address: "{{ metadata.interfaces.public[0].ipv4.ip_address }}"
+    metadata_public_ipv4_netmask: "{{ metadata.interfaces.public[0].ipv4.netmask }}"
+    metadata_anchor_ipv4_address: "{{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
+    metadata_anchor_ipv4_netmask: "{{ metadata.interfaces.public[0].anchor_ipv4.netmask }}"
+    metadata_private_ipv4_address: "{{ metadata.interfaces.private[0].ipv4.ip_address }}"
+    metadata_private_ipv4_netmask: "{{ metadata.interfaces.private[0].ipv4.netmask }}"
+    metadata_gateway: "{{ metadata.interfaces.public[0].ipv4.gateway }}"
+    metadata_short_hostname: "{{ metadata.hostname.split('.')[0] }}"
+    metadata_hostname: "{{ metadata.hostname }}"
 
 - name: "digitalocean: configure /etc/hosts for Digital Ocean"
   blockinfile:
@@ -28,26 +45,26 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     insertafter: EOF
     block: |
-      {{ metadata.interfaces.public[0].ipv4.ip_address }} {{ metadata.hostname.split(".")[0] }} {{ metadata.hostname }} egress
-      {{ metadata.interfaces.public[0].anchor_ipv4.ip_address }} anchor
-      {{ metadata.interfaces.private[0].ipv4.ip_address }} private
+      {{ metadata_public_ipv4_address }} {{ metadata_short_hostname }} {{ metadata_hostname }} egress
+      {{ metadata_anchor_ipv4_address }} anchor
+      {{ metadata_private_ipv4_address }} private
 
 - name: "digitalocean: rc.conf"
   shell:
     cmd: |
       set -e -u -o pipefail
 
-      sysrc ifconfig_vtnet0="inet {{ metadata.interfaces.public[0].ipv4.ip_address }} netmask {{ metadata.interfaces.public[0].ipv4.netmask }}"
-      sysrc ifconfig_vtnet0_alias0="inet {{ metadata.interfaces.public[0].anchor_ipv4.ip_address }} netmask {{ metadata.interfaces.public[0].anchor_ipv4.netmask }}"
-      sysrc ifconfig_vtnet1="inet {{ metadata.interfaces.private[0].ipv4.ip_address }} netmask {{ metadata.interfaces.private[0].ipv4.netmask }}"
-      sysrc defaultrouter="{{ metadata.interfaces.public[0].ipv4.gateway }}"
+      sysrc ifconfig_vtnet0="inet {{ metadata_public_ipv4_address }} netmask {{ metadata_public_ipv4_netmask }}"
+      sysrc ifconfig_vtnet0_alias0="inet {{ metadata_anchor_ipv4_address }} netmask {{ metadata_anchor_ipv4_netmask }}"
+      sysrc ifconfig_vtnet1="inet {{ metadata_private_ipv4_address }} netmask {{ metadata_private_ipv4_netmask }}"
+      sysrc defaultrouter="{{ metadata_gateway }}"
 
       sysrc sshd_flags="$(echo $(sysrc -n sshd_flags | rs 0 1 | grep -v -- -oListenAddress))"
-      sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].ipv4.ip_address }}"
-      sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
-      sysrc sshd_flags+=" -oListenAddress={{ metadata.interfaces.private[0].ipv4.ip_address }}"
+      sysrc sshd_flags+=" -oListenAddress={{ metadata_public_ipv4_address }}"
+      sysrc sshd_flags+=" -oListenAddress={{ metadata_anchor_ipv4_address }}"
+      sysrc sshd_flags+=" -oListenAddress={{ metadata_private_ipv4_address }}"
 
-      sysrc hostname="{{ metadata.hostname.split(".")[0] }}"
+      sysrc hostname="{{ metadata_short_hostname }}"
 
       service sshd configtest
   changed_when: no
