@@ -14,6 +14,30 @@
 - hosts: all
   user: root
   tasks:
+    - name: "Load defaults.yml"
+      tags: always
+      include_vars:
+        file: defaults.yml
+
+    - name: "Check if /.bsdkit.yml exists"
+      tags: always
+      stat:
+        path: /.bsdkit.yml
+      register: stat_bsdkit_yml
+
+    - name: "Load /.bsdkit.yml"
+      tags: always
+      include_vars:
+        file: /.bsdkit.yml
+      when: stat_bsdkit_yml.stat.exists
+
+    - name: "Create /.bsdkit.yml"
+      tags: always
+      copy:
+        src: defaults.yml
+        dest: /.bsdkit.yml
+      when: not stat_bsdkit_yml.stat.exists
+
     - name: "Include facts.inc.yml"
       tags: always
       include: include/facts.inc.yml
