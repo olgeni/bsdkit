@@ -947,6 +947,7 @@ format_fstab() {
 
     echo "#linprocfs /compat/linux/proc linprocfs rw 0 0" >> ${_destdir}/etc/fstab
     echo "#tmpfs /compat/linux/dev/shm tmpfs rw,mode=1777 0 0" >> ${_destdir}/etc/fstab
+    echo "#md0 none swap sw,file=/var/swap 0 0" >> ${_destdir}/etc/fstab
 
     column -t < ${_fstab} | sort > ${_fstab}.0
 
