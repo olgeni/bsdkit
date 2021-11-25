@@ -2631,6 +2631,7 @@ zfs_create_postgresql() {
         install -o postgres -g postgres -m 755 -d /var/db/postgres
 
         cd /var/db/postgres.orig
+
         find . | cpio -p -d -u -v /var/db/postgres
 
         cd /var/db
