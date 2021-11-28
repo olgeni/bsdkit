@@ -119,9 +119,11 @@ $2 == "mountpoint" {
 }
 ' | sh -x
 
-    if [ "$(zfs get -H -o value canmount "${_source_filesystem}")" = "on" ]; then
-        zfs mount "${_source_filesystem}"
-    fi
+    for _filesystem in $(zfs list -H -o name -r "${_source_filesystem}"); do
+        if [ "$(zfs get -H -o value canmount "${_filesystem}")" = "on" ]; then
+            zfs mount "${_filesystem}"
+        fi
+    done
 }
 
 rewrite_filesystem "$@"
