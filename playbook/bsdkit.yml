@@ -121,6 +121,12 @@
         - include-periodic
       include: include/periodic.inc.yml
 
+    - name: "Include rc.inc.yml"
+      tags:
+        - configure
+        - include-rc
+      include: include/rc.inc.yml
+
     - name: "Block: host"
       when: is_host_install
       block:
@@ -366,3 +372,11 @@
       service:
         name: sshd
         state: restarted
+
+    - name: reformat_rc_conf
+      shell:
+        cmd: |
+          set -e -u -o pipefail
+          sysrc -a -e > /etc/.rc.conf
+          cat /etc/.rc.conf > /etc/rc.conf
+          rm -f /etc/.rc.conf
