@@ -5,4 +5,16 @@
     regexp: "^{{ item.key }} *="
     create: yes
     mode: "0644"
+    state: present
   with_items: "{{ periodic_conf | dict2items }}"
+  when: periodic_conf is defined
+
+- name: "periodic: configure periodic.conf"
+  lineinfile:
+    dest: /etc/periodic.conf
+    regexp: "^{{ item.key }} *="
+    create: yes
+    mode: "0644"
+    state: absent
+  with_items: "{{ periodic_conf_delete | dict2items }}"
+  when: periodic_conf_delete is defined
