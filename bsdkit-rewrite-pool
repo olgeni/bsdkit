@@ -28,6 +28,7 @@ BEGIN {
   read_only["mounted"] = 1;
   read_only["normalization"] = 1;
   read_only["objsetid"] = 1;
+  read_only["origin"] = 1;
   read_only["pbkdf2iters"] = 1;
   read_only["refcompressratio"] = 1;
   read_only["referenced"] = 1;
