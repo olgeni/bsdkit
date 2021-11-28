@@ -87,6 +87,8 @@ rewrite_filesystem() {
     zfs destroy -r -f "${_source_filesystem}"
     zfs rename "${_target_filesystem}" "${_source_filesystem}"
 
+    local _filesystem
+
     for _filesystem in $(zfs list -H -o name -t filesystem -r "${_source_filesystem}"); do
         # BD584E0F-28D6-4409-956D-F9B1468C2DD9
         zfs get -H all "${_filesystem}" \
