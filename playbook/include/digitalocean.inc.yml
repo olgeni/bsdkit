@@ -79,3 +79,5 @@
 
       service sshd configtest
   changed_when: no
+  notify:
+    - reformat_rc_conf
