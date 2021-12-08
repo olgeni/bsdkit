@@ -867,8 +867,8 @@ zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/usr/home
 
     # These cannot be created from within the chroot (wrong mountpoint)
-    ${ZFS_CREATE_CMD} -o canmount=on ${BSDKIT_ZFS_POOL}/var/db/postgres
-    ${ZFS_CREATE_CMD} -o canmount=on ${BSDKIT_ZFS_POOL}/var/db/mysql
+    ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/var/db/postgres
+    ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/var/db/mysql
 
     mkdir -p ${_destdir}/altroot
     mkdir -p ${_destdir}/boot
@@ -2627,7 +2627,6 @@ zfs_create_postgresql() {
         find . | cpio -p -d -u -v /var/db/postgres.orig
 
         zfs create \
-            -o canmount=on \
             -o compression=$(zfs_compression) \
             -o atime=off \
             -o redundant_metadata=most \
