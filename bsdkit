@@ -855,6 +855,7 @@ zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/var/db
 
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/src
+    ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/obj
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/ports
 
     ${ZFS_CREATE_CMD} -o exec=off -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/var/audit
