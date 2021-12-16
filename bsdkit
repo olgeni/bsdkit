@@ -1792,18 +1792,18 @@ install_setup_runtime() {
         sysutils/fusefs-exfat
         sysutils/fusefs-ext2
         sysutils/fusefs-ntfs
-        sysutils/htop
-        sysutils/smenu
-        textproc/fzf
         sysutils/hextools
         sysutils/hfsutils
+        sysutils/htop
         sysutils/ipmitool
         sysutils/lsblk
         sysutils/memtester
         sysutils/ncdu
         sysutils/renameutils
         sysutils/smartmontools
+        sysutils/smenu
         sysutils/tmux
+        textproc/fzf
         www/go-www
         www/tinyproxy
         # disabled
