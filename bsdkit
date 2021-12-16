@@ -1784,6 +1784,7 @@ install_setup_runtime() {
         misc/mc
         net/croc
         net/rsync
+        net/zerotier
         security/openvpn
         sysutils/clone
         sysutils/cpdup
