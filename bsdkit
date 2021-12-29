@@ -348,7 +348,8 @@ install_efi_loader() {
 
     # FreeBSD < 13.0: gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
 
-    /sbin/newfs_msdos -F 16 -c 2 ${_device}
+    newfs_msdos -L efi -F 16 -c 2 ${_device}
+
     mkdir -p /tmp/efi
     mount -t msdos ${_device} /tmp/efi
     mkdir -p /tmp/efi/efi/boot
@@ -2128,7 +2129,7 @@ build_setup_iso() {
     _efiboot_md_device=$(mdconfig -f ${_iso_path}/efiboot.img)
 
     {
-        newfs_msdos -F 12 -m 0xF8 /dev/${_efiboot_md_device}
+        newfs_msdos -L efi -F 16 -c 2 /dev/${_efiboot_md_device}
 
         _efiboot_root=$(mktemp -d /tmp/XXXXXX)
 
