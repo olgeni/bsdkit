@@ -10,7 +10,7 @@
     dest: /usr/local/etc/sudoers
     owner: root
     group: wheel
-    mode: "0440"
+    mode: "0644"
     remote_src: yes
 
 - name: "sudo: install sudoers files"
@@ -19,6 +19,6 @@
     dest: /usr/local/etc/sudoers.d/
     owner: root
     group: wheel
-    mode: "0440"
+    mode: "0644"
   with_fileglob:
     - ../ansible/sudoers.d/*
