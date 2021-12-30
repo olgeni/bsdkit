@@ -1,0 +1,16 @@
+- name: "fscd: disable service"
+  service:
+    name: fscd
+    enabled: no
+    state: stopped
+
+- name: "fscd: remove /usr/local/etc/fscd.conf"
+  file:
+    path: /usr/local/etc/fscd.conf
+    state: absent
+
+- name: "fscd: remove 'fscd' package"
+  pkgng:
+    name:
+      - sysutils/fsc
+    state: absent

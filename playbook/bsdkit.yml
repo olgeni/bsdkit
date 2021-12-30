@@ -247,11 +247,11 @@
         - include-ssh
       include: include/ssh.inc.yml
 
-    - name: "Include fscd.inc.yml"
+    - name: "Include fscd-disable.inc.yml"
       tags:
         - configure
-        - include-fscd
-      include: include/fscd.inc.yml
+        - include-fscd-disable
+      include: include/fscd-disable.inc.yml
 
     - name: "Include zoneinfo.inc.yml"
       tags:
@@ -313,7 +313,6 @@
           - sysutils/clone
           - sysutils/cpdup
           - sysutils/direnv
-          - sysutils/fsc
           - sysutils/htop
           - sysutils/lsblk
           - sysutils/ncdu
