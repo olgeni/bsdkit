@@ -2125,7 +2125,7 @@ build_setup_iso() {
 
     # From src/release/amd64/mkisoimages.sh
 
-    dd if=/dev/zero of=${_iso_path}/efiboot.img bs=1k count=2048
+    dd if=/dev/zero of=${_iso_path}/efiboot.img bs=${BSDKIT_PART_SIZE_EFI} count=1
     _efiboot_md_device=$(mdconfig -f ${_iso_path}/efiboot.img)
 
     {
