@@ -748,7 +748,7 @@ zfs_create_gpt_pool() {
             ;;
     esac
 
-    if [ $(uname -K) > 1300000 ]; then
+    if [ $(uname -K) -ge 1300000 ]; then
         ${ZFS_CMD} set xattr=sa ${BSDKIT_ZFS_POOL}
     fi
 
