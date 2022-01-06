@@ -1784,6 +1784,7 @@ install_setup_runtime() {
         misc/gnu-watch
         misc/mc
         net/croc
+        net/rclone
         net/rsync
         net/zerotier
         security/openvpn
