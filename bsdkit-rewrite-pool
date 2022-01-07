@@ -102,8 +102,8 @@ rewrite_pool() {
     zpool create -R /altroot -t "${_target_pool_alias}" "${_target_pool}" "${_target_device}"
     zfs destroy -r "${_source_pool}"@"${_snapshot_name}" > /dev/null 2>&1 || :
     zfs snapshot -r "${_source_pool}"@"${_snapshot_name}"
-    zfs send --verbose --replicate --props --large-block --embed "${_source_pool}"@"${_snapshot_name}" \
-        | zfs receive -v -u -F -d "${_target_pool_alias}"
+    zfs send --verbose --replicate --props --large-block --embed "${_source_pool}"@"${_snapshot_name}" |
+        zfs receive -v -u -F -d "${_target_pool_alias}"
     zfs destroy -r -f "${_source_pool}"@"${_snapshot_name}"
     zfs destroy -r -f "${_target_pool_alias}"@"${_snapshot_name}"
 
@@ -111,19 +111,19 @@ rewrite_pool() {
 
     for _filesystem in $(zfs list -H -o name -t filesystem -r "${_target_pool_alias}"); do
         # BD584E0F-28D6-4409-956D-F9B1468C2DD9
-        zfs get -H all "${_filesystem}" \
-            | filter_properties \
-            | cut -s -f 2 \
-            | sort \
-            | uniq \
-            | xargs -n1 -J % echo zfs inherit -S % "${_filesystem}" \
-            | sh -x
+        zfs get -H all "${_filesystem}" |
+            filter_properties |
+            cut -s -f 2 |
+            sort |
+            uniq |
+            xargs -n1 -J % echo zfs inherit -S % "${_filesystem}" |
+            sh -x
     done
 
     # 8E95F488-BE4B-48F6-9FEE-C58CBBFD25BC
-    zfs get -s received -H -r all "${_target_pool_alias}" \
-        | filter_properties \
-        | awk '
+    zfs get -s received -H -r all "${_target_pool_alias}" |
+        filter_properties |
+        awk '
 $2 != "mountpoint" {
   print "zfs set " $2 "=" $3 " " $1;
 }

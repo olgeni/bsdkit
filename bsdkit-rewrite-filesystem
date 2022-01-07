@@ -77,11 +77,11 @@ rewrite_filesystem() {
     _snapshot_name=$(uuidgen | cut -d - -f 1)
     _target_filesystem=${_source_filesystem}.${_snapshot_name}
 
-    zfs destroy -r "${_source_filesystem}"@"${_snapshot_name}" >/dev/null 2>&1 || :
+    zfs destroy -r "${_source_filesystem}"@"${_snapshot_name}" > /dev/null 2>&1 || :
     zfs unmount -f "${_source_filesystem}"
     zfs snapshot -r "${_source_filesystem}"@"${_snapshot_name}"
-    zfs send --verbose --replicate --props --large-block --embed "${_source_filesystem}"@"${_snapshot_name}" \
-        | zfs receive -v -u -F "${_target_filesystem}"
+    zfs send --verbose --replicate --props --large-block --embed "${_source_filesystem}"@"${_snapshot_name}" |
+        zfs receive -v -u -F "${_target_filesystem}"
     zfs destroy -r -f "${_source_filesystem}"@"${_snapshot_name}"
     zfs destroy -r -f "${_target_filesystem}"@"${_snapshot_name}"
     zfs destroy -r -f "${_source_filesystem}"
@@ -91,19 +91,19 @@ rewrite_filesystem() {
 
     for _filesystem in $(zfs list -H -o name -t filesystem -r "${_source_filesystem}"); do
         # BD584E0F-28D6-4409-956D-F9B1468C2DD9
-        zfs get -H all "${_filesystem}" \
-            | filter_properties \
-            | cut -s -f 2 \
-            | sort \
-            | uniq \
-            | xargs -n1 -J % echo zfs inherit -S % "${_filesystem}" \
-            | sh -x
+        zfs get -H all "${_filesystem}" |
+            filter_properties |
+            cut -s -f 2 |
+            sort |
+            uniq |
+            xargs -n1 -J % echo zfs inherit -S % "${_filesystem}" |
+            sh -x
     done
 
     # 8E95F488-BE4B-48F6-9FEE-C58CBBFD25BC
-    zfs get -s received -H -r all "${_source_filesystem}" \
-        | filter_properties \
-        | awk '
+    zfs get -s received -H -r all "${_source_filesystem}" |
+        filter_properties |
+        awk '
 $2 != "mountpoint" {
   print "zfs set " $2 "=" $3 " " $1;
 }

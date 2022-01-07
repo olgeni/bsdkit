@@ -30,9 +30,9 @@ perform_create() {
     VBoxManage createvm --name ${BSDKIT_VBOX_NAME} --ostype FreeBSD_64 --register
 
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} \
-               --vrdeproperty "TCP/Ports=${BSDKIT_VBOX_VNC_PORT}" \
-               --vrdeproperty "VNCPassword=${BSDKIT_VBOX_VNC_PASSWORD}" \
-               --vrde on
+        --vrdeproperty "TCP/Ports=${BSDKIT_VBOX_VNC_PORT}" \
+        --vrdeproperty "VNCPassword=${BSDKIT_VBOX_VNC_PASSWORD}" \
+        --vrde on
 
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --memory ${BSDKIT_VBOX_MEMORY}
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vram ${BSDKIT_VBOX_VRAM}
@@ -55,11 +55,11 @@ perform_create() {
 
     for _i in $(seq 0 3); do
         VBoxManage createmedium disk --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI \
-                   --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+            --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
         VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-                   --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
-                   --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+            --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
+            --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
         _sata_port=$((_sata_port + 1))
     done
@@ -70,11 +70,11 @@ perform_create() {
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 ssh,tcp,,${BSDKIT_VBOX_SSH_PORT},,22
 
     VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-               --storagectl "IDE Controller" \
-               --port 0 \
-               --device 0 \
-               --type dvddrive \
-               --medium "${BSDKIT_VBOX_ISO}"
+        --storagectl "IDE Controller" \
+        --port 0 \
+        --device 0 \
+        --type dvddrive \
+        --medium "${BSDKIT_VBOX_ISO}"
 }
 
 perform_start() {
@@ -123,10 +123,10 @@ perform_destroy() {
         _sata_port=0
 
         for _i in $(seq 0 3); do
-	    VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-		       --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
-		       --medium none
-	    VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete
+            VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
+                --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
+                --medium none
+            VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete
             rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
             _sata_port=$((_sata_port + 1))
