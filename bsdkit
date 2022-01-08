@@ -1145,6 +1145,8 @@ bsdkit: {
 }
 EOF
 
+    chroot ${_destdir} /etc/rc.d/ldconfig start
+
     return 0
 }
 
@@ -2259,7 +2261,6 @@ deploy() {
 
     ${(@s/ /)@}
 
-    chroot ${BSDKIT_DESTDIR} /etc/rc.d/ldconfig start
     ansible_chroot_playbook
 }
 
