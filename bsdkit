@@ -1533,6 +1533,7 @@ build_md_root_device() {
 
     _type=swap
     _size=2G
+    _reboot=NO
 
     OPTIND=1
     while getopts "mws:r" _option; do
@@ -1578,6 +1579,23 @@ EOF
 
     mkdir -p ${BSDKIT_DESTDIR}/root/bin/
     install -m 0755 -o root -g wheel bsdkit-rewrite-pool ${BSDKIT_DESTDIR}/root/bin/
+
+    mkdir -p ${BSDKIT_DESTDIR}/dev
+
+    {
+        mount -t devfs devfs ${BSDKIT_DESTDIR}/dev
+
+        lockf -k -t ${BSDKIT_PKG_LOCKTIME} ${BSDKIT_PKG_LOCKFILE} pkg -c ${BSDKIT_DESTDIR} install -y \
+              net/rsync \
+              ports-mgmt/pkg \
+              shells/zsh
+
+        if [ -d ${BSDKIT_DESTDIR}/var/cache/pkg ]; then
+            lockf -k -t ${BSDKIT_PKG_LOCKTIME} ${BSDKIT_PKG_LOCKFILE} pkg -c ${BSDKIT_DESTDIR} clean -y -a
+        fi
+    } always {
+        umount -f ${BSDKIT_DESTDIR}/dev
+    }
 
     if is_yes ${_reboot}; then
         kenv vfs.root.mountfrom="ufs:/dev/${_md_device}p3"
