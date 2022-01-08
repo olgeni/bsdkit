@@ -1544,7 +1544,7 @@ build_md_root_device() {
     local _md_device
     _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
 
-    BSDKIT_INSTALL_SRC=no BSDKIT_INSTALL_KERNEL=no BSDKIT_PART_SIZE_SWAP=0 BSDKIT_LABEL_ROOT=mdroot ${BSDKIT_SCRIPT} install_gpt_ufs $* single ${_md_device}
+    BSDKIT_INSTALL_SRC=no BSDKIT_INSTALL_KERNEL=no BSDKIT_PART_SIZE_SWAP=0 BSDKIT_LABEL_ROOT=md_root ${BSDKIT_SCRIPT} install_gpt_ufs $* single ${_md_device}
 
     rm -f ${BSDKIT_DESTDIR}/etc/rc.conf
     touch ${BSDKIT_DESTDIR}/etc/rc.conf
