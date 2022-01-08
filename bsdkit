@@ -1526,12 +1526,26 @@ configure_jail() {
 }
 
 build_md_root_device() {
-    local _reboot
     local _option
+    local _type
+    local _size
+    local _reboot
+
+    _type=swap
+    _size=2G
 
     OPTIND=1
-    while getopts "r" _option; do
+    while getopts "mws:r" _option; do
         case ${_option} in
+            m)
+                _type=malloc
+                ;;
+            w)
+                _type=swap
+                ;;
+            s)
+                _size=${OPTARG}
+                ;;
             r)
                 _reboot=YES
                 ;;
@@ -1542,7 +1556,7 @@ build_md_root_device() {
     shift $((OPTIND - 1))
 
     local _md_device
-    _md_device=$(mdconfig -a -t swap -o reserve -s 2G)
+    _md_device=$(mdconfig -a -o reserve -o compress -L "md_root" -t ${_type} -s ${_size})
 
     BSDKIT_INSTALL_SRC=no BSDKIT_INSTALL_KERNEL=no BSDKIT_PART_SIZE_SWAP=0 BSDKIT_LABEL_ROOT=md_root ${BSDKIT_SCRIPT} install_gpt_ufs $* single ${_md_device}
 
