@@ -411,7 +411,7 @@ gpt_ufs_partition_multi() {
     mkdir -p ${_destdir}/var
 
     if check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${BSDKIT_DESTDIR}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     mount -o async,noatime /dev/gpt/${BSDKIT_LABEL_VAR} ${_destdir}/var
@@ -468,7 +468,7 @@ gpt_ufs_partition_single() {
     mkdir -p ${_destdir}/etc
 
     if check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${BSDKIT_DESTDIR}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -533,7 +533,7 @@ mbr_ufs_partition_multi() {
     mkdir -p ${_destdir}/var
 
     if check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${BSDKIT_DESTDIR}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     mount -o async,noatime /dev/ufs/${BSDKIT_LABEL_VAR} ${_destdir}/var
@@ -589,7 +589,7 @@ mbr_ufs_partition_single() {
     mkdir -p ${_destdir}/etc
 
     if check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${BSDKIT_DESTDIR}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -877,7 +877,7 @@ zfs_create_fs() {
     mkdir -p ${_destdir}/etc
 
     if check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${BSDKIT_DESTDIR}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
