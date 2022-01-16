@@ -89,10 +89,18 @@ install-mbr-ufs-multi-1:
 	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r http://${HOST}:${PORT} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi ada0
 
-install-mbr-ufs-gmirror-single-1:
+install-mbr-ufs-gmirror-single-2:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} \
+		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single gm0 ada0 ada1
+
+install-mbr-ufs-gmirror-single-3:
 	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single gm0 ada0 ada1 ada2
 
-install-mbr-ufs-gmirror-multi-1:
+install-mbr-ufs-gmirror-multi-2:
+	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} \
+		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi gm0 ada0 ada1
+
+install-mbr-ufs-gmirror-multi-3:
 	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r http://${HOST}:${PORT} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi gm0 ada0 ada1 ada2
