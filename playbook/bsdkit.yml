@@ -226,6 +226,12 @@
         - include-sudo
       include: include/sudo.inc.yml
 
+    - name: "Include doas.inc.yml"
+      tags:
+        - configure
+        - include-doas
+      include: include/doas.inc.yml
+
     - name: "Include vagrant.inc.yml"
       include: include/vagrant.inc.yml
 
@@ -304,7 +310,6 @@
           - net/rsync
           - net/socat
           - security/ca_root_nss
-          - security/doas
           - security/gnupg
           - shells/bash
           - shells/zsh
