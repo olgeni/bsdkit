@@ -23,7 +23,5 @@
     - inputrc
     - kermrc
     - login_conf
-    - profile
-    - shrc
     - vimrc
     - zshrc
