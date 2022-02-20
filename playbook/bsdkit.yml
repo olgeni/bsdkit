@@ -40,7 +40,7 @@
 
     - name: "Include facts.inc.yml"
       tags: always
-      include: include/facts.inc.yml
+      import_tasks: include/facts.inc.yml
 
     - name: "Set root shell"
       tags:
@@ -66,7 +66,7 @@
       tags:
         - configure
         - include-remove
-      include: include/remove.inc.yml
+      import_tasks: include/remove.inc.yml
 
     - name: "Create /usr/local/etc"
       tags:
@@ -79,27 +79,27 @@
         mode: "0755"
 
     # - name: "Include login-conf.inc.yml"
-    #   include: include/login-conf.inc.yml
+    #   import_tasks: include/login-conf.inc.yml
 
     - name: "Include pkg.inc.yml"
-      include: include/pkg.inc.yml
+      import_tasks: include/pkg.inc.yml
 
     - name: "Include kernconf.inc.yml"
       tags:
         - configure
         - include-kernconf
-      include: include/kernconf.inc.yml
+      import_tasks: include/kernconf.inc.yml
 
     - name: "Digital Ocean"
       tags: digitalocean
-      include: include/digitalocean.inc.yml
+      import_tasks: include/digitalocean.inc.yml
       when: platform_is_digitalocean | bool
 
     - name: "Include runit.inc.yml"
       tags:
         - configure
         - include-runit
-      include: include/runit.inc.yml
+      import_tasks: include/runit.inc.yml
 
     - name: "Install configuration files in /etc"
       tags:
@@ -119,33 +119,33 @@
       tags:
         - configure
         - include-periodic
-      include: include/periodic.inc.yml
+      import_tasks: include/periodic.inc.yml
 
     - name: "Include rc.inc.yml"
       tags:
         - configure
         - include-rc
-      include: include/rc.inc.yml
+      import_tasks: include/rc.inc.yml
 
     - name: "Block: host"
       when: is_host_install
       block:
         - name: "Include zfs.inc.yml"
-          include: include/zfs.inc.yml
+          import_tasks: include/zfs.inc.yml
           when: not is_chroot_install
 
         - name: "Include loader.inc.yml"
-          include: include/loader.inc.yml
+          import_tasks: include/loader.inc.yml
 
         - name: "Include bsdenv.inc.yml"
-          include: include/bsdenv.inc.yml
+          import_tasks: include/bsdenv.inc.yml
 
         - name: "Include postgres-zfs.inc.yml"
-          include: include/postgres-zfs.inc.yml
+          import_tasks: include/postgres-zfs.inc.yml
           when: not is_chroot_install
 
         - name: "Include mysql-zfs.inc.yml"
-          include: include/mysql-zfs.inc.yml
+          import_tasks: include/mysql-zfs.inc.yml
           when: not is_chroot_install
 
         - name: "Install sysctl.conf"
@@ -218,76 +218,76 @@
       tags:
         - configure
         - include-dotfiles
-      include: include/dotfiles.inc.yml
+      import_tasks: include/dotfiles.inc.yml
 
     - name: "Include sudo.inc.yml"
       tags:
         - configure
         - include-sudo
-      include: include/sudo.inc.yml
+      import_tasks: include/sudo.inc.yml
 
     - name: "Include doas.inc.yml"
       tags:
         - configure
         - include-doas
-      include: include/doas.inc.yml
+      import_tasks: include/doas.inc.yml
 
     - name: "Include vagrant.inc.yml"
-      include: include/vagrant.inc.yml
+      import_tasks: include/vagrant.inc.yml
 
     - name: "Include spiped.inc.yml"
       tags:
         - configure
         - include-spiped
-      include: include/spiped.inc.yml
+      import_tasks: include/spiped.inc.yml
 
     - name: "Include newsyslog.inc.yml"
       tags:
         - configure
         - include-newsyslog
-      include: include/newsyslog.inc.yml
+      import_tasks: include/newsyslog.inc.yml
 
     - name: "Include ssh.inc.yml"
       tags:
         - configure
         - include-ssh
-      include: include/ssh.inc.yml
+      import_tasks: include/ssh.inc.yml
 
     - name: "Include fscd-disable.inc.yml"
       tags:
         - configure
         - include-fscd-disable
-      include: include/fscd-disable.inc.yml
+      import_tasks: include/fscd-disable.inc.yml
 
     - name: "Include zoneinfo.inc.yml"
       tags:
         - configure
         - include-zoneinfo
-      include: include/zoneinfo.inc.yml
+      import_tasks: include/zoneinfo.inc.yml
 
     - name: "Include crontab.inc.yml"
       tags:
         - configure
         - include-crontab
-      include: include/crontab.inc.yml
+      import_tasks: include/crontab.inc.yml
 
     - name: "Include syslog.inc.yml"
       tags:
         - configure
         - include-syslog
-      include: include/syslog.inc.yml
+      import_tasks: include/syslog.inc.yml
 
     - name: "Include ftp.inc.yml"
       tags:
         - configure
         - include-ftp
-      include: include/ftp.inc.yml
+      import_tasks: include/ftp.inc.yml
 
     - name: "Include postgres.inc.yml"
-      include: include/postgres.inc.yml
+      import_tasks: include/postgres.inc.yml
 
     - name: "Include mysql.inc.yml"
-      include: include/mysql.inc.yml
+      import_tasks: include/mysql.inc.yml
 
     - name: "Install base packages (common)"
       tags:
@@ -335,18 +335,18 @@
         state: present
 
     # - name: "Include ca-root-nss.inc.yml"
-    #   include: include/ca-root-nss.inc.yml
+    #   import_tasks: include/ca-root-nss.inc.yml
 
     - name: "Include virtualbox.inc.yml"
-      include: include/virtualbox.inc.yml
+      import_tasks: include/virtualbox.inc.yml
       when: platform_is_virtualbox | bool
 
     - name: "Include vmware.inc.yml"
-      include: include/vmware.inc.yml
+      import_tasks: include/vmware.inc.yml
       when: platform_is_vmware | bool
 
     - name: "Include cleanup.inc.yml"
-      include: include/cleanup.inc.yml
+      import_tasks: include/cleanup.inc.yml
 
   handlers:
     - name: cap_mkdb
