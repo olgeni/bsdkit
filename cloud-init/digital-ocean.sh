@@ -102,7 +102,10 @@ pkg clean -y -a || :
 rm -r -f /usr/freebsd-dist/
 cd /root
 
-rm /var/log/messages
+for _file in /var/log/*; do
+    : > ${_file}
+done
+
 newsyslog -C -v
 
 # _mnt=$(mktemp -d)
