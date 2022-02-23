@@ -95,6 +95,7 @@ rm -f /usr/local/etc/sudoers.d/90-cloud-init-users
 pkg delete -y net/cloud-init python2 python27 || :
 pkg delete -y -g py27\* || :
 pkg autoremove -y || :
+pkg clean -y -a || :
 
 ./bsdkit-upgrade -v${BSDKIT_VERSION} -F
 ./bsdkit-upgrade -v${BSDKIT_VERSION} -n bsdkit
