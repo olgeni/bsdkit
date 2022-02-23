@@ -86,10 +86,7 @@ sysrc -x digitaloceanpre || :
 sysrc -x ifconfig_vtnet0_ipv6 || :
 sysrc -x ipv6_activate_all_interfaces || :
 sysrc -x ipv6_defaultrouter || :
-
-if sysrc -c route_net0 > /dev/null 2>&1; then
-    sysrc -x route_net0
-fi
+sysrc -x route_net0 || :
 
 rm -f /usr/local/etc/rc.d/digitalocean
 rm -f /usr/local/etc/rc.d/digitaloceanpre
