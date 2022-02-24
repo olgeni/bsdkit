@@ -62,6 +62,13 @@
         - /etc/sysctl.conf
         - /etc/sysctl.conf.local
 
+    - name: "Set 'ifconfig_DEFAULT' to 'DHCP'"
+      lineinfile:
+        dest: /etc/rc.conf
+        line: 'ifconfig_DEFAULT="DHCP"'
+        regexp: "^ifconfig_DEFAULT"
+        insertafter: EOF
+
     - name: "Include remove.inc.yml"
       tags:
         - configure
