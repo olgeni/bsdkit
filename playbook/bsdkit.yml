@@ -166,6 +166,8 @@
             - sysctl.conf
 
         - name: "Install /etc/defaults/vendor.conf (host version)"
+          tags:
+            - configure
           copy:
             src: ../ansible/vendor.conf
             dest: /etc/defaults/vendor.conf
@@ -209,6 +211,8 @@
       when: is_jail_install
       block:
         - name: "Install /etc/defaults/vendor.conf (jail version)"
+          tags:
+            - configure
           copy:
             src: ../ansible/vendor.conf.jail
             dest: /etc/defaults/vendor.conf
