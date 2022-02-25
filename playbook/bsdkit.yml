@@ -72,7 +72,6 @@
     - name: "Include remove.inc.yml"
       tags:
         - configure
-        - include-remove
       import_tasks: include/remove.inc.yml
 
     - name: "Create /usr/local/etc"
@@ -94,7 +93,6 @@
     - name: "Include kernconf.inc.yml"
       tags:
         - configure
-        - include-kernconf
       import_tasks: include/kernconf.inc.yml
 
     - name: "Digital Ocean"
@@ -105,7 +103,6 @@
     - name: "Include runit.inc.yml"
       tags:
         - configure
-        - include-runit
       import_tasks: include/runit.inc.yml
 
     - name: "Install configuration files in /etc"
@@ -125,13 +122,11 @@
     - name: "Include periodic.inc.yml"
       tags:
         - configure
-        - include-periodic
       import_tasks: include/periodic.inc.yml
 
     - name: "Include rc.inc.yml"
       tags:
         - configure
-        - include-rc
       import_tasks: include/rc.inc.yml
 
     - name: "Block: host"
@@ -228,19 +223,16 @@
     - name: "Include dotfiles.inc.yml"
       tags:
         - configure
-        - include-dotfiles
       import_tasks: include/dotfiles.inc.yml
 
     - name: "Include sudo.inc.yml"
       tags:
         - configure
-        - include-sudo
       import_tasks: include/sudo.inc.yml
 
     - name: "Include doas.inc.yml"
       tags:
         - configure
-        - include-doas
       import_tasks: include/doas.inc.yml
 
     - name: "Include vagrant.inc.yml"
@@ -249,49 +241,41 @@
     - name: "Include spiped.inc.yml"
       tags:
         - configure
-        - include-spiped
       import_tasks: include/spiped.inc.yml
 
     - name: "Include newsyslog.inc.yml"
       tags:
         - configure
-        - include-newsyslog
       import_tasks: include/newsyslog.inc.yml
 
     - name: "Include ssh.inc.yml"
       tags:
         - configure
-        - include-ssh
       import_tasks: include/ssh.inc.yml
 
     - name: "Include fscd-disable.inc.yml"
       tags:
         - configure
-        - include-fscd-disable
       import_tasks: include/fscd-disable.inc.yml
 
     - name: "Include zoneinfo.inc.yml"
       tags:
         - configure
-        - include-zoneinfo
       import_tasks: include/zoneinfo.inc.yml
 
     - name: "Include crontab.inc.yml"
       tags:
         - configure
-        - include-crontab
       import_tasks: include/crontab.inc.yml
 
     - name: "Include syslog.inc.yml"
       tags:
         - configure
-        - include-syslog
       import_tasks: include/syslog.inc.yml
 
     - name: "Include ftp.inc.yml"
       tags:
         - configure
-        - include-ftp
       import_tasks: include/ftp.inc.yml
 
     - name: "Include postgres.inc.yml"
