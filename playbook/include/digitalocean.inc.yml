@@ -60,7 +60,7 @@
       {{ metadata_anchor_ipv4_address }} anchor
       {{ metadata_private_ipv4_address }} private
 
-- name: "digitalocean: rc.conf"
+- name: "digitalocean: update rc.conf"
   shell:
     cmd: |
       set -e -u -o pipefail
