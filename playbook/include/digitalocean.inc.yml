@@ -40,6 +40,8 @@
 
 - name: "digitalocean: set facts"
   set_fact:
+    metadata_dns_nameservers_0: "{{ metadata.dns.nameservers[0] }}"
+    metadata_dns_nameservers_1: "{{ metadata.dns.nameservers[1] }}"
     metadata_public_ipv4_address: "{{ metadata.interfaces.public[0].ipv4.ip_address }}"
     metadata_public_ipv4_netmask: "{{ metadata.interfaces.public[0].ipv4.netmask }}"
     metadata_anchor_ipv4_address: "{{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
@@ -49,6 +51,14 @@
     metadata_gateway: "{{ metadata.interfaces.public[0].ipv4.gateway }}"
     metadata_short_hostname: "{{ metadata.hostname.split('.')[0] }}"
     metadata_hostname: "{{ metadata.hostname }}"
+
+- name: "digitalocean: configure /etc/resolv.conf for Digital Ocean"
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver {{ metadata_dns_nameservers_0 }}
+      nameserver {{ metadata_dns_nameservers_1 }}
+    mode: "0644"
 
 - name: "digitalocean: configure /etc/hosts for Digital Ocean"
   blockinfile:
