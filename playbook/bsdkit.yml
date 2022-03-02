@@ -68,6 +68,7 @@
         line: 'ifconfig_DEFAULT="DHCP"'
         regexp: "^ifconfig_DEFAULT"
         insertafter: EOF
+      when: not(platform_is_digitalocean | bool)
 
     - name: "Include remove.inc.yml"
       tags:
