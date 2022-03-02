@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# PROVIDE: digitalocean
+# REQUIRE: DAEMON
+# KEYWORD: firstboot
+
+. /etc/rc.subr
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/bin
+
+name="digitalocean"
+desc="Run bsdkit digitalocean"
+start_cmd="digitalocean_start"
+stop_cmd=":"
+rcvar="digitalocean_enable"
+
+digitalocean_start()
+{
+  	cd /root/bsdkit
+	./bsdkit digitalocean
+        service netif restart
+        service routing restart
+	touch /firstboot-reboot
+}
+
+load_rc_config $name
+run_rc_command "$1"
