@@ -16,11 +16,11 @@ rcvar="digitalocean_enable"
 
 digitalocean_start()
 {
-  	cd /root/bsdkit
-	./bsdkit digitalocean
-        service netif restart
-        service routing restart
-	touch /firstboot-reboot
+    cd /root/bsdkit
+    ./bsdkit digitalocean
+    service netif restart
+    service routing restart
+    touch /firstboot-reboot
 }
 
 load_rc_config $name
