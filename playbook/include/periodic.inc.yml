@@ -9,7 +9,7 @@
   with_items: "{{ periodic_conf | dict2items }}"
   when: periodic_conf is defined
 
-- name: "periodic: configure periodic.conf"
+- name: "periodic: configure periodic.conf (delete)"
   lineinfile:
     dest: /etc/periodic.conf
     regexp: "^{{ item.key }} *="

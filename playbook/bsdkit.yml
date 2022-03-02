@@ -119,6 +119,11 @@
         - make.conf
         - src.conf
 
+    - name: "Include pw.inc.yml"
+      tags:
+        - configure
+      import_tasks: include/pw.inc.yml
+
     - name: "Include periodic.inc.yml"
       tags:
         - configure

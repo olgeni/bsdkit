@@ -1,7 +1,15 @@
-- name: "dotfiles: install dotfiles in /usr/share/skel"
+- name: "dotfiles: create /usr/local/share/skel"
+  file:
+    path: /usr/local/share/skel
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: "dotfiles: install dotfiles in /usr/local/share/skel"
   copy:
-    src: ../ansible/dot.{{ item }}
-    dest: /usr/share/skel/dot.{{ item }}
+    src: ../ansible/dotfiles/dot.{{ item }}
+    dest: /usr/local/share/skel/dot.{{ item }}
     owner: root
     group: wheel
     mode: "0644"
@@ -14,7 +22,7 @@
 
 - name: "dotfiles: install dotfiles in /root"
   copy:
-    src: ../ansible/dot.{{ item }}
+    src: ../ansible/dotfiles/dot.{{ item }}
     dest: /root/.{{ item }}
     owner: root
     group: wheel
