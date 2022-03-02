@@ -104,6 +104,27 @@ pkg clean -y -a || :
 rm -r -f /usr/freebsd-dist/
 cd /root
 
+touch /firstboot
+
+cat << "EOF" > /etc/rc.d/bsdkit_loader
+#!/bin/sh
+
+# PROVIDE: bsdkit_loader
+# REQUIRE: DAEMON
+# KEYWORD: firstboot
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/bin
+
+gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 vtbd0
+zfs upgrade -a
+zpool upgrade -a
+bectl destroy -Fo default || :
+touch /firstboot-reboot
+rm -f /etc/rc.d/bsdkit_loader
+EOF
+
+chmod 555 /etc/rc.d/bsdkit_loader
+
 for _file in /var/log/*; do
     : > ${_file}
 done
