@@ -50,7 +50,7 @@
     metadata_private_ipv4_netmask: "{{ metadata.interfaces.private[0].ipv4.netmask }}"
     metadata_gateway: "{{ metadata.interfaces.public[0].ipv4.gateway }}"
     metadata_short_hostname: "{{ metadata.hostname.split('.')[0] }}"
-    metadata_hostname: "{{ metadata.hostname }}"
+    metadata_hostname: "{% if metadata.hostname.split('.') | length == 1 %}{{ metadata.hostname }}.bsdkit{% else %}{{ metadata.hostname }}{% endif %}"
 
 - name: "digitalocean: configure /etc/resolv.conf for Digital Ocean"
   copy:
