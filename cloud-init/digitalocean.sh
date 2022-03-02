@@ -91,6 +91,7 @@ sysrc -x route_net0 || :
 rm -f /usr/local/etc/rc.d/digitalocean
 rm -f /usr/local/etc/rc.d/digitaloceanpre
 rm -f /usr/local/etc/sudoers.d/90-cloud-init-users
+rm -f /root/.cloud-locale-test.skip
 
 pkg delete -y net/cloud-init python2 python27 || :
 pkg delete -y -g py27\* || :
