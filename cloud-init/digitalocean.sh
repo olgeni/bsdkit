@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# #!/bin/sh
 # fetch -o - https://raw.githubusercontent.com/olgeni/bsdkit/master/cloud-init/digitalocean.sh | sh
 
 set -e -u -x
