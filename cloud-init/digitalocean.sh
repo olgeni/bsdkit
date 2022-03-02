@@ -110,9 +110,4 @@ done
 
 newsyslog -C -v
 
-# _mnt=$(mktemp -d)
-# bectl jail -b -o name=bsdkit -o mount.devfs=1 bsdkit ${_mnt}
-# bectl ujail bsdkit
-# rmdir ${_mnt}
-
 exec > /dev/tty 2>&1
