@@ -104,9 +104,9 @@ pkg clean -y -a || :
 rm -r -f /usr/freebsd-dist/
 cd /root
 
-touch /firstboot
+bectl mount bsdkit /mnt
 
-cat << "EOF" > /etc/rc.d/bsdkit_loader
+cat << "EOF" > /mnt/etc/rc.d/bsdkit_loader
 #!/bin/sh
 
 # PROVIDE: bsdkit_loader
@@ -123,12 +123,18 @@ touch /firstboot-reboot
 rm -f /etc/rc.d/bsdkit_loader
 EOF
 
-chmod 555 /etc/rc.d/bsdkit_loader
+chmod 555 /mnt/etc/rc.d/bsdkit_loader
+
+touch /mnt/firstboot
+
+bectl umount bsdkit
 
 for _file in /var/log/*; do
     : > ${_file}
 done
 
 newsyslog -C -v
+
+shutdown -r now
 
 exec > /dev/tty 2>&1
