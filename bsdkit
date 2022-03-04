@@ -1083,7 +1083,7 @@ run_mtree() {
         mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.sendmail.dist -p ${_destdir}/
     fi
 
-    if [ -f ${_destdir}/etc/mtree/BSD.tests.dist ]; then
+    if [ -f ${_destdir}/etc/mtree/BSD.tests.dist -a -d ${_destdir}/usr/tests ]; then
         mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.tests.dist -p ${_destdir}/usr/tests
     fi
 }
