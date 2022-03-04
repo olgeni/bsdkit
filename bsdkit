@@ -1063,6 +1063,14 @@ install_release() {
     fi
 
     return 0
+}
+
+run_mtree() {
+    local _destdir=$1
+
+    [ -d ${_destdir} ]
+    [ ${_destdir} != "/" ]
+
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.var.dist -p ${_destdir}/var
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.usr.dist -p ${_destdir}/usr
@@ -1215,6 +1223,7 @@ install_mbr_ufs() {
 
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1251,6 +1260,7 @@ install_mbr_ufs_gmirror() {
     gmirror_configure ${_mirror} ${_devices}
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1277,6 +1287,7 @@ install_gpt_ufs() {
 
     gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1306,6 +1317,7 @@ install_zfs() {
     zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1335,6 +1347,7 @@ install_gpt_zfs() {
     zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1364,6 +1377,7 @@ install_mbr_zfs() {
     zfs_create_mbr_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1637,6 +1651,8 @@ _do_create_jail() {
     local _destdir=$1
 
     BSDKIT_INSTALL_KERNEL=${BSDKIT_INSTALL_KERNEL} BSDKIT_INSTALL_SRC=${BSDKIT_INSTALL_SRC} install_release ${FREEBSD_REL_URL} ${_destdir}
+
+    run_mtree ${_destdir}
 }
 
 _do_configure_jail() {
@@ -1939,6 +1955,8 @@ build_setup_staging() {
     mkdir -p ${_destdir}
 
     BSDKIT_INSTALL_SRC=no install_release ${_relpath} ${_destdir}
+
+    run_mtree ${_destdir}
 
     rm -f ${_destdir}/boot/kernel/*.symbols(N)
 
