@@ -32,7 +32,7 @@ sync-vm:
 	@$(CURDIR)/bsdkit-vbox sync_vm
 
 logcat:
-	@$(CURDIR)/bsdkit-vbox logcat > /tmp/bsdkit.log
+	@$(CURDIR)/bsdkit-vbox logcat
 
 shell:
 	@$(CURDIR)/bsdkit-vbox shell
