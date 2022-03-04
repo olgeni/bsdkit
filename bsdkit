@@ -1089,6 +1089,11 @@ run_mtree() {
 }
 
 install_resolv_conf() {
+    local _destdir=$1
+
+    [ -d ${_destdir} ]
+    [ ${_destdir} != "/" ]
+
     if [ -f /etc/resolv.conf ] && [ ! -f ${_destdir}/etc/resolv.conf ]; then
         install -m 0644 -o root -g wheel /etc/resolv.conf ${_destdir}/etc/resolv.conf
     fi
