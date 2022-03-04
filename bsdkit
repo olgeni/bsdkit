@@ -1032,6 +1032,8 @@ install_release() {
     fi
 
     cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
+        local _options=""
+
         if ! is_yes ${BSDKIT_INSTALL_SRC} && [ ${_package} = "src" ]; then
             continue
         fi
@@ -1049,7 +1051,7 @@ install_release() {
         fi
 
         echo "Extracting: ${_filename}"
-        ${CAT_CMD} ${_relpath}/${_filename} | tar --unlink -xpJf - -C ${_destdir}
+        ${CAT_CMD} ${_relpath}/${_filename} | tar -x -p -U -C ${_destdir} -f - ${=_options}
 
         sync
     done
@@ -1060,6 +1062,7 @@ install_release() {
         rmdir ${_local_relpath_root}
     fi
 
+    return 0
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.var.dist -p ${_destdir}/var
     mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.usr.dist -p ${_destdir}/usr
@@ -1075,8 +1078,6 @@ install_release() {
     if [ -f ${_destdir}/etc/mtree/BSD.tests.dist ]; then
         mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.tests.dist -p ${_destdir}/usr/tests
     fi
-
-    return 0
 }
 
 install_resolv_conf() {
