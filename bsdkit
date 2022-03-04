@@ -1056,6 +1056,8 @@ install_release() {
         sync
     done
 
+    chroot ${_destdir} /etc/rc.d/ldconfig start
+
     if is_yes ${_delete}; then
         rm -f ${_local_relpath}/*
         rmdir ${_local_relpath}
@@ -1163,8 +1165,6 @@ bsdkit: {
     url: "${FREEBSD_PKG_URL}"
 }
 EOF
-
-    chroot ${_destdir} /etc/rc.d/ldconfig start
 
     return 0
 }
