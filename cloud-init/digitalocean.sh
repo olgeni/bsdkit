@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# #!/bin/sh
-# fetch -o - https://raw.githubusercontent.com/olgeni/bsdkit/master/cloud-init/digitalocean.sh | sh
-
 set -e -u -x
 
 exec > /var/log/bsdkit-cloud-init.log 2>&1
