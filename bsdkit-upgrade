@@ -332,7 +332,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
     if is_yes ${_extract}; then
         echo "Extracting: ${_filename}"
-        ${CAT_CMD} ${_distdir}/${_filename} | tar -x -z -U -C ${DESTDIR}/ -f - ${_options}
+        ${CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${_options}
     fi
 done
 
