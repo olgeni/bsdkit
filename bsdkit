@@ -1032,26 +1032,68 @@ install_release() {
     fi
 
     cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
+        local _extract="no"
         local _options=""
 
-        if ! is_yes ${BSDKIT_INSTALL_SRC} && [ ${_package} = "src" ]; then
-            continue
-        fi
+        case ${_package} in
+            kernel_dbg)
+                if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _extract="yes"
+                fi
+                ;;
 
-        if ! is_yes ${BSDKIT_INSTALL_KERNEL} && [[ ${_package} =~ "kernel" ]]; then
-            continue
-        fi
+            base_dbg)
+                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _extract="yes"
+                fi
+                ;;
 
-        if ! is_yes ${BSDKIT_INSTALL_DEBUG} && [[ ${_package} =~ "_dbg" ]]; then
-            continue
-        fi
+            lib32_dbg)
+                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _extract="yes"
+                fi
+                ;;
 
-        if ! is_yes ${BSDKIT_INSTALL_TESTS} && [ ${_package} = "tests" ]; then
-            continue
-        fi
+            kernel)
+                if is_yes ${BSDKIT_INSTALL_KERNEL}; then
+                    _extract="yes"
+                fi
+                ;;
 
-        echo "Extracting: ${_filename}"
-        ${CAT_CMD} ${_relpath}/${_filename} | tar -x -p -U -C ${_destdir} -f - ${=_options}
+            base)
+                _extract="yes"
+                ;;
+
+            lib32)
+                _options="${_options} --exclude ./etc"
+                _extract="yes"
+                ;;
+
+            src)
+                if is_yes ${BSDKIT_INSTALL_SRC}; then
+                    _options="${_options} --include ./usr/src"
+                    _extract="yes"
+                fi
+                ;;
+
+            tests)
+                if is_yes ${BSDKIT_INSTALL_TESTS}; then
+                    _options="${_options} --include ./usr/tests"
+                    _extract="yes"
+                fi
+                ;;
+
+            ports)
+                ;;
+
+            *)
+                ;;
+        esac
+
+        if is_yes ${_extract}; then
+            echo "Extracting: ${_filename}"
+            ${CAT_CMD} ${_relpath}/${_filename} | tar -x -p -U -C ${_destdir} -f - ${=_options}
+        fi
 
         sync
     done
