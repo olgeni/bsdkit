@@ -32,6 +32,7 @@ autoload throw catch
 : ${BSDKIT_IMG_DATA_LABEL:="2e158b17-5e10-11e5-ac21-080027af0e2a"}
 : ${BSDKIT_PKG_LOCKFILE:="/tmp/pkg.lock"}
 : ${BSDKIT_PKG_LOCKTIME:="120"}
+: ${BSDKIT_FREEBSD_DISTDIR:="/usr/freebsd-dist"}
 
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_JAIL_PROXY:=""}
@@ -1057,13 +1058,13 @@ install_release() {
 
         local _release_tag=${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
-        _local_relpath_root="/usr/freebsd-dist"
+        _local_relpath_root=${BSDKIT_FREEBSD_DISTDIR}
         _local_relpath=${_local_relpath_root}/${_release_tag}
 
         if ! mkdir -p ${_local_relpath}; then
             _delete="yes"
 
-            _local_relpath_root=${_destdir}/freebsd-dist
+            _local_relpath_root=${_destdir}/${BSDKIT_FREEBSD_DISTDIR}
             _local_relpath=${_local_relpath_root}/${_release_tag}
 
             echo "Using ${_local_relpath_root}"
