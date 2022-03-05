@@ -962,6 +962,84 @@ format_fstab() {
     rm ${_fstab}.0
 }
 
+fetch_release() {
+    local _relpath=$1
+    local _local_relpath=$2
+
+    fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
+
+    cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
+        local _fetch="no"
+
+        case ${_package} in
+            kernel_dbg)
+                if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _fetch="yes"
+                fi
+                ;;
+
+            base_dbg)
+                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _fetch="yes"
+                fi
+                ;;
+
+            lib32_dbg)
+                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _fetch="yes"
+                fi
+                ;;
+
+            kernel)
+                if is_yes ${BSDKIT_INSTALL_KERNEL}; then
+                    _fetch="yes"
+                fi
+                ;;
+
+            base)
+                _fetch="yes"
+                ;;
+
+            lib32)
+                _fetch="yes"
+                ;;
+
+            src)
+                if is_yes ${BSDKIT_INSTALL_SRC}; then
+                    _fetch="yes"
+                fi
+                ;;
+
+            tests)
+                if is_yes ${BSDKIT_INSTALL_TESTS}; then
+                    _fetch="yes"
+                fi
+                ;;
+
+            ports) ;;
+
+            *) ;;
+        esac
+
+        if is_yes ${_fetch}; then
+            local _sha256_local=""
+
+            if [ -f ${_local_relpath}/${_filename} ]; then
+                echo "Checking: ${_filename}"
+                _sha256_local=$(${CAT_CMD} ${_local_relpath}/${_filename} | sha256 -q)
+            else
+                _sha256_local="0"
+            fi
+
+            while [ ${_sha256} != ${_sha256_local} ]; do
+                fetch -o ${_local_relpath}/${_filename} ${_relpath}/${_filename}
+                echo "Checking: ${_filename}"
+                _sha256_local=$(${CAT_CMD} ${_local_relpath}/${_filename} | sha256 -q)
+            done
+        fi
+    done
+}
+
 install_release() {
     local _relpath=$1
     local _destdir=$2
@@ -993,80 +1071,7 @@ install_release() {
             mkdir -p ${_local_relpath}
         fi
 
-        fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
-
-        cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-            local _fetch="no"
-
-            case ${_package} in
-                kernel_dbg)
-                    if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                        _fetch="yes"
-                    fi
-                    ;;
-
-                base_dbg)
-                    if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                        _fetch="yes"
-                    fi
-                    ;;
-
-                lib32_dbg)
-                    if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                        _fetch="yes"
-                    fi
-                    ;;
-
-                kernel)
-                    if is_yes ${BSDKIT_INSTALL_KERNEL}; then
-                        _fetch="yes"
-                    fi
-                    ;;
-
-                base)
-                    _fetch="yes"
-                    ;;
-
-                lib32)
-                    _fetch="yes"
-                    ;;
-
-                src)
-                    if is_yes ${BSDKIT_INSTALL_SRC}; then
-                        _fetch="yes"
-                    fi
-                    ;;
-
-                tests)
-                    if is_yes ${BSDKIT_INSTALL_TESTS}; then
-                        _fetch="yes"
-                    fi
-                    ;;
-
-                ports)
-                    ;;
-
-                *)
-                    ;;
-            esac
-
-            if is_yes ${_fetch}; then
-                local _sha256_local=""
-
-                if [ -f ${_local_relpath}/${_filename} ]; then
-                    echo "Checking: ${_filename}"
-                    _sha256_local=$(${CAT_CMD} ${_local_relpath}/${_filename} | sha256 -q)
-                else
-                    _sha256_local="0"
-                fi
-
-                while [ ${_sha256} != ${_sha256_local} ]; do
-                    fetch -o ${_local_relpath}/${_filename} ${_relpath}/${_filename}
-                    echo "Checking: ${_filename}"
-                    _sha256_local=$(${CAT_CMD} ${_local_relpath}/${_filename} | sha256 -q)
-                done
-            fi
-        done
+        fetch_release ${_relpath} ${_local_relpath}
 
         _relpath=${_local_relpath}
     fi
