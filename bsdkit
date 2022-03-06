@@ -1095,29 +1095,29 @@ install_release() {
 
     cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         local _extract="NO"
-        local _options=""
+        local _options=()
 
         if is_yes ${_thin}; then
-            _options="${_options} --exclude ./bin"
-            _options="${_options} --exclude ./boot"
-            _options="${_options} --exclude ./lib"
-            _options="${_options} --exclude ./libexec"
-            _options="${_options} --exclude ./rescue"
-            _options="${_options} --exclude ./sbin"
-            _options="${_options} --exclude ./usr/bin"
-            _options="${_options} --exclude ./usr/include"
-            _options="${_options} --exclude ./usr/lib"
-            _options="${_options} --exclude ./usr/lib32"
-            _options="${_options} --exclude ./usr/libdata"
-            _options="${_options} --exclude ./usr/libexec"
-            _options="${_options} --exclude ./usr/sbin"
-            _options="${_options} --exclude ./usr/share"
-            _options="${_options} --exclude ./usr/src"
-            _options="${_options} --exclude ./usr/tests"
+            _options+="--exclude ./bin"
+            _options+="--exclude ./boot"
+            _options+="--exclude ./lib"
+            _options+="--exclude ./libexec"
+            _options+="--exclude ./rescue"
+            _options+="--exclude ./sbin"
+            _options+="--exclude ./usr/bin"
+            _options+="--exclude ./usr/include"
+            _options+="--exclude ./usr/lib"
+            _options+="--exclude ./usr/lib32"
+            _options+="--exclude ./usr/libdata"
+            _options+="--exclude ./usr/libexec"
+            _options+="--exclude ./usr/sbin"
+            _options+="--exclude ./usr/share"
+            _options+="--exclude ./usr/src"
+            _options+="--exclude ./usr/tests"
         fi
 
         if ! is_yes ${BSDKIT_INSTALL_TESTS}; then
-            _options="${_options} --exclude ./usr/tests"
+            _options+="--exclude ./usr/tests"
         fi
 
         case ${_package} in
@@ -1150,20 +1150,20 @@ install_release() {
                 ;;
 
             lib32)
-                _options="${_options} --exclude ./etc"
+                _options+="--exclude ./etc"
                 _extract="YES"
                 ;;
 
             src)
                 if is_yes ${BSDKIT_INSTALL_SRC}; then
-                    _options="${_options} --include ./usr/src"
+                    _options+="--include ./usr/src"
                     _extract="YES"
                 fi
                 ;;
 
             tests)
                 if is_yes ${BSDKIT_INSTALL_TESTS}; then
-                    _options="${_options} --include ./usr/tests"
+                    _options+="--include ./usr/tests"
                     _extract="YES"
                 fi
                 ;;
@@ -1177,7 +1177,7 @@ install_release() {
 
         if is_yes ${_extract}; then
             echo "Extracting: ${_filename}"
-            ${CAT_CMD} ${_relpath}/${_filename} | tar -x -p -U -C ${_destdir} -f - ${=_options}
+            ${CAT_CMD} ${_relpath}/${_filename} | tar -x -p -U -C ${_destdir} -f - ${=_options[*]}
         fi
 
         sync
