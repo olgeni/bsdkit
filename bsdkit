@@ -85,9 +85,21 @@ is_yes() {
             return 1
             ;;
         *)
-            return 2
+            if [[ $1 == <-> ]]; then
+                [ $1 -ne 0 ]
+            else
+                return 2
+            fi
             ;;
     esac
+}
+
+yes_if() {
+    if is_yes $1; then
+        echo "yes"
+    else
+        echo "no"
+    fi
 }
 
 is_bios() {
@@ -1042,24 +1054,11 @@ fetch_release() {
 }
 
 install_release() {
-    _thin="no"
-
-    local _opts
-    local _opts_args
+    local _opts _opts_args
 
     zparseopts -F -D -E -a _opts -A _opts_args -thin
 
-    local _opt
-
-    for _opt in ${_opts[*]}; do
-        case ${_opt} in
-            --thin)
-                _thin="yes"
-                ;;
-            *)
-                ;;
-        esac
-    done
+    _thin=$(yes_if ${_opts[(Ie)--thin]})
 
     local _relpath=$1
     local _destdir=$2
