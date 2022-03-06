@@ -6,7 +6,6 @@ autoload throw catch
 
 : ${BSDKIT_DESTDIR:="/mnt"}
 : ${BSDKIT_PV_UPDATE_DELAY:="0.1"}
-: ${BSDKIT_JAIL_ROOT:="/jails"}
 : ${BSDKIT_JAIL_NAME:="bsdkit"}
 : ${BSDKIT_PART_SIZE_BOOT:="512K"}
 : ${BSDKIT_PART_SIZE_EFI:="8M"}
@@ -128,7 +127,6 @@ environment() {
     echo \
         BSDKIT_DESTDIR=\"${BSDKIT_DESTDIR}\" \
         BSDKIT_PV_UPDATE_DELAY=\"${BSDKIT_PV_UPDATE_DELAY}\" \
-        BSDKIT_JAIL_ROOT=\"${BSDKIT_JAIL_ROOT}\" \
         BSDKIT_JAIL_NAME=\"${BSDKIT_JAIL_NAME}\" \
         BSDKIT_PART_SIZE_BOOT=\"${BSDKIT_PART_SIZE_BOOT}\" \
         BSDKIT_PART_SIZE_EFI=\"${BSDKIT_PART_SIZE_EFI}\" \
@@ -1683,11 +1681,9 @@ create_jail() {
 
     shift ${PARSE_OPTIONS_SHIFT}
 
-    local _jail_name=$1
+    local _destdir=$1
 
-    local _destdir=${BSDKIT_JAIL_ROOT}/${_jail_name}
-
-    create_jail_destdir ${_jail_name}
+    create_jail_destdir ${_destdir}
 
     BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no _do_create_jail ${_destdir}
 
@@ -1794,23 +1790,23 @@ EOF
 }
 
 create_jail_destdir() {
-    local _jail_name=$1
-
-    local _destdir=${BSDKIT_JAIL_ROOT}/${_jail_name}
+    local _destdir=$1
 
     if [ -d ${_destdir} ]; then
         [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (create_jail_destdir)."
     fi
 
-    local _dirname="$(dirname ${_destdir})"
-    local _parent_fs
+    local _dirname _basename _parent_fs
+
+    _dirname="$(dirname ${_destdir})"
+    _basename="$(basename ${_destdir})"
     _parent_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${_dirname}\" { print \$3; }")
 
     local _zfs="NO"
 
     if [ -n ${_parent_fs} ]; then
-        if ! zfs get -H -o value mountpoint ${_parent_fs}/${_jail_name} > /dev/null 2>&1; then
-            ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${_parent_fs}/${_jail_name}
+        if ! zfs get -H -o value mountpoint ${_parent_fs}/${_basename} > /dev/null 2>&1; then
+            ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${_parent_fs}/${_basename}
             _zfs="YES"
         fi
     else
@@ -1854,17 +1850,15 @@ _do_configure_jail() {
 }
 
 remove_jail() {
-    local _jail_name=$1
-
-    local _destdir=${BSDKIT_JAIL_ROOT}/${_jail_name}
+    local _destdir=$1
 
     valid_destdir ${_destdir}
 
-    local _dirname
-    _dirname=$(dirname ${_destdir})
+    local _dirname _basename _parent_fs
 
-    local _parent_fs
-    _parent_fs=$(mount -p | awk "\$2 == \"${_dirname}\" { print \$1 }")
+    _dirname=$(dirname ${_destdir})
+    _basename=$(basename ${_destdir})
+    _parent_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${_dirname}\" { print \$3; }")
 
     local _zfs="NO"
 
@@ -1877,13 +1871,13 @@ remove_jail() {
     done
 
     if [ -n ${_parent_fs} ]; then
-        if zfs get -H -o value mountpoint ${_parent_fs}/${_jail_name} > /dev/null 2>&1; then
+        if zfs get -H -o value mountpoint ${_parent_fs}/${_basename} > /dev/null 2>&1; then
             _zfs="YES"
         fi
     fi
 
     if is_yes ${_zfs}; then
-        zfs destroy ${_parent_fs}/${_jail_name}
+        zfs destroy ${_parent_fs}/${_basename}
     else
         rm -r -f ${_destdir} > /dev/null 2>&1 || :
         chflags -R noschg ${_destdir} > /dev/null 2>&1 || :
@@ -2679,9 +2673,7 @@ osreldate() {
 }
 
 echo_jail_conf() {
-    local _jail_name=$1
-
-    local _destdir=${BSDKIT_JAIL_ROOT}/${_jail_name}
+    local _destdir=$1
 
     valid_destdir ${_destdir}
 
