@@ -979,7 +979,7 @@ fetch_release() {
     local _relpath=$1
     local _local_relpath=$2
 
-    fetch -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
+    fetch -q -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
 
     cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         local _fetch="no"
