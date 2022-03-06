@@ -21,12 +21,12 @@ autoload throw catch
 : ${BSDKIT_LABEL_USR:="usr"}
 : ${BSDKIT_LABEL_VAR:="var"}
 
-: ${BSDKIT_INSTALL_KERNEL:="yes"}
-: ${BSDKIT_INSTALL_SRC:="yes"}
-: ${BSDKIT_INSTALL_DEBUG:="no"}
-: ${BSDKIT_INSTALL_TESTS:="no"}
-: ${BSDKIT_PROCFS_ENABLE:="yes"}
-: ${BSDKIT_FDESCFS_ENABLE:="yes"}
+: ${BSDKIT_INSTALL_KERNEL:="YES"}
+: ${BSDKIT_INSTALL_SRC:="YES"}
+: ${BSDKIT_INSTALL_DEBUG:="NO"}
+: ${BSDKIT_INSTALL_TESTS:="NO"}
+: ${BSDKIT_PROCFS_ENABLE:="YES"}
+: ${BSDKIT_FDESCFS_ENABLE:="YES"}
 : ${BSDKIT_ZFS_POOL:="rpool"}
 : ${BSDKIT_IMG_DATA_LABEL:="2e158b17-5e10-11e5-ac21-080027af0e2a"}
 : ${BSDKIT_PKG_LOCKFILE:="/tmp/pkg.lock"}
@@ -95,9 +95,9 @@ is_yes() {
 
 yes_if() {
     if is_yes $1; then
-        echo "yes"
+        echo "YES"
     else
-        echo "no"
+        echo "NO"
     fi
 }
 
@@ -980,50 +980,50 @@ fetch_release() {
     fetch -q -o ${_local_relpath}/MANIFEST ${_relpath}/MANIFEST
 
     cat ${_local_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-        local _fetch="no"
+        local _fetch="NO"
 
         case ${_package} in
             kernel_dbg)
                 if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _fetch="yes"
+                    _fetch="YES"
                 fi
                 ;;
 
             base_dbg)
                 if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _fetch="yes"
+                    _fetch="YES"
                 fi
                 ;;
 
             lib32_dbg)
                 if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _fetch="yes"
+                    _fetch="YES"
                 fi
                 ;;
 
             kernel)
                 if is_yes ${BSDKIT_INSTALL_KERNEL}; then
-                    _fetch="yes"
+                    _fetch="YES"
                 fi
                 ;;
 
             base)
-                _fetch="yes"
+                _fetch="YES"
                 ;;
 
             lib32)
-                _fetch="yes"
+                _fetch="YES"
                 ;;
 
             src)
                 if is_yes ${BSDKIT_INSTALL_SRC}; then
-                    _fetch="yes"
+                    _fetch="YES"
                 fi
                 ;;
 
             tests)
                 if is_yes ${BSDKIT_INSTALL_TESTS}; then
-                    _fetch="yes"
+                    _fetch="YES"
                 fi
                 ;;
 
@@ -1066,7 +1066,7 @@ install_release() {
     [ -d ${_destdir} ]
     [ ${_destdir} != "/" ]
 
-    local _delete="no"
+    local _delete="NO"
 
     if valid_url ${_relpath}; then
         local _local_relpath_root
@@ -1078,7 +1078,7 @@ install_release() {
         _local_relpath=${_local_relpath_root}/${_release_tag}
 
         if ! mkdir -p ${_local_relpath}; then
-            _delete="yes"
+            _delete="YES"
 
             _local_relpath_root=${_destdir}/${BSDKIT_FREEBSD_DISTDIR}
             _local_relpath=${_local_relpath_root}/${_release_tag}
@@ -1094,7 +1094,7 @@ install_release() {
     fi
 
     cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-        local _extract="no"
+        local _extract="NO"
         local _options=""
 
         if is_yes ${_thin}; then
@@ -1123,48 +1123,48 @@ install_release() {
         case ${_package} in
             kernel_dbg)
                 if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="yes"
+                    _extract="YES"
                 fi
                 ;;
 
             base_dbg)
                 if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="yes"
+                    _extract="YES"
                 fi
                 ;;
 
             lib32_dbg)
                 if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="yes"
+                    _extract="YES"
                 fi
                 ;;
 
             kernel)
                 if is_yes ${BSDKIT_INSTALL_KERNEL}; then
-                    _extract="yes"
+                    _extract="YES"
                 fi
                 ;;
 
             base)
-                _extract="yes"
+                _extract="YES"
                 ;;
 
             lib32)
                 _options="${_options} --exclude ./etc"
-                _extract="yes"
+                _extract="YES"
                 ;;
 
             src)
                 if is_yes ${BSDKIT_INSTALL_SRC}; then
                     _options="${_options} --include ./usr/src"
-                    _extract="yes"
+                    _extract="YES"
                 fi
                 ;;
 
             tests)
                 if is_yes ${BSDKIT_INSTALL_TESTS}; then
                     _options="${_options} --include ./usr/tests"
-                    _extract="yes"
+                    _extract="YES"
                 fi
                 ;;
 
