@@ -1042,6 +1042,25 @@ fetch_release() {
 }
 
 install_release() {
+    _thin="no"
+
+    local _opts
+    local _opts_args
+
+    zparseopts -F -D -E -a _opts -A _opts_args -thin
+
+    local _opt
+
+    for _opt in ${_opts[*]}; do
+        case ${_opt} in
+            --thin)
+                _thin="yes"
+                ;;
+            *)
+                ;;
+        esac
+    done
+
     local _relpath=$1
     local _destdir=$2
 
@@ -1080,6 +1099,29 @@ install_release() {
     cat ${_relpath}/MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         local _extract="no"
         local _options=""
+
+        if is_yes ${_thin}; then
+            _options="${_options} --exclude ./bin"
+            _options="${_options} --exclude ./boot"
+            _options="${_options} --exclude ./lib"
+            _options="${_options} --exclude ./libexec"
+            _options="${_options} --exclude ./rescue"
+            _options="${_options} --exclude ./sbin"
+            _options="${_options} --exclude ./usr/bin"
+            _options="${_options} --exclude ./usr/include"
+            _options="${_options} --exclude ./usr/lib"
+            _options="${_options} --exclude ./usr/lib32"
+            _options="${_options} --exclude ./usr/libdata"
+            _options="${_options} --exclude ./usr/libexec"
+            _options="${_options} --exclude ./usr/sbin"
+            _options="${_options} --exclude ./usr/share"
+            _options="${_options} --exclude ./usr/src"
+            _options="${_options} --exclude ./usr/tests"
+        fi
+
+        if ! is_yes ${BSDKIT_INSTALL_TESTS}; then
+            _options="${_options} --exclude ./usr/tests"
+        fi
 
         case ${_package} in
             kernel_dbg)
@@ -1144,7 +1186,45 @@ install_release() {
         sync
     done
 
+    if is_yes ${_thin}; then
+        mkdir ${_destdir}/.base
+
+        ln -s -f .base/bin ${_destdir}/bin
+        ln -s -f .base/boot ${_destdir}/boot
+        ln -s -f .base/lib ${_destdir}/lib
+        ln -s -f .base/libexec ${_destdir}/libexec
+        ln -s -f .base/rescue ${_destdir}/rescue
+        ln -s -f .base/sbin ${_destdir}/sbin
+
+        ln -s -f ../.base/usr/bin ${_destdir}/usr/bin
+        ln -s -f ../.base/usr/include ${_destdir}/usr/include
+        ln -s -f ../.base/usr/lib ${_destdir}/usr/lib
+        ln -s -f ../.base/usr/lib32 ${_destdir}/usr/lib32
+        ln -s -f ../.base/usr/libdata ${_destdir}/usr/libdata
+        ln -s -f ../.base/usr/libexec ${_destdir}/usr/libexec
+        ln -s -f ../.base/usr/sbin ${_destdir}/usr/sbin
+        ln -s -f ../.base/usr/share ${_destdir}/usr/share
+
+        if is_yes ${BSDKIT_INSTALL_SRC}; then
+            ln -s -f ../.base/usr/src ${_destdir}/usr/src
+        fi
+
+        if is_yes ${BSDKIT_INSTALL_TESTS}; then
+            ln -s -f ../.base/usr/tests ${_destdir}/usr/tests
+        fi
+
+        mount -t nullfs / ${_destdir}/.base
+        mount -t devfs devfs ${_destdir}/dev
+    else
+        run_mtree ${_destdir}
+    fi
+
     chroot ${_destdir} /etc/rc.d/ldconfig start
+
+    if is_yes ${_thin}; then
+        umount ${_destdir}/.base
+        umount ${_destdir}/dev
+    fi
 
     if is_yes ${_delete}; then
         rm -f ${_local_relpath}/*
@@ -1321,7 +1401,6 @@ install_mbr_ufs() {
 
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1358,7 +1437,6 @@ install_mbr_ufs_gmirror() {
     gmirror_configure ${_mirror} ${_devices}
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1385,7 +1463,6 @@ install_gpt_ufs() {
 
     gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1415,7 +1492,6 @@ install_zfs() {
     zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1445,7 +1521,6 @@ install_gpt_zfs() {
     zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1475,7 +1550,6 @@ install_mbr_zfs() {
     zfs_create_mbr_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    run_mtree ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1749,8 +1823,6 @@ _do_create_jail() {
     local _destdir=$1
 
     BSDKIT_INSTALL_KERNEL=${BSDKIT_INSTALL_KERNEL} BSDKIT_INSTALL_SRC=${BSDKIT_INSTALL_SRC} install_release ${FREEBSD_REL_URL} ${_destdir}
-
-    run_mtree ${_destdir}
 }
 
 _do_configure_jail() {
@@ -2053,8 +2125,6 @@ build_setup_staging() {
     mkdir -p ${_destdir}
 
     BSDKIT_INSTALL_SRC=no install_release ${_relpath} ${_destdir}
-
-    run_mtree ${_destdir}
 
     rm -f ${_destdir}/boot/kernel/*.symbols(N)
 
