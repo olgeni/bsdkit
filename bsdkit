@@ -234,7 +234,6 @@ rc_get() {
     local _key=$2
 
     local _buffer
-
     _buffer="$(grep -E "^[[:space:]]*${_key}[[:space:]]*=" ${_file})"
 
     local _value1
