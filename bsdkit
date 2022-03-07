@@ -1055,6 +1055,7 @@ install_release() {
 
     zparseopts -F -D -E -a _opts -A _opts_args -thin
 
+    local _thin
     _thin=$(yes_if ${_opts[(Ie)--thin]})
 
     local _relpath=$1
