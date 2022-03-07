@@ -2093,9 +2093,6 @@ build_setup_staging() {
     local _relpath=$3
     local _pkgpath=$4
 
-    mkdir -p ${_staging}
-
-    _staging=$(realpath ${_staging})
     _bsdkit=$(realpath ${_bsdkit})
     _relpath=$(realpath ${_relpath})
     _pkgpath=$(realpath ${_pkgpath})
@@ -2103,6 +2100,10 @@ build_setup_staging() {
     valid_bsdkit ${_bsdkit}
     valid_relpath ${_relpath}
     valid_pkgpath ${_pkgpath}
+
+    mkdir -p ${_staging}
+
+    _staging=$(realpath ${_staging})
 
     [ ${_staging} != ${_bsdkit} ]
     [ ${_staging} != ${_relpath} ]
