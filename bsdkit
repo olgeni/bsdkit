@@ -2824,7 +2824,6 @@ purge_local_libdirs() {
 
 zfs_create_postgresql() {
     local _pool
-
     _pool=$(get_boot_pool)
 
     local _exists="NO"
