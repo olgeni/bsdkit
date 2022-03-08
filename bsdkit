@@ -158,9 +158,7 @@ environment() {
         BSDKIT_ARCH=\"${BSDKIT_ARCH}\" \
         BSDKIT_TREE=\"${BSDKIT_TREE}\" \
         BSDKIT_PKGSET=\"${BSDKIT_PKGSET}\" \
-        BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\" \
-        FREEBSD_REL_URL=\"${FREEBSD_REL_URL}\" \
-        FREEBSD_PKG_URL=\"${FREEBSD_PKG_URL}\"
+        BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\"
 }
 
 parse_url() {
