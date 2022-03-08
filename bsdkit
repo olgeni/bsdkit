@@ -46,10 +46,8 @@ autoload throw catch
 : ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
 : ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
 
-# FREEBSD_REL_URL: initialized by parse_options
-# FREEBSD_PKG_URL: initialized by parse_options
-
-: ${PARSE_OPTIONS_SHIFT:=0}
+: ${FREEBSD_REL_URL:=''} # initialized by parse_options
+: ${FREEBSD_PKG_URL:=''} # initialized by parse_options
 
 ZPOOL_CREATE_CMD=(zpool create)
 ZFS_CREATE_CMD=(zfs create)
@@ -160,7 +158,9 @@ environment() {
         BSDKIT_ARCH=\"${BSDKIT_ARCH}\" \
         BSDKIT_TREE=\"${BSDKIT_TREE}\" \
         BSDKIT_PKGSET=\"${BSDKIT_PKGSET}\" \
-        BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\"
+        BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\" \
+        FREEBSD_REL_URL=\"${FREEBSD_REL_URL}\" \
+        FREEBSD_PKG_URL=\"${FREEBSD_PKG_URL}\"
 }
 
 parse_url() {
@@ -174,29 +174,41 @@ parse_url() {
         -e "s|%%PKGSET%%|${BSDKIT_PKGSET}|g"
 }
 
+local_options() {
+    cat << EOF
+local BSDKIT_ROOT_URL='${BSDKIT_ROOT_URL}'
+local BSDKIT_VERSION='${BSDKIT_VERSION}'
+local BSDKIT_ARCH='${BSDKIT_ARCH}'
+local BSDKIT_TREE='${BSDKIT_TREE}'
+local BSDKIT_PKGSET='${BSDKIT_PKGSET}'
+local FREEBSD_REL_URL='${FREEBSD_REL_URL}'
+local FREEBSD_PKG_URL='${FREEBSD_PKG_URL}'
+EOF
+}
+
 parse_options() {
+    zparseopts -D -E -a _opts -A _opts_args r: v: a: p: z:
+
     local _option
 
-    OPTIND=1
-    while getopts "r:v:a:p:z:" _option; do
+    for _option in ${(@k)_opts_args}; do
         case ${_option} in
-            r)
-                BSDKIT_ROOT_URL=${OPTARG%/}
+            -r)
+                BSDKIT_ROOT_URL=${_opts_args[-r]}
                 ;;
-            v)
-                BSDKIT_VERSION=${OPTARG}
+            -v)
+                BSDKIT_VERSION=${_opts_args[-v]}
                 ;;
-            a)
-                BSDKIT_ARCH=${OPTARG}
+            -a)
+                BSDKIT_ARCH=${_opts_args[-a]}
                 ;;
-            p)
-                BSDKIT_TREE=${OPTARG}
+            -p)
+                BSDKIT_TREE=${_opts_args[-p]}
                 ;;
-            z)
-                BSDKIT_PKGSET=${OPTARG}
+            -z)
+                BSDKIT_PKGSET=${_opts_args[-z]}
                 ;;
             *)
-                return 1
                 ;;
         esac
     done
@@ -204,7 +216,16 @@ parse_options() {
     FREEBSD_REL_URL=$(parse_url ${FREEBSD_REL_URL_TEMPLATE})
     FREEBSD_PKG_URL=$(parse_url ${FREEBSD_PKG_URL_TEMPLATE})
 
-    PARSE_OPTIONS_SHIFT=$((OPTIND - 1))
+    cat << EOF
+BSDKIT_ROOT_URL='${BSDKIT_ROOT_URL}';
+BSDKIT_VERSION='${BSDKIT_VERSION}';
+BSDKIT_ARCH='${BSDKIT_ARCH}';
+BSDKIT_TREE='${BSDKIT_TREE}';
+BSDKIT_PKGSET='${BSDKIT_PKGSET}';
+FREEBSD_REL_URL='${FREEBSD_REL_URL}';
+FREEBSD_PKG_URL='${FREEBSD_PKG_URL}';
+set "$@";
+EOF
 }
 
 rc_set() {
@@ -1385,9 +1406,8 @@ reset_state() {
 }
 
 install_mbr_ufs() {
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _class=$1
     local _device=$2
@@ -1411,9 +1431,8 @@ install_mbr_ufs() {
 }
 
 install_mbr_ufs_gmirror() {
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _class=$1
     local _mirror=$2
@@ -1447,9 +1466,8 @@ install_mbr_ufs_gmirror() {
 }
 
 install_gpt_ufs() {
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _class=$1
     local _device=$2
@@ -1475,9 +1493,8 @@ install_gpt_ufs() {
 install_zfs() {
     check_bsdkit_runtime
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _devices
 
@@ -1504,9 +1521,9 @@ install_zfs() {
 install_gpt_zfs() {
     check_bsdkit_runtime
 
-    parse_options $@
+    eval $(local_options)
+    eval $(parse_options $@)
 
-    shift ${PARSE_OPTIONS_SHIFT}
 
     local _devices
 
@@ -1533,9 +1550,8 @@ install_gpt_zfs() {
 install_mbr_zfs() {
     check_bsdkit_runtime
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _devices
 
@@ -1562,9 +1578,8 @@ install_mbr_zfs() {
 create_iocell() {
     check_ansible
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _tag=$1
 
@@ -1590,9 +1605,8 @@ create_iocell() {
 create_iocell_thin() {
     check_ansible
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _tag=$1
 
@@ -1618,9 +1632,8 @@ create_iocell_thin() {
 create_iocage() {
     check_ansible
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _jail_name=$1
 
@@ -1650,9 +1663,8 @@ create_iocage() {
 create_iocage_thin() {
     check_ansible
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _jail_name=$1
 
@@ -1680,9 +1692,8 @@ create_iocage_thin() {
 create_jail() {
     check_ansible
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _destdir=$1
 
@@ -1696,9 +1707,8 @@ create_jail() {
 configure_jail() {
     check_ansible
 
-    parse_options $@
-
-    shift ${PARSE_OPTIONS_SHIFT}
+    eval $(local_options)
+    eval $(parse_options $@)
 
     local _destdir=$1
 
