@@ -1231,18 +1231,9 @@ install_release() {
         if is_yes ${BSDKIT_INSTALL_TESTS}; then
             ln -s -f ../.base/usr/tests ${_destdir}/usr/tests
         fi
-
-        mount -t nullfs / ${_destdir}/.base
-        mount -t devfs devfs ${_destdir}/dev
     else
         run_mtree ${_destdir}
-    fi
-
-    chroot ${_destdir} /etc/rc.d/ldconfig start
-
-    if is_yes ${_thin}; then
-        umount ${_destdir}/.base
-        umount ${_destdir}/dev
+        chroot ${_destdir} /etc/rc.d/ldconfig start
     fi
 
     if is_yes ${_delete}; then
@@ -1595,7 +1586,7 @@ create_iocell() {
 
     [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell)."
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no _do_create_jail ${_destdir}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir}
 
     _do_configure_jail ${_destdir}
 }
@@ -1653,7 +1644,7 @@ create_iocage() {
 
     [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no _do_create_jail ${_destdir}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir}
 
     _do_configure_jail ${_destdir}
 }
@@ -1693,13 +1684,41 @@ create_jail() {
     eval $(local_options)
     eval $(parse_options $@)
 
+    local _opts _opts_args
+
+    zparseopts -F -D -E -a _opts -A _opts_args -thin -plain
+
+    local _thin
+    _thin=$(yes_if ${_opts[(Ie)--thin]})
+
+    local _plain
+    _plain=$(yes_if ${_opts[(Ie)--plain]})
+
+    local _options=()
+
+    if is_yes ${_thin}; then
+        _options+="--thin"
+    fi
+
     local _destdir=$1
 
     create_jail_destdir ${_destdir}
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no _do_create_jail ${_destdir}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir} ${=_options[*]}
 
-    _do_configure_jail ${_destdir}
+    if ! is_yes ${_plain}; then
+        if is_yes ${_thin}; then
+            mount -t nullfs / ${_destdir}/.base
+            mount -t devfs devfs ${_destdir}/dev
+        fi
+
+        _do_configure_jail ${_destdir}
+
+        if is_yes ${_thin}; then
+            umount ${_destdir}/.base
+            umount ${_destdir}/dev
+        fi
+    fi
 }
 
 configure_jail() {
@@ -1823,12 +1842,6 @@ create_jail_destdir() {
     else
         mkdir -p ${_destdir}
     fi
-}
-
-_do_create_jail() {
-    local _destdir=$1
-
-    BSDKIT_INSTALL_KERNEL=${BSDKIT_INSTALL_KERNEL} BSDKIT_INSTALL_SRC=${BSDKIT_INSTALL_SRC} install_release ${FREEBSD_REL_URL} ${_destdir}
 }
 
 _do_configure_jail() {
