@@ -1,3 +1,12 @@
+- name: "loader: touch files"
+  file:
+    path: "{{ item }}"
+    state: touch
+    mode: "0644"
+  changed_when: no
+  loop:
+    - /boot/loader.conf
+
 - name: "loader: configure loader_conf_files"
   lineinfile:
     dest: /boot/loader.conf.local

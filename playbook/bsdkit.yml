@@ -56,7 +56,6 @@
         mode: "0644"
       changed_when: no
       loop:
-        - /boot/loader.conf
         - /etc/rc.conf
         - /etc/rc.conf.local
         - /etc/sysctl.conf
