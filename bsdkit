@@ -1712,7 +1712,13 @@ create_jail() {
             mount -t devfs devfs ${_destdir}/dev
         fi
 
-        _do_configure_jail ${_destdir}
+        local _options=()
+
+        if is_yes ${_plain}; then
+            _options+="--plain"
+        fi
+
+        _do_configure_jail ${=_options[*]} ${_destdir}
 
         if is_yes ${_thin}; then
             umount ${_destdir}/.base
@@ -1845,6 +1851,13 @@ create_jail_destdir() {
 }
 
 _do_configure_jail() {
+    local _opts _opts_args
+
+    zparseopts -F -D -E -a _opts -A _opts_args -plain
+
+    local _plain
+    _plain=$(yes_if ${_opts[(Ie)--plain]})
+
     local _destdir=$1
 
     link_home ${_destdir}
@@ -1860,15 +1873,17 @@ _do_configure_jail() {
     local _shell
     _shell=$(cat ${_destdir}/etc/passwd | grep ^root | cut -d : -f 7)
 
-    start_jail ${_destdir}
-    pw -V ${_destdir}/etc usermod root -s /bin/sh
+    if ! is_yes ${_plain}; then
+        start_jail ${_destdir}
+        pw -V ${_destdir}/etc usermod root -s /bin/sh
 
-    {
-        ansible_jail_playbook
-    } always {
-        pw -V ${_destdir}/etc usermod root -s ${_shell}
-        stop_jail ${_destdir}
-    }
+        {
+            ansible_jail_playbook
+        } always {
+            pw -V ${_destdir}/etc usermod root -s ${_shell}
+            stop_jail ${_destdir}
+        }
+    fi
 
     return 0
 }
