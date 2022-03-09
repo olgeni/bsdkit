@@ -1708,7 +1708,7 @@ create_jail() {
 
     if ! is_yes ${_plain}; then
         if is_yes ${_thin}; then
-            mount -t nullfs / ${_destdir}/.base
+            mount -t nullfs -o ro / ${_destdir}/.base
             mount -t devfs devfs ${_destdir}/dev
         fi
 
