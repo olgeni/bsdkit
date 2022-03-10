@@ -1744,7 +1744,7 @@ configure_jail() {
     shift
 
     [ -d ${_destdir} ] || error "jail root does not exist (configure_jail)."
-    [ -f ${_destdir}/etc/rc.conf ] || error "rc.conf does not exist in jail (configure_jail)."
+    [ -f ${_destdir}/bin/sh ] || error "/bin/sh does not exist in jail (configure_jail)."
 
     _do_configure_jail ${_destdir}
 }
