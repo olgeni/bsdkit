@@ -1072,6 +1072,63 @@ fetch_release() {
     done
 }
 
+make_thin_jail() {
+    local _destdir=$1
+
+    _destdir=$(realpath ${_destdir})
+
+    [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
+    [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
+    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing rc.d)"
+
+    local _directory_list=(
+        "boot" "."
+        "lib" "."
+        "libexec" "."
+        "rescue" "."
+        "sbin" "."
+        "usr/bin" ".."
+        "usr/include" ".."
+        "usr/lib" ".."
+        "usr/lib32" ".."
+        "usr/libdata" ".."
+        "usr/libexec" ".."
+        "usr/sbin" ".."
+        "usr/share" "..")
+
+    if is_yes ${BSDKIT_INSTALL_SRC}; then
+        _directory_list+=("usr/src" "..")
+    else
+        rm -r -f ${_destdir}/usr/src
+    fi
+
+    if is_yes ${BSDKIT_INSTALL_TESTS}; then
+        _directory_list+=("usr/tests" "..")
+    else
+        rm -r -f ${_destdir}/usr/tests
+    fi
+
+    local _directory
+
+    for _directory _prefix in ${_directory_list}; do
+        if [ -d ${_destdir}/${_directory} ]; then
+            rm -r -f ${_destdir}/${_directory} > /dev/null 2>&1 || :
+            chflags -R noschg ${_destdir}/${_directory} > /dev/null 2>&1 || :
+            rm -r -f ${_destdir}/${_directory}
+        fi
+
+        echo "${_directory}"
+
+        if [ -L ${_destdir}/${_directory} ]; then
+            rm -f ${_destdir}/${_directory}
+        fi
+
+        ln -s -f ${_prefix}/.base/${_directory} ${_destdir}/${_directory}
+    done
+
+    mkdir -p ${_destdir}/.base
+}
+
 install_release() {
     local _opts _opts_args
 
