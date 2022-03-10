@@ -1233,7 +1233,13 @@ install_release() {
         fi
     else
         run_mtree ${_destdir}
-        chroot ${_destdir} /etc/rc.d/ldconfig start
+
+        {
+            mount -t devfs devfs ${_destdir}/dev
+            chroot ${_destdir} /etc/rc.d/ldconfig start
+        } always {
+            umount -f ${_destdir}/dev
+        }
     fi
 
     if is_yes ${_delete}; then
