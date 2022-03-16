@@ -2115,7 +2115,7 @@ EOF
 
     rm -f ${_master_passwd}
 
-    install -m 0644 -o root -g wheel ${_bsdkit}/ansible/dot.zshrc ${_destdir}/root/.zshrc
+    install -m 0644 -o root -g wheel ${_bsdkit}/ansible/dotfiles/dot.zshrc ${_destdir}/root/.zshrc
 
     cat >> ${_destdir}/root/.zshrc << EOF
 echo -n "Available disks: "
