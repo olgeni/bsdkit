@@ -257,7 +257,7 @@ if is_yes ${BOOTENV_ENABLE}; then
 else
     if [ -z "${DESTDIR}" ]; then
         if is_yes ${_proc_mounted}; then
-            while umount -f /proc > /dev/null 2>&1; do :; done
+            umount -f /proc
         fi
     fi
 fi
