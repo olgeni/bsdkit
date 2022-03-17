@@ -183,7 +183,7 @@ _distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
 _destdir_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }")
 
 if [ -n "${_destdir_fs}" ]; then
-    zfs snapshot "${_destdir_fs}@$(date -u "+%Y-%m-%dT%H:%M:%SZ")"
+    zfs snapshot "${_destdir_fs}@$(date +%F.%H%M)"
 fi
 
 mkdir -p ${_distdir}
