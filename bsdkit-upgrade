@@ -368,7 +368,9 @@ if [ -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist ]; then
 fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.tests.dist ]; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.tests.dist -p ${DESTDIR}/usr/tests
+    if [ -d ${DESTDIR}/usr/tests ]; then
+        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.tests.dist -p ${DESTDIR}/usr/tests
+    fi
 fi
 
 chroot ${DESTDIR}/ newaliases
