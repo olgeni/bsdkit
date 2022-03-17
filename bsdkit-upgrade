@@ -11,6 +11,7 @@ set -e -u -o pipefail
 : ${BOOTENV_MOUNT:="/mnt"}
 : ${FETCH_ONLY:="no"}
 : ${UPGRADE_PACKAGES:="no"}
+: ${REBUILD_PORTS:="no"}
 : ${PV_UPDATE_DELAY:="0.1"}
 
 : ${_install_src:="no"}
@@ -101,7 +102,7 @@ if mount | cut -w -f 3 | fgrep -q "/proc"; then
 fi
 
 OPTIND=1
-while getopts "eEn:r:v:a:d:Fp" OPT; do
+while getopts "eEn:r:v:a:d:Fpb" OPT; do
     case ${OPT} in
         e)
             BOOTENV_ENABLE=yes
@@ -129,6 +130,9 @@ while getopts "eEn:r:v:a:d:Fp" OPT; do
             ;;
         p)
             UPGRADE_PACKAGES="yes"
+            ;;
+        b)
+            REBUILD_PORTS="yes"
             ;;
         *)
             exit 64 # EX_USAGE
@@ -403,9 +407,11 @@ if is_yes ${BOOTENV_ENABLE}; then
         umount -f ${BOOTENV_MOUNT}/dev
     fi
 
-    for _port in $(pkg which -qo /boot/modules/* | sort | uniq); do
-        rebuild_port ${_port}
-    done
+    if is_yes ${REBUILD_PORTS}; then
+        for _port in $(pkg which -qo /boot/modules/* | sort | uniq); do
+            rebuild_port ${_port}
+        done
+    fi
 
     if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/src"; then
         umount -f ${BOOTENV_MOUNT}/usr/src
