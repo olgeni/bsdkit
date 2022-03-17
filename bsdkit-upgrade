@@ -168,10 +168,6 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
     _install_src=yes
 fi
 
-_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
-
-_distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
-
 if [ -f ${DESTDIR}/usr/lib/debug/bin/sh.debug ]; then
     _install_debug=yes
 fi
@@ -179,6 +175,10 @@ fi
 if [ -f ${DESTDIR}/usr/tests/Kyuafile ]; then
     _install_tests=yes
 fi
+
+_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
+
+_distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
 _destdir_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }")
 
