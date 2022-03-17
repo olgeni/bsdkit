@@ -253,6 +253,8 @@ if is_yes ${BOOTENV_ENABLE}; then
         mount -t nullfs /usr/ports ${BOOTENV_MOUNT}/usr/ports
     fi
 
+    mount -t devfs devfs ${BOOTENV_MOUNT}/dev
+
     DESTDIR=${BOOTENV_MOUNT}
 else
     if [ -z "${DESTDIR}" ]; then
@@ -396,15 +398,11 @@ fi
 
 if is_yes ${BOOTENV_ENABLE}; then
     if is_yes ${UPGRADE_PACKAGES}; then
-        mount -t devfs devfs ${BOOTENV_MOUNT}/dev
-
         if pkg -c ${BOOTENV_MOUNT} update --repository bsdkit --force; then
             pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --yes pkg
             pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --fetch-only --yes
             env HANDLE_RC_SCRIPTS=NO pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --yes
         fi
-
-        umount -f ${BOOTENV_MOUNT}/dev
     fi
 
     if is_yes ${REBUILD_PORTS}; then
