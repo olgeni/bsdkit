@@ -36,12 +36,12 @@ autoload throw catch
 : ${BSDKIT_FREEBSD_DISTDIR:="/usr/freebsd-dist"}
 
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
-: ${BSDKIT_JAIL_PROXY:=""}
 : ${BSDKIT_VERSION:="13.0"}
 : ${BSDKIT_ARCH:="amd64"}
 : ${BSDKIT_TREE:="default"}
 : ${BSDKIT_PKGSET:="nox11"}
 : ${BSDKIT_SSH_PUBLIC_KEY:=""}
+: ${BSDKIT_JAIL_PROXY:=""}
 
 : ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
 : ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
