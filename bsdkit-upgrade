@@ -20,7 +20,7 @@ set -e -u -o pipefail
 : ${_proc_mounted:="no"}
 
 error() {
-    echo "bsdkit-upgrade: $@"
+    echo "bsdkit-upgrade: $*"
     exit 1
 }
 
