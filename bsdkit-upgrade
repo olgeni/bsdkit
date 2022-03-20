@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 set -e -u -o pipefail
+
+autoload throw catch
 
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:="13.0"}
@@ -222,7 +224,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
     if [ -f "${_filename}" ]; then
         echo "Checking ${_filename}"
-        _sha256_local=$(${CAT_CMD} "${_filename}" | sha256 -q)
+        _sha256_local=$(${=CAT_CMD} "${_filename}" | sha256 -q)
     else
         _sha256_local="0"
     fi
@@ -283,7 +285,7 @@ if is_yes ${_install_src}; then
         rm -r -f ${_file}
     done
 
-    ${CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
+    ${=CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
 fi
 
 find ${DESTDIR}/bin \
@@ -302,7 +304,7 @@ fi
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     _extract="no"
-    _options=""
+    _options=()
 
     if ! is_yes ${_install_debug} && [ ${_package} != ${_package%_dbg} ]; then
         continue
@@ -319,12 +321,12 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             fi
             ;;
         base)
-            _options="${_options} --exclude ./.cshrc"
-            _options="${_options} --exclude ./.profile"
-            _options="${_options} --exclude ./etc"
-            _options="${_options} --exclude ./root"
-            _options="${_options} --exclude ./tmp"
-            _options="${_options} --exclude ./var"
+            _options+="--exclude ./.cshrc"
+            _options+="--exclude ./.profile"
+            _options+="--exclude ./etc"
+            _options+="--exclude ./root"
+            _options+="--exclude ./tmp"
+            _options+="--exclude ./var"
             _extract="yes"
             ;;
         ports) ;;
@@ -338,7 +340,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
     if is_yes ${_extract}; then
         echo "Extracting: ${_filename}"
-        ${CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${_options}
+        ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]}
     fi
 done
 
