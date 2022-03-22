@@ -59,6 +59,7 @@
       nameserver {{ metadata_dns_nameservers_0 }}
       nameserver {{ metadata_dns_nameservers_1 }}
     mode: "0644"
+  when: digitalocean.update_dns
 
 - name: "digitalocean: configure /etc/hosts for Digital Ocean"
   blockinfile:

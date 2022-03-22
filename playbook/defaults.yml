@@ -17,3 +17,6 @@ periodic_conf:
 
 pw_conf:
     skeleton: "/usr/local/share/skel"
+
+digitalocean:
+    update_dns: False
