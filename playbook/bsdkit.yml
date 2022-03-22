@@ -204,6 +204,7 @@
           pkgng:
             name:
               - misc/inplace
+              - net/py-netaddr
               - sysutils/ansible
               - sysutils/beadm
               - sysutils/checkrestart

@@ -2155,6 +2155,7 @@ install_setup_runtime() {
     local _runtime=(
         # required
         lang/python
+        net/py-netaddr
         ports-mgmt/pkg
         security/ca_root_nss
         shells/zsh
