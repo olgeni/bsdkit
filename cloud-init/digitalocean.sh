@@ -96,6 +96,9 @@ pkg delete -y -g py27\* || :
 pkg autoremove -y || :
 pkg clean -y -a || :
 
+rm -r -f /usr/tests
+rm -r -f /usr/lib/debug
+
 ./bsdkit-upgrade -v${BSDKIT_VERSION} -F
 ./bsdkit-upgrade -v${BSDKIT_VERSION} -n bsdkit
 rm -r -f /usr/freebsd-dist/
