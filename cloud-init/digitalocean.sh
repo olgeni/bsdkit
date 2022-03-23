@@ -19,6 +19,7 @@ mv -v /boot/loader.conf.local /boot/.loader.conf
 sed -i -e "/vfs\.root\.mountfrom/d;" /boot/.loader.conf
 sed -i -e "/vfs\.zfs\.vdev\.cache\.size/d;" /boot/.loader.conf
 sed -i -e "/vfs\.zfs\.arc_max/d;" /boot/.loader.conf
+sed -i -e "/loader_logo/d;" /boot/.loader.conf
 
 cat -s /boot/.loader.conf > /boot/loader.conf
 rm -f -v /boot/.loader.conf
