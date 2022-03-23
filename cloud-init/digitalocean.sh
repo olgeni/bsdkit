@@ -116,6 +116,10 @@ gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 vtbd0
 zfs upgrade -a
 zpool upgrade -a
 bectl destroy -Fo default || :
+
+pkg upgrade -F -y
+pkg upgrade -y
+
 touch /firstboot-reboot
 rm -f /etc/rc.d/digitalocean_boot
 EOF
