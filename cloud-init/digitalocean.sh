@@ -103,10 +103,10 @@ cd /root
 
 bectl mount bsdkit /mnt
 
-cat << "EOF" > /mnt/etc/rc.d/bsdkit_loader
+cat << "EOF" > /mnt/etc/rc.d/digitalocean_boot
 #!/bin/sh
 
-# PROVIDE: bsdkit_loader
+# PROVIDE: digitalocean_boot
 # REQUIRE: DAEMON
 # KEYWORD: firstboot
 
@@ -117,10 +117,10 @@ zfs upgrade -a
 zpool upgrade -a
 bectl destroy -Fo default || :
 touch /firstboot-reboot
-rm -f /etc/rc.d/bsdkit_loader
+rm -f /etc/rc.d/digitalocean_boot
 EOF
 
-chmod 555 /mnt/etc/rc.d/bsdkit_loader
+chmod 555 /mnt/etc/rc.d/digitalocean_boot
 
 touch /mnt/firstboot
 
