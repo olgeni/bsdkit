@@ -1,0 +1,3 @@
+---
+gitlab_runner_home: /home/gitlab-runner
+gitlab_url: https://gitlab.com/
