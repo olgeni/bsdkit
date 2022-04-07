@@ -1,4 +1,10 @@
-- name: "digitalocean: gather metadata (#1)"
+- name: "digitalocean: gather metadata (uri)"
+  uri:
+    url: http://169.254.169.254/metadata/v1.json
+    return_content: yes
+  register: uri_metadata_payload
+
+- name: "digitalocean: gather metadata (cloud-init)"
   shell:
     cmd: |
       set -e -u -o pipefail
@@ -27,12 +33,19 @@
           fi
       done
       exit 1
-  register: metadata_payload
+  register: cloud_init_metadata_payload
+  when: uri_metadata_payload is failed
   changed_when: no
 
-- name: "digitalocean: gather metadata (#2)"
+- name: "digitalocean: gather metadata (uri, json)"
   set_fact:
-    metadata: "{{ metadata_payload.stdout | from_json }}"
+    metadata: "{{ uri_metadata_payload.content | from_json }}"
+  when: uri_metadata_payload is succeeded
+
+- name: "digitalocean: gather metadata (cloud-init, json)"
+  set_fact:
+    metadata: "{{ cloud_init_metadata_payload.stdout | from_json }}"
+  when: uri_metadata_payload is failed
 
 - name: "digitalocean: debug metadata"
   debug:
