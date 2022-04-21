@@ -8,7 +8,7 @@
         hidden: yes
       register: find_var_db_mysql
 
-    - name: Gather facts about MySQL ZFS dataset
+    - name: "mysql-zfs: gather facts about MySQL ZFS dataset"
       zfs_facts:
         dataset: "{{ boot_pool }}/var/db/mysql"
       ignore_errors: yes
