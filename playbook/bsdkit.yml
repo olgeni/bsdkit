@@ -138,6 +138,8 @@
       when: is_host_install
       block:
         - name: "Include zfs.inc.yml"
+          tags:
+            - configure
           import_tasks: include/zfs.inc.yml
           when: not is_chroot_install
 
