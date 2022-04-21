@@ -19,3 +19,39 @@
         state: present
         extra_zfs_properties:
           canmount: off
+
+    - name: "zfs: gather facts about pkg ZFS dataset"
+      tags:
+        - configure
+      zfs_facts:
+        dataset: "{{ boot_pool }}/usr/local/pkg"
+      ignore_errors: yes
+      register: zfs_facts_usr_local_pkg
+
+    - name: "zfs: save /var/db/pkg"
+      tags:
+        - configure
+      shell: |
+        set -e -u -o pipefail
+        mkdir /tmp/pkg/
+        mv /var/db/pkg/* /tmp/pkg/
+      when: zfs_facts_usr_local_pkg is not successful
+
+    - name: "zfs: create ZFS dataset for pkg"
+      tags:
+        - configure
+      zfs:
+        name: "{{ boot_pool }}/usr/local/pkg"
+        state: present
+        extra_zfs_properties:
+          mountpoint: "/var/db/pkg"
+      when: zfs_facts_usr_local_pkg is not successful
+
+    - name: "zfs: restore /var/db/pkg"
+      tags:
+        - configure
+      shell: |
+        set -e -u -o pipefail
+        mv /tmp/pkg/* /var/db/pkg/
+        rmdir /tmp/pkg
+      when: zfs_facts_usr_local_pkg is not successful
