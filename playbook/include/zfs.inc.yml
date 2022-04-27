@@ -21,8 +21,6 @@
           canmount: off
 
     - name: "zfs: gather facts about pkg ZFS dataset"
-      tags:
-        - configure
       zfs_facts:
         dataset: "{{ boot_pool }}/usr/local/pkg"
       ignore_errors: yes
@@ -30,27 +28,19 @@
 
     - name: "zfs: remove usr/local/pkg"
       when: zfs_facts_usr_local_pkg is successful
-      tags:
-        - configure
       block:
         - name: "zfs: save /var/db/pkg"
-          tags:
-            - configure
           shell: |
             set -e -u -o pipefail
             mkdir /tmp/pkg/
             mv /var/db/pkg/* /tmp/pkg/
 
         - name: "zfs: destroy ZFS dataset for pkg"
-          tags:
-            - configure
           zfs:
             name: "{{ boot_pool }}/usr/local/pkg"
             state: absent
 
         - name: "zfs: restore /var/db/pkg"
-          tags:
-            - configure
           shell: |
             set -e -u -o pipefail
             mkdir -p /usr/local/pkg
