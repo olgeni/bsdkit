@@ -31,4 +31,4 @@
 
       rmdir /usr/local/etc/sv/
     executable: /usr/local/bin/zsh
-  when: stat_usr_local_etc_sv.stat.isdir is defined and stat_usr_local_etc_sv.stat.isdir
+  when: (stat_usr_local_etc_sv.stat.isdir is defined) and (stat_usr_local_etc_sv.stat.isdir)
