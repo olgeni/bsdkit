@@ -887,8 +887,6 @@ zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/usr/local
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/var/db
 
-    ${ZFS_CREATE_CMD} -o mountpoint=/var/db/pkg  ${BSDKIT_ZFS_POOL}/usr/local/pkg
-
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/src
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/obj
     ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/ports

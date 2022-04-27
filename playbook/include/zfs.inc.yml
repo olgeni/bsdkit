@@ -28,30 +28,33 @@
       ignore_errors: yes
       register: zfs_facts_usr_local_pkg
 
-    - name: "zfs: save /var/db/pkg"
+    - name: "zfs: remove usr/local/pkg"
+      when: zfs_facts_usr_local_pkg is successful
       tags:
         - configure
-      shell: |
-        set -e -u -o pipefail
-        mkdir /tmp/pkg/
-        mv /var/db/pkg/* /tmp/pkg/
-      when: zfs_facts_usr_local_pkg is not successful
+      block:
+        - name: "zfs: save /var/db/pkg"
+          tags:
+            - configure
+          shell: |
+            set -e -u -o pipefail
+            mkdir /tmp/pkg/
+            mv /var/db/pkg/* /tmp/pkg/
 
-    - name: "zfs: create ZFS dataset for pkg"
-      tags:
-        - configure
-      zfs:
-        name: "{{ boot_pool }}/usr/local/pkg"
-        state: present
-        extra_zfs_properties:
-          mountpoint: "/var/db/pkg"
-      when: zfs_facts_usr_local_pkg is not successful
+        - name: "zfs: destroy ZFS dataset for pkg"
+          tags:
+            - configure
+          zfs:
+            name: "{{ boot_pool }}/usr/local/pkg"
+            state: absent
 
-    - name: "zfs: restore /var/db/pkg"
-      tags:
-        - configure
-      shell: |
-        set -e -u -o pipefail
-        mv /tmp/pkg/* /var/db/pkg/
-        rmdir /tmp/pkg
-      when: zfs_facts_usr_local_pkg is not successful
+        - name: "zfs: restore /var/db/pkg"
+          tags:
+            - configure
+          shell: |
+            set -e -u -o pipefail
+            mkdir -p /usr/local/pkg
+            rm -r -f /var/db/pkg
+            ln -s -f /usr/local/pkg /var/db/pkg
+            mv /tmp/pkg/* /var/db/pkg/
+            rmdir /tmp/pkg
