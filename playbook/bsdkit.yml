@@ -143,6 +143,11 @@
           import_tasks: include/zfs.inc.yml
           when: not is_chroot_install
 
+        - name: "Include pkgdir.inc.yml"
+          tags:
+            - configure
+          import_tasks: include/pkgdir.inc.yml
+
         - name: "Include loader.inc.yml"
           import_tasks: include/loader.inc.yml
 
