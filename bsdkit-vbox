@@ -138,6 +138,10 @@ perform_destroy() {
     fi
 }
 
+perform_snapshot() {
+    VBoxManage snapshot ${BSDKIT_VBOX_NAME} take "$(date +%Y%m%d-%H%M%S)"
+}
+
 perform_remote_deploy() {
     ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
 }
@@ -215,6 +219,10 @@ case ${_command} in
 
     destroy)
         perform_destroy
+        ;;
+
+    snapshot)
+        perform_snapshot
         ;;
 
     remote_deploy)
