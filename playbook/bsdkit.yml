@@ -302,6 +302,9 @@
     - name: "Include mysql.inc.yml"
       import_tasks: include/mysql.inc.yml
 
+    - name: "Include bsdkit-git.inc.yml"
+      import_tasks: include/bsdkit-git.inc.yml
+
     - name: "Install base packages (common)"
       tags:
         - configure

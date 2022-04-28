@@ -1,0 +1,8 @@
+- name: "bsdkit-git: install files into /usr/local/bsdkit/"
+  tags:
+    - configure
+  git:
+    repo: "https://github.com/olgeni/bsdkit.git"
+    dest: "/usr/local/bsdkit/"
+    single_branch: yes
+    version: "master"
