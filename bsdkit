@@ -1201,7 +1201,7 @@ make_full_jail() {
     [ -d ${_destdir}/.base ] && rmdir ${_destdir}/.base
 }
 
-install_release() {
+__install_release() {
     local _opts _opts_args
 
     zparseopts -F -D -E -a _opts -A _opts_args -thin
@@ -1533,7 +1533,7 @@ install_mbr_ufs() {
     mkdir -p ${BSDKIT_DESTDIR}
 
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
-    install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1568,7 +1568,7 @@ install_mbr_ufs_gmirror() {
 
     gmirror_configure ${_mirror} ${_devices}
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
-    install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1593,7 +1593,7 @@ install_gpt_ufs() {
     mkdir -p ${BSDKIT_DESTDIR}
 
     gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
-    install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1621,7 +1621,7 @@ install_zfs() {
 
     zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
-    install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1650,7 +1650,7 @@ install_gpt_zfs() {
 
     zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
-    install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1678,7 +1678,7 @@ install_mbr_zfs() {
 
     zfs_create_mbr_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
-    install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
@@ -1710,7 +1710,7 @@ create_iocell() {
 
     [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell)."
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir}
 
     __do_configure_jail ${_destdir}
 }
@@ -1768,7 +1768,7 @@ create_iocage() {
 
     [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir}
 
     __do_configure_jail ${_destdir}
 }
@@ -1828,7 +1828,7 @@ create_jail() {
 
     create_jail_destdir ${_destdir}
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir} ${=_options[*]}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir} ${=_options[*]}
 
     if ! is_yes ${_plain}; then
         if is_yes ${_thin}; then
@@ -2283,7 +2283,7 @@ build_setup_staging() {
 
     mkdir -p ${_destdir}
 
-    BSDKIT_INSTALL_SRC=no install_release ${_relpath} ${_destdir}
+    BSDKIT_INSTALL_SRC=no __install_release ${_relpath} ${_destdir}
 
     rm -f ${_destdir}/boot/kernel/*.symbols(N)
 
