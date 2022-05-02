@@ -1403,7 +1403,7 @@ __run_mtree() {
     fi
 }
 
-install_resolv_conf() {
+__install_resolv_conf() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1451,7 +1451,7 @@ EOF
 
     mkdir -p ${_destdir}/etc/rc.conf.d
 
-    install_resolv_conf ${_destdir}
+    __install_resolv_conf ${_destdir}
     install_ca_root_nss ${_destdir}
 
     mkdir -p ${_destdir}/usr/local/etc/pkg/repos
