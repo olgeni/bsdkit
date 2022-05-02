@@ -1712,7 +1712,7 @@ create_iocell() {
 
     BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir}
 
-    _do_configure_jail ${_destdir}
+    __do_configure_jail ${_destdir}
 }
 
 create_iocell_thin() {
@@ -1739,7 +1739,7 @@ create_iocell_thin() {
 
     [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell_thin)."
 
-    _do_configure_jail ${_destdir}
+    __do_configure_jail ${_destdir}
 }
 
 create_iocage() {
@@ -1770,7 +1770,7 @@ create_iocage() {
 
     BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no install_release ${FREEBSD_REL_URL} ${_destdir}
 
-    _do_configure_jail ${_destdir}
+    __do_configure_jail ${_destdir}
 }
 
 create_iocage_thin() {
@@ -1799,7 +1799,7 @@ create_iocage_thin() {
 
     [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
 
-    _do_configure_jail ${_destdir}
+    __do_configure_jail ${_destdir}
 }
 
 create_jail() {
@@ -1842,7 +1842,7 @@ create_jail() {
             _options+="--plain"
         fi
 
-        _do_configure_jail ${=_options[*]} ${_destdir}
+        __do_configure_jail ${=_options[*]} ${_destdir}
 
         if is_yes ${_thin}; then
             umount ${_destdir}/.base
@@ -1864,7 +1864,7 @@ configure_jail() {
     [ -d ${_destdir} ] || error "jail root does not exist (configure_jail)."
     [ -f ${_destdir}/bin/sh ] || error "/bin/sh does not exist in jail (configure_jail)."
 
-    _do_configure_jail ${_destdir}
+    __do_configure_jail ${_destdir}
 }
 
 build_md_root_device() {
@@ -1974,7 +1974,7 @@ create_jail_destdir() {
     fi
 }
 
-_do_configure_jail() {
+__do_configure_jail() {
     local _opts _opts_args
 
     zparseopts -F -D -E -a _opts -A _opts_args -plain
