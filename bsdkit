@@ -123,7 +123,7 @@ __check_ansible() {
     fi
 }
 
-environment() {
+__environment() {
     echo \
         BSDKIT_DESTDIR=\"${BSDKIT_DESTDIR}\" \
         BSDKIT_PV_UPDATE_DELAY=\"${BSDKIT_PV_UPDATE_DELAY}\" \
@@ -2706,7 +2706,7 @@ EOF
         rsync -a --exclude=.git -e "ssh -p ${_remote_port} -i ${_ansible_key}" ${BSDKIT_SRCDIR}/ root@${_remote_address}:/root/bsdkit/
 
     - name: "Run requested bsdkit function"
-      shell: $(environment) /root/bsdkit/bsdkit deploy "$@" > /tmp/bsdkit.log 2>&1
+      shell: $(__environment) /root/bsdkit/bsdkit deploy "$@" > /tmp/bsdkit.log 2>&1
 
 - hosts: install
   connection: ssh
@@ -2719,7 +2719,7 @@ EOF
     eval env \
         ANSIBLE_CONFIG=${_ansible_cfg} \
         SSH_AUTH_SOCK="" \
-        $(environment) \
+        $(__environment) \
         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
@@ -2763,7 +2763,7 @@ EOF
         eval env \
              ANSIBLE_CONFIG=${_ansible_cfg} \
              SSH_AUTH_SOCK="" \
-             $(environment) \
+             $(__environment) \
              BSDKIT_INTERFACE=${_bsdkit_interface} \
              BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
              BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
@@ -2806,7 +2806,7 @@ EOF
     eval env \
         ANSIBLE_CONFIG=${_ansible_cfg} \
         SSH_AUTH_SOCK="" \
-        $(environment) \
+        $(__environment) \
         BSDKIT_INTERFACE=${_bsdkit_interface} \
         BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
         BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
