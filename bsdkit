@@ -115,7 +115,7 @@ check_freebsd() {
     fi
 }
 
-check_ansible() {
+__check_ansible() {
     if ! command -v ansible-playbook > /dev/null 2>&1; then
         error "required command missing (ansible-playbook)."
         # EX_UNAVAILABLE
@@ -1689,7 +1689,7 @@ install_mbr_zfs() {
 }
 
 create_iocell() {
-    check_ansible
+    __check_ansible
 
     eval $(local_options)
     eval $(parse_options $@)
@@ -1716,7 +1716,7 @@ create_iocell() {
 }
 
 create_iocell_thin() {
-    check_ansible
+    __check_ansible
 
     eval $(local_options)
     eval $(parse_options $@)
@@ -1743,7 +1743,7 @@ create_iocell_thin() {
 }
 
 create_iocage() {
-    check_ansible
+    __check_ansible
 
     eval $(local_options)
     eval $(parse_options $@)
@@ -1774,7 +1774,7 @@ create_iocage() {
 }
 
 create_iocage_thin() {
-    check_ansible
+    __check_ansible
 
     eval $(local_options)
     eval $(parse_options $@)
@@ -1803,7 +1803,7 @@ create_iocage_thin() {
 }
 
 create_jail() {
-    check_ansible
+    __check_ansible
 
     eval $(local_options)
     eval $(parse_options $@)
@@ -1852,7 +1852,7 @@ create_jail() {
 }
 
 configure_jail() {
-    check_ansible
+    __check_ansible
 
     eval $(local_options)
     eval $(parse_options $@)
@@ -2634,7 +2634,7 @@ build_setup_img() {
 }
 
 deploy() {
-    check_ansible
+    __check_ansible
     echo "Running: $*"
 
     ${(@s/ /)@}
@@ -2643,7 +2643,7 @@ deploy() {
 }
 
 remote_deploy() {
-    check_ansible
+    __check_ansible
 
     local _remote_address=""
     local _remote_port="22"
@@ -2726,7 +2726,7 @@ EOF
 }
 
 ansible_local_playbook() {
-    check_ansible
+    __check_ansible
 
     ansible-playbook \
         --inventory localhost, \
@@ -2736,7 +2736,7 @@ ansible_local_playbook() {
 }
 
 ansible_chroot_playbook() {
-    check_ansible
+    __check_ansible
 
     local _ansible_root
     _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
@@ -2777,7 +2777,7 @@ EOF
 }
 
 ansible_jail_playbook() {
-    check_ansible
+    __check_ansible
 
     local _ansible_root
     _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
