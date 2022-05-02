@@ -293,7 +293,7 @@ valid_url() {
     esac
 }
 
-check_bsdkit_runtime() {
+__check_bsdkit_runtime() {
     mount -p | grep "/baseroot" > /dev/null 2>&1
 }
 
@@ -442,7 +442,7 @@ __gpt_ufs_partition_multi() {
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    if check_bsdkit_runtime; then
+    if __check_bsdkit_runtime; then
         mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
@@ -499,7 +499,7 @@ __gpt_ufs_partition_single() {
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    if check_bsdkit_runtime; then
+    if __check_bsdkit_runtime; then
         mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
@@ -564,7 +564,7 @@ __mbr_ufs_partition_multi() {
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    if check_bsdkit_runtime; then
+    if __check_bsdkit_runtime; then
         mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
@@ -620,7 +620,7 @@ __mbr_ufs_partition_single() {
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    if check_bsdkit_runtime; then
+    if __check_bsdkit_runtime; then
         mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
@@ -908,7 +908,7 @@ __zfs_create_fs() {
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    if check_bsdkit_runtime; then
+    if __check_bsdkit_runtime; then
         mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
@@ -1604,7 +1604,7 @@ install_gpt_ufs() {
 }
 
 install_zfs() {
-    check_bsdkit_runtime
+    __check_bsdkit_runtime
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -1632,7 +1632,7 @@ install_zfs() {
 }
 
 install_gpt_zfs() {
-    check_bsdkit_runtime
+    __check_bsdkit_runtime
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -1661,7 +1661,7 @@ install_gpt_zfs() {
 }
 
 install_mbr_zfs() {
-    check_bsdkit_runtime
+    __check_bsdkit_runtime
 
     eval $(__local_options)
     eval $(__parse_options $@)
