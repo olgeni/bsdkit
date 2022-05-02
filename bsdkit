@@ -271,7 +271,7 @@ rc_get() {
     fi
 }
 
-valid_url() {
+__valid_url() {
     local _url=$1
 
     case ${_url} in
@@ -300,7 +300,7 @@ __check_bsdkit_runtime() {
 valid_relpath() {
     local _relpath=$1
 
-    valid_url ${_relpath} && return 0
+    __valid_url ${_relpath} && return 0
 
     [ -d ${_relpath} ]
     [ -f ${_relpath}/base.txz ]
@@ -311,7 +311,7 @@ valid_relpath() {
 valid_pkgpath() {
     local _pkgpath=$1
 
-    valid_url ${_pkgpath} && return 0
+    __valid_url ${_pkgpath} && return 0
 
     [ -d ${_pkgpath} ]
     [ -f ${_pkgpath}/packagesite.txz ]
@@ -1219,7 +1219,7 @@ __install_release() {
 
     local _delete="NO"
 
-    if valid_url ${_relpath}; then
+    if __valid_url ${_relpath}; then
         local _local_relpath_root
         local _local_relpath
 
