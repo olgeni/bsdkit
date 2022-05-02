@@ -317,7 +317,7 @@ __valid_pkgpath() {
     [ -f ${_pkgpath}/packagesite.txz ]
 }
 
-valid_staging() {
+__valid_staging() {
     local _staging=$1
 
     [ -f ${_staging}/base.ufs.uzip ]
@@ -2480,7 +2480,7 @@ build_setup_iso() {
         exit 69
     fi
 
-    valid_staging ${_staging}
+    __valid_staging ${_staging}
 
     if [ ${_relpath} != "none" ]; then
         __valid_relpath ${_relpath}
