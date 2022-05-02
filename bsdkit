@@ -337,7 +337,7 @@ valid_bsdkit() {
     [ -d ${_bsdkit} ] && [ -f ${_bsdkit}/bsdkit ]
 }
 
-valid_class() {
+__valid_class() {
     local _class=$1
 
     case ${_class} in
@@ -1528,7 +1528,7 @@ install_mbr_ufs() {
     [ -n ${_class} ]
     [ -n ${_device} ]
 
-    valid_class ${_class}
+    __valid_class ${_class}
 
     mkdir -p ${BSDKIT_DESTDIR}
 
@@ -1560,7 +1560,7 @@ install_mbr_ufs_gmirror() {
     [ -n ${_mirror} ]
     [ ${#_devices} -gt 0 ]
 
-    valid_class ${_class}
+    __valid_class ${_class}
 
     kldload -n geom_mirror
 
@@ -1588,7 +1588,7 @@ install_gpt_ufs() {
     [ -n ${_class} ]
     [ -n ${_device} ]
 
-    valid_class ${_class}
+    __valid_class ${_class}
 
     mkdir -p ${BSDKIT_DESTDIR}
 
