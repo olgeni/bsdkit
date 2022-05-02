@@ -2132,7 +2132,7 @@ EOF
     return 0
 }
 
-install_setup_runtime() {
+__install_setup_runtime() {
     local _destdir=$1
     local _bsdkit=$2
     local _pkgpath=$3
@@ -2306,7 +2306,7 @@ build_setup_staging() {
 
     make_read_only ${_destdir}
 
-    install_setup_runtime ${_destdir} ${_bsdkit} ${_pkgpath}
+    __install_setup_runtime ${_destdir} ${_bsdkit} ${_pkgpath}
 
     mkdir ${_mfsroot}/dev
     mkdir ${_mfsroot}/baseroot
