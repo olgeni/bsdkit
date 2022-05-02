@@ -389,7 +389,7 @@ install_efi_loader() {
     umount /tmp/efi
 }
 
-gpt_ufs_partition_multi() {
+__gpt_ufs_partition_multi() {
     local _destdir=$1
     local _device=$2
 
@@ -464,7 +464,7 @@ gpt_ufs_partition_multi() {
     return 0
 }
 
-gpt_ufs_partition_single() {
+__gpt_ufs_partition_single() {
     local _destdir=$1
     local _device=$2
 
@@ -1592,7 +1592,7 @@ install_gpt_ufs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
+    __gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
