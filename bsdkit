@@ -635,7 +635,7 @@ __mbr_ufs_partition_single() {
     return 0
 }
 
-zfs_create_pool() {
+__zfs_create_pool() {
     local _destdir=$1
 
     shift 1
@@ -683,7 +683,7 @@ zfs_create_pool() {
                 raidz1 ${_devices[1]} ${_devices[2]} ${_devices[3]}
             ;;
         *)
-            error "unsupported number of devices in pool (zfs_create_pool)."
+            error "unsupported number of devices in pool (__zfs_create_pool)."
             ;;
     esac
 
@@ -1619,7 +1619,7 @@ install_zfs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
+    __zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
     zfs_create_fs ${BSDKIT_DESTDIR}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
