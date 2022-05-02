@@ -45,6 +45,7 @@
   changed_when: no
   register: gitlab_runner_list
 
+  # https://docs.gitlab.com/runner/register/
 - name: "gitlab_runner: register"
   shell:
     cmd: |
