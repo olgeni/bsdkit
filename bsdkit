@@ -867,7 +867,7 @@ zfs_compression() {
     fi
 }
 
-zfs_create_fs() {
+__zfs_create_fs() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1620,7 +1620,7 @@ install_zfs() {
     mkdir -p ${BSDKIT_DESTDIR}
 
     __zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
-    zfs_create_fs ${BSDKIT_DESTDIR}
+    __zfs_create_fs ${BSDKIT_DESTDIR}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
@@ -1649,7 +1649,7 @@ install_gpt_zfs() {
     mkdir -p ${BSDKIT_DESTDIR}
 
     zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
-    zfs_create_fs ${BSDKIT_DESTDIR}
+    __zfs_create_fs ${BSDKIT_DESTDIR}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
@@ -1677,7 +1677,7 @@ install_mbr_zfs() {
     mkdir -p ${BSDKIT_DESTDIR}
 
     zfs_create_mbr_pool ${BSDKIT_DESTDIR} ${_devices}
-    zfs_create_fs ${BSDKIT_DESTDIR}
+    __zfs_create_fs ${BSDKIT_DESTDIR}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
