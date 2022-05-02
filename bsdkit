@@ -942,7 +942,7 @@ swap_setup() {
     return 0
 }
 
-procfs_setup() {
+__procfs_setup() {
     if ! is_yes ${BSDKIT_PROCFS_ENABLE}; then
         return 0
     fi
@@ -1535,7 +1535,7 @@ install_mbr_ufs() {
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
-    procfs_setup ${BSDKIT_DESTDIR}
+    __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
@@ -1570,7 +1570,7 @@ install_mbr_ufs_gmirror() {
     mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
-    procfs_setup ${BSDKIT_DESTDIR}
+    __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
@@ -1595,7 +1595,7 @@ install_gpt_ufs() {
     gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
-    procfs_setup ${BSDKIT_DESTDIR}
+    __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
@@ -1623,7 +1623,7 @@ install_zfs() {
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
-    procfs_setup ${BSDKIT_DESTDIR}
+    __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
@@ -1652,7 +1652,7 @@ install_gpt_zfs() {
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
-    procfs_setup ${BSDKIT_DESTDIR}
+    __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
@@ -1680,7 +1680,7 @@ install_mbr_zfs() {
     zfs_create_fs ${BSDKIT_DESTDIR}
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
-    procfs_setup ${BSDKIT_DESTDIR}
+    __procfs_setup ${BSDKIT_DESTDIR}
     __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
