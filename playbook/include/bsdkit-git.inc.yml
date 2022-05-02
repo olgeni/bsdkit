@@ -1,3 +1,11 @@
+- name: "bsdkit-git: install packages"
+  tags:
+    - configure
+  pkgng:
+    name:
+      - devel/git
+    state: present
+
 - name: "bsdkit-git: install files into /usr/local/bsdkit/"
   tags:
     - configure
