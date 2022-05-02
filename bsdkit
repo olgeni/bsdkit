@@ -297,7 +297,7 @@ __check_bsdkit_runtime() {
     mount -p | grep "/baseroot" > /dev/null 2>&1
 }
 
-valid_relpath() {
+__valid_relpath() {
     local _relpath=$1
 
     __valid_url ${_relpath} && return 0
@@ -1212,7 +1212,7 @@ __install_release() {
     local _relpath=$1
     local _destdir=$2
 
-    valid_relpath ${_relpath}
+    __valid_relpath ${_relpath}
 
     [ -d ${_destdir} ]
     [ ${_destdir} != "/" ]
@@ -2263,7 +2263,7 @@ build_setup_staging() {
     _pkgpath=$(realpath ${_pkgpath})
 
     valid_bsdkit ${_bsdkit}
-    valid_relpath ${_relpath}
+    __valid_relpath ${_relpath}
     valid_pkgpath ${_pkgpath}
 
     mkdir -p ${_staging}
@@ -2483,7 +2483,7 @@ build_setup_iso() {
     valid_staging ${_staging}
 
     if [ ${_relpath} != "none" ]; then
-        valid_relpath ${_relpath}
+        __valid_relpath ${_relpath}
     fi
 
     if [ ${_pkgpath} != "none" ]; then
