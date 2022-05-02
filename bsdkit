@@ -308,7 +308,7 @@ __valid_relpath() {
     return 0
 }
 
-valid_pkgpath() {
+__valid_pkgpath() {
     local _pkgpath=$1
 
     __valid_url ${_pkgpath} && return 0
@@ -2139,7 +2139,7 @@ __install_setup_runtime() {
 
     valid_destdir ${_destdir}
     valid_bsdkit ${_bsdkit}
-    valid_pkgpath ${_pkgpath}
+    __valid_pkgpath ${_pkgpath}
 
     local _runtime=(
         # required
@@ -2264,7 +2264,7 @@ build_setup_staging() {
 
     valid_bsdkit ${_bsdkit}
     __valid_relpath ${_relpath}
-    valid_pkgpath ${_pkgpath}
+    __valid_pkgpath ${_pkgpath}
 
     mkdir -p ${_staging}
 
@@ -2487,7 +2487,7 @@ build_setup_iso() {
     fi
 
     if [ ${_pkgpath} != "none" ]; then
-        valid_pkgpath ${_pkgpath}
+        __valid_pkgpath ${_pkgpath}
     fi
 
     local _iso_path=${_iso}.fs
