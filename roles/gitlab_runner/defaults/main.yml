@@ -1,3 +1,6 @@
 ---
 gitlab_runner_home: /home/gitlab-runner
 gitlab_url: https://gitlab.com/
+# gitlab_runner_name
+# gitlab_runner_token
+# gitlab_runner_tag_list
