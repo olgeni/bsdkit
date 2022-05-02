@@ -956,7 +956,7 @@ procfs_setup() {
     return 0
 }
 
-fdescfs_setup() {
+__fdescfs_setup() {
     if ! is_yes ${BSDKIT_FDESCFS_ENABLE}; then
         return 0
     fi
@@ -1536,7 +1536,7 @@ install_mbr_ufs() {
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
-    fdescfs_setup ${BSDKIT_DESTDIR}
+    __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
 
@@ -1571,7 +1571,7 @@ install_mbr_ufs_gmirror() {
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
-    fdescfs_setup ${BSDKIT_DESTDIR}
+    __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
 
@@ -1596,7 +1596,7 @@ install_gpt_ufs() {
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
-    fdescfs_setup ${BSDKIT_DESTDIR}
+    __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
 
@@ -1624,7 +1624,7 @@ install_zfs() {
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
-    fdescfs_setup ${BSDKIT_DESTDIR}
+    __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
 
@@ -1653,7 +1653,7 @@ install_gpt_zfs() {
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
-    fdescfs_setup ${BSDKIT_DESTDIR}
+    __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
 
@@ -1681,7 +1681,7 @@ install_mbr_zfs() {
     install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
-    fdescfs_setup ${BSDKIT_DESTDIR}
+    __fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
     __customize_base ${BSDKIT_DESTDIR}
 
