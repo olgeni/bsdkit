@@ -331,7 +331,7 @@ __valid_destdir() {
     [ -d ${_destdir} ] && [ ${_destdir} != "/" ] && [ -f ${_destdir}/bin/sh ]
 }
 
-valid_bsdkit() {
+__valid_bsdkit() {
     local _bsdkit=$1
 
     [ -d ${_bsdkit} ] && [ -f ${_bsdkit}/bsdkit ]
@@ -2138,7 +2138,7 @@ __install_setup_runtime() {
     local _pkgpath=$3
 
     __valid_destdir ${_destdir}
-    valid_bsdkit ${_bsdkit}
+    __valid_bsdkit ${_bsdkit}
     __valid_pkgpath ${_pkgpath}
 
     local _runtime=(
@@ -2262,7 +2262,7 @@ build_setup_staging() {
     _relpath=$(realpath ${_relpath})
     _pkgpath=$(realpath ${_pkgpath})
 
-    valid_bsdkit ${_bsdkit}
+    __valid_bsdkit ${_bsdkit}
     __valid_relpath ${_relpath}
     __valid_pkgpath ${_pkgpath}
 
