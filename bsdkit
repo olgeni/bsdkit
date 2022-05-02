@@ -859,7 +859,7 @@ __zfs_create_mbr_pool() {
     return 0
 }
 
-zfs_compression() {
+__zfs_compression() {
     if [ $(uname -K) -ge 1300000 ]; then
         echo zstd
     else
@@ -887,14 +887,14 @@ __zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/usr/local
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/var/db
 
-    ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/src
-    ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/obj
-    ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/usr/ports
+    ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/usr/src
+    ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/usr/obj
+    ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/usr/ports
 
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/var/audit
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/var/crash
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(zfs_compression) ${BSDKIT_ZFS_POOL}/var/log
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(zfs_compression) -o atime=on ${BSDKIT_ZFS_POOL}/var/mail
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/var/audit
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/var/crash
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/var/log
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) -o atime=on ${BSDKIT_ZFS_POOL}/var/mail
 
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/var/tmp
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/usr/home
@@ -1966,7 +1966,7 @@ create_jail_destdir() {
 
     if [ -n ${_parent_fs} ]; then
         if ! zfs get -H -o value mountpoint ${_parent_fs}/${_basename} > /dev/null 2>&1; then
-            ${ZFS_CREATE_CMD} -o compression=$(zfs_compression) ${_parent_fs}/${_basename}
+            ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${_parent_fs}/${_basename}
             _zfs="YES"
         fi
     else
@@ -3006,7 +3006,7 @@ zfs_create_postgresql() {
         find . | cpio -p -d -u -v /var/db/postgres.orig
 
         zfs create \
-            -o compression=$(zfs_compression) \
+            -o compression=$(__zfs_compression) \
             -o atime=off \
             -o redundant_metadata=most \
             ${_pool}/var/db/postgres
