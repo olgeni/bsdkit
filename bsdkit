@@ -2048,7 +2048,7 @@ remove_jail() {
     fi
 }
 
-make_read_only() {
+__make_read_only() {
     local _destdir=$1
 
     __valid_destdir ${_destdir}
@@ -2304,7 +2304,7 @@ build_setup_staging() {
 
     (cd ${_destdir} && pax -r -w -pe rescue ${_mfsroot})
 
-    make_read_only ${_destdir}
+    __make_read_only ${_destdir}
 
     __install_setup_runtime ${_destdir} ${_bsdkit} ${_pkgpath}
 
