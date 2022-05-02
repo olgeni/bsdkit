@@ -353,7 +353,7 @@ __valid_class() {
     esac
 }
 
-gmirror_configure() {
+__gmirror_configure() {
     local _mirror=$1
 
     shift
@@ -1566,7 +1566,7 @@ install_mbr_ufs_gmirror() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    gmirror_configure ${_mirror} ${_devices}
+    __gmirror_configure ${_mirror} ${_devices}
     __mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
