@@ -512,7 +512,7 @@ gpt_ufs_partition_single() {
     return 0
 }
 
-mbr_ufs_partition_multi() {
+__mbr_ufs_partition_multi() {
     local _destdir=$1
     local _device=$2
 
@@ -586,7 +586,7 @@ mbr_ufs_partition_multi() {
     return 0
 }
 
-mbr_ufs_partition_single() {
+__mbr_ufs_partition_single() {
     local _destdir=$1
     local _device=$2
 
@@ -1532,7 +1532,7 @@ install_mbr_ufs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
+    __mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
@@ -1567,7 +1567,7 @@ install_mbr_ufs_gmirror() {
     mkdir -p ${BSDKIT_DESTDIR}
 
     gmirror_configure ${_mirror} ${_devices}
-    mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
+    __mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
     __procfs_setup ${BSDKIT_DESTDIR}
