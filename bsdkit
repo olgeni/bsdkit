@@ -226,51 +226,6 @@ set -- $*;
 EOF
 }
 
-rc_set() {
-    local _file=$1
-    local _key=$2
-    local _value=$3
-
-    if grep -E "^[[:space:]]*${_key}|#[[:space:]]*${_key}" ${_file} > /dev/null 2>&1; then
-        sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*/ c\\
-${_key}=\"${_value}\"
-/^[[:space:]]*#[[:space:]]*${_key}/ c\\
-${_key}=\"${_value}\"
-" ${_file}
-    else
-        echo "${_key}=\"${_value}\"" >> ${_file}
-    fi
-}
-
-rc_delete() {
-    local _file=$1
-    local _key=$2
-
-    [ -e ${_file} ] || return 0
-
-    sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=/d" ${_file}
-}
-
-rc_get() {
-    local _file=$1
-    local _key=$2
-
-    local _buffer
-    _buffer="$(grep -E "^[[:space:]]*${_key}[[:space:]]*=" ${_file})"
-
-    local _value1
-    _value1=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
-
-    local _value2
-    _value2=$(expr ${_value1} : "\"\(.*\)\"")
-
-    if [ -n ${_value2} ]; then
-        echo ${_value2}
-    else
-        echo ${_value1}
-    fi
-}
-
 __valid_url() {
     local _url=$1
 
@@ -1471,6 +1426,317 @@ EOF
     return 0
 }
 
+__do_configure_jail() {
+    local _opts _opts_args
+
+    zparseopts -F -D -E -a _opts -A _opts_args -plain
+
+    local _plain
+    _plain=$(yes_if ${_opts[(Ie)--plain]})
+
+    local _destdir=$1
+
+    __link_home ${_destdir}
+
+    mkdir -p ${_destdir}/usr/ports
+
+    __customize_base ${_destdir}
+
+    if [ -f /etc/hosts ] && [ ! -f ${_destdir}/etc/hosts ]; then
+        install -m 0644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
+    fi
+
+    local _shell
+    _shell=$(cat ${_destdir}/etc/passwd | grep ^root | cut -d : -f 7)
+
+    if ! is_yes ${_plain}; then
+        start_jail ${_destdir}
+        pw -V ${_destdir}/etc usermod root -s /bin/sh
+
+        {
+            __ansible_jail_playbook
+        } always {
+            pw -V ${_destdir}/etc usermod root -s ${_shell}
+            stop_jail ${_destdir}
+        }
+    fi
+
+    return 0
+}
+
+__make_read_only() {
+    local _destdir=$1
+
+    __valid_destdir ${_destdir}
+
+    local _file
+
+    for _file in /entropy /boot/entropy; do
+        [ -e ${_file} ] && install -m 0600 -o root -g wheel ${_file} ${_destdir}${_file}
+    done
+
+    sed -i '' -e '/^root:/ c\
+root:$1$PkLp4/DM$/3D/umXPR0XIb0HsPHByU/:0:0::0:0:System Administrator:/root:/bin/csh' \
+        ${_destdir}/etc/master.passwd
+
+    pwd_mkdb -d ${_destdir}/etc ${_destdir}/etc/master.passwd
+
+    touch ${_destdir}/etc/fstab
+
+    # newsyslog -v -C -f ${_destdir}/etc/newsyslog.conf -d ${_destdir}
+
+    uuidgen > ${_destdir}/etc/hostid
+
+    cat > ${_destdir}/etc/ttys << EOF
+ttyv0 "/usr/libexec/getty al.Pc" xterm onifexists  secure
+ttyv1 "/usr/libexec/getty al.Pc" xterm onifexists  secure
+ttyv2 "/usr/libexec/getty al.Pc" xterm onifexists  secure
+ttyv3 "/usr/libexec/getty al.Pc" xterm onifexists  secure
+ttyu0 "/usr/libexec/getty al.Pc" vt100 onifconsole secure
+EOF
+
+    cat > ${_destdir}/etc/rc.conf.local << EOF
+background_dhclient="YES"
+background_fsck="NO"
+cleanvar_enable="NO"
+crashinfo_enable="NO"
+cron_enable="NO"
+defaultroute_delay="10"
+entropy_boot_file="NO"
+entropy_file="NO"
+hostid_enable="NO"
+hostname="bsdkit"
+ifconfig_DEFAULT="DHCP"
+ip6addrctl_enable="NO"
+keyrate="fast"
+mixer_enable="NO"
+moused_nondefault_enable="NO"
+newsyslog_enable="YES"
+ntpd_enable="YES"
+ntpd_sync_on_start="YES"
+root_rw_mount="NO"
+sendmail_enable="NONE"
+sendmail_msp_queue_enable="NO"
+sendmail_outbound_enable="NO"
+sendmail_submit_enable="NO"
+sshd_enable="YES"
+syslogd_enable="YES"
+tmpmfs="YES"
+varmfs="YES"
+virecover_enable="NO"
+EOF
+
+    sed -i '' -e '/^PermitRootLogin/d' ${_destdir}/etc/ssh/sshd_config
+    sed -i '' -e '/^UseDNS/d' ${_destdir}/etc/ssh/sshd_config
+    sed -i '' -e '/^GatewayPorts/d' ${_destdir}/etc/ssh/sshd_config
+    sed -i '' -e '/^MaxAuthTries/d' ${_destdir}/etc/ssh/sshd_config
+    sed -i '' -e '/^leapfile/d' ${_destdir}/etc/ntp.conf
+
+    cat >> ${_destdir}/etc/ssh/sshd_config << EOF
+UseDNS no
+PermitRootLogin yes
+GatewayPorts yes
+MaxAuthTries 32
+EOF
+
+    cat > ${_destdir}/etc/host.conf << EOF
+# Auto-generated from nsswitch.conf
+hosts
+dns
+EOF
+
+    return 0
+}
+
+__install_setup_runtime() {
+    local _destdir=$1
+    local _bsdkit=$2
+    local _pkgpath=$3
+
+    __valid_destdir ${_destdir}
+    __valid_bsdkit ${_bsdkit}
+    __valid_pkgpath ${_pkgpath}
+
+    local _runtime=(
+        # required
+	devel/git
+        lang/python
+        net/py-netaddr
+        ports-mgmt/pkg
+        security/ca_root_nss
+        shells/zsh
+        sysutils/ansible
+        sysutils/pv
+        # optional
+        archivers/zip
+        comms/kermit
+        devel/git
+        editors/bvi
+        editors/nano
+        editors/vim
+        ftp/curl
+        ftp/lftp
+        misc/gnu-watch
+        misc/mc
+        net/croc
+        net/rclone
+        net/rsync
+        net/zerotier
+        security/openvpn
+        sysutils/clone
+        sysutils/cpdup
+        sysutils/ddrescue
+        sysutils/fusefs-exfat
+        sysutils/fusefs-ext2
+        sysutils/fusefs-ntfs
+        sysutils/hextools
+        sysutils/hfsutils
+        sysutils/htop
+        sysutils/ipmitool
+        sysutils/lsblk
+        sysutils/memtester
+        sysutils/ncdu
+        sysutils/renameutils
+        sysutils/smartmontools
+        sysutils/smenu
+        sysutils/tmux
+        textproc/fzf
+        www/go-www
+        www/tinyproxy
+        # disabled
+        # genisoimage
+    )
+
+    local _allpkg=${_pkgpath}/All
+
+    local _pkgdir=/usr/ports/packages
+
+    mkdir -p ${_destdir}/${_pkgdir}
+    mkdir -p ${_destdir}/dev
+
+    {
+        mount -t devfs devfs ${_destdir}/dev
+        mount -t nullfs ${_pkgpath} ${_destdir}/${_pkgdir}
+
+        mkdir -p ${_destdir}/usr/local/etc/pkg/repos
+
+        cat > ${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf << EOF
+FreeBSD: {
+    enabled: no
+}
+EOF
+
+        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
+bsdkit: {
+    url: "file://${_pkgdir}"
+}
+EOF
+
+        lockf -k -t ${BSDKIT_PKG_LOCKTIME} ${BSDKIT_PKG_LOCKFILE} pkg -c ${_destdir} install -y ${_runtime}
+
+        if [ -d ${_destdir}/var/cache/pkg ]; then
+            lockf -k -t ${BSDKIT_PKG_LOCKTIME} ${BSDKIT_PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
+        fi
+
+        rm -f ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf
+    } always {
+        umount -f ${_destdir}/${_pkgdir}
+        umount -f ${_destdir}/dev
+    }
+
+    rmdir ${_destdir}/${_pkgdir}
+
+    local _master_passwd
+    _master_passwd=$(mktemp ${_destdir}/tmp/master.passwd.XXXXXX)
+
+    install -m 0600 ${_destdir}/etc/master.passwd ${_master_passwd}
+
+    sed -i '' -e '/^root/s@/bin/csh@/usr/local/bin/zsh@' ${_master_passwd}
+
+    pwd_mkdb -d ${_destdir}/etc ${_master_passwd}
+
+    rm -f ${_master_passwd}
+
+    install -m 0644 -o root -g wheel ${_bsdkit}/ansible/dotfiles/dot.zshrc ${_destdir}/root/.zshrc
+
+    cat >> ${_destdir}/root/.zshrc << EOF
+echo -n "Available disks: "
+sysctl -n kern.disks | rs 0 1 | sort | grep -v -E "^cd|^acd" | rs 1 0 | sed -E -e "s/ +/ /g"
+echo
+EOF
+
+    return 0
+}
+
+__ansible_jail_playbook() {
+    __check_ansible
+
+    local _ansible_root
+    _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
+
+    local _ansible_cfg=${_ansible_root}/ansible.cfg
+    local _ansible_hosts=${_ansible_root}/ansible_hosts
+
+    cat > ${_ansible_cfg} << EOF
+[defaults]
+inventory = ${_ansible_hosts}
+host_key_checking = False
+
+[ssh_connection]
+pipelining = True
+ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+EOF
+
+    cat > ${_ansible_hosts} << EOF
+${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
+EOF
+
+    _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
+    _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
+    _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
+
+    eval env \
+        ANSIBLE_CONFIG=${_ansible_cfg} \
+        SSH_AUTH_SOCK="" \
+        $(__environment) \
+        BSDKIT_INTERFACE=${_bsdkit_interface} \
+        BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
+        BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
+        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
+
+    rm -r ${_ansible_root}
+}
+
+__echo_runtime_jail_conf() {
+    local _destdir=$1
+
+    __valid_destdir ${_destdir}
+
+    cat > ${_jail_conf} << EOF
+exec.clean;
+
+mount.devfs;
+persist;
+
+sysvsem = new;
+sysvshm = new;
+sysvmsg = new;
+
+${BSDKIT_JAIL_NAME} {
+        allow.raw_sockets;
+        allow.sysvipc;
+
+        osrelease = "$(osrelease ${_destdir})";
+        osreldate = "$(osreldate ${_destdir})";
+
+        path = "${_destdir%/}";
+        host.hostname = "${BSDKIT_JAIL_NAME}";
+        host.domainname = "local";
+        ip4.addr = "$(inet_address)";
+}
+EOF
+}
+
 inet_interface() {
     route get default | awk '/interface:/ { print $2 }'
 }
@@ -1974,44 +2240,6 @@ create_jail_destdir() {
     fi
 }
 
-__do_configure_jail() {
-    local _opts _opts_args
-
-    zparseopts -F -D -E -a _opts -A _opts_args -plain
-
-    local _plain
-    _plain=$(yes_if ${_opts[(Ie)--plain]})
-
-    local _destdir=$1
-
-    __link_home ${_destdir}
-
-    mkdir -p ${_destdir}/usr/ports
-
-    __customize_base ${_destdir}
-
-    if [ -f /etc/hosts ] && [ ! -f ${_destdir}/etc/hosts ]; then
-        install -m 0644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
-    fi
-
-    local _shell
-    _shell=$(cat ${_destdir}/etc/passwd | grep ^root | cut -d : -f 7)
-
-    if ! is_yes ${_plain}; then
-        start_jail ${_destdir}
-        pw -V ${_destdir}/etc usermod root -s /bin/sh
-
-        {
-            __ansible_jail_playbook
-        } always {
-            pw -V ${_destdir}/etc usermod root -s ${_shell}
-            stop_jail ${_destdir}
-        }
-    fi
-
-    return 0
-}
-
 remove_jail() {
     local _destdir=$1
 
@@ -2046,210 +2274,6 @@ remove_jail() {
         chflags -R noschg ${_destdir} > /dev/null 2>&1 || :
         rm -r -f ${_destdir}
     fi
-}
-
-__make_read_only() {
-    local _destdir=$1
-
-    __valid_destdir ${_destdir}
-
-    local _file
-
-    for _file in /entropy /boot/entropy; do
-        [ -e ${_file} ] && install -m 0600 -o root -g wheel ${_file} ${_destdir}${_file}
-    done
-
-    sed -i '' -e '/^root:/ c\
-root:$1$PkLp4/DM$/3D/umXPR0XIb0HsPHByU/:0:0::0:0:System Administrator:/root:/bin/csh' \
-        ${_destdir}/etc/master.passwd
-
-    pwd_mkdb -d ${_destdir}/etc ${_destdir}/etc/master.passwd
-
-    touch ${_destdir}/etc/fstab
-
-    # newsyslog -v -C -f ${_destdir}/etc/newsyslog.conf -d ${_destdir}
-
-    uuidgen > ${_destdir}/etc/hostid
-
-    cat > ${_destdir}/etc/ttys << EOF
-ttyv0 "/usr/libexec/getty al.Pc" xterm onifexists  secure
-ttyv1 "/usr/libexec/getty al.Pc" xterm onifexists  secure
-ttyv2 "/usr/libexec/getty al.Pc" xterm onifexists  secure
-ttyv3 "/usr/libexec/getty al.Pc" xterm onifexists  secure
-ttyu0 "/usr/libexec/getty al.Pc" vt100 onifconsole secure
-EOF
-
-    cat > ${_destdir}/etc/rc.conf.local << EOF
-background_dhclient="YES"
-background_fsck="NO"
-cleanvar_enable="NO"
-crashinfo_enable="NO"
-cron_enable="NO"
-defaultroute_delay="10"
-entropy_boot_file="NO"
-entropy_file="NO"
-hostid_enable="NO"
-hostname="bsdkit"
-ifconfig_DEFAULT="DHCP"
-ip6addrctl_enable="NO"
-keyrate="fast"
-mixer_enable="NO"
-moused_nondefault_enable="NO"
-newsyslog_enable="YES"
-ntpd_enable="YES"
-ntpd_sync_on_start="YES"
-root_rw_mount="NO"
-sendmail_enable="NONE"
-sendmail_msp_queue_enable="NO"
-sendmail_outbound_enable="NO"
-sendmail_submit_enable="NO"
-sshd_enable="YES"
-syslogd_enable="YES"
-tmpmfs="YES"
-varmfs="YES"
-virecover_enable="NO"
-EOF
-
-    sed -i '' -e '/^PermitRootLogin/d' ${_destdir}/etc/ssh/sshd_config
-    sed -i '' -e '/^UseDNS/d' ${_destdir}/etc/ssh/sshd_config
-    sed -i '' -e '/^GatewayPorts/d' ${_destdir}/etc/ssh/sshd_config
-    sed -i '' -e '/^MaxAuthTries/d' ${_destdir}/etc/ssh/sshd_config
-    sed -i '' -e '/^leapfile/d' ${_destdir}/etc/ntp.conf
-
-    cat >> ${_destdir}/etc/ssh/sshd_config << EOF
-UseDNS no
-PermitRootLogin yes
-GatewayPorts yes
-MaxAuthTries 32
-EOF
-
-    cat > ${_destdir}/etc/host.conf << EOF
-# Auto-generated from nsswitch.conf
-hosts
-dns
-EOF
-
-    return 0
-}
-
-__install_setup_runtime() {
-    local _destdir=$1
-    local _bsdkit=$2
-    local _pkgpath=$3
-
-    __valid_destdir ${_destdir}
-    __valid_bsdkit ${_bsdkit}
-    __valid_pkgpath ${_pkgpath}
-
-    local _runtime=(
-        # required
-	devel/git
-        lang/python
-        net/py-netaddr
-        ports-mgmt/pkg
-        security/ca_root_nss
-        shells/zsh
-        sysutils/ansible
-        sysutils/pv
-        # optional
-        archivers/zip
-        comms/kermit
-        devel/git
-        editors/bvi
-        editors/nano
-        editors/vim
-        ftp/curl
-        ftp/lftp
-        misc/gnu-watch
-        misc/mc
-        net/croc
-        net/rclone
-        net/rsync
-        net/zerotier
-        security/openvpn
-        sysutils/clone
-        sysutils/cpdup
-        sysutils/ddrescue
-        sysutils/fusefs-exfat
-        sysutils/fusefs-ext2
-        sysutils/fusefs-ntfs
-        sysutils/hextools
-        sysutils/hfsutils
-        sysutils/htop
-        sysutils/ipmitool
-        sysutils/lsblk
-        sysutils/memtester
-        sysutils/ncdu
-        sysutils/renameutils
-        sysutils/smartmontools
-        sysutils/smenu
-        sysutils/tmux
-        textproc/fzf
-        www/go-www
-        www/tinyproxy
-        # disabled
-        # genisoimage
-    )
-
-    local _allpkg=${_pkgpath}/All
-
-    local _pkgdir=/usr/ports/packages
-
-    mkdir -p ${_destdir}/${_pkgdir}
-    mkdir -p ${_destdir}/dev
-
-    {
-        mount -t devfs devfs ${_destdir}/dev
-        mount -t nullfs ${_pkgpath} ${_destdir}/${_pkgdir}
-
-        mkdir -p ${_destdir}/usr/local/etc/pkg/repos
-
-        cat > ${_destdir}/usr/local/etc/pkg/repos/FreeBSD.conf << EOF
-FreeBSD: {
-    enabled: no
-}
-EOF
-
-        cat > ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf << EOF
-bsdkit: {
-    url: "file://${_pkgdir}"
-}
-EOF
-
-        lockf -k -t ${BSDKIT_PKG_LOCKTIME} ${BSDKIT_PKG_LOCKFILE} pkg -c ${_destdir} install -y ${_runtime}
-
-        if [ -d ${_destdir}/var/cache/pkg ]; then
-            lockf -k -t ${BSDKIT_PKG_LOCKTIME} ${BSDKIT_PKG_LOCKFILE} pkg -c ${_destdir} clean -y -a
-        fi
-
-        rm -f ${_destdir}/usr/local/etc/pkg/repos/bsdkit.conf
-    } always {
-        umount -f ${_destdir}/${_pkgdir}
-        umount -f ${_destdir}/dev
-    }
-
-    rmdir ${_destdir}/${_pkgdir}
-
-    local _master_passwd
-    _master_passwd=$(mktemp ${_destdir}/tmp/master.passwd.XXXXXX)
-
-    install -m 0600 ${_destdir}/etc/master.passwd ${_master_passwd}
-
-    sed -i '' -e '/^root/s@/bin/csh@/usr/local/bin/zsh@' ${_master_passwd}
-
-    pwd_mkdb -d ${_destdir}/etc ${_master_passwd}
-
-    rm -f ${_master_passwd}
-
-    install -m 0644 -o root -g wheel ${_bsdkit}/ansible/dotfiles/dot.zshrc ${_destdir}/root/.zshrc
-
-    cat >> ${_destdir}/root/.zshrc << EOF
-echo -n "Available disks: "
-sysctl -n kern.disks | rs 0 1 | sort | grep -v -E "^cd|^acd" | rs 1 0 | sed -E -e "s/ +/ /g"
-echo
-EOF
-
-    return 0
 }
 
 build_setup_staging() {
@@ -2776,45 +2800,6 @@ EOF
     rm -r ${_ansible_root}
 }
 
-__ansible_jail_playbook() {
-    __check_ansible
-
-    local _ansible_root
-    _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
-
-    local _ansible_cfg=${_ansible_root}/ansible.cfg
-    local _ansible_hosts=${_ansible_root}/ansible_hosts
-
-    cat > ${_ansible_cfg} << EOF
-[defaults]
-inventory = ${_ansible_hosts}
-host_key_checking = False
-
-[ssh_connection]
-pipelining = True
-ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
-EOF
-
-    cat > ${_ansible_hosts} << EOF
-${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
-EOF
-
-    _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
-    _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
-    _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
-
-    eval env \
-        ANSIBLE_CONFIG=${_ansible_cfg} \
-        SSH_AUTH_SOCK="" \
-        $(__environment) \
-        BSDKIT_INTERFACE=${_bsdkit_interface} \
-        BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
-        BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
-
-    rm -r ${_ansible_root}
-}
-
 configure() {
     ansible_local_playbook -t configure
 }
@@ -2868,36 +2853,6 @@ ${_jail_name} {
         interface = "$(inet_interface)";
         # ip4.addr = "";
         # mount.fstab = "${_destdir%/}/\$name.fstab";
-}
-EOF
-}
-
-__echo_runtime_jail_conf() {
-    local _destdir=$1
-
-    __valid_destdir ${_destdir}
-
-    cat > ${_jail_conf} << EOF
-exec.clean;
-
-mount.devfs;
-persist;
-
-sysvsem = new;
-sysvshm = new;
-sysvmsg = new;
-
-${BSDKIT_JAIL_NAME} {
-        allow.raw_sockets;
-        allow.sysvipc;
-
-        osrelease = "$(osrelease ${_destdir})";
-        osreldate = "$(osreldate ${_destdir})";
-
-        path = "${_destdir%/}";
-        host.hostname = "${BSDKIT_JAIL_NAME}";
-        host.domainname = "local";
-        ip4.addr = "$(inet_address)";
 }
 EOF
 }
@@ -3020,6 +2975,51 @@ zfs_create_postgresql() {
         cd /var/db
 
         rm -r -f /var/db/postgres.orig
+    fi
+}
+
+rc_set() {
+    local _file=$1
+    local _key=$2
+    local _value=$3
+
+    if grep -E "^[[:space:]]*${_key}|#[[:space:]]*${_key}" ${_file} > /dev/null 2>&1; then
+        sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*/ c\\
+${_key}=\"${_value}\"
+/^[[:space:]]*#[[:space:]]*${_key}/ c\\
+${_key}=\"${_value}\"
+" ${_file}
+    else
+        echo "${_key}=\"${_value}\"" >> ${_file}
+    fi
+}
+
+rc_delete() {
+    local _file=$1
+    local _key=$2
+
+    [ -e ${_file} ] || return 0
+
+    sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=/d" ${_file}
+}
+
+rc_get() {
+    local _file=$1
+    local _key=$2
+
+    local _buffer
+    _buffer="$(grep -E "^[[:space:]]*${_key}[[:space:]]*=" ${_file})"
+
+    local _value1
+    _value1=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
+
+    local _value2
+    _value2=$(expr ${_value1} : "\"\(.*\)\"")
+
+    if [ -n ${_value2} ]; then
+        echo ${_value2}
+    else
+        echo ${_value1}
     fi
 }
 
