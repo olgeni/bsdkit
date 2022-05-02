@@ -976,7 +976,7 @@ has_swap() {
     return 0
 }
 
-format_fstab() {
+__finalize_fstab() {
     local _destdir=$1
 
     valid_destdir ${_destdir}
@@ -1537,7 +1537,7 @@ install_mbr_ufs() {
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
-    format_fstab ${BSDKIT_DESTDIR}
+    __finalize_fstab ${BSDKIT_DESTDIR}
     customize_base ${BSDKIT_DESTDIR}
 
     return 0
@@ -1572,7 +1572,7 @@ install_mbr_ufs_gmirror() {
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
-    format_fstab ${BSDKIT_DESTDIR}
+    __finalize_fstab ${BSDKIT_DESTDIR}
     customize_base ${BSDKIT_DESTDIR}
 
     return 0
@@ -1597,7 +1597,7 @@ install_gpt_ufs() {
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
-    format_fstab ${BSDKIT_DESTDIR}
+    __finalize_fstab ${BSDKIT_DESTDIR}
     customize_base ${BSDKIT_DESTDIR}
 
     return 0
@@ -1625,7 +1625,7 @@ install_zfs() {
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
-    format_fstab ${BSDKIT_DESTDIR}
+    __finalize_fstab ${BSDKIT_DESTDIR}
     customize_base ${BSDKIT_DESTDIR}
 
     return 0
@@ -1654,7 +1654,7 @@ install_gpt_zfs() {
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
-    format_fstab ${BSDKIT_DESTDIR}
+    __finalize_fstab ${BSDKIT_DESTDIR}
     customize_base ${BSDKIT_DESTDIR}
 
     return 0
@@ -1682,7 +1682,7 @@ install_mbr_zfs() {
     swap_setup ${BSDKIT_DESTDIR}
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
-    format_fstab ${BSDKIT_DESTDIR}
+    __finalize_fstab ${BSDKIT_DESTDIR}
     customize_base ${BSDKIT_DESTDIR}
 
     return 0
