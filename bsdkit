@@ -172,7 +172,7 @@ parse_url() {
         -e "s|%%PKGSET%%|${BSDKIT_PKGSET}|g"
 }
 
-local_options() {
+__local_options() {
     cat << EOF
 local BSDKIT_ROOT_URL='${BSDKIT_ROOT_URL}';
 local BSDKIT_VERSION='${BSDKIT_VERSION}';
@@ -1519,7 +1519,7 @@ reset_state() {
 }
 
 install_mbr_ufs() {
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _class=$1
@@ -1544,7 +1544,7 @@ install_mbr_ufs() {
 }
 
 install_mbr_ufs_gmirror() {
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _class=$1
@@ -1579,7 +1579,7 @@ install_mbr_ufs_gmirror() {
 }
 
 install_gpt_ufs() {
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _class=$1
@@ -1606,7 +1606,7 @@ install_gpt_ufs() {
 install_zfs() {
     check_bsdkit_runtime
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _devices
@@ -1634,7 +1634,7 @@ install_zfs() {
 install_gpt_zfs() {
     check_bsdkit_runtime
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
 
@@ -1663,7 +1663,7 @@ install_gpt_zfs() {
 install_mbr_zfs() {
     check_bsdkit_runtime
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _devices
@@ -1691,7 +1691,7 @@ install_mbr_zfs() {
 create_iocell() {
     __check_ansible
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _tag=$1
@@ -1718,7 +1718,7 @@ create_iocell() {
 create_iocell_thin() {
     __check_ansible
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _tag=$1
@@ -1745,7 +1745,7 @@ create_iocell_thin() {
 create_iocage() {
     __check_ansible
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _jail_name=$1
@@ -1776,7 +1776,7 @@ create_iocage() {
 create_iocage_thin() {
     __check_ansible
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _jail_name=$1
@@ -1805,7 +1805,7 @@ create_iocage_thin() {
 create_jail() {
     __check_ansible
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _opts _opts_args
@@ -1854,7 +1854,7 @@ create_jail() {
 configure_jail() {
     __check_ansible
 
-    eval $(local_options)
+    eval $(__local_options)
     eval $(parse_options $@)
 
     local _destdir=$1
