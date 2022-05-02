@@ -2002,7 +2002,7 @@ __do_configure_jail() {
         pw -V ${_destdir}/etc usermod root -s /bin/sh
 
         {
-            ansible_jail_playbook
+            __ansible_jail_playbook
         } always {
             pw -V ${_destdir}/etc usermod root -s ${_shell}
             stop_jail ${_destdir}
@@ -2776,7 +2776,7 @@ EOF
     rm -r ${_ansible_root}
 }
 
-ansible_jail_playbook() {
+__ansible_jail_playbook() {
     __check_ansible
 
     local _ansible_root
