@@ -994,7 +994,7 @@ __finalize_fstab() {
     rm ${_fstab}.0
 }
 
-fetch_release() {
+__fetch_release() {
     local _relpath=$1
     local _local_relpath=$2
 
@@ -1239,7 +1239,7 @@ __install_release() {
             mkdir -p ${_local_relpath}
         fi
 
-        fetch_release ${_relpath} ${_local_relpath}
+        __fetch_release ${_relpath} ${_local_relpath}
 
         _relpath=${_local_relpath}
     fi
