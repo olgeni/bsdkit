@@ -706,7 +706,7 @@ __zfs_create_pool() {
     return 0
 }
 
-zfs_create_gpt_pool() {
+__zfs_create_gpt_pool() {
     local _destdir=$1
 
     shift 1
@@ -776,7 +776,7 @@ zfs_create_gpt_pool() {
                 raidz1 ${_devices[1]}${_suffix} ${_devices[2]}${_suffix} ${_devices[3]}${_suffix}
             ;;
         *)
-            error "unsupported number of devices in pool (zfs_create_gpt_pool)."
+            error "unsupported number of devices in pool (__zfs_create_gpt_pool)."
             ;;
     esac
 
@@ -1648,7 +1648,7 @@ install_gpt_zfs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
+    __zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
     __zfs_create_fs ${BSDKIT_DESTDIR}
     __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap_setup ${BSDKIT_DESTDIR}
