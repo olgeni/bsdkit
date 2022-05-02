@@ -109,7 +109,7 @@ is_efi() {
     [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
 
-check_freebsd() {
+__check_freebsd() {
     if [ $(uname) != "FreeBSD" ]; then
         error "only works on FreeBSD."
     fi
