@@ -1414,7 +1414,7 @@ __install_resolv_conf() {
     fi
 }
 
-install_ca_root_nss() {
+__install_ca_root_nss() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1452,7 +1452,7 @@ EOF
     mkdir -p ${_destdir}/etc/rc.conf.d
 
     __install_resolv_conf ${_destdir}
-    install_ca_root_nss ${_destdir}
+    __install_ca_root_nss ${_destdir}
 
     mkdir -p ${_destdir}/usr/local/etc/pkg/repos
 
