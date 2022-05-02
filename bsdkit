@@ -1426,7 +1426,7 @@ install_ca_root_nss() {
     fi
 }
 
-customize_base() {
+__customize_base() {
     local _destdir=$1
 
     valid_destdir ${_destdir}
@@ -1538,7 +1538,7 @@ install_mbr_ufs() {
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
-    customize_base ${BSDKIT_DESTDIR}
+    __customize_base ${BSDKIT_DESTDIR}
 
     return 0
 }
@@ -1573,7 +1573,7 @@ install_mbr_ufs_gmirror() {
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
-    customize_base ${BSDKIT_DESTDIR}
+    __customize_base ${BSDKIT_DESTDIR}
 
     return 0
 }
@@ -1598,7 +1598,7 @@ install_gpt_ufs() {
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
-    customize_base ${BSDKIT_DESTDIR}
+    __customize_base ${BSDKIT_DESTDIR}
 
     return 0
 }
@@ -1626,7 +1626,7 @@ install_zfs() {
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
-    customize_base ${BSDKIT_DESTDIR}
+    __customize_base ${BSDKIT_DESTDIR}
 
     return 0
 }
@@ -1655,7 +1655,7 @@ install_gpt_zfs() {
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
-    customize_base ${BSDKIT_DESTDIR}
+    __customize_base ${BSDKIT_DESTDIR}
 
     return 0
 }
@@ -1683,7 +1683,7 @@ install_mbr_zfs() {
     procfs_setup ${BSDKIT_DESTDIR}
     fdescfs_setup ${BSDKIT_DESTDIR}
     __finalize_fstab ${BSDKIT_DESTDIR}
-    customize_base ${BSDKIT_DESTDIR}
+    __customize_base ${BSDKIT_DESTDIR}
 
     return 0
 }
@@ -1988,7 +1988,7 @@ _do_configure_jail() {
 
     mkdir -p ${_destdir}/usr/ports
 
-    customize_base ${_destdir}
+    __customize_base ${_destdir}
 
     if [ -f /etc/hosts ] && [ ! -f ${_destdir}/etc/hosts ]; then
         install -m 0644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
