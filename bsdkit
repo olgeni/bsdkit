@@ -459,7 +459,7 @@ __gpt_ufs_partition_multi() {
         echo "/dev/ufs/${BSDKIT_LABEL_USR}  /usr ufs rw 2 2"
     } >> ${_destdir}/etc/fstab
 
-    link_home ${_destdir}
+    __link_home ${_destdir}
 
     return 0
 }
@@ -507,7 +507,7 @@ __gpt_ufs_partition_single() {
 
     echo "/dev/ufs/${BSDKIT_LABEL_ROOT} / ufs rw 1 1" >> ${_destdir}/etc/fstab
 
-    link_home ${_destdir}
+    __link_home ${_destdir}
 
     return 0
 }
@@ -581,7 +581,7 @@ __mbr_ufs_partition_multi() {
         echo "/dev/ufs/${BSDKIT_LABEL_USR}  /usr ufs rw 2 2"
     } >> ${_destdir}/etc/fstab
 
-    link_home ${_destdir}
+    __link_home ${_destdir}
 
     return 0
 }
@@ -630,7 +630,7 @@ __mbr_ufs_partition_single() {
         echo "/dev/ufs/${BSDKIT_LABEL_ROOT} / ufs rw 1 1"
     } >> ${_destdir}/etc/fstab
 
-    link_home ${_destdir}
+    __link_home ${_destdir}
 
     return 0
 }
@@ -914,14 +914,14 @@ __zfs_create_fs() {
 
     touch ${_destdir}/etc/fstab
 
-    link_home ${_destdir}
+    __link_home ${_destdir}
 
     zpool set bootfs=${BSDKIT_ZFS_POOL}/ROOT/default ${BSDKIT_ZFS_POOL}
 
     return 0
 }
 
-link_home() {
+__link_home() {
     local _destdir=$1
 
     mkdir -p ${_destdir}/usr/home
@@ -1984,7 +1984,7 @@ __do_configure_jail() {
 
     local _destdir=$1
 
-    link_home ${_destdir}
+    __link_home ${_destdir}
 
     mkdir -p ${_destdir}/usr/ports
 
