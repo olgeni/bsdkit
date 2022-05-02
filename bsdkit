@@ -412,7 +412,7 @@ __gpt_ufs_partition_multi() {
     __install_efi_loader /dev/${_device}p${_p}
     _p=$((_p + 1))
 
-    if has_swap; then
+    if __has_swap; then
         gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP} ${_device}
         _p=$((_p + 1))
         swapon /dev/gpt/${BSDKIT_LABEL_SWAP}
@@ -537,7 +537,7 @@ __mbr_ufs_partition_multi() {
 
     gpart add -i 1 -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs ${_device}s1 # a
 
-    if has_swap; then
+    if __has_swap; then
         gpart add -i 2 -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap ${_device}s1 # b
         swapon /dev/${_device}s1b
     fi
@@ -687,7 +687,7 @@ __zfs_create_pool() {
             ;;
     esac
 
-    if has_swap; then
+    if __has_swap; then
         ${ZFS_CREATE_CMD} \
             -o checksum=off \
             -o compression=off \
@@ -735,7 +735,7 @@ __zfs_create_gpt_pool() {
         __install_efi_loader /dev/${_device}p${_p}
         _p=$((_p + 1))
 
-        if has_swap; then
+        if __has_swap; then
             gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP}${_device_index} ${_device}
             _p=$((_p + 1))
             swapon /dev/gpt/${BSDKIT_LABEL_SWAP}${_device_index}
@@ -816,7 +816,7 @@ __zfs_create_mbr_pool() {
         # do not align partitions here
         gpart add -i 1 -s ${_autorootsize}M -t freebsd-zfs ${_device}s1 # a
 
-        if has_swap; then
+        if __has_swap; then
             gpart add -i 2 -t freebsd-swap ${_device}s1 # b
             swapon /dev/${_device}s1b
         fi
@@ -970,7 +970,7 @@ __fdescfs_setup() {
     return 0
 }
 
-has_swap() {
+__has_swap() {
     [ ${BSDKIT_PART_SIZE_SWAP} = 0 ] && return 1
 
     return 0
