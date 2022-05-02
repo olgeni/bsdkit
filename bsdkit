@@ -1486,7 +1486,7 @@ start_jail() {
     local _jail_conf
     _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
-    echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
+    __echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -c ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
 }
@@ -1498,7 +1498,7 @@ stop_jail() {
     local _jail_conf
     _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
-    echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
+    __echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -r ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
 }
@@ -2872,7 +2872,7 @@ ${_jail_name} {
 EOF
 }
 
-echo_runtime_jail_conf() {
+__echo_runtime_jail_conf() {
     local _destdir=$1
 
     __valid_destdir ${_destdir}
