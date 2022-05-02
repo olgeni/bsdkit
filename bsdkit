@@ -161,7 +161,7 @@ __environment() {
         BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\"
 }
 
-parse_url() {
+__parse_url() {
     local _url=$1
 
     echo ${_url} | sed \
@@ -211,8 +211,8 @@ __parse_options() {
         esac
     done
 
-    FREEBSD_REL_URL=$(parse_url ${FREEBSD_REL_URL_TEMPLATE})
-    FREEBSD_PKG_URL=$(parse_url ${FREEBSD_PKG_URL_TEMPLATE})
+    FREEBSD_REL_URL=$(__parse_url ${FREEBSD_REL_URL_TEMPLATE})
+    FREEBSD_PKG_URL=$(__parse_url ${FREEBSD_PKG_URL_TEMPLATE})
 
     cat << EOF
 BSDKIT_ROOT_URL='${BSDKIT_ROOT_URL}';
