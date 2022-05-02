@@ -325,7 +325,7 @@ __valid_staging() {
     [ -f ${_staging}/memroot.ufs.gz ]
 }
 
-valid_destdir() {
+__valid_destdir() {
     local _destdir=$1
 
     [ -d ${_destdir} ] && [ ${_destdir} != "/" ] && [ -f ${_destdir}/bin/sh ]
@@ -931,7 +931,7 @@ link_home() {
 __swap_setup() {
     local _destdir=$1
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     local _swap
 
@@ -979,7 +979,7 @@ has_swap() {
 __finalize_fstab() {
     local _destdir=$1
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     local _fstab=${_destdir}/etc/fstab
 
@@ -1429,7 +1429,7 @@ __install_ca_root_nss() {
 __customize_base() {
     local _destdir=$1
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     chroot ${_destdir} chpass -p '$1$Kk8uqtid$UZr4tpkPw6388O6xDSFLt1' root
 
@@ -1481,7 +1481,7 @@ inet_address() {
 
 start_jail() {
     local _destdir=$1
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     local _jail_conf
     _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
@@ -1493,7 +1493,7 @@ start_jail() {
 
 stop_jail() {
     local _destdir=$1
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     local _jail_conf
     _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
@@ -2015,7 +2015,7 @@ __do_configure_jail() {
 remove_jail() {
     local _destdir=$1
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     local _dirname _basename _parent_fs
 
@@ -2051,7 +2051,7 @@ remove_jail() {
 make_read_only() {
     local _destdir=$1
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     local _file
 
@@ -2137,7 +2137,7 @@ __install_setup_runtime() {
     local _bsdkit=$2
     local _pkgpath=$3
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
     valid_bsdkit ${_bsdkit}
     __valid_pkgpath ${_pkgpath}
 
@@ -2841,7 +2841,7 @@ osreldate() {
 echo_jail_conf() {
     local _destdir=$1
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     cat << EOF
 exec.start = "/bin/sh /etc/rc";
@@ -2875,7 +2875,7 @@ EOF
 echo_runtime_jail_conf() {
     local _destdir=$1
 
-    valid_destdir ${_destdir}
+    __valid_destdir ${_destdir}
 
     cat > ${_jail_conf} << EOF
 exec.clean;
