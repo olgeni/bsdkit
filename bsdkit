@@ -1037,6 +1037,7 @@ make_thin_jail() {
     [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing rc.d)"
 
     local _directory_list=(
+        "bin" "."
         "boot" "."
         "lib" "."
         "libexec" "."
@@ -1107,6 +1108,7 @@ make_full_jail() {
     done
 
     local _directory_list=(
+        "bin"
         "boot"
         "lib"
         "libexec"
