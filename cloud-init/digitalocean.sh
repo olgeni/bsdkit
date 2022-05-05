@@ -13,6 +13,8 @@ export IGNORE_OSVERSION=yes
 
 cd /root
 
+rm -f /root/.wget-hsts
+
 # shellcheck disable=SC2016
 chpass -p '$1$Kk8uqtid$UZr4tpkPw6388O6xDSFLt1' root
 
