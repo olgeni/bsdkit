@@ -9,6 +9,8 @@ exec > /var/log/bsdkit-cloud-init.log 2>&1
 : "${BSDKIT_JAIL_NETWORK:=172.16.1.0/24}"
 : "${ZFS_SWAP_SIZE:=4G}"
 
+export IGNORE_OSVERSION=yes
+
 cd /root
 
 # shellcheck disable=SC2016
