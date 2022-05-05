@@ -1,0 +1,7 @@
+galaxy_info:
+  description: "bsdkit: gitlab_runner"
+  license: BSD
+  min_ansible_version: 2.1
+  galaxy_tags: []
+
+dependencies: []
