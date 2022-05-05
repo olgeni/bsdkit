@@ -117,6 +117,8 @@ perform_poweroff() {
 
 perform_destroy() {
     if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+        perform_purge
+
         _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
         local _sata_port
@@ -140,6 +142,15 @@ perform_destroy() {
 
 perform_snapshot() {
     VBoxManage snapshot ${BSDKIT_VBOX_NAME} take "$(date +%Y%m%d-%H%M%S)"
+}
+
+perform_purge() {
+    if [ "$(VBoxManage snapshot ${BSDKIT_VBOX_NAME} list | grep -v 'snapshots' | wc -l)" -gt 0 ]; then
+        VBoxManage snapshot ${BSDKIT_VBOX_NAME} list \
+            | sed -E 's/.*UUID: (.*)\).*/\1/' \
+            | gtac \
+            | xargs -n1 -t VBoxManage snapshot ${BSDKIT_VBOX_NAME} delete
+    fi
 }
 
 perform_remote_deploy() {
@@ -223,6 +234,10 @@ case ${_command} in
 
     snapshot)
         perform_snapshot
+        ;;
+
+    purge)
+        perform_purge
         ;;
 
     remote_deploy)
