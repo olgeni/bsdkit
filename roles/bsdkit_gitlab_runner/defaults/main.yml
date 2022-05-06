@@ -4,3 +4,6 @@ gitlab_url: https://gitlab.com/
 # gitlab_runner_name
 # gitlab_runner_token
 # gitlab_runner_tag_list
+gitlab_runner_run_untagged: false
+gitlab_runner_locked: false
+gitlab_runner_access_level: not_protected

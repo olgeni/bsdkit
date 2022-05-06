@@ -57,7 +57,10 @@
           --config ~gitlab-runner/.gitlab-runner/config.toml \
           --name "{{ gitlab_runner_name }} ({{ ansible_hostname }})" \
           --url {{ gitlab_url }} \
-          --registration-token "{{ gitlab_runner_token }}"
+          --registration-token "{{ gitlab_runner_token }}" \
+          --run-untagged="{{ gitlab_runner_run_untagged }}" \
+          --locked="{{ gitlab_runner_locked }}" \
+          --access-level="{{ gitlab_runner_access_level }}"
       EOF
     warn: no
   when: >
