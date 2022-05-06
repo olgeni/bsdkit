@@ -14,3 +14,39 @@
     dest: "/usr/local/bsdkit/"
     single_branch: yes
     version: "master"
+
+- name: "bsdkit-git: create ansible role directory"
+  tags:
+    - configure
+  file:
+    path: /usr/local/etc/ansible/roles
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: "bsdkit-git: get role list"
+  tags:
+    - configure
+  shell:
+    cmd: |
+      ls /root/bsdkit/roles
+  register: role_list
+
+- name: "bsdkit-git: link ansible roles"
+  tags:
+    - configure
+  file:
+    src: "/root/bsdkit/roles/{{ item }}"
+    dest: "/usr/local/etc/ansible/roles/{{ item }}"
+    state: link
+    owner: root
+    group: wheel
+    mode: "0755"
+  with_items: "{{ role_list.stdout_lines }}"
+
+- name: "bsdkit-git: ansible role cleanup"
+  tags:
+    - configure
+  shell:
+    cmd: find -L /usr/local/etc/ansible/roles -type l -exec rm -- {} +
