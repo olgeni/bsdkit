@@ -155,6 +155,9 @@ export LANG=en_US.UTF-8
 export CLICOLOR=yes
 export GPG_TTY=$(tty)
 
+export NSC_HOME=~/.nsc
+export NKEYS_PATH=~/.nsc/keys
+
 if [ -n "${INSIDE_EMACS}" ]; then
     export ALTERNATE_EDITOR=emacsclient
     export EDITOR=emacsclient
