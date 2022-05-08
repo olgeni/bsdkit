@@ -16,6 +16,7 @@ rcvar="digitalocean_enable"
 
 digitalocean_start()
 {
+    sysrc -x digitalocean_enable
     cd /root/bsdkit
     ./bsdkit digitalocean
     service netif restart
