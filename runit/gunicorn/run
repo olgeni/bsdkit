@@ -21,7 +21,7 @@ if [ -f envrc ]; then
 fi
 
 if [ -f envrc.local ]; then
-    ENVRC="${ENVRC}$(cat envrc.local)"
+    ENVRC="${ENVRC} $(cat envrc.local)"
 fi
 
 : ${GUNICORN_USER:="nobody"}
