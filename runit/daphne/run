@@ -20,6 +20,10 @@ if [ -f envrc ]; then
     ENVRC="$(cat envrc)"
 fi
 
+if [ -f envrc.local ]; then
+    ENVRC="${ENVRC}$(cat envrc.local)"
+fi
+
 : ${DAPHNE_USER:="nobody"}
 : ${DAPHNE_PATH:="/tmp"}
 : ${DAPHNE_ARGS=""}

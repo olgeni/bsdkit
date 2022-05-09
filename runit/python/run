@@ -20,6 +20,10 @@ if [ -f envrc ]; then
     ENVRC="$(cat envrc)"
 fi
 
+if [ -f envrc.local ]; then
+    ENVRC="${ENVRC}$(cat envrc.local)"
+fi
+
 : ${PYTHON_USER:="nobody"}
 : ${PYTHON_PATH:=""}
 : ${PYTHON_ARGS=""}

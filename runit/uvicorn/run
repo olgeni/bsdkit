@@ -20,6 +20,10 @@ if [ -f envrc ]; then
     ENVRC="$(cat envrc)"
 fi
 
+if [ -f envrc.local ]; then
+    ENVRC="${ENVRC}$(cat envrc.local)"
+fi
+
 : ${UVICORN_USER:="nobody"}
 : ${UVICORN_PATH:="/tmp"}
 : ${UVICORN_ARGS=""}
