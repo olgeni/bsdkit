@@ -30,14 +30,14 @@
     - configure
   shell:
     cmd: |
-      ls /root/bsdkit/roles
+      ls /usr/local/bsdkit/roles
   register: role_list
 
 - name: "bsdkit-git: link ansible roles"
   tags:
     - configure
   file:
-    src: "/root/bsdkit/roles/{{ item }}"
+    src: "/usr/local/bsdkit/roles/{{ item }}"
     dest: "/usr/local/etc/ansible/roles/{{ item }}"
     state: link
     owner: root
