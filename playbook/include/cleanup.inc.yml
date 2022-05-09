@@ -6,8 +6,6 @@
   ignore_errors: yes
 
 - name: "cleanup: remove ansible directory"
-  tags:
-    - configure
   file:
     path: '/root/.ansible'
     state: absent
