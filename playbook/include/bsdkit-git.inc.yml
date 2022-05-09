@@ -1,14 +1,10 @@
 - name: "bsdkit-git: install packages"
-  tags:
-    - configure
   pkgng:
     name:
       - devel/git
     state: present
 
 - name: "bsdkit-git: install files into /usr/local/bsdkit/"
-  tags:
-    - configure
   git:
     repo: "https://github.com/olgeni/bsdkit.git"
     dest: "/usr/local/bsdkit/"
@@ -16,8 +12,6 @@
     version: "master"
 
 - name: "bsdkit-git: create ansible role directory"
-  tags:
-    - configure
   file:
     path: /usr/local/etc/ansible/roles
     state: directory
@@ -26,16 +20,12 @@
     mode: "0755"
 
 - name: "bsdkit-git: get role list"
-  tags:
-    - configure
   shell:
     cmd: |
       ls /usr/local/bsdkit/roles
   register: role_list
 
 - name: "bsdkit-git: link ansible roles"
-  tags:
-    - configure
   file:
     src: "/usr/local/bsdkit/roles/{{ item }}"
     dest: "/usr/local/etc/ansible/roles/{{ item }}"
@@ -46,7 +36,5 @@
   with_items: "{{ role_list.stdout_lines }}"
 
 - name: "bsdkit-git: ansible role cleanup"
-  tags:
-    - configure
   shell:
     cmd: find -L /usr/local/etc/ansible/roles -type l -exec rm -- {} +
