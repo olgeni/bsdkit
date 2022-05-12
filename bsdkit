@@ -2811,6 +2811,12 @@ digitalocean() {
     ansible_local_playbook -t digitalocean
 }
 
+update() {
+    [ -d ${BSDKIT_SRCDIR}/.git ] || error "local git repository not found"
+
+    cd ${BSDKIT_SRCDIR} && git pull
+}
+
 osrelease() {
     local _destdir=$1
     ${_destdir}/bin/freebsd-version -u
