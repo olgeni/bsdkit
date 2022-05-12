@@ -2819,6 +2819,7 @@ update() {
 
 osrelease() {
     local _destdir=$1
+
     ${_destdir}/bin/freebsd-version -u
 }
 
