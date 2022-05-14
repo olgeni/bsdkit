@@ -1,17 +1,18 @@
+---
 - name: "mysql-zfs: block"
   when: zfs_enabled | bool
   block:
     - name: "mysql-zfs: check contents of MySQL home directory"
       find:
-        paths: "/var/db/mysql"
-        recurse: yes
-        hidden: yes
+        paths: /var/db/mysql
+        recurse: true
+        hidden: true
       register: find_var_db_mysql
 
     - name: "mysql-zfs: gather facts about MySQL ZFS dataset"
       zfs_facts:
         dataset: "{{ boot_pool }}/var/db/mysql"
-      ignore_errors: yes
+      ignore_errors: true
       register: mysql_zfs_facts
 
     - name: "mysql-zfs: create ZFS dataset for MySQL"
@@ -19,8 +20,8 @@
         name: "{{ boot_pool }}/var/db/mysql"
         state: present
         extra_zfs_properties:
-          canmount: on
+          canmount: true
           compression: "{{ zfs_compression }}"
-          atime: off
+          atime: false
           redundant_metadata: most
       when: find_var_db_mysql.matched == 0 or mysql_zfs_facts is successful

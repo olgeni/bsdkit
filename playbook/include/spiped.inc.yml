@@ -1,3 +1,4 @@
+---
 - name: "spiped: create /usr/local/etc/spiped/"
   file:
     path: /usr/local/etc/spiped/

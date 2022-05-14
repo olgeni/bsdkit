@@ -1,3 +1,4 @@
+---
 - name: "ftp: add FTP group"
   lineinfile:
     dest: /etc/group
@@ -9,7 +10,7 @@
 - name: "ftp: add FTP user (master.passwd)"
   lineinfile:
     dest: /etc/master.passwd
-    line: "ftp:*:14:14::0:0:Anonymous FTP Admin:/var/ftp:/sbin/nologin"
+    line: ftp:*:14:14::0:0:Anonymous FTP Admin:/var/ftp:/sbin/nologin
     regexp: "^ftp:"
     insertafter: "^man:"
   notify: pwd_mkdb
@@ -17,9 +18,9 @@
 - name: "ftp: add FTP user (ftpusers)"
   lineinfile:
     dest: /etc/ftpusers
-    line: "ftp"
-    regexp: "^ftp$"
-    insertafter: "^man$"
+    line: ftp
+    regexp: ^ftp$
+    insertafter: ^man$
 
 # Workaround for "pw: user '...' disappeared during update"
 - name: "ftp: flush handlers"

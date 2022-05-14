@@ -1,8 +1,9 @@
+---
 - name: "facts: register kenv smbios.system.product"
   command:
     cmd: kenv smbios.system.product
-  changed_when: no
-  ignore_errors: yes
+  changed_when: false
+  ignore_errors: true
   register: kenv_smbios_system_product
 
 - name: "facts: debug kenv_smbios_system_product"
@@ -12,8 +13,8 @@
 - name: "facts: register kenv smbios.bios.vendor"
   command:
     cmd: kenv smbios.bios.vendor
-  changed_when: no
-  ignore_errors: yes
+  changed_when: false
+  ignore_errors: true
   register: kenv_smbios_bios_vendor
 
 - name: "facts: debug kenv_smbios_bios_vendor"
@@ -26,7 +27,7 @@
       set -o pipefail
       echo "{{ ansible_distribution_release }}" | sed -E 's/([0-9]+).*/\1/;'
   register: freebsd_major
-  changed_when: no
+  changed_when: false
 
 - name: "facts: debug freebsd_major"
   debug:
@@ -37,7 +38,7 @@
     cmd: |
       set -o pipefail
       sysctl -n security.jail.jailed
-  changed_when: no
+  changed_when: false
   register: sysctl_security_jail_jailed
 
 - name: "facts: debug sysctl_security_jail_jailed"
@@ -54,12 +55,12 @@
 
 - name: "facts: set_fact (bsdkit defaults)"
   set_fact:
-    default_bsdkit_root_url: "https://hub.olgeni.com/FreeBSD"
+    default_bsdkit_root_url: https://hub.olgeni.com/FreeBSD
     default_bsdkit_version: "13.0"
-    default_bsdkit_arch: "amd64"
-    default_bsdkit_tree: "default"
-    default_bsdkit_pkgset: "nox11"
-    default_bsdkit_chroot: False
+    default_bsdkit_arch: amd64
+    default_bsdkit_tree: default
+    default_bsdkit_pkgset: nox11
+    default_bsdkit_chroot: false
 
 - name: "facts: set_fact (bsdkit variables)"
   set_fact:
@@ -148,7 +149,7 @@
     cmd: |
       uname -K
   register: uname_k_output
-  changed_when: no
+  changed_when: false
 
 - name: "facts: debug uname_k_output"
   debug:
@@ -181,8 +182,8 @@
       set -o pipefail
       zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
   register: zpool_get_bootfs
-  changed_when: no
-  ignore_errors: yes
+  changed_when: false
+  ignore_errors: true
 
 - name: "facts: debug zpool_get_bootfs"
   debug:

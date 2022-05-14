@@ -1,3 +1,4 @@
+---
 - name: "fscd: stat /usr/local/etc/fscd.conf"
   stat:
     path: /usr/local/etc/fscd.conf
@@ -6,7 +7,7 @@
 - name: "fscd: disable service"
   service:
     name: fscd
-    enabled: no
+    enabled: false
     state: stopped
   when: stat_fscd_conf.stat.exists
 

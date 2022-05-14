@@ -1,3 +1,4 @@
+---
 - name: "mysql: add MySQL group"
   lineinfile:
     dest: /etc/group
@@ -8,7 +9,7 @@
 - name: "mysql: add MySQL user"
   lineinfile:
     dest: /etc/master.passwd
-    line: "mysql:*:88:88::0:0:MySQL Daemon:/var/db/mysql:/usr/sbin/nologin"
+    line: mysql:*:88:88::0:0:MySQL Daemon:/var/db/mysql:/usr/sbin/nologin
     regexp: "^mysql:"
   notify: pwd_mkdb
 
@@ -30,7 +31,7 @@
 - name: "mysql: create ssh identity for MySQL"
   openssh_keypair:
     path: /var/db/mysql/.ssh/id_ed25519
-    comment: "mysql@{{ ansible_hostname }}"
+    comment: mysql@{{ ansible_hostname }}
     type: ed25519
     owner: mysql
     group: mysql

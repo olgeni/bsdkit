@@ -1,3 +1,4 @@
+---
 - name: "pkg: create /usr/local/etc/pkg/repos"
   file:
     path: /usr/local/etc/pkg/repos

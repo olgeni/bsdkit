@@ -1,80 +1,80 @@
 ---
 - hosts: all
   user: root
-  gather_facts: no
+  gather_facts: false
   tasks:
-    - name: "Bootstrap pkgng"
-      raw: "/bin/sh -c /usr/bin/env ASSUME_ALWAYS_YES=yes pkg -N || pkg update -f"
-      changed_when: no
+    - name: Bootstrap pkgng
+      raw: /bin/sh -c /usr/bin/env ASSUME_ALWAYS_YES=yes pkg -N || pkg update -f
+      changed_when: false
 
-    - name: "Install Python"
-      raw: "/usr/bin/env http_proxy=\"{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}\" pkg install -y lang/python"
-      changed_when: no
+    - name: Install Python
+      raw: /usr/bin/env http_proxy="{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}" pkg install -y lang/python
+      changed_when: false
 
 - hosts: all
   user: root
   tasks:
-    - name: "Load defaults.yml"
+    - name: Load defaults.yml
       tags: always
       include_vars:
         file: defaults.yml
 
-    - name: "Check if /.bsdkit.yml exists"
+    - name: Check if /.bsdkit.yml exists
       tags: always
       stat:
         path: /.bsdkit.yml
       register: stat_bsdkit_yml
 
-    - name: "Load /.bsdkit.yml"
+    - name: Load /.bsdkit.yml
       tags: always
       include_vars:
         file: /.bsdkit.yml
       when: stat_bsdkit_yml.stat.exists
 
-    - name: "Create /.bsdkit.yml"
+    - name: Create /.bsdkit.yml
       tags: always
       copy:
         src: defaults.yml
         dest: /.bsdkit.yml
       when: not stat_bsdkit_yml.stat.exists
 
-    - name: "Include facts.inc.yml"
+    - name: Include facts.inc.yml
       tags: always
       import_tasks: include/facts.inc.yml
 
-    - name: "Set root shell"
+    - name: Set root shell
       tags:
         - configure
       user:
         name: root
         shell: /bin/sh
 
-    - name: "Touch files"
+    - name: Touch files
       file:
         path: "{{ item }}"
         state: touch
         mode: "0644"
-      changed_when: no
+      changed_when: false
       loop:
         - /etc/rc.conf
         - /etc/rc.conf.local
         - /etc/sysctl.conf
         - /etc/sysctl.conf.local
 
-    - name: "Set 'ifconfig_DEFAULT' to 'DHCP'"
+    - name: Set 'ifconfig_DEFAULT' to 'DHCP'
       lineinfile:
         dest: /etc/rc.conf
-        line: 'ifconfig_DEFAULT="DHCP"'
-        regexp: "^ifconfig_DEFAULT"
+        line: ifconfig_DEFAULT="DHCP"
+        regexp: ^ifconfig_DEFAULT
         insertafter: EOF
       when: not(platform_is_digitalocean | bool)
 
-    - name: "Include remove.inc.yml"
+    - name: Include remove.inc.yml
       tags:
         - configure
       import_tasks: include/remove.inc.yml
 
-    - name: "Create /usr/local/etc"
+    - name: Create /usr/local/etc
       tags:
         - configure
       file:
@@ -87,25 +87,25 @@
     # - name: "Include login-conf.inc.yml"
     #   import_tasks: include/login-conf.inc.yml
 
-    - name: "Include pkg.inc.yml"
+    - name: Include pkg.inc.yml
       import_tasks: include/pkg.inc.yml
 
-    - name: "Include kernconf.inc.yml"
+    - name: Include kernconf.inc.yml
       tags:
         - configure
       import_tasks: include/kernconf.inc.yml
 
-    - name: "Digital Ocean"
+    - name: Digital Ocean
       tags: digitalocean
       import_tasks: include/digitalocean.inc.yml
       when: platform_is_digitalocean | bool
 
-    - name: "Include runit.inc.yml"
+    - name: Include runit.inc.yml
       tags:
         - configure
       import_tasks: include/runit.inc.yml
 
-    - name: "Install configuration files in /etc"
+    - name: Install configuration files in /etc
       tags:
         - configure
       copy:
@@ -119,17 +119,17 @@
         - make.conf
         - src.conf
 
-    - name: "Include pw.inc.yml"
+    - name: Include pw.inc.yml
       tags:
         - configure
       import_tasks: include/pw.inc.yml
 
-    - name: "Include periodic.inc.yml"
+    - name: Include periodic.inc.yml
       tags:
         - configure
       import_tasks: include/periodic.inc.yml
 
-    - name: "Include rc.inc.yml"
+    - name: Include rc.inc.yml
       tags:
         - configure
       import_tasks: include/rc.inc.yml
@@ -137,32 +137,32 @@
     - name: "Block: host"
       when: is_host_install
       block:
-        - name: "Include zfs.inc.yml"
+        - name: Include zfs.inc.yml
           tags:
             - configure
           import_tasks: include/zfs.inc.yml
           when: not is_chroot_install
 
-        - name: "Include pkgdir.inc.yml"
+        - name: Include pkgdir.inc.yml
           tags:
             - configure
           import_tasks: include/pkgdir.inc.yml
 
-        - name: "Include loader.inc.yml"
+        - name: Include loader.inc.yml
           import_tasks: include/loader.inc.yml
 
-        - name: "Include bsdenv.inc.yml"
+        - name: Include bsdenv.inc.yml
           import_tasks: include/bsdenv.inc.yml
 
-        - name: "Include postgres-zfs.inc.yml"
+        - name: Include postgres-zfs.inc.yml
           import_tasks: include/postgres-zfs.inc.yml
           when: not is_chroot_install
 
-        - name: "Include mysql-zfs.inc.yml"
+        - name: Include mysql-zfs.inc.yml
           import_tasks: include/mysql-zfs.inc.yml
           when: not is_chroot_install
 
-        - name: "Install sysctl.conf"
+        - name: Install sysctl.conf
           copy:
             src: ../ansible/{{ item }}
             dest: /etc/{{ item }}
@@ -172,7 +172,7 @@
           with_items:
             - sysctl.conf
 
-        - name: "Install /etc/defaults/vendor.conf (host version)"
+        - name: Install /etc/defaults/vendor.conf (host version)
           tags:
             - configure
           copy:
@@ -182,16 +182,16 @@
             group: wheel
             mode: "0644"
 
-        - name: "Configure /etc/devfs.conf"
+        - name: Configure /etc/devfs.conf
           lineinfile:
             dest: /etc/devfs.conf
-            regexp: "^{{ item }}"
+            regexp: ^{{ item }}
             state: absent
           with_items:
-            - ".*devstat"
-            - ".*fuse.*"
+            - .*devstat
+            - .*fuse.*
 
-        - name: "Set http_proxy in pkg.conf"
+        - name: Set http_proxy in pkg.conf
           lineinfile:
             dest: /usr/local/etc/pkg.conf
             line: 'pkg_env: { http_proxy: "{{ bsdkit_jail_proxy }}" }'
@@ -199,7 +199,7 @@
             insertafter: EOF
           when: bsdkit_jail_proxy | length > 0
 
-        - name: "Install /usr/local/etc/smartd.conf"
+        - name: Install /usr/local/etc/smartd.conf
           copy:
             src: ../ansible/smartd.conf
             dest: /usr/local/etc/smartd.conf
@@ -207,7 +207,7 @@
             group: wheel
             mode: "0644"
 
-        - name: "Install base packages (host)"
+        - name: Install base packages (host)
           pkgng:
             name:
               - misc/inplace
@@ -223,7 +223,7 @@
     - name: "Block: jail"
       when: is_jail_install
       block:
-        - name: "Install /etc/defaults/vendor.conf (jail version)"
+        - name: Install /etc/defaults/vendor.conf (jail version)
           tags:
             - configure
           copy:
@@ -233,81 +233,81 @@
             group: wheel
             mode: "0644"
 
-    - name: "Remove obsolete /usr/local/etc/portmaster.rc"
+    - name: Remove obsolete /usr/local/etc/portmaster.rc
       file:
         path: /usr/local/etc/portmaster.rc
         state: absent
 
-    - name: "Include dotfiles.inc.yml"
+    - name: Include dotfiles.inc.yml
       tags:
         - configure
       import_tasks: include/dotfiles.inc.yml
 
-    - name: "Include sudo.inc.yml"
+    - name: Include sudo.inc.yml
       tags:
         - configure
       import_tasks: include/sudo.inc.yml
 
-    - name: "Include doas.inc.yml"
+    - name: Include doas.inc.yml
       tags:
         - configure
       import_tasks: include/doas.inc.yml
 
-    - name: "Include vagrant.inc.yml"
+    - name: Include vagrant.inc.yml
       import_tasks: include/vagrant.inc.yml
 
-    - name: "Include spiped.inc.yml"
+    - name: Include spiped.inc.yml
       tags:
         - configure
       import_tasks: include/spiped.inc.yml
 
-    - name: "Include newsyslog.inc.yml"
+    - name: Include newsyslog.inc.yml
       tags:
         - configure
       import_tasks: include/newsyslog.inc.yml
 
-    - name: "Include ssh.inc.yml"
+    - name: Include ssh.inc.yml
       tags:
         - configure
       import_tasks: include/ssh.inc.yml
 
-    - name: "Include fscd-disable.inc.yml"
+    - name: Include fscd-disable.inc.yml
       tags:
         - configure
       import_tasks: include/fscd-disable.inc.yml
 
-    - name: "Include zoneinfo.inc.yml"
+    - name: Include zoneinfo.inc.yml
       tags:
         - configure
       import_tasks: include/zoneinfo.inc.yml
 
-    - name: "Include crontab.inc.yml"
+    - name: Include crontab.inc.yml
       tags:
         - configure
       import_tasks: include/crontab.inc.yml
 
-    - name: "Include syslog.inc.yml"
+    - name: Include syslog.inc.yml
       tags:
         - configure
       import_tasks: include/syslog.inc.yml
 
-    - name: "Include ftp.inc.yml"
+    - name: Include ftp.inc.yml
       tags:
         - configure
       import_tasks: include/ftp.inc.yml
 
-    - name: "Include postgres.inc.yml"
+    - name: Include postgres.inc.yml
       import_tasks: include/postgres.inc.yml
 
-    - name: "Include mysql.inc.yml"
+    - name: Include mysql.inc.yml
       import_tasks: include/mysql.inc.yml
 
-    - name: "Include bsdkit-git.inc.yml"
+    - name: Include bsdkit-git.inc.yml
       tags:
         - configure
       import_tasks: include/bsdkit-git.inc.yml
 
-    - name: "Install base packages (common)"
+    - name: Install base packages (common)
       tags:
         - configure
       pkgng:
@@ -350,15 +350,15 @@
     # - name: "Include ca-root-nss.inc.yml"
     #   import_tasks: include/ca-root-nss.inc.yml
 
-    - name: "Include virtualbox.inc.yml"
+    - name: Include virtualbox.inc.yml
       import_tasks: include/virtualbox.inc.yml
       when: platform_is_virtualbox | bool
 
-    - name: "Include vmware.inc.yml"
+    - name: Include vmware.inc.yml
       import_tasks: include/vmware.inc.yml
       when: platform_is_vmware | bool
 
-    - name: "Include cleanup.inc.yml"
+    - name: Include cleanup.inc.yml
       import_tasks: include/cleanup.inc.yml
 
   handlers:

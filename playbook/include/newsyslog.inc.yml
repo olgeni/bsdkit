@@ -1,3 +1,4 @@
+---
 - name: "newsyslog: create /usr/local/etc/newsyslog.conf.d/"
   file:
     path: /usr/local/etc/newsyslog.conf.d/

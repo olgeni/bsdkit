@@ -1,3 +1,4 @@
+---
 - name: "bsdenv: set bsdkit ifconfig in rc.conf"
   command:
     cmd: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"

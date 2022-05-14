@@ -1,18 +1,19 @@
+---
 - name: "ssh: set 'UseDNS no' in /etc/ssh/sshd_config"
   lineinfile:
     dest: /etc/ssh/sshd_config
-    line: "UseDNS no"
-    regexp: "^UseDNS"
+    line: UseDNS no
+    regexp: ^UseDNS
     insertafter: EOF
-  # notify: restart_sshd
+# notify: restart_sshd
 
 - name: "ssh: set 'PermitRootLogin without-password' in /etc/ssh/sshd_config"
   lineinfile:
     dest: /etc/ssh/sshd_config
-    line: "PermitRootLogin without-password"
-    regexp: "^PermitRootLogin"
+    line: PermitRootLogin without-password
+    regexp: ^PermitRootLogin
     insertafter: EOF
-  # notify: restart_sshd
+# notify: restart_sshd
 
 - name: "ssh: create ssh directory for root"
   file:
@@ -25,7 +26,7 @@
 - name: "ssh: create ssh identity for root"
   openssh_keypair:
     path: /root/.ssh/id_ed25519
-    comment: "root@{{ ansible_hostname }}"
+    comment: root@{{ ansible_hostname }}
     type: ed25519
     owner: root
     group: wheel

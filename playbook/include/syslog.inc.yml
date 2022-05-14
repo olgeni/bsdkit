@@ -1,3 +1,4 @@
+---
 - name: "syslog: create /usr/local/etc/syslog.d/"
   file:
     path: /usr/local/etc/syslog.d/
@@ -27,23 +28,23 @@
 
 - name: "syslog: touch log files"
   file:
-    path: "/var/log/{{ item }}"
+    path: /var/log/{{ item }}
     state: touch
     mode: "0600"
-  changed_when: no
+  changed_when: false
   loop:
     - console.log
 
 - name: "syslog: cleanup of /etc/syslog.conf"
   replace:
     path: /etc/syslog.conf
-    regexp: '(manpage\.)#+$'
-    replace: '\1'
+    regexp: (manpage\.)#+$
+    replace: \1
   notify: restart_syslogd
 
 - name: "syslog: disable '/dev/console' target in /etc/syslog.conf"
   replace:
     path: /etc/syslog.conf
-    regexp: '^([^#].*/dev/console$)'
-    replace: '#\1'
+    regexp: ^([^#].*/dev/console$)
+    replace: "#\\1"
   notify: restart_syslogd

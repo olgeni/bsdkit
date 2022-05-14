@@ -1,3 +1,4 @@
+---
 - name: "runit: create /var/service"
   file:
     path: /var/service

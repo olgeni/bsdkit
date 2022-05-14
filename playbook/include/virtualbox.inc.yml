@@ -1,8 +1,9 @@
+---
 - name: "virtualbox: configuration"
   lineinfile:
     dest: /etc/rc.conf
     line: '{{ item }}_enable="YES"'
-    regexp: "^{{ item }}_enable"
+    regexp: ^{{ item }}_enable
     insertafter: EOF
   with_items:
     - vboxguest

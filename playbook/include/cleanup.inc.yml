@@ -1,15 +1,16 @@
+---
 - name: "cleanup: clean package cache"
   command:
     cmd: pkg clean -a -y
-  changed_when: no
-  failed_when: no
-  ignore_errors: yes
+  changed_when: false
+  failed_when: false
+  ignore_errors: true
 
 - name: "cleanup: remove ansible directory"
   file:
-    path: '/root/.ansible'
+    path: /root/.ansible
     state: absent
-  changed_when: no
+  changed_when: false
 
 - name: "cleanup: remove authorized_key"
   authorized_key:

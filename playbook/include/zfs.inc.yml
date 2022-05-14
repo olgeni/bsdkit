@@ -1,3 +1,4 @@
+---
 - name: "zfs: block"
   when: zfs_enabled | bool
   block:
@@ -6,7 +7,7 @@
         name: "{{ boot_pool }}/var/db"
         state: present
         extra_zfs_properties:
-          canmount: off
+          canmount: false
 
     - name: "zfs: create ZFS dataset for /jails"
       zfs:
@@ -18,12 +19,12 @@
         name: "{{ boot_pool }}/usr/local"
         state: present
         extra_zfs_properties:
-          canmount: off
+          canmount: false
 
     - name: "zfs: gather facts about pkg ZFS dataset"
       zfs_facts:
         dataset: "{{ boot_pool }}/usr/local/pkg"
-      ignore_errors: yes
+      ignore_errors: true
       register: zfs_facts_usr_local_pkg
 
     - name: "zfs: remove usr/local/pkg"

@@ -1,3 +1,4 @@
+---
 - name: "postgres: add PostgreSQL group"
   lineinfile:
     dest: /etc/group
@@ -8,7 +9,7 @@
 - name: "postgres: add PostgreSQL user"
   lineinfile:
     dest: /etc/master.passwd
-    line: "postgres:*:770:770::0:0:PostgreSQL Daemon:/var/db/postgres:/bin/sh"
+    line: postgres:*:770:770::0:0:PostgreSQL Daemon:/var/db/postgres:/bin/sh
     regexp: "^postgres:"
   notify: pwd_mkdb
 
@@ -30,7 +31,7 @@
 - name: "postgres: create ssh identity for PostgreSQL"
   openssh_keypair:
     path: /var/db/postgres/.ssh/id_ed25519
-    comment: "postgres@{{ ansible_hostname }}"
+    comment: postgres@{{ ansible_hostname }}
     type: ed25519
     owner: postgres
     group: postgres

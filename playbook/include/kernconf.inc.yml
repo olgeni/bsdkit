@@ -1,3 +1,4 @@
+---
 - name: "kernconf: install kernel configuration (stat: /usr/src/sys)"
   stat:
     path: /usr/src/sys

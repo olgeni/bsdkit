@@ -1,7 +1,8 @@
+---
 - name: "crontab: set 'MAILTO' in /etc/crontab"
   lineinfile:
     dest: /etc/crontab
-    line: 'MAILTO=""'
-    regexp: "^MAILTO"
-    insertbefore: "^SHELL="
+    line: MAILTO=""
+    regexp: ^MAILTO
+    insertbefore: ^SHELL=
   notify: restart_cron

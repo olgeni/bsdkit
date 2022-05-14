@@ -1,9 +1,10 @@
+---
 - name: "rc: configure rc.conf"
   lineinfile:
     dest: /etc/rc.conf
-    line: "{{ item.key }}=\"{{ item.value }}\""
-    regexp: "^{{ item.key }} *="
-    create: yes
+    line: '{{ item.key }}="{{ item.value }}"'
+    regexp: ^{{ item.key }} *=
+    create: true
     mode: "0644"
     state: present
   with_items: "{{ rc_conf | dict2items }}"
@@ -14,7 +15,7 @@
 - name: "rc: configure rc.conf (delete)"
   lineinfile:
     dest: /etc/rc.conf
-    regexp: "^{{ item.key }} *="
+    regexp: ^{{ item.key }} *=
     mode: "0644"
     state: absent
   with_items: "{{ rc_conf_delete | dict2items }}"

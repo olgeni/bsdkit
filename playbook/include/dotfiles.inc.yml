@@ -1,3 +1,4 @@
+---
 - name: "dotfiles: create /usr/local/share/skel"
   file:
     path: /usr/local/share/skel

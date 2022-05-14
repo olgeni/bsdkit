@@ -1,3 +1,4 @@
+---
 - name: "fscd: install 'fscd' package"
   pkgng:
     name:
@@ -14,21 +15,21 @@
     path: /usr/local/etc/fscd.conf
     state: touch
     mode: "0644"
-  changed_when: no
+  changed_when: false
   when: not stat_fscd_conf.stat.exists
 
 - name: "fscd: enable service"
   service:
     name: fscd
-    enabled: yes
+    enabled: true
     state: started
 
 - name: "fscd: configure services"
   lineinfile:
     dest: /usr/local/etc/fscd.conf
-    line: "sshd"
-    regexp: "^sshd$"
+    line: sshd
+    regexp: ^sshd$
     insertbefore: EOF
-    create: yes
+    create: true
     mode: "0644"
   notify: restart_fscd

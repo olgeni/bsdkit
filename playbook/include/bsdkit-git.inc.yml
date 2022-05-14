@@ -1,3 +1,4 @@
+---
 - name: "bsdkit-git: install packages"
   pkgng:
     name:
@@ -6,10 +7,10 @@
 
 - name: "bsdkit-git: install files into /usr/local/bsdkit/"
   git:
-    repo: "https://github.com/olgeni/bsdkit.git"
-    dest: "/usr/local/bsdkit/"
-    single_branch: yes
-    version: "master"
+    repo: https://github.com/olgeni/bsdkit.git
+    dest: /usr/local/bsdkit/
+    single_branch: true
+    version: master
 
 - name: "bsdkit-git: create ansible role directory"
   file:
@@ -27,8 +28,8 @@
 
 - name: "bsdkit-git: link ansible roles"
   file:
-    src: "/usr/local/bsdkit/roles/{{ item }}"
-    dest: "/usr/local/etc/ansible/roles/{{ item }}"
+    src: /usr/local/bsdkit/roles/{{ item }}
+    dest: /usr/local/etc/ansible/roles/{{ item }}
     state: link
     owner: root
     group: wheel

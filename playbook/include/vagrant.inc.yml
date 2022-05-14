@@ -1,3 +1,4 @@
+---
 - name: "vagrant: check if /vagrant exists"
   stat:
     path: /vagrant

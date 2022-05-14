@@ -1,19 +1,20 @@
+---
 - name: "loader: touch files"
   file:
     path: "{{ item }}"
     state: touch
     mode: "0644"
-  changed_when: no
+  changed_when: false
   loop:
     - /boot/loader.conf
 
 - name: "loader: configure loader_conf_files"
   lineinfile:
     dest: /boot/loader.conf.local
-    line: 'loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"'
+    line: loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"
     regexp: ^loader_conf_files=
     insertbefore: BOF
-    create: yes
+    create: true
     mode: "0644"
 
 - name: "loader: install loader.conf.vendor"

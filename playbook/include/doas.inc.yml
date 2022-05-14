@@ -1,3 +1,4 @@
+---
 - name: "doas: install 'doas' package"
   pkgng:
     name:

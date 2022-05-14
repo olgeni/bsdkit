@@ -1,3 +1,4 @@
+---
 - name: "pkgdir: block"
   when: zfs_enabled | bool
   block:

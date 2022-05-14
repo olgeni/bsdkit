@@ -1,9 +1,10 @@
+---
 - name: "periodic: configure periodic.conf"
   lineinfile:
     dest: /etc/periodic.conf
-    line: "{{ item.key }}=\"{{ item.value }}\""
-    regexp: "^{{ item.key }} *="
-    create: yes
+    line: '{{ item.key }}="{{ item.value }}"'
+    regexp: ^{{ item.key }} *=
+    create: true
     mode: "0644"
     state: present
   with_items: "{{ periodic_conf | dict2items }}"
@@ -12,8 +13,8 @@
 - name: "periodic: configure periodic.conf (delete)"
   lineinfile:
     dest: /etc/periodic.conf
-    regexp: "^{{ item.key }} *="
-    create: yes
+    regexp: ^{{ item.key }} *=
+    create: true
     mode: "0644"
     state: absent
   with_items: "{{ periodic_conf_delete | dict2items }}"

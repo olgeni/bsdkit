@@ -1,9 +1,10 @@
+---
 - name: "remove: /usr/lib/debug directory"
   file:
-    path: "/usr/lib/debug"
+    path: /usr/lib/debug
     state: absent
 
 - name: "remove: /usr/tests directory"
   file:
-    path: "/usr/tests"
+    path: /usr/tests
     state: absent
