@@ -1,7 +1,13 @@
 galaxy_info:
+  author: olgeni
   description: "bsdkit: gitlab_runner"
-  license: BSD
+  company: Digital Forest
+  license: BSD-2-Clause
   min_ansible_version: 2.1
+  platforms:
+    - name: FreeBSD
+      versions:
+        - 13
   galaxy_tags: []
 
 dependencies: []
