@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: olgeni
   description: "bsdkit: gitlab_runner"
@@ -9,5 +10,4 @@ galaxy_info:
       versions:
         - 13
   galaxy_tags: []
-
 dependencies: []

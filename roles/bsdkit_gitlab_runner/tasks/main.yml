@@ -11,7 +11,7 @@
     name: gitlab-runner
     state: present
     shell: /bin/sh
-    create_home: yes
+    create_home: true
     password: '{{ lookup("password", "/dev/null length=16") | password_hash("sha256") }}'
     update_password: on_create
     home: "{{ gitlab_runner_home }}"
@@ -32,8 +32,8 @@
       sudo --user=gitlab-runner zsh <<- "EOF"
       gitlab-runner verify --delete
       EOF
-    warn: no
-  changed_when: no
+    warn: false
+  changed_when: false
 
 - name: "gitlab-runner: list"
   shell:
@@ -41,11 +41,11 @@
       sudo --user=gitlab-runner zsh <<- "EOF"
       gitlab-runner list --config ~gitlab-runner/.gitlab-runner/config.toml 2>&1
       EOF
-    warn: no
-  changed_when: no
+    warn: false
+  changed_when: false
   register: gitlab_runner_list
 
-  # https://docs.gitlab.com/runner/register/
+# https://docs.gitlab.com/runner/register/
 - name: "gitlab_runner: register"
   shell:
     cmd: |
@@ -62,7 +62,7 @@
           --locked="{{ gitlab_runner_locked }}" \
           --access-level="{{ gitlab_runner_access_level }}"
       EOF
-    warn: no
+    warn: false
   when: >
     (gitlab_runner_name is defined)
     and (gitlab_runner_token is defined)
