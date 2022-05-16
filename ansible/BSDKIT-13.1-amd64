@@ -1,0 +1,5 @@
+include		GENERIC
+
+ident		BSDKIT
+
+options		DDB		# Enable the ddb debugger backend.
