@@ -36,7 +36,7 @@ autoload throw catch
 : ${BSDKIT_FREEBSD_DISTDIR:="/usr/freebsd-dist"}
 
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
-: ${BSDKIT_VERSION:="13.0"}
+: ${BSDKIT_VERSION:="13.1"}
 : ${BSDKIT_ARCH:="amd64"}
 : ${BSDKIT_TREE:="default"}
 : ${BSDKIT_PKGSET:="nox11"}
