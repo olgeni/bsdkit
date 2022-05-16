@@ -1588,6 +1588,7 @@ __install_setup_runtime() {
         sysutils/clone
         sysutils/cpdup
         sysutils/ddrescue
+        sysutils/filemon
         sysutils/flashrom
         sysutils/fusefs-exfat
         sysutils/fusefs-ext2
