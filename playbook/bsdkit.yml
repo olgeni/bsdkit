@@ -333,6 +333,7 @@
           - sysutils/clone
           - sysutils/cpdup
           - sysutils/direnv
+          - sysutils/filemon
           - sysutils/htop
           - sysutils/ncdu
           - sysutils/pv
