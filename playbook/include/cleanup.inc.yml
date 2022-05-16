@@ -4,7 +4,6 @@
     cmd: pkg clean -a -y
   changed_when: false
   failed_when: false
-  ignore_errors: true
 
 - name: "cleanup: remove ansible directory"
   file:

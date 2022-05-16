@@ -36,6 +36,9 @@
       copy:
         src: defaults.yml
         dest: /.bsdkit.yml
+        owner: root
+        group: wheel
+        mode: "0600"
       when: not stat_bsdkit_yml.stat.exists
 
     - name: Include facts.inc.yml

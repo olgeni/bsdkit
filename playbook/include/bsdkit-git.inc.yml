@@ -24,6 +24,7 @@
   shell:
     cmd: |
       ls /usr/local/bsdkit/roles
+  changed_when: false
   register: role_list
 
 - name: "bsdkit-git: link ansible roles"
@@ -39,3 +40,4 @@
 - name: "bsdkit-git: ansible role cleanup"
   shell:
     cmd: find -L /usr/local/etc/ansible/roles -type l -exec rm -- {} +
+  changed_when: false
