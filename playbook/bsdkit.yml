@@ -70,12 +70,7 @@
         line: ifconfig_DEFAULT="DHCP"
         regexp: ^ifconfig_DEFAULT
         insertafter: EOF
-      when: not(platform_is_digitalocean | bool)
-
-    - name: Include remove.inc.yml
-      tags:
-        - configure
-      import_tasks: include/remove.inc.yml
+      when: not (platform_is_digitalocean | bool)
 
     - name: Create /usr/local/etc
       tags:
@@ -89,6 +84,11 @@
 
     # - name: "Include login-conf.inc.yml"
     #   import_tasks: include/login-conf.inc.yml
+
+    - name: Include remove.inc.yml
+      tags:
+        - configure
+      import_tasks: include/remove.inc.yml
 
     - name: Include pkg.inc.yml
       import_tasks: include/pkg.inc.yml
@@ -304,6 +304,17 @@
         - configure
       import_tasks: include/bsdkit-git.inc.yml
 
+    # - name: "Include ca-root-nss.inc.yml"
+    #   import_tasks: include/ca-root-nss.inc.yml
+
+    - name: Include virtualbox.inc.yml
+      import_tasks: include/virtualbox.inc.yml
+      when: platform_is_virtualbox | bool
+
+    - name: Include vmware.inc.yml
+      import_tasks: include/vmware.inc.yml
+      when: platform_is_vmware | bool
+
     - name: Install base packages (common)
       tags:
         - configure
@@ -346,17 +357,6 @@
           - textproc/jq
           - textproc/the_silver_searcher
         state: present
-
-    # - name: "Include ca-root-nss.inc.yml"
-    #   import_tasks: include/ca-root-nss.inc.yml
-
-    - name: Include virtualbox.inc.yml
-      import_tasks: include/virtualbox.inc.yml
-      when: platform_is_virtualbox | bool
-
-    - name: Include vmware.inc.yml
-      import_tasks: include/vmware.inc.yml
-      when: platform_is_vmware | bool
 
     - name: Include cleanup.inc.yml
       import_tasks: include/cleanup.inc.yml
