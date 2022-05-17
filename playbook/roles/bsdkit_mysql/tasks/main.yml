@@ -1,0 +1,37 @@
+---
+- name: "mysql: add MySQL group"
+  lineinfile:
+    dest: /etc/group
+    line: "mysql:*:88:"
+    regexp: "^mysql:"
+  notify: pwd_mkdb
+
+- name: "mysql: add MySQL user"
+  lineinfile:
+    dest: /etc/master.passwd
+    line: mysql:*:88:88::0:0:MySQL Daemon:/var/db/mysql:/usr/sbin/nologin
+    regexp: "^mysql:"
+  notify: pwd_mkdb
+
+# Workaround for "pw: user '...' disappeared during update"
+- name: "mysql: flush handlers"
+  meta: flush_handlers
+
+- name: "mysql: create home directory for MySQL"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: mysql
+    group: mysql
+  with_items:
+    - /var/db/mysql
+    - /var/db/mysql/.ssh
+
+- name: "mysql: create ssh identity for MySQL"
+  community.crypto.openssh_keypair:
+    path: /var/db/mysql/.ssh/id_ed25519
+    comment: mysql@{{ ansible_hostname }}
+    type: ed25519
+    owner: mysql
+    group: mysql

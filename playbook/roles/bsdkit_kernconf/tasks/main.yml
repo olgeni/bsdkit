@@ -1,0 +1,14 @@
+---
+- name: "kernconf: install kernel configuration (stat: /usr/src/sys)"
+  stat:
+    path: /usr/src/sys
+  register: stat_usr_src_sys
+
+- name: "kernconf: install kernel configuration (exec)"
+  when: stat_usr_src_sys.stat.exists
+  copy:
+    src: ../ansible/BSDKIT-{{ freebsd_major.stdout }}-{{ ansible_architecture }}
+    dest: /usr/src/sys/{{ ansible_architecture }}/conf/BSDKIT
+    owner: root
+    group: wheel
+    mode: "0644"

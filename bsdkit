@@ -1706,7 +1706,7 @@ EOF
         BSDKIT_INTERFACE=${_bsdkit_interface} \
         BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
         BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-        ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
+        ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
 
     rm -r ${_ansible_root}
 }
@@ -2760,7 +2760,7 @@ ansible_local_playbook() {
         --inventory localhost, \
         --connection local \
         -e ansible_python_interpreter=/usr/local/bin/python3 \
-        ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
+        ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
 }
 
 ansible_chroot_playbook() {
@@ -2778,7 +2778,7 @@ inventory = ${_ansible_hosts}
 EOF
 
     cat > ${_ansible_hosts} << EOF
-${BSDKIT_DESTDIR} ansible_connection=chroot ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
+${BSDKIT_DESTDIR} ansible_connection=community.general.chroot ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
 EOF
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
@@ -2796,7 +2796,7 @@ EOF
              BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
              BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
              BSDKIT_CHROOT=1 \
-             ansible-playbook ${BSDKIT_SRCDIR}/playbook/bsdkit.yml $*
+             ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
     } always {
         umount -f ${BSDKIT_DESTDIR}/dev
     }

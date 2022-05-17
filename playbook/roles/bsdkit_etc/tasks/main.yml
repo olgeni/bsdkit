@@ -1,0 +1,94 @@
+---
+- name: Touch files
+  file:
+    path: "{{ item }}"
+    state: touch
+    mode: "0644"
+  changed_when: false
+  loop:
+    - /etc/rc.conf
+    - /etc/rc.conf.local
+    - /etc/sysctl.conf
+    - /etc/sysctl.conf.local
+
+- name: Create /usr/local/etc
+  file:
+    path: /usr/local/etc
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: Install configuration files in /etc
+  tags:
+    - configure
+  copy:
+    src: ../ansible/{{ item }}
+    dest: /etc/{{ item }}
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items:
+    - csh.cshrc
+    - make.conf
+    - src.conf
+
+- name: Install sysctl.conf
+  when: is_host_install
+  copy:
+    src: ../ansible/{{ item }}
+    dest: /etc/{{ item }}
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items:
+    - sysctl.conf
+
+- name: Install /etc/defaults/vendor.conf (host version)
+  when: is_host_install
+  tags:
+    - configure
+  copy:
+    src: ../ansible/vendor.conf
+    dest: /etc/defaults/vendor.conf
+    owner: root
+    group: wheel
+    mode: "0644"
+
+- name: Install /etc/defaults/vendor.conf (jail version)
+  when: is_jail_install
+  tags:
+    - configure
+  copy:
+    src: ../ansible/vendor.conf.jail
+    dest: /etc/defaults/vendor.conf
+    owner: root
+    group: wheel
+    mode: "0644"
+
+- name: Configure /etc/devfs.conf
+  when: is_host_install
+  lineinfile:
+    dest: /etc/devfs.conf
+    regexp: ^{{ item }}
+    state: absent
+  with_items:
+    - .*devstat
+    - .*fuse.*
+
+- name: Set http_proxy in pkg.conf
+  when: is_host_install and (bsdkit_jail_proxy | length > 0)
+  lineinfile:
+    dest: /usr/local/etc/pkg.conf
+    line: 'pkg_env: { http_proxy: "{{ bsdkit_jail_proxy }}" }'
+    regexp: ^pkg_env
+    insertafter: EOF
+
+- name: Install /usr/local/etc/smartd.conf
+  when: is_host_install
+  copy:
+    src: ../ansible/smartd.conf
+    dest: /usr/local/etc/smartd.conf
+    owner: root
+    group: wheel
+    mode: "0644"

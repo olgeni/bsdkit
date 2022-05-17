@@ -1,0 +1,8 @@
+---
+- name: Bootstrap pkgng
+  raw: /bin/sh -c /usr/bin/env ASSUME_ALWAYS_YES=yes pkg -N || pkg update -f
+  changed_when: false
+
+- name: Install Python
+  raw: /usr/bin/env http_proxy="{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}" pkg install -y lang/python
+  changed_when: false

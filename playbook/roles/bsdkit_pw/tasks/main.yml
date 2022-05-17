@@ -1,0 +1,21 @@
+---
+- name: "pw: configure pw.conf"
+  when: pw_conf is defined
+  lineinfile:
+    dest: /etc/pw.conf
+    line: '{{ item.key }} = "{{ item.value }}"'
+    regexp: ^{{ item.key }} *=
+    create: true
+    mode: "0644"
+    state: present
+  with_items: "{{ pw_conf | dict2items }}"
+
+- name: "pw: configure pw.conf (delete)"
+  when: pw_conf_delete is defined
+  lineinfile:
+    dest: /etc/pw.conf
+    regexp: ^{{ item.key }} *=
+    create: true
+    mode: "0644"
+    state: absent
+  with_items: "{{ pw_conf_delete | dict2items }}"

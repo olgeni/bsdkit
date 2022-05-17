@@ -1,0 +1,12 @@
+---
+- name: "vagrant: check if /vagrant exists"
+  stat:
+    path: /vagrant
+  register: stat_vagrant
+
+- name: "vagrant: enable sudo for vagrant user"
+  when: (stat_vagrant.stat.isdir is defined) and (stat_vagrant.stat.isdir)
+  copy:
+    content: "vagrant ALL = (ALL) NOPASSWD: SETENV: ALL"
+    dest: /usr/local/etc/sudoers.d/vagrant
+    mode: "0644"

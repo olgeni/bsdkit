@@ -1,6 +1,6 @@
 ---
 - name: "ca-root-nss: install ca_root_nss"
-  pkgng:
+  community.general.pkgng:
     name:
       - security/ca_root_nss
     state: present
@@ -24,6 +24,7 @@
   register: stat_cert_pem
 
 - name: "ca-root-nss: link ca-root-nss.crt (exec)"
+  when: stat_ca_root_nss.stat.exists and not stat_cert_pem.stat.exists
   file:
     src: /usr/local/share/certs/ca-root-nss.crt
     dest: /usr/local/etc/ssl/cert.pem
@@ -31,4 +32,3 @@
     owner: root
     group: wheel
     mode: "0644"
-  when: stat_ca_root_nss.stat.exists and not stat_cert_pem.stat.exists

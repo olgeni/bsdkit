@@ -1,0 +1,72 @@
+---
+- name: "gitlab_runner: install packages"
+  community.general.pkgng:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - devel/gitlab-runner
+
+- name: "gitlab_runner: configure user"
+  user:
+    name: gitlab-runner
+    state: present
+    shell: /bin/sh
+    create_home: true
+    password: '{{ lookup("password", "/dev/null length=16") | password_hash("sha256") }}'
+    update_password: on_create
+    home: "{{ gitlab_runner_home }}"
+
+- name: "gitlab_runner: configure rc.conf.d"
+  copy:
+    content: |
+      gitlab_runner_enable="YES"
+      gitlab_runner_dir="{{ gitlab_runner_home }}"
+    mode: "0644"
+    dest: /etc/rc.conf.d/gitlab_runner
+  notify:
+    - restart_gitlab_runner
+
+- name: "gitlab_runner: verify"
+  shell:
+    cmd: |
+      sudo --user=gitlab-runner zsh <<- "EOF"
+      gitlab-runner verify --delete
+      EOF
+    warn: false
+  changed_when: false
+
+- name: "gitlab-runner: list"
+  shell:
+    cmd: |
+      sudo --user=gitlab-runner zsh <<- "EOF"
+      gitlab-runner list --config ~gitlab-runner/.gitlab-runner/config.toml 2>&1
+      EOF
+    warn: false
+  changed_when: false
+  register: gitlab_runner_list
+
+# https://docs.gitlab.com/runner/register/
+- name: "gitlab_runner: register"
+  when: >
+    (gitlab_runner_name is defined)
+    and (gitlab_runner_token is defined)
+    and (gitlab_runner_tag_list is defined)
+    and gitlab_runner_list.stdout.find(gitlab_runner_name + " (" + ansible_hostname + ")") == -1
+  shell:
+    cmd: |
+      sudo --user=gitlab-runner zsh <<- "EOF"
+      gitlab-runner register \
+          --non-interactive \
+          --executor shell \
+          --tag-list "{{ gitlab_runner_tag_list }}" \
+          --config ~gitlab-runner/.gitlab-runner/config.toml \
+          --name "{{ gitlab_runner_name }} ({{ ansible_hostname }})" \
+          --url {{ gitlab_url }} \
+          --registration-token "{{ gitlab_runner_token }}" \
+          --run-untagged="{{ gitlab_runner_run_untagged }}" \
+          --locked="{{ gitlab_runner_locked }}" \
+          --access-level="{{ gitlab_runner_access_level }}"
+      EOF
+    warn: false
+  notify:
+    - restart_gitlab_runner

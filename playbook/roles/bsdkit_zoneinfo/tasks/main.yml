@@ -1,0 +1,10 @@
+---
+- name: "zoneinfo: run tzsetup (stat: /var/db/zoneinfo)"
+  stat:
+    path: /var/db/zoneinfo
+  register: stat_zoneinfo
+
+- name: "zoneinfo: run tzsetup (exec)"
+  when: not stat_zoneinfo.stat.exists
+  command:
+    cmd: tzsetup Europe/Rome

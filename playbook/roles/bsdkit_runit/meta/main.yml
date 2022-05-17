@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: bsdkit
+  description: bsdkit_runit
+  company: bsdkit
+  license: BSD-2-Clause
+  min_ansible_version: 2.1
+  platforms:
+    - name: FreeBSD
+      versions:
+        - 13
+  galaxy_tags: []
+
+dependencies:
+  - bsdkit_facts
+  - bsdkit_handlers
