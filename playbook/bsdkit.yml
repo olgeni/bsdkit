@@ -144,12 +144,13 @@
           tags:
             - configure
           import_tasks: include/zfs.inc.yml
-          when: not is_chroot_install
+          when: (not is_chroot_install) and (zfs_enabled | bool)
 
         - name: Include pkgdir.inc.yml
           tags:
             - configure
           import_tasks: include/pkgdir.inc.yml
+          when: (not is_chroot_install) and (zfs_enabled | bool)
 
         - name: Include loader.inc.yml
           import_tasks: include/loader.inc.yml
@@ -159,11 +160,11 @@
 
         - name: Include postgres-zfs.inc.yml
           import_tasks: include/postgres-zfs.inc.yml
-          when: not is_chroot_install
+          when: (not is_chroot_install) and (zfs_enabled | bool)
 
         - name: Include mysql-zfs.inc.yml
           import_tasks: include/mysql-zfs.inc.yml
-          when: not is_chroot_install
+          when: (not is_chroot_install) and (zfs_enabled | bool)
 
         - name: Install sysctl.conf
           copy:
