@@ -213,14 +213,12 @@
         - name: Install base packages (host)
           pkgng:
             name:
-              - misc/inplace
               - net/py-netaddr
               - sysutils/ansible
               - sysutils/beadm
               - sysutils/checkrestart
               - sysutils/lsblk
               - sysutils/smartmontools
-              - textproc/align
             state: present
 
     - name: "Block: jail"
@@ -324,6 +322,7 @@
           - ftp/lftp
           - misc/buffer
           - misc/gnu-watch
+          - misc/inplace
           - misc/mbuffer
           - misc/mc
           - net/croc
@@ -346,6 +345,7 @@
           - sysutils/spiped
           - sysutils/tmux
           - sysutils/ts
+          - textproc/align
           - textproc/fzf
           - textproc/jq
           - textproc/the_silver_searcher
