@@ -235,11 +235,6 @@
             group: wheel
             mode: "0644"
 
-    - name: Remove obsolete /usr/local/etc/portmaster.rc
-      file:
-        path: /usr/local/etc/portmaster.rc
-        state: absent
-
     - name: Include dotfiles.inc.yml
       tags:
         - configure

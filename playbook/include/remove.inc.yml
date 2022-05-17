@@ -8,3 +8,8 @@
   file:
     path: /usr/tests
     state: absent
+
+- name: "remove: /usr/local/etc/portmaster.rc"
+  file:
+    path: /usr/local/etc/portmaster.rc
+    state: absent
