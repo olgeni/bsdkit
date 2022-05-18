@@ -221,3 +221,25 @@
 - name: "facts: set_fact platform_is_vmware"
   set_fact:
     platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"
+
+- name: "facts: register netstat output"
+  shell:
+    cmd: |
+      set -o pipefail
+      netstat --libxo json -n -r
+  register: netstat_r_output
+  changed_when: false
+
+- name: "facts: register gateway information"
+  shell:
+    cmd: |
+      set -o pipefail
+      cat << EOF | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | { interface: .["interface-name"], address: .["gateway"] }'
+      {{ netstat_r_output.stdout }}
+      EOF
+  register: gateway_data_result
+  changed_when: false
+
+- name: "facts: set_fact gateway_data"
+  set_fact:
+    gateway_data: "{{ gateway_data_result.stdout | from_json }}"
