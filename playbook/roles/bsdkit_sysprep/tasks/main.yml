@@ -1,0 +1,32 @@
+---
+- name: Create /etc/rc.d/digitalocean
+  when: platform_is_digitalocean
+  copy:
+    src: files/digitalocean
+    dest: /etc/rc.d/digitalocean
+    owner: root
+    group: wheel
+    mode: 755
+
+- name: Enable digitalocean service
+  when: platform_is_digitalocean
+  service:
+    name: digitalocean
+    enabled: true
+    state: stopped
+
+- name: Touch /firstboot
+  file:
+    path: /firstboot
+    state: touch
+    owner: root
+    group: wheel
+    mode: "0644"
+
+- name: Reset log files
+  shell:
+    cmd: |
+      for _file in /var/log/*; do
+          : > ${_file}
+      done
+      newsyslog -C -v
