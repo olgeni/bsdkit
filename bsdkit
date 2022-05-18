@@ -1750,6 +1750,10 @@ inet_address() {
     ifconfig $(inet_interface) | awk '$1 == "inet" { print $2; exit }'
 }
 
+gateway_interface() {
+    netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["interface-name"]'
+}
+
 start_jail() {
     local _destdir=$1
     __valid_destdir ${_destdir}
