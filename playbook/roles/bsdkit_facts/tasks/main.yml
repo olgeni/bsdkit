@@ -1,4 +1,10 @@
 ---
+- name: "facts: install packages"
+  community.general.pkgng:
+    name:
+      - textproc/jq
+    state: present
+
 - name: "facts: register kenv smbios.system.product"
   command:
     cmd: kenv smbios.system.product
