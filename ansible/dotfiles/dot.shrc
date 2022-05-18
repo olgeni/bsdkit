@@ -1,6 +1,4 @@
-# $FreeBSD$
-#
-# .shrc - bourne shell startup file 
+# .shrc - bourne shell startup file
 #
 # This file will be used if the shell is invoked for interactive use and
 # the environment variable ENV is set to this file.
@@ -25,14 +23,14 @@ alias m="$PAGER"
 alias ll='ls -laFo'
 alias l='ls -l'
 alias g='egrep -i'
- 
+
 # # be paranoid
 # alias cp='cp -ip'
 # alias mv='mv -i'
 # alias rm='rm -i'
 
 
-# set prompt: ``username@hostname:directory $ '' 
+# set prompt: ``username@hostname:directory $ ''
 PS1="\u@\h:\w \\$ "
 
 # search path for cd(1)
