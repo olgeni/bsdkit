@@ -1,5 +1,5 @@
 ---
-- name: "runit: install package"
+- name: "runit: install packages"
   community.general.pkgng:
     name:
       - sysutils/runit
