@@ -319,6 +319,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             if [ -f "${DESTDIR}/boot/kernel/kernel" ]; then
                 _extract="yes"
             fi
+            _options+="--exclude ./usr"
             ;;
         base)
             _options+="--exclude ./.cshrc"
@@ -327,6 +328,11 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             _options+="--exclude ./root"
             _options+="--exclude ./tmp"
             _options+="--exclude ./var"
+
+            if ! is_yes ${_install_tests}; then
+                _options+="--exclude ./usr/tests"
+            fi
+
             _extract="yes"
             ;;
         ports) ;;
