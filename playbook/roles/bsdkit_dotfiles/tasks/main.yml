@@ -35,14 +35,14 @@
     group: wheel
     mode: "0644"
   with_items:
-    - cshrc
     - inputrc
     - kermrc
     - login
     - login_conf
     - mail_aliases
     - mailrc
-    - profile
-    - shrc
     - vimrc
     - zshrc
+    # - cshrc
+    # - profile
+    # - shrc
