@@ -854,7 +854,7 @@ __zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/var/tmp
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/usr/home
 
-    # These cannot be created from within the chroot (wrong mountpoint)
+    # These cannot be created from within the chroot (wrong mountpoint). Properties will be set by Ansible.
     ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/var/db/postgres
     ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/var/db/mysql
 
