@@ -50,9 +50,9 @@
   set_fact:
     metadata: "{{ cloud_init_metadata_payload.stdout | from_json }}"
 
-- name: "digitalocean: debug metadata"
-  debug:
-    var: metadata
+# - name: "digitalocean: debug metadata"
+#   debug:
+#     var: metadata
 
 - name: "digitalocean: set facts"
   set_fact:
