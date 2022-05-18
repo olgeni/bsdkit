@@ -18,7 +18,6 @@
     name: "{{ boot_pool }}/var/db/mysql"
     state: present
     extra_zfs_properties:
-      canmount: true
       compression: "{{ zfs_compression }}"
       atime: false
       redundant_metadata: most
