@@ -1,4 +1,10 @@
 ---
+- name: "runit: install package"
+  community.general.pkgng:
+    name:
+      - sysutils/runit
+    state: present
+
 - name: "runit: create /var/service"
   file:
     path: /var/service
@@ -33,3 +39,11 @@
 
       rmdir /usr/local/etc/sv/
     executable: /usr/local/bin/zsh
+
+- name: "runit: enable service"
+  service:
+    name: runsvdir
+    enabled: true
+    state: started
+  notify:
+    - reformat_rc_conf
