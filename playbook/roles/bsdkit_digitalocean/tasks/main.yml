@@ -54,7 +54,7 @@
 #   debug:
 #     var: metadata
 
-- name: "Set facts"
+- name: Metadata facts
   set_fact:
     metadata_dns_nameservers_0: "{{ metadata.dns.nameservers[0] }}"
     metadata_dns_nameservers_1: "{{ metadata.dns.nameservers[1] }}"

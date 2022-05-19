@@ -1,5 +1,5 @@
 ---
-- name: "Set 'UseDNS no' in /etc/ssh/sshd_config"
+- name: Set 'UseDNS no' in /etc/ssh/sshd_config
   lineinfile:
     dest: /etc/ssh/sshd_config
     line: UseDNS no
@@ -7,7 +7,7 @@
     insertafter: EOF
 # notify: restart_sshd
 
-- name: "Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config"
+- name: Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config
   lineinfile:
     dest: /etc/ssh/sshd_config
     line: PermitRootLogin without-password
@@ -31,7 +31,7 @@
     owner: root
     group: wheel
 
-- name: "Set authorized_key"
+- name: Set authorized_key
   when: bsdkit_ssh_public_key | length > 0
   ansible.posix.authorized_key:
     user: root

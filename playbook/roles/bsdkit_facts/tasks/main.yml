@@ -35,11 +35,11 @@
   changed_when: false
   register: sysctl_security_jail_jailed
 
-- name: "Set fact (security_jail_jailed)"
+- name: Set security_jail_jailed
   set_fact:
     security_jail_jailed: "{{ sysctl_security_jail_jailed.stdout == '1' }}"
 
-- name: "Set fact (bsdkit defaults)"
+- name: Set bsdkit defaults
   set_fact:
     default_bsdkit_root_url: https://hub.olgeni.com/FreeBSD
     default_bsdkit_version: "13.1"
@@ -48,7 +48,7 @@
     default_bsdkit_pkgset: nox11
     default_bsdkit_chroot: false
 
-- name: "Set fact (bsdkit variables)"
+- name: Set bsdkit variables
   set_fact:
     bsdkit_interface: "{{ lookup('env', 'BSDKIT_INTERFACE') }}"
     bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
@@ -62,15 +62,15 @@
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
     bsdkit_chroot: "{{ (lookup('env', 'BSDKIT_CHROOT') | default(default_bsdkit_chroot, False)) | bool }}"
 
-- name: "Set fact (is_host_install)"
+- name: Set is_host_install
   set_fact:
     is_host_install: "{{ not security_jail_jailed }}"
 
-- name: "Set fact (is_jail_install)"
+- name: Set is_jail_install
   set_fact:
     is_jail_install: "{{ security_jail_jailed }}"
 
-- name: "Set fact (is_chroot_install)"
+- name: Set is_chroot_install
   set_fact:
     is_chroot_install: "{{ bsdkit_chroot }}"
 
@@ -81,15 +81,15 @@
   register: uname_k_output
   changed_when: false
 
-- name: "Set fact (uname_k)"
+- name: Set uname_k
   set_fact:
     uname_k: "{{ uname_k_output.stdout }}"
 
-- name: "Set fact (zfs_compression, default)"
+- name: Set zfs_compression (default)
   set_fact:
     zfs_compression: lz4
 
-- name: "Set fact (zfs_compression, zstd)"
+- name: Set zfs_compression (zstd)
   when: uname_k | int > 1300000
   set_fact:
     zfs_compression: zstd
@@ -103,24 +103,24 @@
   changed_when: false
   ignore_errors: true
 
-- name: "Set fact zfs_available"
+- name: Set zfs_available
   set_fact:
     zfs_available: "{{ ((zpool_get_bootfs is succeeded) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
 
-- name: "Set fact boot_pool"
+- name: Set boot_pool
   when: zfs_available
   set_fact:
     boot_pool: "{{ zpool_get_bootfs.stdout }}"
 
-- name: "Set fact platform_is_digitalocean"
+- name: Set platform_is_digitalocean
   set_fact:
     platform_is_digitalocean: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
 
-- name: "Set fact platform_is_virtualbox"
+- name: Set platform_is_virtualbox
   set_fact:
     platform_is_virtualbox: "{{ kenv_smbios_system_product.stdout == 'VirtualBox' }}"
 
-- name: "Set fact platform_is_vmware"
+- name: Set platform_is_vmware
   set_fact:
     platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"
 
@@ -142,6 +142,6 @@
   register: gateway_data_result
   changed_when: false
 
-- name: "Set fact gateway_data"
+- name: Set gateway_data
   set_fact:
     gateway_data: "{{ gateway_data_result.stdout | from_json }}"
