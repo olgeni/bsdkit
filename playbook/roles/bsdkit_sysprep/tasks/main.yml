@@ -30,3 +30,4 @@
           : > ${_file}
       done
       newsyslog -C -v
+  changed_when: false
