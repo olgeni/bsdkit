@@ -1,18 +1,18 @@
 ---
-- name: "postgres-zfs: check contents of PostgreSQL home directory"
+- name: "Check contents of PostgreSQL home directory"
   find:
     paths: /var/db/postgres
     recurse: true
     hidden: true
   register: find_var_db_postgres
 
-- name: "postgres-zfs: gather facts about PostgreSQL ZFS dataset"
+- name: "Gather facts about PostgreSQL ZFS dataset"
   community.general.zfs_facts:
     dataset: "{{ boot_pool }}/var/db/postgres"
   ignore_errors: true
   register: var_db_postgres_zfs_facts
 
-- name: "postgres-zfs: create ZFS dataset for PostgreSQL"
+- name: "Create ZFS dataset for PostgreSQL"
   when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is successful
   zfs:
     name: "{{ boot_pool }}/var/db/postgres"

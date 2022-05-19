@@ -1,16 +1,16 @@
 ---
-- name: "doas: install 'doas' package"
+- name: "Install packages"
   community.general.pkgng:
     name:
       - security/doas
     state: present
 
-- name: "doas: check if doas.conf exists"
+- name: "Check if doas.conf exists"
   stat:
     path: /usr/local/etc/doas.conf
   register: stat_usr_local_etc_doas_conf
 
-- name: "doas: install default doas.conf"
+- name: "Install default doas.conf"
   when: not stat_usr_local_etc_doas_conf.stat.exists
   copy:
     src: ../ansible/doas.conf

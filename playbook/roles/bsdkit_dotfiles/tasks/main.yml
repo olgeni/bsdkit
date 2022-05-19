@@ -1,5 +1,5 @@
 ---
-- name: "dotfiles: create /usr/local/share/skel"
+- name: "Create /usr/local/share/skel"
   file:
     path: /usr/local/share/skel
     state: directory
@@ -7,7 +7,7 @@
     group: wheel
     mode: "0755"
 
-- name: "dotfiles: install dotfiles in /usr/local/share/skel"
+- name: "Install dotfiles in /usr/local/share/skel"
   copy:
     src: ../ansible/dotfiles/dot.{{ item }}
     dest: /usr/local/share/skel/dot.{{ item }}
@@ -27,7 +27,7 @@
     - vimrc
     - zshrc
 
-- name: "dotfiles: install dotfiles in /root"
+- name: "Install dotfiles in /root"
   copy:
     src: ../ansible/dotfiles/dot.{{ item }}
     dest: /root/.{{ item }}

@@ -1,11 +1,11 @@
 ---
-- name: "sudo: install 'sudo' package"
+- name: "Install packages"
   community.general.pkgng:
     name:
       - security/sudo
     state: present
 
-- name: "sudo: install default sudoers"
+- name: "Install default sudoers"
   copy:
     src: /usr/local/etc/sudoers.dist
     dest: /usr/local/etc/sudoers
@@ -14,7 +14,7 @@
     mode: "0644"
     remote_src: true
 
-- name: "sudo: install sudoers files"
+- name: "Install sudoers files"
   copy:
     src: "{{ item }}"
     dest: /usr/local/etc/sudoers.d/

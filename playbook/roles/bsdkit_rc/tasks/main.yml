@@ -1,5 +1,5 @@
 ---
-- name: "rc: configure rc.conf"
+- name: "Configure rc.conf"
   when: rc_conf is defined
   lineinfile:
     dest: /etc/rc.conf
@@ -12,7 +12,7 @@
   notify:
     - reformat_rc_conf
 
-- name: "rc: configure rc.conf (delete)"
+- name: "Configure rc.conf (delete)"
   when: rc_conf_delete is defined
   lineinfile:
     dest: /etc/rc.conf

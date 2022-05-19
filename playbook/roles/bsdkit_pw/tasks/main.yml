@@ -1,5 +1,5 @@
 ---
-- name: "pw: configure pw.conf"
+- name: "Configure pw.conf"
   when: pw_conf is defined
   lineinfile:
     dest: /etc/pw.conf
@@ -10,7 +10,7 @@
     state: present
   with_items: "{{ pw_conf | dict2items }}"
 
-- name: "pw: configure pw.conf (delete)"
+- name: "Configure pw.conf (delete)"
   when: pw_conf_delete is defined
   lineinfile:
     dest: /etc/pw.conf

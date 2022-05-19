@@ -1,5 +1,5 @@
 ---
-- name: "pkg: create /usr/local/etc/pkg/repos"
+- name: "Create /usr/local/etc/pkg/repos"
   file:
     path: /usr/local/etc/pkg/repos
     state: directory
@@ -7,7 +7,7 @@
     group: wheel
     mode: "0755"
 
-- name: "pkg: disable default FreeBSD repository"
+- name: "Disable default FreeBSD repository"
   copy:
     content: |
       FreeBSD: {
@@ -16,7 +16,7 @@
     dest: /usr/local/etc/pkg/repos/FreeBSD.conf
     mode: "0644"
 
-- name: "pkg: enable bsdkit repository"
+- name: "Enable bsdkit repository"
   copy:
     content: |
       bsdkit: {

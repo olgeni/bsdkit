@@ -1,5 +1,5 @@
 ---
-- name: "syslog: create /usr/local/etc/syslog.d/"
+- name: "Create /usr/local/etc/syslog.d/"
   file:
     path: /usr/local/etc/syslog.d/
     state: directory
@@ -7,7 +7,7 @@
     group: wheel
     mode: "0755"
 
-- name: "syslog: remove obsolete syslog files"
+- name: "Remove obsolete syslog files"
   file:
     path: "{{ item }}"
     state: absent
@@ -15,7 +15,7 @@
     - /usr/local/etc/syslog.d/console.conf
   notify: restart_syslogd
 
-- name: "syslog: install syslog.d files"
+- name: "Install syslog.d files"
   copy:
     src: "{{ item }}"
     dest: /usr/local/etc/syslog.d/
@@ -26,7 +26,7 @@
     - ../ansible/syslog.d/*.conf
   notify: restart_syslogd
 
-- name: "syslog: touch log files"
+- name: "Touch log files"
   file:
     path: /var/log/{{ item }}
     state: touch
@@ -35,14 +35,14 @@
   loop:
     - console.log
 
-- name: "syslog: cleanup of /etc/syslog.conf"
+- name: "Cleanup of /etc/syslog.conf"
   replace:
     path: /etc/syslog.conf
     regexp: (manpage\.)#+$
     replace: \1
   notify: restart_syslogd
 
-- name: "syslog: disable '/dev/console' target in /etc/syslog.conf"
+- name: "Disable '/dev/console' target in /etc/syslog.conf"
   replace:
     path: /etc/syslog.conf
     regexp: ^([^#].*/dev/console$)

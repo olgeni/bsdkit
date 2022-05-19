@@ -1,12 +1,12 @@
 ---
-- name: "gitlab_runner: install packages"
+- name: "Install packages"
   community.general.pkgng:
     name: "{{ item }}"
     state: present
   loop:
     - devel/gitlab-runner
 
-- name: "gitlab_runner: configure user"
+- name: "Configure user"
   user:
     name: gitlab-runner
     state: present
@@ -16,7 +16,7 @@
     update_password: on_create
     home: "{{ gitlab_runner_home }}"
 
-- name: "gitlab_runner: configure rc.conf.d"
+- name: "Configure rc.conf.d"
   copy:
     content: |
       gitlab_runner_enable="YES"
@@ -26,7 +26,7 @@
   notify:
     - restart_gitlab_runner
 
-- name: "gitlab_runner: verify"
+- name: "Verify"
   shell:
     cmd: |
       sudo --user=gitlab-runner zsh <<- "EOF"
@@ -35,7 +35,7 @@
     warn: false
   changed_when: false
 
-- name: "gitlab-runner: list"
+- name: "Gitlab-runner: list"
   shell:
     cmd: |
       sudo --user=gitlab-runner zsh <<- "EOF"
@@ -46,7 +46,7 @@
   register: gitlab_runner_list
 
 # https://docs.gitlab.com/runner/register/
-- name: "gitlab_runner: register"
+- name: "Register"
   when: >
     (gitlab_runner_name is defined)
     and (gitlab_runner_token is defined)

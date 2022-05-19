@@ -1,10 +1,10 @@
 ---
-- name: "bsdenv: set bsdkit ifconfig in rc.conf"
+- name: "Set bsdkit ifconfig in rc.conf"
   when: (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
   command:
     cmd: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
 
-- name: "bsdenv: set bsdkit defaultrouter in rc.conf"
+- name: "Set bsdkit defaultrouter in rc.conf"
   when: bsdkit_defaultrouter | length > 0
   command:
     cmd: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"

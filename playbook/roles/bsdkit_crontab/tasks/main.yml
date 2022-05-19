@@ -1,5 +1,5 @@
 ---
-- name: "crontab: set 'MAILTO' in /etc/crontab"
+- name: "Set 'MAILTO' in /etc/crontab"
   lineinfile:
     dest: /etc/crontab
     line: MAILTO=""

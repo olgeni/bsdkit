@@ -1,18 +1,18 @@
 ---
-- name: "bsdkit-git: install packages"
+- name: "Install packages"
   community.general.pkgng:
     name:
       - devel/git
     state: present
 
-- name: "bsdkit-git: install files into /usr/local/bsdkit/"
+- name: "Install files into /usr/local/bsdkit/"
   git:
     repo: https://github.com/olgeni/bsdkit.git
     dest: /usr/local/bsdkit/
     single_branch: true
     version: master
 
-- name: "bsdkit-git: create ansible role directory"
+- name: "Create ansible role directory"
   file:
     path: /usr/local/etc/ansible/roles
     state: directory
@@ -20,12 +20,12 @@
     group: wheel
     mode: "0755"
 
-- name: "bsdkit-git: ansible role cleanup"
+- name: "Ansible role cleanup"
   shell:
     cmd: find -L /usr/local/etc/ansible/roles -type l -exec rm -- {} +
   changed_when: false
 
-- name: "bsdkit-git: get role list"
+- name: "Get role list"
   shell:
     cmd: |
       ls /usr/local/bsdkit/playbook/roles
@@ -33,7 +33,7 @@
   register: role_list
   ignore_errors: true
 
-- name: "bsdkit-git: link ansible roles"
+- name: "Link ansible roles"
   when: role_list is success
   file:
     src: /usr/local/bsdkit/playbook/roles/{{ item }}

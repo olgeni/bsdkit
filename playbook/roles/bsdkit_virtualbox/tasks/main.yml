@@ -1,5 +1,5 @@
 ---
-- name: "virtualbox: configuration"
+- name: "Configuration"
   lineinfile:
     dest: /etc/rc.conf
     line: '{{ item }}_enable="YES"'

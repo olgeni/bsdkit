@@ -1,17 +1,17 @@
 ---
-- name: "cleanup: clean package cache"
+- name: "Clean package cache"
   command:
     cmd: pkg clean -a -y
   changed_when: false
   failed_when: false
 
-- name: "cleanup: remove ansible directory"
+- name: "Remove ansible directory"
   file:
     path: /root/.ansible
     state: absent
   changed_when: false
 
-- name: "cleanup: remove authorized_key"
+- name: "Remove authorized_key"
   when: bsdkit_ssh_public_key | length > 0
   ansible.posix.authorized_key:
     user: root
