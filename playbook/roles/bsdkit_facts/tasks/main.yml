@@ -136,7 +136,11 @@
   shell:
     cmd: |
       set -o pipefail
-      cat << EOF | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | { interface: .["interface-name"], address: .["gateway"] }'
+      cat << EOF | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][]
+                          | select(.["address-family"] == "Internet")
+                          | .["rt-entry"][]
+                          | select(.["destination"] == "default")
+                          | { interface: .["interface-name"], address: .["gateway"] }'
       {{ netstat_r_output.stdout }}
       EOF
   register: gateway_data_result
