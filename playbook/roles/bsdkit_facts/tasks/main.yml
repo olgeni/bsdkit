@@ -1,25 +1,25 @@
 ---
-- name: "Install packages"
+- name: Install packages
   community.general.pkgng:
     name:
       - textproc/jq
     state: present
 
-- name: "Register kenv smbios.system.product"
+- name: Register kenv smbios.system.product
   command:
     cmd: kenv smbios.system.product
   changed_when: false
   ignore_errors: true
   register: kenv_smbios_system_product
 
-- name: "Register kenv smbios.bios.vendor"
+- name: Register kenv smbios.bios.vendor
   command:
     cmd: kenv smbios.bios.vendor
   changed_when: false
   ignore_errors: true
   register: kenv_smbios_bios_vendor
 
-- name: "Register freebsd_major"
+- name: Register freebsd_major
   shell:
     cmd: |
       set -o pipefail
@@ -27,7 +27,7 @@
   register: freebsd_major
   changed_when: false
 
-- name: "Register security.jail.jailed"
+- name: Register security.jail.jailed
   shell:
     cmd: |
       set -o pipefail
@@ -74,7 +74,7 @@
   set_fact:
     is_chroot_install: "{{ bsdkit_chroot }}"
 
-- name: "Register uname -K"
+- name: Register uname -K
   command:
     cmd: |
       uname -K
@@ -94,7 +94,7 @@
   set_fact:
     zfs_compression: zstd
 
-- name: "Check ZFS boot pool"
+- name: Check ZFS boot pool
   shell:
     cmd: |
       set -o pipefail
@@ -124,7 +124,7 @@
   set_fact:
     platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"
 
-- name: "Register netstat output"
+- name: Register netstat output
   shell:
     cmd: |
       set -o pipefail
@@ -132,7 +132,7 @@
   register: netstat_r_output
   changed_when: false
 
-- name: "Register gateway information"
+- name: Register gateway information
   shell:
     cmd: |
       set -o pipefail

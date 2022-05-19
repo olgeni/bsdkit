@@ -2737,19 +2737,19 @@ EOF
   connection: ssh
   user: root
   tasks:
-    - name: "Install bsdkit"
+    - name: Install bsdkit
       delegate_to: localhost
       shell: |
         rsync -a --exclude=.git -e "ssh -p ${_remote_port} -i ${_ansible_key}" ${BSDKIT_SRCDIR}/ root@${_remote_address}:/root/bsdkit/
 
-    - name: "Run requested bsdkit function"
+    - name: Run requested bsdkit function
       shell: $(__environment) /root/bsdkit/bsdkit deploy "$@" > /tmp/bsdkit.log 2>&1
 
 - hosts: install
   connection: ssh
   user: root
   tasks:
-    - name: "Remove bsdkit"
+    - name: Remove bsdkit
       file: path=/root/bsdkit state=absent
 EOF
 

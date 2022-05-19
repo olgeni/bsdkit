@@ -15,7 +15,7 @@
     insertafter: EOF
 # notify: restart_sshd
 
-- name: "Create ssh directory for root"
+- name: Create ssh directory for root
   file:
     path: /root/.ssh
     state: directory
@@ -23,7 +23,7 @@
     group: wheel
     mode: "0755"
 
-- name: "Create ssh identity for root"
+- name: Create ssh identity for root
   community.crypto.openssh_keypair:
     path: /root/.ssh/id_ed25519
     comment: root@{{ ansible_hostname }}

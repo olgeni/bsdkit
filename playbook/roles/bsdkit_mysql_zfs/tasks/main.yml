@@ -1,18 +1,18 @@
 ---
-- name: "Check contents of MySQL home directory"
+- name: Check contents of MySQL home directory
   find:
     paths: /var/db/mysql
     recurse: true
     hidden: true
   register: find_var_db_mysql
 
-- name: "Gather facts about MySQL ZFS dataset"
+- name: Gather facts about MySQL ZFS dataset
   community.general.zfs_facts:
     dataset: "{{ boot_pool }}/var/db/mysql"
   ignore_errors: true
   register: mysql_zfs_facts
 
-- name: "Create ZFS dataset for MySQL"
+- name: Create ZFS dataset for MySQL
   when: find_var_db_mysql.matched == 0 or mysql_zfs_facts is successful
   zfs:
     name: "{{ boot_pool }}/var/db/mysql"

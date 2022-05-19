@@ -1,45 +1,45 @@
 ---
-- name: "Create ZFS dataset for /var/db"
+- name: Create ZFS dataset for /var/db
   zfs:
     name: "{{ boot_pool }}/var/db"
     state: present
     extra_zfs_properties:
       canmount: false
 
-- name: "Create ZFS dataset for /jails"
+- name: Create ZFS dataset for /jails
   zfs:
     name: "{{ boot_pool }}/jails"
     state: present
 
-- name: "Create ZFS dataset for /usr/local"
+- name: Create ZFS dataset for /usr/local
   zfs:
     name: "{{ boot_pool }}/usr/local"
     state: present
     extra_zfs_properties:
       canmount: false
 
-- name: "Gather facts about pkg ZFS dataset"
+- name: Gather facts about pkg ZFS dataset
   community.general.zfs_facts:
     dataset: "{{ boot_pool }}/usr/local/pkg"
   ignore_errors: true
   register: zfs_facts_usr_local_pkg
 
-- name: "Remove usr/local/pkg"
+- name: Remove usr/local/pkg
   when: zfs_facts_usr_local_pkg is successful
   block:
-    - name: "Save /var/db/pkg"
+    - name: Save /var/db/pkg
       shell: |
         set -e -u -o pipefail
         mkdir /tmp/pkg/
         mv /var/db/pkg/* /tmp/pkg/
       changed_when: true
 
-    - name: "Destroy ZFS dataset for pkg"
+    - name: Destroy ZFS dataset for pkg
       zfs:
         name: "{{ boot_pool }}/usr/local/pkg"
         state: absent
 
-    - name: "Restore /var/db/pkg"
+    - name: Restore /var/db/pkg
       shell: |
         set -e -u -o pipefail
         mkdir -p /usr/local/pkg

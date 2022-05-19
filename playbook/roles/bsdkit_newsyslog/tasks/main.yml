@@ -1,5 +1,5 @@
 ---
-- name: "Create /usr/local/etc/newsyslog.conf.d/"
+- name: Create /usr/local/etc/newsyslog.conf.d/
   file:
     path: /usr/local/etc/newsyslog.conf.d/
     state: directory
@@ -7,7 +7,7 @@
     group: wheel
     mode: "0755"
 
-- name: "Remove obsolete newsyslog files (newsyslog.conf)"
+- name: Remove obsolete newsyslog files (newsyslog.conf)
   file:
     path: "{{ item }}"
     state: absent
@@ -18,7 +18,7 @@
     - /usr/local/etc/newsyslog.conf.d/varnish.conf
     - /usr/local/etc/newsyslog.conf.d/webmin.conf
 
-- name: "Install newsyslog files"
+- name: Install newsyslog files
   copy:
     src: "{{ item }}"
     dest: /usr/local/etc/newsyslog.conf.d/

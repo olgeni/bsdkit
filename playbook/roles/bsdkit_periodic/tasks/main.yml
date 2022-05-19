@@ -1,5 +1,5 @@
 ---
-- name: "Configure periodic.conf"
+- name: Configure periodic.conf
   when: periodic_conf is defined
   lineinfile:
     dest: /etc/periodic.conf
@@ -10,7 +10,7 @@
     state: present
   with_items: "{{ periodic_conf | dict2items }}"
 
-- name: "Configure periodic.conf (delete)"
+- name: Configure periodic.conf (delete)
   when: periodic_conf_delete is defined
   lineinfile:
     dest: /etc/periodic.conf

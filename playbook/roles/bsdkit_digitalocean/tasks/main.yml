@@ -1,5 +1,5 @@
 ---
-- name: "Gather metadata (uri)"
+- name: Gather metadata (uri)
   uri:
     url: http://169.254.169.254/metadata/v1.json
     timeout: 5
@@ -7,7 +7,7 @@
   ignore_errors: true
   register: uri_metadata_payload
 
-- name: "Gather metadata (cloud-init)"
+- name: Gather metadata (cloud-init)
   when: uri_metadata_payload is failed
   shell:
     cmd: |
@@ -40,17 +40,17 @@
   register: cloud_init_metadata_payload
   changed_when: false
 
-- name: "Gather metadata (uri, json)"
+- name: Gather metadata (uri, json)
   when: uri_metadata_payload is succeeded
   set_fact:
     metadata: "{{ uri_metadata_payload.content | from_json }}"
 
-- name: "Gather metadata (cloud-init, json)"
+- name: Gather metadata (cloud-init, json)
   when: uri_metadata_payload is failed
   set_fact:
     metadata: "{{ cloud_init_metadata_payload.stdout | from_json }}"
 
-# - name: "Debug metadata"
+# - name: Debug metadata
 #   debug:
 #     var: metadata
 
@@ -68,7 +68,7 @@
     metadata_short_hostname: "{{ metadata.hostname.split('.')[0] }}"
     metadata_hostname: "{% if metadata.hostname.split('.') | length == 1 %}{{ metadata.hostname }}.bsdkit{% else %}{{ metadata.hostname }}{% endif %}"
 
-- name: "Configure /etc/resolv.conf for Digital Ocean"
+- name: Configure /etc/resolv.conf for Digital Ocean
   when: digitalocean.update_dns
   copy:
     dest: /etc/resolv.conf
@@ -77,7 +77,7 @@
       nameserver {{ metadata_dns_nameservers_1 }}
     mode: "0644"
 
-- name: "Configure /etc/hosts for Digital Ocean"
+- name: Configure /etc/hosts for Digital Ocean
   blockinfile:
     path: /etc/hosts
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
@@ -87,7 +87,7 @@
       {{ metadata_anchor_ipv4_address }} anchor
       {{ metadata_private_ipv4_address }} private
 
-- name: "Update rc.conf"
+- name: Update rc.conf
   shell:
     cmd: |
       set -e -u -o pipefail

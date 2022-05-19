@@ -1,10 +1,10 @@
 ---
-- name: "Install kernel configuration (stat: /usr/src/sys)"
+- name: Install kernel configuration (stat /usr/src/sys)
   stat:
     path: /usr/src/sys
   register: stat_usr_src_sys
 
-- name: "Install kernel configuration (exec)"
+- name: Install kernel configuration (exec)
   when: stat_usr_src_sys.stat.exists
   copy:
     src: ../ansible/BSDKIT-{{ freebsd_major.stdout }}-{{ ansible_architecture }}

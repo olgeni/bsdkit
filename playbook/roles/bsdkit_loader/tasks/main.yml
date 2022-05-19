@@ -1,5 +1,5 @@
 ---
-- name: "Touch files"
+- name: Touch files
   file:
     path: "{{ item }}"
     state: touch
@@ -8,7 +8,7 @@
   loop:
     - /boot/loader.conf
 
-- name: "Configure loader_conf_files"
+- name: Configure loader_conf_files
   lineinfile:
     dest: /boot/loader.conf.local
     line: loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"
@@ -17,7 +17,7 @@
     create: true
     mode: "0644"
 
-- name: "Install loader.conf.vendor"
+- name: Install loader.conf.vendor
   copy:
     src: ../ansible/{{ item }}
     dest: /boot/{{ item }}

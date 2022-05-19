@@ -1,10 +1,10 @@
 ---
-- name: "Check /var/db/pkg"
+- name: Check /var/db/pkg
   stat:
     path: /var/db/pkg
   register: stat_var_db_pkg
 
-- name: "Migrate /var/db/pkg to /usr/local/pkg"
+- name: Migrate /var/db/pkg to /usr/local/pkg
   when: (stat_var_db_pkg.stat.isdir is defined) and (stat_var_db_pkg.stat.isdir) and (not stat_var_db_pkg.stat.islnk)
   shell: |
     set -e -u -o pipefail

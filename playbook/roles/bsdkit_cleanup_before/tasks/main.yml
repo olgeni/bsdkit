@@ -1,15 +1,15 @@
 ---
-- name: "Remove /usr/lib/debug directory"
+- name: Remove /usr/lib/debug directory
   file:
     path: /usr/lib/debug
     state: absent
 
-- name: "Remove /usr/tests directory"
+- name: Remove /usr/tests directory
   file:
     path: /usr/tests
     state: absent
 
-- name: "Remove /usr/local/etc/portmaster.rc"
+- name: Remove /usr/local/etc/portmaster.rc
   file:
     path: /usr/local/etc/portmaster.rc
     state: absent

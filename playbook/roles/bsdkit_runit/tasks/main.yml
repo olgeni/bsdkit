@@ -1,11 +1,11 @@
 ---
-- name: "Install packages"
+- name: Install packages
   community.general.pkgng:
     name:
       - sysutils/runit
     state: present
 
-- name: "Create /var/service"
+- name: Create /var/service
   file:
     path: /var/service
     state: directory
@@ -13,7 +13,7 @@
     group: wheel
     mode: "0755"
 
-- name: "Create /var/db/runit"
+- name: Create /var/db/runit
   file:
     path: /var/db/runit
     state: directory
@@ -21,12 +21,12 @@
     group: wheel
     mode: "0755"
 
-- name: "Check if /usr/local/etc/sv exists"
+- name: Check if /usr/local/etc/sv exists
   stat:
     path: /usr/local/etc/sv
   register: stat_usr_local_etc_sv
 
-- name: "Migrate /usr/local/etc/sv"
+- name: Migrate /usr/local/etc/sv
   when: (stat_usr_local_etc_sv.stat.isdir is defined) and (stat_usr_local_etc_sv.stat.isdir)
   shell:
     cmd: |
@@ -40,7 +40,7 @@
       rmdir /usr/local/etc/sv/
     executable: /usr/local/bin/zsh
 
-- name: "Enable service"
+- name: Enable service
   service:
     name: runsvdir
     enabled: true
