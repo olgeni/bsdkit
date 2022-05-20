@@ -1,0 +1,11 @@
+---
+- name: Create SSL in /usr/local/etc
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+  with_items:
+    - /usr/local/etc/ssl/certs
+    - /usr/local/etc/ssl/blacklisted
