@@ -15,16 +15,16 @@
     insertafter: "^man:"
   notify: pwd_mkdb
 
+# Workaround for "pw: user '...' disappeared during update"
+- name: Flush handlers
+  meta: flush_handlers
+
 - name: Add FTP user (ftpusers)
   lineinfile:
     dest: /etc/ftpusers
     line: ftp
     regexp: ^ftp$
     insertafter: ^man$
-
-# Workaround for "pw: user '...' disappeared during update"
-- name: Flush handlers
-  meta: flush_handlers
 
 - name: Create /var/ftp
   file:
