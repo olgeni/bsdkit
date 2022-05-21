@@ -13,3 +13,8 @@
   file:
     path: /usr/local/etc/portmaster.rc
     state: absent
+
+- name: Remove /var/log/console
+  file:
+    path: /var/log/console
+    state: absent
