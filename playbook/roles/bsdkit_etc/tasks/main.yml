@@ -12,6 +12,8 @@
     - /etc/sysctl.conf.local
 
 - name: Create /usr/local/etc
+  tags:
+    - configure
   file:
     path: /usr/local/etc
     state: directory
