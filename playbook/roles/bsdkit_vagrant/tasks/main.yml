@@ -1,12 +1,15 @@
 ---
-- name: Check if /vagrant exists
-  stat:
-    path: /vagrant
-  register: stat_vagrant
+- name: bsdkit_vagrant
+  when: is_host_install
+  block:
+    - name: Check if /vagrant exists
+      stat:
+        path: /vagrant
+      register: stat_vagrant
 
-- name: Enable sudo for vagrant user
-  when: (stat_vagrant.stat.isdir is defined) and (stat_vagrant.stat.isdir)
-  copy:
-    content: "vagrant ALL = (ALL) NOPASSWD: SETENV: ALL"
-    dest: /usr/local/etc/sudoers.d/vagrant
-    mode: "0644"
+    - name: Enable sudo for vagrant user
+      when: (stat_vagrant.stat.isdir is defined) and (stat_vagrant.stat.isdir)
+      copy:
+        content: "vagrant ALL = (ALL) NOPASSWD: SETENV: ALL"
+        dest: /usr/local/etc/sudoers.d/vagrant
+        mode: "0644"

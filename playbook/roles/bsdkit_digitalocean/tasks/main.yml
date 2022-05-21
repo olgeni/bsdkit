@@ -1,110 +1,113 @@
 ---
-- name: Gather metadata (uri)
-  uri:
-    url: http://169.254.169.254/metadata/v1.json
-    timeout: 5
-    return_content: true
-  ignore_errors: true
-  register: uri_metadata_payload
+- name: Digital Ocean
+  when: platform_is_digitalocean
+  block:
+    - name: Gather metadata (uri)
+      uri:
+        url: http://169.254.169.254/metadata/v1.json
+        timeout: 5
+        return_content: true
+      ignore_errors: true
+      register: uri_metadata_payload
 
-- name: Gather metadata (cloud-init)
-  when: uri_metadata_payload is failed
-  shell:
-    cmd: |
-      set -e -u -o pipefail
+    - name: Gather metadata (cloud-init)
+      when: uri_metadata_payload is failed
+      shell:
+        cmd: |
+          set -e -u -o pipefail
 
-      metadata_mountpoint=/var/lib/cloud/seed/config_drive
+          metadata_mountpoint=/var/lib/cloud/seed/config_drive
 
-      if [ ! -d ${metadata_mountpoint} ]; then
-          mkdir -p ${metadata_mountpoint}
-      fi
-
-      if [ -e ${metadata_mountpoint}/digitalocean_meta_data.json ]; then
-          cat ${metadata_mountpoint}/digitalocean_meta_data.json
-          exit 0
-      fi
-
-      for _device in $(sysctl -n kern.disks); do
-          if [ "$(fstyp /dev/${_device} 2> /dev/null)" = "cd9660" ]; then
-              mount -t cd9660 /dev/${_device} ${metadata_mountpoint}
-              if [ -f ${metadata_mountpoint}/digitalocean_meta_data.json ]; then
-                  cat ${metadata_mountpoint}/digitalocean_meta_data.json
-                  umount ${metadata_mountpoint}
-                  exit 0
-              else
-                  umount ${metadata_mountpoint}
-              fi
+          if [ ! -d ${metadata_mountpoint} ]; then
+              mkdir -p ${metadata_mountpoint}
           fi
-      done
-      exit 1
-  register: cloud_init_metadata_payload
-  changed_when: false
 
-- name: Gather metadata (uri, json)
-  when: uri_metadata_payload is succeeded
-  set_fact:
-    metadata: "{{ uri_metadata_payload.content | from_json }}"
+          if [ -e ${metadata_mountpoint}/digitalocean_meta_data.json ]; then
+              cat ${metadata_mountpoint}/digitalocean_meta_data.json
+              exit 0
+          fi
 
-- name: Gather metadata (cloud-init, json)
-  when: uri_metadata_payload is failed
-  set_fact:
-    metadata: "{{ cloud_init_metadata_payload.stdout | from_json }}"
+          for _device in $(sysctl -n kern.disks); do
+              if [ "$(fstyp /dev/${_device} 2> /dev/null)" = "cd9660" ]; then
+                  mount -t cd9660 /dev/${_device} ${metadata_mountpoint}
+                  if [ -f ${metadata_mountpoint}/digitalocean_meta_data.json ]; then
+                      cat ${metadata_mountpoint}/digitalocean_meta_data.json
+                      umount ${metadata_mountpoint}
+                      exit 0
+                  else
+                      umount ${metadata_mountpoint}
+                  fi
+              fi
+          done
+          exit 1
+      register: cloud_init_metadata_payload
+      changed_when: false
 
-# - name: Debug metadata
-#   debug:
-#     var: metadata
+    - name: Gather metadata (uri, json)
+      when: uri_metadata_payload is succeeded
+      set_fact:
+        metadata: "{{ uri_metadata_payload.content | from_json }}"
 
-- name: Metadata facts
-  set_fact:
-    metadata_dns_nameservers_0: "{{ metadata.dns.nameservers[0] }}"
-    metadata_dns_nameservers_1: "{{ metadata.dns.nameservers[1] }}"
-    metadata_public_ipv4_address: "{{ metadata.interfaces.public[0].ipv4.ip_address }}"
-    metadata_public_ipv4_netmask: "{{ metadata.interfaces.public[0].ipv4.netmask }}"
-    metadata_anchor_ipv4_address: "{{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
-    metadata_anchor_ipv4_netmask: "{{ metadata.interfaces.public[0].anchor_ipv4.netmask }}"
-    metadata_private_ipv4_address: "{{ metadata.interfaces.private[0].ipv4.ip_address }}"
-    metadata_private_ipv4_netmask: "{{ metadata.interfaces.private[0].ipv4.netmask }}"
-    metadata_gateway: "{{ metadata.interfaces.public[0].ipv4.gateway }}"
-    metadata_short_hostname: "{{ metadata.hostname.split('.')[0] }}"
-    metadata_hostname: "{% if metadata.hostname.split('.') | length == 1 %}{{ metadata.hostname }}.bsdkit{% else %}{{ metadata.hostname }}{% endif %}"
+    - name: Gather metadata (cloud-init, json)
+      when: uri_metadata_payload is failed
+      set_fact:
+        metadata: "{{ cloud_init_metadata_payload.stdout | from_json }}"
 
-- name: Configure /etc/resolv.conf for Digital Ocean
-  when: digitalocean.update_dns
-  copy:
-    dest: /etc/resolv.conf
-    content: |
-      nameserver {{ metadata_dns_nameservers_0 }}
-      nameserver {{ metadata_dns_nameservers_1 }}
-    mode: "0644"
+    # - name: Debug metadata
+    #   debug:
+    #     var: metadata
 
-- name: Configure /etc/hosts for Digital Ocean
-  blockinfile:
-    path: /etc/hosts
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-    insertafter: EOF
-    block: |
-      {{ metadata_public_ipv4_address }} {{ metadata_short_hostname }} {{ metadata_hostname }} egress
-      {{ metadata_anchor_ipv4_address }} anchor
-      {{ metadata_private_ipv4_address }} private
+    - name: Metadata facts
+      set_fact:
+        metadata_dns_nameservers_0: "{{ metadata.dns.nameservers[0] }}"
+        metadata_dns_nameservers_1: "{{ metadata.dns.nameservers[1] }}"
+        metadata_public_ipv4_address: "{{ metadata.interfaces.public[0].ipv4.ip_address }}"
+        metadata_public_ipv4_netmask: "{{ metadata.interfaces.public[0].ipv4.netmask }}"
+        metadata_anchor_ipv4_address: "{{ metadata.interfaces.public[0].anchor_ipv4.ip_address }}"
+        metadata_anchor_ipv4_netmask: "{{ metadata.interfaces.public[0].anchor_ipv4.netmask }}"
+        metadata_private_ipv4_address: "{{ metadata.interfaces.private[0].ipv4.ip_address }}"
+        metadata_private_ipv4_netmask: "{{ metadata.interfaces.private[0].ipv4.netmask }}"
+        metadata_gateway: "{{ metadata.interfaces.public[0].ipv4.gateway }}"
+        metadata_short_hostname: "{{ metadata.hostname.split('.')[0] }}"
+        metadata_hostname: "{% if metadata.hostname.split('.') | length == 1 %}{{ metadata.hostname }}.bsdkit{% else %}{{ metadata.hostname }}{% endif %}"
 
-- name: Update rc.conf
-  shell:
-    cmd: |
-      set -e -u -o pipefail
+    - name: Configure /etc/resolv.conf for Digital Ocean
+      when: digitalocean.update_dns
+      copy:
+        dest: /etc/resolv.conf
+        content: |
+          nameserver {{ metadata_dns_nameservers_0 }}
+          nameserver {{ metadata_dns_nameservers_1 }}
+        mode: "0644"
 
-      sysrc ifconfig_vtnet0="inet {{ metadata_public_ipv4_address }} netmask {{ metadata_public_ipv4_netmask }}"
-      sysrc ifconfig_vtnet0_alias0="inet {{ metadata_anchor_ipv4_address }} netmask {{ metadata_anchor_ipv4_netmask }}"
-      sysrc ifconfig_vtnet1="inet {{ metadata_private_ipv4_address }} netmask {{ metadata_private_ipv4_netmask }}"
-      sysrc defaultrouter="{{ metadata_gateway }}"
+    - name: Configure /etc/hosts for Digital Ocean
+      blockinfile:
+        path: /etc/hosts
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        insertafter: EOF
+        block: |
+          {{ metadata_public_ipv4_address }} {{ metadata_short_hostname }} {{ metadata_hostname }} egress
+          {{ metadata_anchor_ipv4_address }} anchor
+          {{ metadata_private_ipv4_address }} private
 
-      sysrc sshd_flags="$(echo $(sysrc -n sshd_flags | rs 0 1 | grep -v -- -oListenAddress))"
-      sysrc sshd_flags+=" -oListenAddress={{ metadata_public_ipv4_address }}"
-      sysrc sshd_flags+=" -oListenAddress={{ metadata_anchor_ipv4_address }}"
-      sysrc sshd_flags+=" -oListenAddress={{ metadata_private_ipv4_address }}"
+    - name: Update rc.conf
+      shell:
+        cmd: |
+          set -e -u -o pipefail
 
-      sysrc hostname="{{ metadata_short_hostname }}"
+          sysrc ifconfig_vtnet0="inet {{ metadata_public_ipv4_address }} netmask {{ metadata_public_ipv4_netmask }}"
+          sysrc ifconfig_vtnet0_alias0="inet {{ metadata_anchor_ipv4_address }} netmask {{ metadata_anchor_ipv4_netmask }}"
+          sysrc ifconfig_vtnet1="inet {{ metadata_private_ipv4_address }} netmask {{ metadata_private_ipv4_netmask }}"
+          sysrc defaultrouter="{{ metadata_gateway }}"
 
-      service sshd configtest
-  changed_when: false
-  notify:
-    - reformat_rc_conf
+          sysrc sshd_flags="$(echo $(sysrc -n sshd_flags | rs 0 1 | grep -v -- -oListenAddress))"
+          sysrc sshd_flags+=" -oListenAddress={{ metadata_public_ipv4_address }}"
+          sysrc sshd_flags+=" -oListenAddress={{ metadata_anchor_ipv4_address }}"
+          sysrc sshd_flags+=" -oListenAddress={{ metadata_private_ipv4_address }}"
+
+          sysrc hostname="{{ metadata_short_hostname }}"
+
+          service sshd configtest
+      changed_when: false
+      notify:
+        - reformat_rc_conf

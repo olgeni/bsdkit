@@ -14,19 +14,7 @@
     - role: bsdkit_etc
     - role: bsdkit_settings
     - role: bsdkit_ifconfig
-    - role: bsdkit_pkg
-
-- hosts: all
-  user: root
-  roles:
-    - role: bsdkit_loader
-      when: is_host_install
     - role: bsdkit_bsdenv
-      when: is_host_install
-    - role: bsdkit_virtualbox
-      when: platform_is_virtualbox
-    - role: bsdkit_vmware
-      when: platform_is_vmware
 
 - hosts: all
   user: root
@@ -34,47 +22,40 @@
     - configure
   roles:
     - role: bsdkit_cleanup_before
-    - role: bsdkit_ssl
+    - role: bsdkit_loader
+    - role: bsdkit_pkg
     - role: bsdkit_kernconf
-    - role: bsdkit_runit
-    - role: bsdkit_pw
-    - role: bsdkit_periodic
-    - role: bsdkit_rc
-    - role: bsdkit_dotfiles
-    - role: bsdkit_sudo
-    - role: bsdkit_doas
-    - role: bsdkit_spiped
-    - role: bsdkit_newsyslog
-    - role: bsdkit_ssh
     - role: bsdkit_zoneinfo
+    - role: bsdkit_pw
+    - role: bsdkit_rc
+    - role: bsdkit_periodic
+    - role: bsdkit_ftp
     - role: bsdkit_crontab
     - role: bsdkit_syslog
-    - role: bsdkit_ftp
-    - role: bsdkit_git
-    - role: bsdkit_vagrant
-    - role: bsdkit_mysql
-    - role: bsdkit_postgres
+    - role: bsdkit_newsyslog
+    - role: bsdkit_ssh
+    - role: bsdkit_dotfiles
+    - role: bsdkit_ssl
     - role: bsdkit_basepkg
-
-- hosts: all
-  user: root
-  tags:
-    - configure
-  roles:
+    - role: bsdkit_runit
+    - role: bsdkit_spiped
+    - role: bsdkit_sudo
+    - role: bsdkit_doas
+    - role: bsdkit_postgres
+    - role: bsdkit_mysql
+    - role: bsdkit_vagrant
+    - role: bsdkit_virtualbox
+    - role: bsdkit_vmware
+    - role: bsdkit_git
     - role: bsdkit_zfs
-      when: is_host_install and (not is_chroot_install) and zfs_available
     - role: bsdkit_pkgdir
-      when: is_host_install and (not is_chroot_install) and zfs_available
     - role: bsdkit_postgres_zfs
-      when: is_host_install and (not is_chroot_install) and zfs_available
     - role: bsdkit_mysql_zfs
-      when: is_host_install and (not is_chroot_install) and zfs_available
 
 - hosts: all
   user: root
   roles:
     - role: bsdkit_digitalocean
-      when: platform_is_digitalocean
 
 - hosts: all
   user: root

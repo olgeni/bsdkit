@@ -94,18 +94,28 @@
   set_fact:
     zfs_compression: zstd
 
-- name: Check ZFS boot pool
-  shell:
-    cmd: |
-      set -o pipefail
-      zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
-  register: zpool_get_bootfs
-  changed_when: false
-  ignore_errors: true
+- name: Set zfs_available (not is_chroot_install)
+  when: not is_chroot_install
+  block:
+    - name: Check ZFS boot pool
+      shell:
+        cmd: |
+          set -o pipefail
+          zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
+      register: zpool_get_bootfs
+      changed_when: false
+      ignore_errors: true
 
-- name: Set zfs_available
-  set_fact:
-    zfs_available: "{{ ((zpool_get_bootfs is succeeded) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
+    - name: Set zfs_available (computed)
+      set_fact:
+        zfs_available: "{{ ((zpool_get_bootfs is succeeded) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
+
+- name: Set zfs_available (is_chroot_install)
+  when: is_chroot_install
+  block:
+    - name: Set zfs_available to false
+      set_fact:
+        zfs_available: false
 
 - name: Set boot_pool
   when: zfs_available

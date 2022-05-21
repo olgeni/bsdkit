@@ -1,23 +1,26 @@
 ---
-- name: Check contents of PostgreSQL home directory
-  find:
-    paths: /var/db/postgres
-    recurse: true
-    hidden: true
-  register: find_var_db_postgres
+- name: bsdkit_postgres_zfs
+  when: is_host_install and zfs_available
+  block:
+    - name: Check contents of PostgreSQL home directory
+      find:
+        paths: /var/db/postgres
+        recurse: true
+        hidden: true
+      register: find_var_db_postgres
 
-- name: Gather facts about PostgreSQL ZFS dataset
-  community.general.zfs_facts:
-    dataset: "{{ boot_pool }}/var/db/postgres"
-  ignore_errors: true
-  register: var_db_postgres_zfs_facts
+    - name: Gather facts about PostgreSQL ZFS dataset
+      community.general.zfs_facts:
+        dataset: "{{ boot_pool }}/var/db/postgres"
+      ignore_errors: true
+      register: var_db_postgres_zfs_facts
 
-- name: Create ZFS dataset for PostgreSQL
-  when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is successful
-  zfs:
-    name: "{{ boot_pool }}/var/db/postgres"
-    state: present
-    extra_zfs_properties:
-      compression: "{{ zfs_compression }}"
-      atime: false
-      redundant_metadata: most
+    - name: Create ZFS dataset for PostgreSQL
+      when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is successful
+      zfs:
+        name: "{{ boot_pool }}/var/db/postgres"
+        state: present
+        extra_zfs_properties:
+          compression: "{{ zfs_compression }}"
+          atime: false
+          redundant_metadata: most

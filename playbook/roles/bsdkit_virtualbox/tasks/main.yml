@@ -1,10 +1,19 @@
 ---
-- name: Configuration
-  lineinfile:
-    dest: /etc/rc.conf
-    line: '{{ item }}_enable="YES"'
-    regexp: ^{{ item }}_enable
-    insertafter: EOF
-  with_items:
-    - vboxguest
-    - vboxservice
+- name: bsdkit_virtualbox
+  when: is_host_install and platform_is_virtualbox
+  block:
+    - name: Install packages
+      community.general.pkgng:
+        name:
+          - emulators/virtualbox-ose-additions
+        state: present
+
+    - name: Enable VirtualBox guest
+      lineinfile:
+        dest: /etc/rc.conf
+        line: '{{ item }}_enable="YES"'
+        regexp: ^{{ item }}_enable
+        insertafter: EOF
+      with_items:
+        - vboxguest
+        - vboxservice
