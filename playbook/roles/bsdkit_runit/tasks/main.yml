@@ -21,6 +21,15 @@
     group: wheel
     mode: "0755"
 
+- name: Link /etc/sv
+  file:
+    path: /etc/sv
+    src: /var/db/runit
+    state: link
+    owner: root
+    group: wheel
+    mode: "0755"
+
 - name: Check if /usr/local/etc/sv exists
   stat:
     path: /usr/local/etc/sv
