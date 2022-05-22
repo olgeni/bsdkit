@@ -359,27 +359,27 @@ __gpt_ufs_partition_multi() {
 
     local _p=1
 
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_BOOT} -t freebsd-boot -l ${BSDKIT_LABEL_BOOT} ${_device}
+    gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_BOOT} -t freebsd-boot -l ${BSDKIT_LABEL_BOOT} ${_device}
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
     _p=$((_p + 1))
 
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
+    gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
     __install_efi_loader /dev/${_device}p${_p}
     _p=$((_p + 1))
 
     if __has_swap; then
-        gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP} ${_device}
+        gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP} ${_device}
         _p=$((_p + 1))
         swapon /dev/gpt/${BSDKIT_LABEL_SWAP}
     fi
 
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs -l ${BSDKIT_LABEL_ROOT} ${_device}
+    gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs -l ${BSDKIT_LABEL_ROOT} ${_device}
     _p=$((_p + 1))
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_TMP} -t freebsd-ufs -l ${BSDKIT_LABEL_TMP} ${_device}
+    gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_TMP} -t freebsd-ufs -l ${BSDKIT_LABEL_TMP} ${_device}
     _p=$((_p + 1))
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_VAR} -t freebsd-ufs -l ${BSDKIT_LABEL_VAR} ${_device}
+    gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_VAR} -t freebsd-ufs -l ${BSDKIT_LABEL_VAR} ${_device}
     _p=$((_p + 1))
-    gpart add -i ${_p} -t freebsd-ufs -l ${BSDKIT_LABEL_USR} ${_device}
+    gpart add -a 4k -i ${_p} -t freebsd-ufs -l ${BSDKIT_LABEL_USR} ${_device}
     _p=$((_p + 1))
 
     # FIXME: use -j
@@ -434,15 +434,15 @@ __gpt_ufs_partition_single() {
 
     local _p=1
 
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_BOOT} -t freebsd-boot -l ${BSDKIT_LABEL_BOOT} ${_device}
+    gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_BOOT} -t freebsd-boot -l ${BSDKIT_LABEL_BOOT} ${_device}
     gpart bootcode -p /boot/gptboot -i ${_p} ${_device}
     _p=$((_p + 1))
 
-    gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
+    gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
     __install_efi_loader /dev/${_device}p${_p}
     _p=$((_p + 1))
 
-    gpart add -i ${_p} -t freebsd-ufs -l ${BSDKIT_LABEL_ROOT} ${_device}
+    gpart add -a 4k -i ${_p} -t freebsd-ufs -l ${BSDKIT_LABEL_ROOT} ${_device}
     _p=$((_p + 1))
 
     # FIXME: use -j
@@ -479,7 +479,7 @@ __mbr_ufs_partition_multi() {
 
     gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s mbr ${_device}
-    gpart add -i 1 -t freebsd ${_device}
+    gpart add -a 4k -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
 
     gpart destroy -F ${_device}s1 2> /dev/null || :
@@ -490,17 +490,17 @@ __mbr_ufs_partition_multi() {
 
     # FIXME: refactor (end)
 
-    gpart add -i 1 -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs ${_device}s1 # a
+    gpart add -a 4k -i 1 -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs ${_device}s1 # a
 
     if __has_swap; then
-        gpart add -i 2 -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap ${_device}s1 # b
+        gpart add -a 4k -i 2 -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap ${_device}s1 # b
         swapon /dev/${_device}s1b
     fi
 
     # reserved partition c
-    gpart add -i 4 -s ${BSDKIT_PART_SIZE_TMP} -t freebsd-ufs ${_device}s1 # d
-    gpart add -i 5 -s ${BSDKIT_PART_SIZE_VAR} -t freebsd-ufs ${_device}s1 # e
-    gpart add -i 6 -t freebsd-ufs ${_device}s1                            # f
+    gpart add -a 4k -i 4 -s ${BSDKIT_PART_SIZE_TMP} -t freebsd-ufs ${_device}s1 # d
+    gpart add -a 4k -i 5 -s ${BSDKIT_PART_SIZE_VAR} -t freebsd-ufs ${_device}s1 # e
+    gpart add -a 4k -i 6 -t freebsd-ufs ${_device}s1                            # f
 
     # FIXME: use -j
 
@@ -553,7 +553,7 @@ __mbr_ufs_partition_single() {
 
     gpart destroy -F ${_device} 2> /dev/null || :
     gpart create -s mbr ${_device}
-    gpart add -i 1 -t freebsd ${_device}
+    gpart add -a 4k -i 1 -t freebsd ${_device}
     gpart set -a active -i 1 ${_device}
 
     gpart destroy -F ${_device}s1 2> /dev/null || :
@@ -564,7 +564,7 @@ __mbr_ufs_partition_single() {
 
     # FIXME: refactor (end)
 
-    gpart add -i 1 -t freebsd-ufs ${_device}s1 # a
+    gpart add -a 4k -i 1 -t freebsd-ufs ${_device}s1 # a
 
     # FIXME: use -j
 
@@ -613,6 +613,7 @@ __zfs_create_pool() {
 
     sysctl -q kern.geom.debugflags=0x00
 
+    # cachefile is handled later by Ansible
     local _options=(-f -m none -o altroot=${_destdir})
 
     local _device
@@ -682,21 +683,21 @@ __zfs_create_gpt_pool() {
 
         local _p=1
 
-        gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_BOOT} -t freebsd-boot -l ${BSDKIT_LABEL_BOOT}${_device_index} ${_device}
+        gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_BOOT} -t freebsd-boot -l ${BSDKIT_LABEL_BOOT}${_device_index} ${_device}
         gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_p} ${_device}
         _p=$((_p + 1))
 
-        gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI}${_device_index} ${_device}
+        gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI}${_device_index} ${_device}
         __install_efi_loader /dev/${_device}p${_p}
         _p=$((_p + 1))
 
         if __has_swap; then
-            gpart add -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP}${_device_index} ${_device}
+            gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP}${_device_index} ${_device}
             _p=$((_p + 1))
             swapon /dev/gpt/${BSDKIT_LABEL_SWAP}${_device_index}
         fi
 
-        gpart add -i ${_p} -t freebsd-zfs -l pool${_device_index} ${_device}
+        gpart add -a 4k -i ${_p} -t freebsd-zfs -l pool${_device_index} ${_device}
         gpart set -a bootme -i ${_p} ${_device}
         _pool_partition=${_p}
         _p=$((_p + 1))
@@ -760,7 +761,7 @@ __zfs_create_mbr_pool() {
 
         gpart destroy -F ${_device} 2> /dev/null || :
         gpart create -s mbr ${_device}
-        gpart add -i 1 -t freebsd ${_device}
+        gpart add -a 4k -i 1 -t freebsd ${_device}
         gpart set -a active -i 1 ${_device}
         gpart destroy -F ${_device}s1 2> /dev/null || :
         gpart create -s BSD ${_device}s1
@@ -769,10 +770,10 @@ __zfs_create_mbr_pool() {
         local _autorootsize="$(($(diskinfo ${_device} | cut -f 3) / 1024 / 1024 - ${BSDKIT_PART_SIZE_SWAP%G} * 1024))"
 
         # do not align partitions here
-        gpart add -i 1 -s ${_autorootsize}M -t freebsd-zfs ${_device}s1 # a
+        gpart add -a 4k -i 1 -s ${_autorootsize}M -t freebsd-zfs ${_device}s1 # a
 
         if __has_swap; then
-            gpart add -i 2 -t freebsd-swap ${_device}s1 # b
+            gpart add -a 4k -i 2 -t freebsd-swap ${_device}s1 # b
             swapon /dev/${_device}s1b
         fi
 
