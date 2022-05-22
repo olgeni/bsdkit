@@ -2929,6 +2929,10 @@ get_boot_pool() {
     zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
 }
 
+rebuild_zpool_cache() {
+    zpool set cachefile=/etc/zfs/zpool.cache $(get_boot_pool)
+}
+
 purge_libdir() {
     local _directory=$1
 
