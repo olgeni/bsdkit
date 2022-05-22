@@ -2,6 +2,12 @@
 - name: bsdkit_zfs
   when: is_host_install and zfs_available
   block:
+    - name: Create /etc/zfs/zpool.cache
+      shell:
+        cmd: |
+          zpool set cachefile=/etc/zfs/zpool.cache {{ boot_pool }}
+        creates: /etc/zfs/zpool.cache
+
     - name: Create ZFS dataset for /var/db
       zfs:
         name: "{{ boot_pool }}/var/db"
