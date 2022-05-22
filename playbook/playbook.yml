@@ -41,8 +41,6 @@
     - role: bsdkit_spiped
     - role: bsdkit_sudo
     - role: bsdkit_doas
-    - role: bsdkit_postgres
-    - role: bsdkit_mysql
     - role: bsdkit_vagrant
     - role: bsdkit_virtualbox
     - role: bsdkit_vmware
@@ -51,6 +49,8 @@
     - role: bsdkit_pkgdir
     - role: bsdkit_postgres_zfs
     - role: bsdkit_mysql_zfs
+    - role: bsdkit_postgres
+    - role: bsdkit_mysql
 
 - hosts: all
   user: root
