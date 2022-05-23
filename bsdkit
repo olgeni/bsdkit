@@ -618,8 +618,7 @@ __zfs_create_pool() {
     sysctl -q kern.geom.debugflags=0x00
 
     # cachefile is handled later by Ansible
-    local _options=(-f -m none -o altroot=${_destdir})
-
+    local _options=(-m none -o altroot=${_destdir})
     local _device
 
     for _device in ${_devices}; do
