@@ -823,7 +823,19 @@ __zfs_create_mbr_pool() {
             ;;
     esac
 
+    if [ $(uname -K) -ge 1300000 ]; then
+        ${ZFS_CMD} set xattr=sa ${BSDKIT_ZFS_POOL}
+    fi
+
     return 0
+}
+
+__zfs_create_zpool_cache() {
+    local _destdir=$1
+
+    [ -d ${_destdir} ]
+
+    zpool set cachefile=${_destdir}/etc/zfs/zpool.cache ${BSDKIT_ZFS_POOL}
 }
 
 __zfs_compression() {
