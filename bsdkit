@@ -677,6 +677,10 @@ __zfs_create_gpt_pool() {
 
     [ -d ${_destdir} ]
 
+    if [ $(sysctl -n vfs.zfs.min_auto_ashift) -eq 9 ]; then
+        sysctl -q vfs.zfs.min_auto_ashift=12
+    fi
+
     local _device_index=0
 
     local _pool_partition=0
