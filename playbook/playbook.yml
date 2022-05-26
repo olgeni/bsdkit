@@ -15,6 +15,7 @@
     - role: bsdkit_settings
     - role: bsdkit_ifconfig
     - role: bsdkit_bsdenv
+    - role: bsdkit_pkg
 
 - hosts: all
   user: root
@@ -23,7 +24,6 @@
   roles:
     - role: bsdkit_cleanup_before
     - role: bsdkit_loader
-    - role: bsdkit_pkg
     - role: bsdkit_kernconf
     - role: bsdkit_zoneinfo
     - role: bsdkit_pw
