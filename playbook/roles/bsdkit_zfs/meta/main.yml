@@ -12,5 +12,5 @@ galaxy_info:
   galaxy_tags: []
 
 dependencies:
-  - bsdkit_facts
-  - bsdkit_handlers
+  - name: bsdkit_facts
+  - name: bsdkit_handlers
