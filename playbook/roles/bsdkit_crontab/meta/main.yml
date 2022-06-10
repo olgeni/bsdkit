@@ -4,7 +4,7 @@ galaxy_info:
   description: bsdkit_crontab
   company: bsdkit
   license: BSD-2-Clause
-  min_ansible_version: 2.1
+  min_ansible_version: "2.1"
   platforms:
     - name: FreeBSD
       versions:
