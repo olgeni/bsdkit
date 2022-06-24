@@ -1,24 +1,28 @@
 ---
 - name: Load bsdkit-defaults.yml
-  tags: always
+  tags:
+    - always
   include_vars:
     file: bsdkit-defaults.yml
 
 - name: Check if /.bsdkit.yml exists
-  tags: always
+  tags:
+    - always
   stat:
     path: /.bsdkit.yml
   register: stat_bsdkit_yml
 
 - name: Load /.bsdkit.yml
   when: stat_bsdkit_yml.stat.exists
-  tags: always
+  tags:
+    - always
   include_vars:
     file: /.bsdkit.yml
 
 - name: Create /.bsdkit.yml
   when: not stat_bsdkit_yml.stat.exists
-  tags: always
+  tags:
+    - always
   copy:
     src: bsdkit-defaults.yml
     dest: /.bsdkit.yml
