@@ -1,10 +1,4 @@
 ---
-- name: Install packages
-  community.general.pkgng:
-    name:
-      - textproc/jq
-    state: present
-
 - name: Register kenv smbios.system.product
   command:
     cmd: kenv smbios.system.product
