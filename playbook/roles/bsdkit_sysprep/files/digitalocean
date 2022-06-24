@@ -16,9 +16,9 @@ rcvar="digitalocean_enable"
 
 digitalocean_start()
 {
-    # gpart recover vtbd0
-    # gpart resize -i 3 vtbd0
-    # zpool online -e zroot gpt/disk0
+    gpart recover vtbd0
+    gpart resize -i 3 vtbd0
+    zpool online -e zroot gpt/disk0
 
     sysrc -x digitalocean_enable
     cd /usr/local/bsdkit
