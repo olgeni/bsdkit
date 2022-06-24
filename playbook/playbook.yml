@@ -56,6 +56,8 @@
   user: root
   roles:
     - role: bsdkit_digitalocean
+      tags:
+        - digitalocean
 
 - hosts: all
   user: root
