@@ -160,3 +160,4 @@
 - name: Set gateway_data
   set_fact:
     gateway_data: "{{ gateway_data_result.stdout | from_json }}"
+  when: gateway_data_result.stdout | length > 0
