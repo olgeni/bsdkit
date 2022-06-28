@@ -4,6 +4,7 @@
     name:
       - textproc/jq
     state: present
+    cached: true
 
 - name: Register kenv smbios.system.product
   command:
