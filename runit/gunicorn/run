@@ -38,3 +38,4 @@ exec env -S "${ENVRC}" chpst -u ${GUNICORN_USER} ${CHPST_ARGS} gunicorn ${GUNICO
 
 # For logs: "--log-level debug"
 # For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"
+# For proxy address resolution: "--forwarded-allow-ips='*'"
