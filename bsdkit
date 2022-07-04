@@ -2862,6 +2862,10 @@ echo_jail_conf() {
 
     __valid_destdir ${_destdir}
 
+    local _jail_name
+
+    _jail_name=$(basename ${_destdir})
+
     cat << EOF
 exec.start = "/bin/sh /etc/rc";
 exec.stop = "/bin/sh /etc/rc.shutdown";
