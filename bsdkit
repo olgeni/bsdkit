@@ -2865,6 +2865,7 @@ echo_jail_conf() {
     local _jail_name
 
     _jail_name=$(basename ${_destdir})
+    _jail_root=$(dirname ${_destdir})
 
     cat << EOF
 exec.start = "/bin/sh /etc/rc";
@@ -2890,7 +2891,7 @@ ${_jail_name} {
         host.domainname = "local";
         interface = "$(inet_interface)";
         # ip4.addr = "";
-        # mount.fstab = "${_destdir%/}/\${name}.fstab";
+        # mount.fstab = "${_jail_root%/}/\${name}.fstab";
 }
 EOF
 }
