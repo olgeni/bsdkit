@@ -2835,6 +2835,16 @@ digitalocean() {
     ansible_local_playbook -t digitalocean
 }
 
+sysprep() {
+    __check_ansible
+
+    ansible-playbook \
+        --inventory localhost, \
+        --connection local \
+        -e ansible_python_interpreter=/usr/local/bin/python3 \
+        ${BSDKIT_SRCDIR}/playbook/sysprep.yml $*
+}
+
 update() {
     [ -d ${BSDKIT_SRCDIR}/.git ] || error "local git repository not found"
 
