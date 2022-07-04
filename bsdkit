@@ -2886,11 +2886,11 @@ ${_jail_name} {
         osreldate = "$(osreldate ${_destdir})";
 
         path = "${_destdir%/}";
-        host.hostname = "\$name";
+        host.hostname = "\${name}";
         host.domainname = "local";
         interface = "$(inet_interface)";
         # ip4.addr = "";
-        # mount.fstab = "${_destdir%/}/\$name.fstab";
+        # mount.fstab = "${_destdir%/}/\${name}.fstab";
 }
 EOF
 }
