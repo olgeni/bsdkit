@@ -2995,6 +2995,18 @@ purge_local_libdirs() {
     purge_libdir /usr/local/lib/perl5
 }
 
+purge_pkg_tempfiles() {
+    local _path=$1
+
+    local _file
+
+    rm -v $(for _file in $(find ${_path} \( -type f -o -type l \) | awk '$0 ~ /\.[a-zA-Z0-9]{12}$/ { print $0 }'); do
+            if ! pkg which ${_file} >/dev/null 2>&1; then
+                echo ${_file}
+            fi;
+        done | fzf -e -m)
+}
+
 zfs_create_postgresql() {
     local _pool
     _pool=$(get_boot_pool)
