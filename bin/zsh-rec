@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -e -u -o pipefail
+
+mkdir -p ~/.asciinema/
+
+exec /usr/local/bin/asciinema rec -q ~/.asciinema/$(date +%FT%T).cast -c '/usr/local/bin/zsh -l'
