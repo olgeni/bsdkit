@@ -55,6 +55,7 @@ ZFS_CMD=(zfs)
 
 BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
+ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
 
 if command -v pv > /dev/null 2>&1; then
     CAT_CMD=(pv -i ${BSDKIT_PV_UPDATE_DELAY})
@@ -1704,7 +1705,7 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
+${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
 EOF
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
@@ -2782,7 +2783,7 @@ ansible_local_playbook() {
     ansible-playbook \
         --inventory localhost, \
         --connection local \
-        -e ansible_python_interpreter=/usr/local/bin/python3 \
+        -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
         ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
 }
 
@@ -2841,7 +2842,7 @@ sysprep() {
     ansible-playbook \
         --inventory localhost, \
         --connection local \
-        -e ansible_python_interpreter=/usr/local/bin/python3 \
+        -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
         ${BSDKIT_SRCDIR}/playbook/sysprep.yml $*
 }
 
