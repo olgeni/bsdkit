@@ -128,11 +128,31 @@
   set_fact:
     platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"
 
+- name: Retrieve gateway address
+  set_fact:
+    gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"
+    public_interface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
+
+- name: Retrieve private interface (#1)
+  shell:
+    cmd: |
+      set -o pipefail
+      ifconfig -u -l ether | rs 0 1 | grep -v {{ public_interface }} | head -n 1
+  register: ifconfig_ether_output
+  changed_when: false
+  ignore_errors: true
+
+- name: Retrieve private interface (#2)
+  set_fact:
+    private_interface: "{{ ifconfig_ether_output.stdout }}"
+  when: ifconfig_ether_output.stdout | length > 0
+
 - name: Retrieve private address
   set_fact:
     private_address: "{{ address_dict['address'] }}"
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'][0] }}"
+  when: private_interface is defined
 
 - name: Retrieve public address
   set_fact:
@@ -146,6 +166,7 @@
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'][0] }}"
     address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
+  when: private_interface is defined
 
 - name: Retrieve public network
   set_fact:
@@ -153,8 +174,3 @@
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + public_interface]['ipv4'][0] }}"
     address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
-
-- name: Retrieve gateway address
-  set_fact:
-    gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"
-    gateway_interface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
