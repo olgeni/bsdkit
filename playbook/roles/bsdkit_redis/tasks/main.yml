@@ -1,0 +1,53 @@
+---
+- name: Install packages (redis)
+  pkgng:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - databases/redis
+
+- name: Create /var/db/runit/{{ bsdkit_redis_service_name }}
+  file:
+    mode: "0755"
+    path: /var/db/runit/{{ bsdkit_redis_service_name }}
+    state: directory
+- name: Create /var/db/runit/{{ bsdkit_redis_service_name }}/data
+  file:
+    mode: "0755"
+    path: /var/db/runit/{{ bsdkit_redis_service_name }}/data
+    state: directory
+
+- name: Copy redis.conf
+  template:
+    src: "{{ bsdkit_redis_configuration }}"
+    dest: /var/db/runit/{{ bsdkit_redis_service_name }}/redis.conf
+    group: wheel
+    mode: "0644"
+  notify:
+    - restart_redis
+
+- name: Copy /var/db/runit/{{ bsdkit_redis_service_name }}/run
+  copy:
+    dest: /var/db/runit/{{ bsdkit_redis_service_name }}/run
+    group: wheel
+    src: ../files/run
+    mode: "0755"
+  notify:
+    - restart_redis
+
+- name: Copy /var/db/runit/{{ bsdkit_redis_service_name }}/redis.conf.sample
+  copy:
+    dest: /var/db/runit/{{ bsdkit_redis_service_name }}/redis.conf.sample
+    group: wheel
+    src: ../files/redis.conf.sample
+    mode: "0644"
+  notify:
+    - restart_redis
+
+- name: Link /var/service/{{ bsdkit_redis_service_name }}
+  file:
+    src: /var/db/runit/{{ bsdkit_redis_service_name }}
+    path: /var/service/{{ bsdkit_redis_service_name }}
+    state: link
+  notify:
+    - restart_redis
