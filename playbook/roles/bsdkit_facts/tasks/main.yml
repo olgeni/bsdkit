@@ -1,11 +1,4 @@
 ---
-- name: Install packages
-  community.general.pkgng:
-    name:
-      - textproc/jq
-    state: present
-    cached: true
-
 - name: Register kenv smbios.system.product
   command:
     cmd: kenv smbios.system.product
@@ -135,29 +128,33 @@
   set_fact:
     platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"
 
-- name: Register netstat output
-  shell:
-    cmd: |
-      set -o pipefail
-      netstat --libxo json -n -r
-  register: netstat_r_output
-  changed_when: false
-
-- name: Register gateway information
-  shell:
-    cmd: |
-      set -o pipefail
-      cat << EOF | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][]
-                          | select(.["address-family"] == "Internet")
-                          | .["rt-entry"][]
-                          | select(.["destination"] == "default")
-                          | { interface: .["interface-name"], address: .["gateway"] }'
-      {{ netstat_r_output.stdout }}
-      EOF
-  register: gateway_data_result
-  changed_when: false
-
-- name: Set gateway_data
+- name: Retrieve private address
   set_fact:
-    gateway_data: "{{ gateway_data_result.stdout | from_json }}"
-  when: gateway_data_result.stdout | length > 0
+    private_address: "{{ address_dict['address'] }}"
+  vars:
+    address_dict: "{{ hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'][0] }}"
+
+- name: Retrieve public address
+  set_fact:
+    public_address: "{{ address_dict['address'] }}"
+  vars:
+    address_dict: "{{ hostvars[inventory_hostname]['ansible_' + public_interface]['ipv4'][0] }}"
+
+- name: Retrieve private network
+  set_fact:
+    private_network: "{{ address_with_netmask | ipaddr('network') }}/{{ address_with_netmask | ipaddr('prefix') }}"
+  vars:
+    address_dict: "{{ hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'][0] }}"
+    address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
+
+- name: Retrieve public network
+  set_fact:
+    public_network: "{{ address_with_netmask | ipaddr('network') }}/{{ address_with_netmask | ipaddr('prefix') }}"
+  vars:
+    address_dict: "{{ hostvars[inventory_hostname]['ansible_' + public_interface]['ipv4'][0] }}"
+    address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
+
+- name: Retrieve gateway address
+  set_fact:
+    gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"
+    gateway_interface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
