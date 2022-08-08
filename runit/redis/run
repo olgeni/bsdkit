@@ -27,9 +27,14 @@ fi
 : ${REDIS_USER:="redis"}
 : ${REDIS_GROUP:="redis"}
 : ${REDIS_ARGS="redis.conf"}
+: ${REDIS_PORT=""}
 
 mkdir -p data
 
 chown -R ${REDIS_USER}:${REDIS_GROUP} data
+
+if [ -n "${REDIS_PORT}" ]; then
+    REDIS_ARGS="--port ${REDIS_PORT} ${REDIS_ARGS}"
+fi
 
 exec env -S "${ENVRC}" chpst -u ${REDIS_USER}:${REDIS_GROUP} ${CHPST_ARGS} /usr/local/bin/redis-server ${REDIS_ARGS}
