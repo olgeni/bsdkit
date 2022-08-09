@@ -24,6 +24,10 @@ if [ -f envrc.local ]; then
     ENVRC="${ENVRC} $(cat envrc.local)"
 fi
 
+if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
+    ENVRC="${ENVRC} $(cat envrc.d/*)"
+fi
+
 : ${PYTHON_USER:="nobody"}
 : ${PYTHON_PATH:=""}
 : ${PYTHON_ARGS=""}
