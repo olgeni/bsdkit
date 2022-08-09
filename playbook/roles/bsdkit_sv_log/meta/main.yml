@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: bsdkit
-  description: bsdkit_log_svlogd
+  description: bsdkit_sv_log
   company: bsdkit
   license: BSD-2-Clause
   min_ansible_version: "2.1"
