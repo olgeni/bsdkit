@@ -1,5 +1,0 @@
----
-- name: restart_redis
-  shell:
-    cmd: |
-      sv restart {{ bsdkit_redis_service_name }} || :
