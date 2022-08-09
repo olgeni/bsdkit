@@ -1,0 +1,19 @@
+---
+- name: Create /var/db/runit/{{ bsdkit_service_name }}
+  file:
+    mode: "0755"
+    path: /var/db/runit/{{ bsdkit_service_name }}
+    state: directory
+
+- name: Create /var/db/runit/{{ bsdkit_service_name }}/log
+  file:
+    mode: "0755"
+    path: /var/db/runit/{{ bsdkit_service_name }}/log
+    state: directory
+
+- name: Copy /var/db/runit/{{ bsdkit_service_name }}/log/run
+  copy:
+    dest: /var/db/runit/{{ bsdkit_service_name }}/log/run
+    group: wheel
+    src: ../files/run
+    mode: "0755"
