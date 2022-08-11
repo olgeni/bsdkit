@@ -7,4 +7,4 @@
 - name: Run tzsetup (exec)
   when: not stat_zoneinfo.stat.exists
   command:
-    cmd: tzsetup Europe/Rome
+    cmd: tzsetup {{ bsdkit_zoneinfo }}
