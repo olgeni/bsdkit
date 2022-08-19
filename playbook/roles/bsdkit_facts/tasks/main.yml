@@ -163,7 +163,7 @@
 
 - name: Retrieve private network
   set_fact:
-    private_network: "{{ address_with_netmask | ipaddr('network') }}/{{ address_with_netmask | ipaddr('prefix') }}"
+    private_network: "{{ address_with_netmask | ansible.utils.ipaddr('network') }}/{{ address_with_netmask | ansible.utils.ipaddr('prefix') }}"
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'][0] }}"
     address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
@@ -171,7 +171,7 @@
 
 - name: Retrieve public network
   set_fact:
-    public_network: "{{ address_with_netmask | ipaddr('network') }}/{{ address_with_netmask | ipaddr('prefix') }}"
+    public_network: "{{ address_with_netmask | ansible.utils.ipaddr('network') }}/{{ address_with_netmask | ansible.utils.ipaddr('prefix') }}"
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + public_interface]['ipv4'][0] }}"
     address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
