@@ -152,13 +152,14 @@
     private_address: "{{ address_dict['address'] }}"
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'][0] }}"
-  when: private_interface is defined
+  when: private_interface is defined and hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'] | length > 0
 
 - name: Retrieve public address
   set_fact:
     public_address: "{{ address_dict['address'] }}"
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + public_interface]['ipv4'][0] }}"
+  when: public_interface is defined and hostvars[inventory_hostname]['ansible_' + public_interface]['ipv4'] | length > 0
 
 - name: Retrieve private network
   set_fact:
@@ -166,7 +167,7 @@
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + private_interface]['ipv4'][0] }}"
     address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
-  when: private_interface is defined
+  when: private_address is defined
 
 - name: Retrieve public network
   set_fact:
@@ -174,3 +175,4 @@
   vars:
     address_dict: "{{ hostvars[inventory_hostname]['ansible_' + public_interface]['ipv4'][0] }}"
     address_with_netmask: "{{ address_dict['address'] }}/{{ address_dict['netmask'] }}"
+  when: public_address is defined
