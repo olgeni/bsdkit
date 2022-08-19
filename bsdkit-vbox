@@ -19,6 +19,8 @@ which nc > /dev/null 2>&1 || error 'nc not found'
 : ${BSDKIT_VBOX_ISO:=""}
 : ${BSDKIT_VBOX_EFI:=""}
 : ${BSDKIT_VBOX_DISK_SIZE:="30000"}
+: ${BSDKIT_LAST_DISK="3"}
+: ${BSDKIT_LAST_DISK_LIMIT="8"}
 
 perform_create() {
     [ -f "${BSDKIT_VBOX_ISO}" ] || error "ISO file does not exist."
@@ -53,7 +55,7 @@ perform_create() {
     local _sata_port
     _sata_port=0
 
-    for _i in $(seq 0 3); do
+    for _i in $(seq 0 ${BSDKIT_LAST_DISK}); do
         VBoxManage createmedium disk --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI \
             --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
@@ -124,11 +126,11 @@ perform_destroy() {
         local _sata_port
         _sata_port=0
 
-        for _i in $(seq 0 3); do
+        for _i in $(seq 0 ${BSDKIT_LAST_DISK_LIMIT}); do
             VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
                 --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
-                --medium none
-            VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete
+                --medium none >/dev/null 2>&1 || :
+            VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete >/dev/null 2>&1 || :
             rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
             _sata_port=$((_sata_port + 1))
