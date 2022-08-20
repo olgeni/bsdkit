@@ -1,6 +1,6 @@
 ---
 - name: Create /etc/rc.d/digitalocean
-  when: platform_is_digitalocean
+  # when: platform_is_digitalocean
   copy:
     src: files/digitalocean
     dest: /etc/rc.d/digitalocean
@@ -9,7 +9,7 @@
     mode: "0755"
 
 - name: Enable digitalocean service
-  when: platform_is_digitalocean
+  # when: platform_is_digitalocean
   service:
     name: digitalocean
     enabled: true
