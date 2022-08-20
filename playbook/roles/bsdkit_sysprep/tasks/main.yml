@@ -4,6 +4,13 @@
     name: emulators/virtualbox-ose-additions
     state: absent
 
+- name: Initialize ZFS pool
+  shell:
+    cmd: |
+      set -e -u -o pipefail
+      zpool initialize -w {{ boot_pool }}
+  when: zfs_available
+
 - name: Create /etc/rc.d/digitalocean
   # when: platform_is_digitalocean
   copy:
