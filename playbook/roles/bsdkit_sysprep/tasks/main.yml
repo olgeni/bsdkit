@@ -1,4 +1,9 @@
 ---
+- name: Remove virtualbox-ose-additions
+  community.general.pkgng:
+    name: emulators/virtualbox-ose-additions
+    state: absent
+
 - name: Create /etc/rc.d/digitalocean
   # when: platform_is_digitalocean
   copy:
