@@ -16,9 +16,14 @@ rcvar="digitalocean_enable"
 
 digitalocean_start()
 {
+    _index=$(gpart show | awk '$4 == "freebsd-zfs" { print $3 }')
+    _pool=$(/usr/local/bsdkit/bsdkit get_boot_pool)
+
     gpart recover vtbd0
-    gpart resize -i 3 vtbd0
-    zpool online -e zroot gpt/disk0
+
+    gpart resize -i ${_index} vtbd0
+    zpool online -e ${_pool} vtbd0p${_index}
+    zpool initialize ${_pool}
 
     sysrc -x digitalocean_enable
     cd /usr/local/bsdkit
