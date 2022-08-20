@@ -4,12 +4,12 @@
     name: emulators/virtualbox-ose-additions
     state: absent
 
-- name: Initialize ZFS pool
+- name: Reset unused disk space
   shell:
     cmd: |
       set -e -u -o pipefail
-      zpool initialize -w {{ boot_pool }}
-  when: zfs_available
+      dd if=/dev/zero of=/zero bs=1m || :
+      rm -f /zero
 
 - name: Create /etc/rc.d/digitalocean
   # when: platform_is_digitalocean
