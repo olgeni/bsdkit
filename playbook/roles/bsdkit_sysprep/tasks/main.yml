@@ -4,6 +4,14 @@
     name: emulators/virtualbox-ose-additions
     state: absent
 
+- name: Upgrade packages
+  shell:
+    cmd: |
+      set -e -u -o pipefail
+      pkg upgrade -y
+      pkg autoremove -y
+      pkg clean -a -y
+
 - name: Reset unused disk space
   shell:
     cmd: |
