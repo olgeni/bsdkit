@@ -19,4 +19,4 @@ pw_conf:
   skeleton: /usr/local/share/skel
 
 digitalocean:
-  update_dns: false
+  update_dns: true
