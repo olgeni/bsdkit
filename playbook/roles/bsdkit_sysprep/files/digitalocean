@@ -26,6 +26,7 @@ digitalocean_start()
     service netif restart
     service routing restart
     touch /firstboot-reboot
+    rm -f /etc/rc.d/digitalocean
 }
 
 load_rc_config $name
