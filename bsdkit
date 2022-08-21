@@ -1582,6 +1582,7 @@ __install_setup_runtime() {
         sysutils/ansible
         sysutils/pv
         textproc/jq
+        textproc/yq
         # optional
         archivers/zip
         comms/kermit

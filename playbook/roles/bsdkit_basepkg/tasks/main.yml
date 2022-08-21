@@ -50,4 +50,5 @@
       - textproc/fzf
       - textproc/jq
       - textproc/the_silver_searcher
+      - textproc/yq
     state: present
