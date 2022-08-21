@@ -12,6 +12,12 @@
       pkg autoremove -y
       pkg clean -a -y
 
+- name: Initialize boot pool
+  shell:
+    cmd: |
+      set -e -u -o pipefail
+      zpool initialize -w {{ boot_pool }}
+
 - name: Reset unused disk space
   shell:
     cmd: |
