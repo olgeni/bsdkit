@@ -12,6 +12,11 @@
       pkg autoremove -y
       pkg clean -a -y
 
+- name: Remove /usr/freebsd-dist
+  file:
+    path: /usr/freebsd-dist
+    state: absent
+
 - name: Initialize boot pool
   shell:
     cmd: |
