@@ -12,6 +12,15 @@
       pkg autoremove -y
       pkg clean -a -y
 
+- name: rc.conf cleanup
+  shell:
+    cmd: |
+      sysrc -x ifconfig_DEFAULT
+      sysrc -x vboxguest_enable
+      sysrc -x vboxservice_enable
+  notify:
+    - reformat_rc_conf
+
 - name: Remove /usr/freebsd-dist
   file:
     path: /usr/freebsd-dist
