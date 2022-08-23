@@ -15,7 +15,6 @@
 - name: rc.conf cleanup
   shell:
     cmd: |
-      sysrc -x ifconfig_DEFAULT
       sysrc -x vboxguest_enable
       sysrc -x vboxservice_enable
   notify:
