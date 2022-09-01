@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# 1f008a68-2398-11ed-aa96-b79b797c677d
+
+set -e -u -o pipefail
+
+exec 2>&1
+
+[ -f config ] && . $(realpath config)
+
+: ${CHPST_ARGS=""}
+
+if [ -d env ]; then
+    CHPST_ARGS="${CHPST_ARGS} -e ${PWD}/env"
+fi
+
+ENVRC=""
+
+if [ -f envrc ]; then
+    ENVRC="$(cat envrc)"
+fi
+
+if [ -f envrc.local ]; then
+    ENVRC="${ENVRC} $(cat envrc.local)"
+fi
+
+if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
+    ENVRC="${ENVRC} $(cat envrc.d/*)"
+fi
+
+: ${UWSGI_USER:="nobody"}
+: ${UWSGI_PATH:="/tmp"}
+: ${UWSGI_ARGS="--log-master --ini $(pwd)/uwsgi.ini"}
+: ${UWSGI_VENV:="${UWSGI_PATH}/.venv"}
+
+eval export HOME=~${UWSGI_USER}
+
+if [ -n "${PYENV_VERSION}" ]; then
+    eval "$(pyenv init -)"
+    pyenv shell ${PYENV_VERSION}
+fi
+
+cd ${UWSGI_PATH}
+
+. ${UWSGI_VENV}/bin/activate
+
+exec env -S "${ENVRC}" chpst -u ${UWSGI_USER} ${CHPST_ARGS} uwsgi ${UWSGI_ARGS}
+
+# For logs: "--log-master"

@@ -1,0 +1,8 @@
+[uwsgi]
+die-on-term = true
+http-socket = :8000
+log-master = true
+master = true
+processes = 4
+threads = 4
+wsgi-file = app.wsgi
