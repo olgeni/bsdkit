@@ -119,7 +119,7 @@
 
 - name: Set platform_is_vmware
   set_fact:
-    platform_is_vmware: "{{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }}"
+    platform_is_vmware: "{{ (is_host_install | bool) and ({{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }})"
 
 - name: Retrieve gateway address
   set_fact:
