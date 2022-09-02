@@ -111,15 +111,19 @@
 
 - name: Set platform_is_digitalocean
   set_fact:
-    platform_is_digitalocean: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout in ['Droplet']) }}"
+    platform_is_digitalocean: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'Droplet') }}"
+
+- name: Set platform_is_cloudsigma
+  set_fact:
+    platform_is_cloudsigma: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'CloudSigma') }}"
 
 - name: Set platform_is_virtualbox
   set_fact:
-    platform_is_virtualbox: "{{ (is_host_install | bool) and ({{ kenv_smbios_system_product.stdout == 'VirtualBox' }})"
+    platform_is_virtualbox: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'VirtualBox') }}"
 
 - name: Set platform_is_vmware
   set_fact:
-    platform_is_vmware: "{{ (is_host_install | bool) and ({{ kenv_smbios_system_product.stdout == 'VMware Virtual Platform' }})"
+    platform_is_vmware: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'VMware Virtual Platform') }}"
 
 - name: Retrieve gateway address
   set_fact:
