@@ -115,7 +115,7 @@
 
 - name: Set platform_is_virtualbox
   set_fact:
-    platform_is_virtualbox: "{{ kenv_smbios_system_product.stdout == 'VirtualBox' }}"
+    platform_is_virtualbox: "{{ (is_host_install | bool) and ({{ kenv_smbios_system_product.stdout == 'VirtualBox' }})"
 
 - name: Set platform_is_vmware
   set_fact:
