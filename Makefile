@@ -1,4 +1,4 @@
-BSDKIT_ROOT_URL?=http://192.168.0.1:8080/
+BSDKIT_ROOT_URL?=https://hub.olgeni.com/FreeBSD
 BSDKIT_VERSION?=13.1
 BSDKIT_PKGSET?=nox11
 
