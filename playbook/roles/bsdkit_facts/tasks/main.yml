@@ -6,13 +6,6 @@
   ignore_errors: true
   register: kenv_smbios_system_product
 
-- name: Register kenv smbios.bios.vendor
-  command:
-    cmd: kenv smbios.bios.vendor
-  changed_when: false
-  ignore_errors: true
-  register: kenv_smbios_bios_vendor
-
 - name: Register freebsd_major
   shell:
     cmd: |
