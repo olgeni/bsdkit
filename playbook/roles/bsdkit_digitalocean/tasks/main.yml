@@ -95,7 +95,7 @@
         cmd: |
           set -e -u -o pipefail
 
-          sysrc -x ifconfig_DEFAULT
+          sysrc ifconfig_DEFAULT && sysrc -x ifconfig_DEFAULT
 
           sysrc ifconfig_vtnet0="inet {{ metadata_public_ipv4_address }} netmask {{ metadata_public_ipv4_netmask }}"
           sysrc ifconfig_vtnet0_alias0="inet {{ metadata_anchor_ipv4_address }} netmask {{ metadata_anchor_ipv4_netmask }}"
