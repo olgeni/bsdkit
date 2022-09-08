@@ -4,11 +4,10 @@
     name: emulators/virtualbox-ose-additions
     state: absent
 
-- name: Upgrade packages
+- name: Package cleanup
   shell:
     cmd: |
       set -e -u -o pipefail
-      pkg upgrade -y
       pkg autoremove -y
       pkg clean -a -y
 
