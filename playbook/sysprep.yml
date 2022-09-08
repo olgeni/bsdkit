@@ -2,4 +2,5 @@
 - hosts: all
   user: root
   roles:
+    - role: bsdkit_pkg
     - role: bsdkit_sysprep
