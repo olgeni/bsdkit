@@ -14,8 +14,8 @@
 - name: rc.conf cleanup
   shell:
     cmd: |
-      sysrc -x vboxguest_enable
-      sysrc -x vboxservice_enable
+      sysrc -x vboxguest_enable || :
+      sysrc -x vboxservice_enable || :
   notify:
     - reformat_rc_conf
 
