@@ -31,6 +31,15 @@
       dd if=/dev/zero of=/zero bs=1m || :
       rm -f /zero
 
+- name: Configure /etc/resolvconf.conf
+  copy:
+    content: |
+      resolvconf="NO"
+    dest: /etc/resolvconf.conf
+    owner: root
+    group: wheel
+    mode: "0644"
+
 - name: Create /etc/rc.d/digitalocean
   # when: platform_is_digitalocean
   copy:
