@@ -71,6 +71,54 @@
         metadata_short_hostname: "{{ metadata.hostname.split('.')[0] }}"
         metadata_hostname: "{% if metadata.hostname.split('.') | length == 1 %}{{ metadata.hostname }}.bsdkit{% else %}{{ metadata.hostname }}{% endif %}"
 
+    - name: Display metadata_dns_nameservers_0
+      debug:
+        var: metadata_dns_nameservers_0
+
+    - name: Display metadata_dns_nameservers_1
+      debug:
+        var: metadata_dns_nameservers_1
+
+    - name: Display metadata_public_ipv4_address
+      debug:
+        var: metadata_public_ipv4_address
+
+    - name: Display metadata_public_ipv4_netmask
+      debug:
+        var: metadata_public_ipv4_netmask
+
+    - name: Display metadata_anchor_ipv4_address
+      debug:
+        var: metadata_anchor_ipv4_address
+
+    - name: Display metadata_anchor_ipv4_netmask
+      debug:
+        var: metadata_anchor_ipv4_netmask
+
+    - name: Display metadata_private_ipv4_address
+      debug:
+        var: metadata_private_ipv4_address
+
+    - name: Display metadata_private_ipv4_netmask
+      debug:
+        var: metadata_private_ipv4_netmask
+
+    - name: Display metadata_gateway
+      debug:
+        var: metadata_gateway
+
+    - name: Display metadata_short_hostname
+      debug:
+        var: metadata_short_hostname
+
+    - name: Display metadata_hostname
+      debug:
+        var: metadata_hostname
+
+    - name: Display digitalocean.update_dns
+      debug:
+        var: digitalocean.update_dns
+
     - name: Configure /etc/resolv.conf for Digital Ocean
       when: digitalocean.update_dns
       copy:
