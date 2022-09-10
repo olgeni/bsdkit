@@ -71,4 +71,5 @@
           : > ${_file}
       done
       newsyslog -C -v
+      : > /root/.history
   changed_when: false
