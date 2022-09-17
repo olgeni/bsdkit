@@ -1586,6 +1586,7 @@ __install_setup_runtime() {
         # optional
         archivers/zip
         comms/kermit
+        devel/bsddialog
         devel/git
         editors/bvi
         editors/nano

@@ -15,6 +15,7 @@
   community.general.pkgng:
     name:
       - archivers/zip
+      - devel/bsddialog
       - devel/git
       - editors/bvi
       - editors/nano
