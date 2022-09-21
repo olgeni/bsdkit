@@ -23,6 +23,7 @@
     - configure
   roles:
     - role: bsdkit_cleanup_before
+    - role: bsdkit_basepkg
     - role: bsdkit_loader
     - role: bsdkit_kernconf
     - role: bsdkit_zoneinfo
@@ -36,7 +37,6 @@
     - role: bsdkit_ssh
     - role: bsdkit_dotfiles
     - role: bsdkit_ssl
-    - role: bsdkit_basepkg
     - role: bsdkit_runit
     - role: bsdkit_spiped
     - role: bsdkit_sudo
