@@ -1,5 +1,2 @@
-Defaults umask=022, umask_override, always_set_home
-Defaults env_keep += "http_proxy https_proxy"
-
 root   ALL = (ALL) NOPASSWD: SETENV: ALL
 %wheel ALL = (ALL) NOPASSWD: SETENV: ALL
