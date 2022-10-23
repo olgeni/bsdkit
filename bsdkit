@@ -1400,8 +1400,8 @@ __customize_base() {
 
     __valid_destdir ${_destdir}
 
-    chroot ${_destdir} chpass -p '$1$Kk8uqtid$UZr4tpkPw6388O6xDSFLt1' root
     # openssl passwd -1 -stdin
+    chroot ${_destdir} chpass -p '$1$t/ql/hHd$NBbpjIdMc8Zg6.omS2XmB/' root
 
     mkdir -p ${_destdir}/root/.ssh
 
