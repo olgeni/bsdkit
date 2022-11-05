@@ -21,7 +21,6 @@ rebuild-vm:
 
 restart-vm:
 	@$(CURDIR)/bsdkit-vbox stop || :
-	@$(CURDIR)/bsdkit-vbox snapshot
 	@$(CURDIR)/bsdkit-vbox start
 
 purge-vm:
