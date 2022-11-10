@@ -182,12 +182,6 @@ _release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
 _distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
-_destdir_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }")
-
-if [ -n "${_destdir_fs}" ]; then
-    zfs snapshot "${_destdir_fs}@$(date +%F.%H%M)"
-fi
-
 mkdir -p ${_distdir}
 
 cd ${_distdir}
@@ -237,6 +231,12 @@ done
 
 if is_yes ${FETCH_ONLY}; then
     exit 0
+fi
+
+_destdir_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }")
+
+if [ -n "${_destdir_fs}" ]; then
+    zfs snapshot "${_destdir_fs}@$(date +%F.%H%M)"
 fi
 
 if is_yes ${BOOTENV_ENABLE}; then
