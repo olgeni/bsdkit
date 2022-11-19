@@ -129,6 +129,7 @@
   set_fact:
     gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"
     public_interface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
+  when: "'gateway' in hostvars[inventory_hostname]['ansible_default_ipv4']"
 
 - name: Display gateway_address
   debug:
@@ -146,11 +147,12 @@
   register: ifconfig_ether_output
   changed_when: false
   ignore_errors: true
+  when: public_interface is defined
 
 - name: Retrieve private interface (#2)
   set_fact:
     private_interface: "{{ ifconfig_ether_output.stdout }}"
-  when: ifconfig_ether_output.stdout | length > 0
+  when: public_interface is defined and ifconfig_ether_output.stdout | length > 0
 
 - name: Display private_interface
   debug:
