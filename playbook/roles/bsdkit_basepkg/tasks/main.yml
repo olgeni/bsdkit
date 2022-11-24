@@ -3,8 +3,6 @@
   when: is_host_install
   community.general.pkgng:
     name:
-      - net/py-netaddr
-      - sysutils/ansible
       - sysutils/beadm
       - sysutils/checkrestart
       - sysutils/lsblk
@@ -28,12 +26,14 @@
       - misc/mbuffer
       - misc/mc
       - net/croc
+      - net/py-netaddr
       - net/rsync
       - net/socat
       - security/ca_root_nss
       - security/gnupg
       - shells/bash
       - shells/zsh
+      - sysutils/ansible
       - sysutils/clone
       - sysutils/cpdup
       - sysutils/direnv
