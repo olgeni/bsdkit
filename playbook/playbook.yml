@@ -37,6 +37,7 @@
     - role: bsdkit_ssh
     - role: bsdkit_dotfiles
     - role: bsdkit_ssl
+    - role: bsdkit_certs
     - role: bsdkit_runit
     - role: bsdkit_spiped
     - role: bsdkit_sudo

@@ -1,0 +1,12 @@
+---
+- name: Install CA certificates in /usr/local/etc/ssl/certs
+  copy:
+    src: ../ansible/certs/{{ item }}.crt
+    dest: /usr/local/etc/ssl/certs/{{ item }}.crt
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items:
+    - uma
+  notify:
+    - certctl_rehash
