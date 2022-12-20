@@ -321,6 +321,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             fi
             _options+="--exclude ./usr"
             ;;
+
         base)
             _options+="--exclude ./.cshrc"
             _options+="--exclude ./.profile"
@@ -335,6 +336,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
             _extract="yes"
             ;;
+
         ports) ;;
 
         src) ;;
