@@ -1,4 +1,10 @@
 ---
+- name: Install bsdkit_facts packages
+  community.general.pkgng:
+    name:
+      - net/py-netaddr
+    state: present
+
 - name: Register kenv smbios.system.product
   command:
     cmd: kenv smbios.system.product
