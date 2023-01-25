@@ -124,6 +124,19 @@ __check_ansible() {
     fi
 }
 
+__check_python3() {
+    if ! command -v python3 > /dev/null 2>&1; then
+        error "required command missing (python3)."
+        # EX_UNAVAILABLE
+        exit 69
+    fi
+}
+
+__check_requirements() {
+    __check_python3
+    __check_ansible
+}
+
 __environment() {
     echo \
         BSDKIT_DESTDIR=\"${BSDKIT_DESTDIR}\" \
@@ -1692,7 +1705,7 @@ EOF
 }
 
 __ansible_jail_playbook() {
-    __check_ansible
+    __check_requirements
 
     local _ansible_root
     _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
@@ -1989,7 +2002,7 @@ install_mbr_zfs() {
 }
 
 create_iocell() {
-    __check_ansible
+    __check_requirements
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2016,7 +2029,7 @@ create_iocell() {
 }
 
 create_iocell_thin() {
-    __check_ansible
+    __check_requirements
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2043,7 +2056,7 @@ create_iocell_thin() {
 }
 
 create_iocage() {
-    __check_ansible
+    __check_requirements
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2074,7 +2087,7 @@ create_iocage() {
 }
 
 create_iocage_thin() {
-    __check_ansible
+    __check_requirements
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2103,7 +2116,7 @@ create_iocage_thin() {
 }
 
 create_jail() {
-    __check_ansible
+    __check_requirements
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2152,7 +2165,7 @@ create_jail() {
 }
 
 configure_jail() {
-    __check_ansible
+    __check_requirements
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2692,7 +2705,8 @@ build_setup_img() {
 }
 
 deploy() {
-    __check_ansible
+    __check_requirements
+
     echo "Running: $*"
 
     ${(@s/ /)@}
@@ -2701,7 +2715,7 @@ deploy() {
 }
 
 remote_deploy() {
-    __check_ansible
+    __check_requirements
 
     local _remote_address=""
     local _remote_port="22"
@@ -2784,7 +2798,7 @@ EOF
 }
 
 ansible_local_playbook() {
-    __check_ansible
+    __check_requirements
 
     ansible-playbook \
         --inventory localhost, \
@@ -2794,7 +2808,7 @@ ansible_local_playbook() {
 }
 
 ansible_chroot_playbook() {
-    __check_ansible
+    __check_requirements
 
     local _ansible_root
     _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
@@ -2843,7 +2857,7 @@ digitalocean() {
 }
 
 sysprep() {
-    __check_ansible
+    __check_requirements
 
     ansible-playbook \
         --inventory localhost, \
