@@ -27,13 +27,9 @@
     - vimrc
     - zshrc
 
-- name: Install dotfiles in /root
-  copy:
-    src: ../ansible/dotfiles/dot.{{ item }}
-    dest: /root/.{{ item }}
-    owner: root
-    group: wheel
-    mode: "0644"
+- name: Set dotfile_list
+  set_fact:
+    dotfile_list: "{{ dotfile_list | default([]) + [item] }}"
   with_items:
     - inputrc
     - kermrc
@@ -43,6 +39,28 @@
     - mailrc
     - vimrc
     - zshrc
-    # - cshrc
-    # - profile
-    # - shrc
+
+- name: Install dotfiles for root
+  copy:
+    src: ../ansible/dotfiles/dot.{{ item }}
+    dest: /root/.{{ item }}
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_items: "{{ dotfile_list }}"
+
+- name: Install dotfiles for ec2-user
+  copy:
+    src: ../ansible/dotfiles/dot.{{ item }}
+    dest: /home/ec2-user/.{{ item }}
+    owner: ec2-user
+    group: ec2-user
+    mode: "0644"
+  with_items: "{{ dotfile_list }}"
+  when: platform_is_aws
+
+- name: Set zsh shell for ec2-user
+  user:
+    name: ec2-user
+    shell: /usr/local/bin/zsh
+  when: platform_is_aws
