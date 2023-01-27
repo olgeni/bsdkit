@@ -1,11 +1,13 @@
 ---
-- hosts: all
+- name: Bootstrap
+  hosts: all
   user: root
   gather_facts: false
   roles:
     - role: bsdkit_bootstrap
 
-- hosts: all
+- name: One-time setup
+  hosts: all
   user: root
   roles:
     - role: bsdkit_facts
@@ -17,7 +19,8 @@
     - role: bsdkit_bsdenv
     - role: bsdkit_pkg
 
-- hosts: all
+- name: Configuration
+  hosts: all
   user: root
   tags:
     - configure
@@ -53,14 +56,16 @@
     - role: bsdkit_postgres
     - role: bsdkit_mysql
 
-- hosts: all
+- name: DigitalOcean
+  hosts: all
   user: root
   roles:
     - role: bsdkit_digitalocean
       tags:
         - digitalocean
 
-- hosts: all
+- name: Cleanup
+  hosts: all
   user: root
   roles:
     - role: bsdkit_cleanup_after
