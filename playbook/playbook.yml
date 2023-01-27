@@ -62,7 +62,7 @@
   roles:
     - role: bsdkit_digitalocean
       tags:
-        - bsdkit_provision
+        - provision_digitalocean
 
 - name: Cleanup
   hosts: all

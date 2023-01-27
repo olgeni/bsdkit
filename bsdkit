@@ -2855,7 +2855,7 @@ configure() {
 }
 
 digitalocean() {
-    ansible_local_playbook -t digitalocean
+    ansible_local_playbook -t provision_digitalocean
 }
 
 sysprep() {
