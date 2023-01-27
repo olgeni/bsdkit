@@ -10,12 +10,14 @@
       set -e -u -o pipefail
       pkg autoremove -y
       pkg clean -a -y
+  changed_when: false
 
 - name: rc.conf cleanup
   shell:
     cmd: |
       sysrc -x vboxguest_enable || :
       sysrc -x vboxservice_enable || :
+  changed_when: false
   notify:
     - reformat_rc_conf
 
@@ -30,6 +32,7 @@
       set -e -u -o pipefail
       dd if=/dev/zero of=/zero bs=1m || :
       rm -f /zero
+  changed_when: false
 
 - name: Configure /etc/resolvconf.conf
   copy:
