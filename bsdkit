@@ -2861,11 +2861,33 @@ digitalocean() {
 sysprep() {
     __check_requirements
 
+    local OPTIONS=""
+
+    while getopts ":t:" opt; do
+        case ${opt} in
+            t)
+              case ${OPTARG} in
+                aws|digitalocean)
+                  ;;
+                *)
+                  error "Invalid platform: ${OPTARG}"
+                  ;;
+                esac
+
+                OPTIONS="${OPTIONS} -e sysprep_target=${OPTARG}"
+                ;;
+            *)
+                error "Invalid option: ${opt}"
+                ;;
+        esac
+    done
+
     ansible-playbook \
         --inventory localhost, \
         --connection local \
         -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
-        ${BSDKIT_SRCDIR}/playbook/sysprep.yml $*
+        ${=OPTIONS} \
+        ${BSDKIT_SRCDIR}/playbook/sysprep.yml
 }
 
 update() {

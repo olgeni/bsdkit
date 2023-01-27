@@ -12,12 +12,19 @@
       pkg clean -a -y
   changed_when: false
 
-- name: rc.conf cleanup
-  shell:
-    cmd: |
-      sysrc -x vboxguest_enable || :
-      sysrc -x vboxservice_enable || :
-  changed_when: false
+- name: Remove vboxguest_enable from /etc/rc.conf
+  lineinfile:
+      path: /etc/rc.conf
+      regexp: "^vboxguest_enable="
+      state: absent
+  notify:
+    - reformat_rc_conf
+
+- name: Remove vboxservice_enable from /etc/rc.conf
+  lineinfile:
+      path: /etc/rc.conf
+      regexp: "^vboxservice_enable="
+      state: absent
   notify:
     - reformat_rc_conf
 
@@ -64,6 +71,190 @@
     owner: root
     group: wheel
     mode: "0644"
+
+# block when sysprep_target is defined and sysprep_target == "aws"
+- name: AWS block
+  when: sysprep_target is defined and sysprep_target == "aws"
+  block:
+    - name: Install packages for AWS platform
+      community.general.pkgng:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - devel/py-awscli
+        - net/isc-dhcp44-client
+        - security/ca_root_nss
+        - sysutils/amazon-ssm-agent
+        - sysutils/ebsnvme-id
+        - sysutils/ec2-scripts
+
+    - name: Set growfs_enable in /etc/rc.conf
+      lineinfile:
+        path: /etc/rc.conf
+        regexp: "^growfs_enable="
+        line: "growfs_enable=\"YES\""
+        state: present
+
+    - name: Set ifconfig_DEFAULT in /etc/rc.conf
+      lineinfile:
+        path: /etc/rc.conf
+        regexp: "^ifconfig_DEFAULT="
+        line: "ifconfig_DEFAULT=\"SYNCDHCP accept_rtadv\""
+        state: present
+
+    - name: Set ipv6_activate_all_interfaces in /etc/rc.conf
+      lineinfile:
+          path: /etc/rc.conf
+          regexp: "^ipv6_activate_all_interfaces="
+          line: "ipv6_activate_all_interfaces=\"YES\""
+          state: present
+
+    - name: Set rtsold_enable in /etc/rc.conf
+      lineinfile:
+        path: /etc/rc.conf
+        regexp: "^rtsold_enable="
+        line: "rtsold_enable=\"YES\""
+        state: present
+
+    - name: Set rtsold_flags in /etc/rc.conf
+      lineinfile:
+        path: /etc/rc.conf
+        regexp: "^rtsold_flags="
+        line: "rtsold_flags=\"-M /usr/local/libexec/rtsold-M -a\""
+        state: present
+
+    - name: Set net.inet6.ip6.dad_count in /etc/sysctl.conf
+      lineinfile:
+          path: /etc/sysctl.conf
+          regexp: "^net.inet6.ip6.dad_count="
+          line: "net.inet6.ip6.dad_count=\"0\""
+          state: present
+
+    - name: Set debug.trace_on_panic in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^debug.trace_on_panic="
+          line: "debug.trace_on_panic=\"1\""
+          state: present
+
+    - name: Set debug.debugger_on_panic in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^debug.debugger_on_panic="
+          line: "debug.debugger_on_panic=\"0\""
+          state: present
+
+    - name: Set kern.panic_reboot_wait_time in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^kern.panic_reboot_wait_time="
+          line: "kern.panic_reboot_wait_time=\"0\""
+          state: present
+
+    - name: Set autoboot_delay in /boot/loader.conf
+      lineinfile:
+        path: /boot/loader.conf
+        regexp: "^autoboot_delay="
+        line: "autoboot_delay=\"-1\""
+        state: present
+
+    - name: Set beastie_disable in /boot/loader.conf
+      lineinfile:
+        path: /boot/loader.conf
+        regexp: "^beastie_disable="
+        line: "beastie_disable=\"YES\""
+        state: present
+
+    - name: Set hint.atkbd.0.disabled in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^hint.atkbd.0.disabled="
+          line: "hint.atkbd.0.disabled=\"1\""
+          state: present
+
+    - name: Set hint.atkbdc.0.disabled in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^hint.atkbdc.0.disabled="
+          line: "hint.atkbdc.0.disabled=\"1\""
+          state: present
+
+    - name: Set boot_multicons in /boot/loader.conf
+      lineinfile:
+        path: /boot/loader.conf
+        regexp: "^boot_multicons="
+        line: "boot_multicons=\"YES\""
+        state: present
+
+    - name: Set hw.broken_txfifo in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^hw.broken_txfifo="
+          line: "hw.broken_txfifo=\"1\""
+          state: present
+
+    - name: Set if_ena_load in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^if_ena_load="
+          line: "if_ena_load=\"YES\""
+          state: present
+
+    - name: Set hw.nvme.use_nvd in /boot/loader.conf
+      lineinfile:
+          path: /boot/loader.conf
+          regexp: "^hw.nvme.use_nvd="
+          line: "hw.nvme.use_nvd=\"0\""
+          state: present
+
+    - name: Set KbdInteractiveAuthentication in /etc/ssh/sshd_config
+      lineinfile:
+          path: /etc/ssh/sshd_config
+          regexp: "^KbdInteractiveAuthentication"
+          line: "KbdInteractiveAuthentication no"
+          state: present
+
+    - name: Create script /usr/local/libexec/rtsold-M
+      # This is used in /etc/rc.conf to set rtsold_flags
+      copy:
+          content: |
+              #!/bin/sh
+              /usr/local/sbin/dhclient -6 -nw -N -cf /dev/null $1
+          dest: /usr/local/libexec/rtsold-M
+          owner: root
+          group: wheel
+          mode: "0755"
+
+    - name: Create /etc/autofs/special_efs
+      copy:
+          content: |
+              #!/bin/sh
+
+              if [ $# -eq 0 ]; then
+                      # No way to know which EFS filesystems exist and are
+                      # accessible to this EC2 instance.
+                      exit 0
+              fi
+
+              # Provide instructions on how to mount the requested filesystem.
+              FS=$1
+              REGION=`fetch -qo- http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/[a-z]$//'`
+              echo "-nfsv4,minorversion=1,oneopenown ${FS}.efs.${REGION}.amazonaws.com:/"
+          dest: /etc/autofs/special_efs
+          owner: root
+          group: wheel
+          mode: "0755"
+
+    - name: Update /etc/ntp.conf
+      shell:
+          cmd: |
+              if grep -q '^server 169.254.169.123 iburst' /etc/ntp.conf; then
+                  exit 1
+              fi
+              sed -i '' -e 's/^pool/#pool/' -e '1,/^#server/s/^#server.*/server 169.254.169.123 iburst/' /etc/ntp.conf
+      register: ntp_conf_updated
+      failed_when: false
+      changed_when: ntp_conf_updated.rc == 0
 
 - name: Reset log files
   shell:
