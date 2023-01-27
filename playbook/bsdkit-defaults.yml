@@ -18,5 +18,5 @@ periodic_conf:
 pw_conf:
   skeleton: /usr/local/share/skel
 
-digitalocean:
+bsdkit_provision:
   update_dns: true

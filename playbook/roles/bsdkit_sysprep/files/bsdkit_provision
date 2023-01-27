@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# PROVIDE: digitalocean
+# PROVIDE: bsdkit_provision
 # REQUIRE: DAEMON
 # KEYWORD: firstboot
 
@@ -8,13 +8,13 @@
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/root/bin
 
-name="digitalocean"
-desc="Run bsdkit digitalocean"
-start_cmd="digitalocean_start"
+name="bsdkit_provision"
+desc="Run bsdkit provision"
+start_cmd="bsdkit_provision_start"
 stop_cmd=":"
-rcvar="digitalocean_enable"
+rcvar="bsdkit_provision_enable"
 
-digitalocean_start()
+bsdkit_provision_start()
 {
     _index=$(gpart show | awk '$4 == "freebsd-zfs" { print $3 }')
     _pool=$(/usr/local/bsdkit/bsdkit get_boot_pool)
@@ -25,13 +25,13 @@ digitalocean_start()
     zpool online -e ${_pool} vtbd0p${_index}
     zpool initialize ${_pool}
 
-    sysrc -x digitalocean_enable
+    sysrc -x bsdkit_provision_enable
     cd /usr/local/bsdkit
-    ./bsdkit digitalocean
+    ./bsdkit bsdkit_provision
     service netif restart
     service routing restart
     touch /firstboot-reboot
-    rm -f /etc/rc.d/digitalocean
+    rm -f /etc/rc.d/bsdkit_provision
 }
 
 load_rc_config $name

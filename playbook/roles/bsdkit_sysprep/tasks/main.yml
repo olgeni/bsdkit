@@ -43,19 +43,17 @@
     group: wheel
     mode: "0644"
 
-- name: Create /etc/rc.d/digitalocean
-  # when: platform_is_digitalocean
+- name: Create /etc/rc.d/bsdkit_provision
   copy:
-    src: files/digitalocean
-    dest: /etc/rc.d/digitalocean
+    src: files/bsdkit_provision
+    dest: /etc/rc.d/bsdkit_provision
     owner: root
     group: wheel
     mode: "0755"
 
-- name: Enable digitalocean service
-  # when: platform_is_digitalocean
+- name: Enable bsdkit_provision service
   service:
-    name: digitalocean
+    name: bsdkit_provision
     enabled: true
     state: stopped
 
