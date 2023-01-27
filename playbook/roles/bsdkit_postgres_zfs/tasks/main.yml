@@ -17,7 +17,7 @@
 
     - name: Create ZFS dataset for PostgreSQL
       when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is successful
-      zfs:
+      community.general.zfs:
         name: "{{ boot_pool }}/var/db/postgres"
         state: present
         extra_zfs_properties:
