@@ -1,5 +1,5 @@
 ---
-- name: Digital Ocean
+- name: DigitalOcean
   when: platform_is_digitalocean
   block:
     - name: Gather metadata (uri)
@@ -119,7 +119,7 @@
       debug:
         var: digitalocean.update_dns
 
-    - name: Configure /etc/resolv.conf for Digital Ocean
+    - name: Configure /etc/resolv.conf for DigitalOcean
       when: digitalocean.update_dns
       copy:
         dest: /etc/resolv.conf
@@ -128,7 +128,7 @@
           nameserver {{ metadata_dns_nameservers_1 }}
         mode: "0644"
 
-    - name: Configure /etc/hosts for Digital Ocean
+    - name: Configure /etc/hosts for DigitalOcean
       blockinfile:
         path: /etc/hosts
         marker: "# {mark} ANSIBLE MANAGED BLOCK"
