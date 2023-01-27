@@ -1,6 +1,6 @@
 ---
 - name: Install packages (redis)
-  pkgng:
+  community.general.pkgng:
     name: "{{ item }}"
     state: present
   loop:
