@@ -49,6 +49,12 @@
     mode: "0644"
   with_items: "{{ dotfile_list }}"
 
+- name: Check if ec2-user exists
+  command: pw usershow ec2-user
+  register: ec2_user_exists
+  ignore_errors: true
+  when: platform_is_aws
+
 - name: Install dotfiles for ec2-user
   copy:
     src: ../ansible/dotfiles/dot.{{ item }}
@@ -57,10 +63,10 @@
     group: ec2-user
     mode: "0644"
   with_items: "{{ dotfile_list }}"
-  when: platform_is_aws
+  when: platform_is_aws and ec2_user_exists is defined and ec2_user_exists.rc == 0
 
 - name: Set zsh shell for ec2-user
   user:
     name: ec2-user
     shell: /usr/local/bin/zsh
-  when: platform_is_aws
+  when: platform_is_aws and ec2_user_exists is defined and ec2_user_exists.rc == 0
