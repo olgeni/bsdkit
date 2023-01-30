@@ -146,6 +146,18 @@ platform_is_cloud() {
     platform_is_digitalocean || platform_is_cloudsigma || platform_is_virtualbox || platform_is_vmware || platform_is_aws
 }
 
+reformat_fstab() {
+    local _fstab=$1
+
+    if [ ! -e ${_fstab} ]; then
+        error "fstab file not found: ${_fstab}"
+    fi
+
+    column -t < ${_fstab} | sort > ${_fstab}.0
+    install -m 0644 -o root -g wheel ${_fstab}.0 ${_fstab}
+    rm ${_fstab}.0
+}
+
 __check_freebsd() {
     if [ $(uname) != "FreeBSD" ]; then
         error "only works on FreeBSD."
@@ -1002,11 +1014,7 @@ __finalize_fstab() {
     echo "#tmpfs /compat/linux/dev/shm tmpfs rw,mode=1777 0 0" >> ${_destdir}/etc/fstab
     echo "#md0 none swap sw,late,file=/var/swap 0 0" >> ${_destdir}/etc/fstab
 
-    column -t < ${_fstab} | sort > ${_fstab}.0
-
-    install -m 0644 -o root -g wheel ${_fstab}.0 ${_fstab}
-
-    rm ${_fstab}.0
+    reformat_fstab ${_fstab}
 }
 
 __fetch_release() {
