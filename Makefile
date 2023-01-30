@@ -112,3 +112,8 @@ sysprep-aws:
 
 sysprep-digitalocean:
 	$(CURDIR)/bsdkit-vbox remote_exec sysprep -t digitalocean
+
+image-aws: rebuild-vm install-gpt-zfs-1 restart-vm sync-vm sysprep-aws
+
+image-digitalocean: rebuild-vm install-gpt-zfs-1 restart-vm sync-vm sysprep-digitalocean
+
