@@ -7,19 +7,21 @@ autoload throw catch
 : ${BSDKIT_DESTDIR:="/mnt"}
 : ${BSDKIT_PV_UPDATE_DELAY:="0.1"}
 : ${BSDKIT_JAIL_NAME:="bsdkit"}
+
 : ${BSDKIT_PART_SIZE_BOOT:="512K"}
 : ${BSDKIT_PART_SIZE_EFI:="8M"}
 : ${BSDKIT_PART_SIZE_ROOT:="2G"}
 : ${BSDKIT_PART_SIZE_SWAP:="0"}
 : ${BSDKIT_PART_SIZE_TMP:="64M"}
 : ${BSDKIT_PART_SIZE_VAR:="4G"}
+
 : ${BSDKIT_LABEL_BOOT:="boot"}
 : ${BSDKIT_LABEL_EFI:="efiboot"}
 : ${BSDKIT_LABEL_ROOT:="root"}
 : ${BSDKIT_LABEL_SWAP:="swap"}
 : ${BSDKIT_LABEL_TMP:="tmp"}
-: ${BSDKIT_LABEL_USR:="usr"}
 : ${BSDKIT_LABEL_VAR:="var"}
+: ${BSDKIT_LABEL_USR:="usr"}
 
 : ${BSDKIT_INSTALL_KERNEL:="YES"}
 : ${BSDKIT_INSTALL_SRC:="YES"}
