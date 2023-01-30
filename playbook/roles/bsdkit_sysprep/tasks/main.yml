@@ -99,6 +99,24 @@
       nameserver 8.8.8.8
     dest: /etc/resolv.conf
 
+- name: Check enc0 interface
+  shell:
+    cmd: |
+      ifconfig enc0
+  register: ifconfig_enc0
+  changed_when: false
+  failed_when: false
+
+- name: Configure enc0 interface
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^ifconfig_enc0="
+    line: "ifconfig_enc0=\"up\""
+    state: present
+  when: ifconfig_enc0.rc == 0
+  notify:
+    - reformat_rc_conf
+
 - name: Delete /root/.history
   file:
     path: /root/.history
