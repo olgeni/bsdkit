@@ -83,7 +83,7 @@ if [ -z ${BSDKIT_SSH_PUBLIC_KEY} ] && [ -e ~/.ssh/id_rsa.pub ]; then
 fi
 
 error() {
-    echo "bsdkit: $*"
+    echo "bsdkit: $*" >&2
     exit 1
 }
 
