@@ -83,11 +83,13 @@ if [ -z ${BSDKIT_SSH_PUBLIC_KEY} ] && [ -e ~/.ssh/id_rsa.pub ]; then
 fi
 
 error() {
+    # Print an error message to stderr and exit with a non-zero status.
     echo "bsdkit: $*" >&2
     exit 1
 }
 
 is_yes() {
+    # Return 0 if the argument is a positive answer, 1 if it is a negative
     case $1 in
         [Yy][Ee][Ss])
             return 0
@@ -118,6 +120,7 @@ is_yes() {
 }
 
 yes_if() {
+    # Return "YES" if the argument is a positive answer, "NO" if it is a negative answer.
     if is_yes $1; then
         echo "YES"
     else
@@ -126,10 +129,12 @@ yes_if() {
 }
 
 is_bios() {
+    # Return 0 if the system is booted in BIOS mode
     [ "$(sysctl -n machdep.bootmethod)" = "BIOS" ]
 }
 
 is_efi() {
+    # Return 0 if the system is booted in UEFI mode
     [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
 
