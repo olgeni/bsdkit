@@ -1966,7 +1966,6 @@ install_gpt_zfs() {
     eval $(__local_options)
     eval $(__parse_options $@)
 
-
     local _devices
 
     _devices=($*)
