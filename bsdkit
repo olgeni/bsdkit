@@ -8,6 +8,7 @@ autoload throw catch
 : ${BSDKIT_PV_UPDATE_DELAY:="0.1"}
 : ${BSDKIT_JAIL_NAME:="bsdkit"}
 
+# Default partition sizes
 : ${BSDKIT_PART_SIZE_BOOT:="512K"}
 : ${BSDKIT_PART_SIZE_EFI:="8M"}
 : ${BSDKIT_PART_SIZE_ROOT:="2G"}
@@ -15,6 +16,7 @@ autoload throw catch
 : ${BSDKIT_PART_SIZE_TMP:="64M"}
 : ${BSDKIT_PART_SIZE_VAR:="4G"}
 
+# Default partition labels
 : ${BSDKIT_LABEL_BOOT:="boot"}
 : ${BSDKIT_LABEL_EFI:="efiboot"}
 : ${BSDKIT_LABEL_ROOT:="root"}
@@ -23,34 +25,39 @@ autoload throw catch
 : ${BSDKIT_LABEL_VAR:="var"}
 : ${BSDKIT_LABEL_USR:="usr"}
 
+# Default install flags
 : ${BSDKIT_INSTALL_KERNEL:="YES"}
 : ${BSDKIT_INSTALL_SRC:="YES"}
 : ${BSDKIT_INSTALL_DEBUG:="NO"}
 : ${BSDKIT_INSTALL_TESTS:="NO"}
 
+# Other defaults
 : ${BSDKIT_PROCFS_ENABLE:="YES"}
 : ${BSDKIT_FDESCFS_ENABLE:="YES"}
-
 : ${BSDKIT_ZFS_POOL:="rpool"}
 : ${BSDKIT_IMG_DATA_LABEL:="2e158b17-5e10-11e5-ac21-080027af0e2a"}
 : ${BSDKIT_PKG_LOCKFILE:="/tmp/pkg.lock"}
 : ${BSDKIT_PKG_LOCKTIME:="120"}
 : ${BSDKIT_FREEBSD_DISTDIR:="/usr/freebsd-dist"}
+: ${BSDKIT_SSH_PUBLIC_KEY:=""}
+: ${BSDKIT_JAIL_PROXY:=""}
 
+# Default release and package URLs
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:="13.1"}
 : ${BSDKIT_ARCH:="amd64"}
 : ${BSDKIT_TREE:="default"}
 : ${BSDKIT_PKGSET:="nox11"}
-: ${BSDKIT_SSH_PUBLIC_KEY:=""}
-: ${BSDKIT_JAIL_PROXY:=""}
 
+# Default FreeBSD release and package URLs templates
 : ${FREEBSD_REL_URL_TEMPLATE:='%%ROOT_URL%%/release-%%VERSION%%-%%ARCH%%'}
 : ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
 
+# Default FreeBSD release and package URLs
 : ${FREEBSD_REL_URL:=''} # initialized by __parse_options
 : ${FREEBSD_PKG_URL:=''} # initialized by __parse_options
 
+# Default ZFS options
 DEFAULT_ASHIFT=12
 
 ZPOOL_CREATE_CMD=(zpool create -o ashift=${DEFAULT_ASHIFT})
