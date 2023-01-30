@@ -161,3 +161,6 @@
       changed_when: false
       notify:
         - reformat_rc_conf
+        - restart_sshd
+        - restart_netif
+        - restart_routing

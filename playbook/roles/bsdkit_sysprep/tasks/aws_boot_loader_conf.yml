@@ -1,0 +1,76 @@
+- name: Set debug.trace_on_panic in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^debug.trace_on_panic="
+    line: "debug.trace_on_panic=\"1\""
+    state: present
+
+- name: Set debug.debugger_on_panic in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^debug.debugger_on_panic="
+    line: "debug.debugger_on_panic=\"0\""
+    state: present
+
+- name: Set kern.panic_reboot_wait_time in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^kern.panic_reboot_wait_time="
+    line: "kern.panic_reboot_wait_time=\"0\""
+    state: present
+
+- name: Set autoboot_delay in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^autoboot_delay="
+    line: "autoboot_delay=\"-1\""
+    state: present
+
+- name: Set beastie_disable in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^beastie_disable="
+    line: "beastie_disable=\"YES\""
+    state: present
+
+- name: Set hint.atkbd.0.disabled in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^hint.atkbd.0.disabled="
+    line: "hint.atkbd.0.disabled=\"1\""
+    state: present
+
+- name: Set hint.atkbdc.0.disabled in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^hint.atkbdc.0.disabled="
+    line: "hint.atkbdc.0.disabled=\"1\""
+    state: present
+
+- name: Set boot_multicons in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^boot_multicons="
+    line: "boot_multicons=\"YES\""
+    state: present
+
+- name: Set hw.broken_txfifo in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^hw.broken_txfifo="
+    line: "hw.broken_txfifo=\"1\""
+    state: present
+
+- name: Set if_ena_load in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^if_ena_load="
+    line: "if_ena_load=\"YES\""
+    state: present
+
+- name: Set hw.nvme.use_nvd in /boot/loader.conf
+  lineinfile:
+    path: /boot/loader.conf
+    regexp: "^hw.nvme.use_nvd="
+    line: "hw.nvme.use_nvd=\"0\""
+    state: present

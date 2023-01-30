@@ -1,0 +1,26 @@
+- name: Set values in /etc/rc.conf for AWS
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^{{ item }}="
+    line: "{{ item }}=\"YES\""
+    state: present
+  with_items:
+    - amazon_ssm_agent_enable
+    - dev_aws_disk_enable
+    - ec2_configinit_enable
+    - ec2_fetchkey_enable
+    - ec2_loghostkey_enable
+    - growfs_enable
+    - ipv6_activate_all_interfaces
+    - rtsold_enable
+  notify:
+    - reformat_rc_conf
+
+- name: Set ifconfig_DEFAULT in /etc/rc.conf
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^ifconfig_DEFAULT="
+    line: "ifconfig_DEFAULT=\"SYNCDHCP accept_rtadv\""
+    state: present
+  notify:
+    - reformat_rc_conf

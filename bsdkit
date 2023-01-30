@@ -2729,7 +2729,7 @@ deploy() {
     ansible_chroot_playbook
 }
 
-remote_deploy() {
+remote_exec() {
     __check_requirements
 
     local _remote_address=""
@@ -2793,7 +2793,7 @@ EOF
         rsync -a --exclude=.git -e "ssh -p ${_remote_port} -i ${_ansible_key}" ${BSDKIT_SRCDIR}/ root@${_remote_address}:/root/bsdkit/
 
     - name: Run requested bsdkit function
-      shell: $(__environment) /root/bsdkit/bsdkit deploy "$@" > /tmp/bsdkit.log 2>&1
+      shell: $(__environment) /root/bsdkit/bsdkit "$@" > /tmp/bsdkit.log 2>&1
 
 - hosts: install
   connection: ssh
@@ -2803,9 +2803,9 @@ EOF
       file: path=/root/bsdkit state=absent
 EOF
 
+    # SSH_AUTH_SOCK="" was removed to allow sysprep to run
     eval env \
         ANSIBLE_CONFIG=${_ansible_cfg} \
-        SSH_AUTH_SOCK="" \
         $(__environment) \
         ansible-playbook ${_ansible_yml}
 
@@ -2867,8 +2867,14 @@ configure() {
     ansible_local_playbook -t configure
 }
 
-digitalocean() {
-    ansible_local_playbook -t provision_digitalocean
+provision() {
+    if platform_is_digitalocean; then
+        ansible_local_playbook -t provision_digitalocean
+    elif platform_is_aws; then
+        ansible_local_playbook -t provision_aws
+    else
+        error "Unsupported provisioning platform"
+    fi
 }
 
 sysprep() {

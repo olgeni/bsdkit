@@ -18,6 +18,16 @@
     name: sshd
     state: restarted
 
+- name: restart_netif
+  service:
+    name: netif
+    state: restarted
+
+- name: restart_routing
+  service:
+    name: routing
+    state: restarted
+
 - name: reformat_rc_conf
   shell:
     cmd: |

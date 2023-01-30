@@ -56,13 +56,23 @@
     - role: bsdkit_postgres
     - role: bsdkit_mysql
 
-- name: DigitalOcean
+- name: Provisioning (DigitalOcean)
   hosts: all
   user: root
   roles:
     - role: bsdkit_digitalocean
       tags:
         - provision_digitalocean
+      when: platform_is_digitalocean
+
+- name: Provisioning (AWS)
+  hosts: all
+  user: root
+  roles:
+    - role: bsdkit_aws
+      tags:
+        - provision_aws
+      when: platform_is_aws
 
 - name: Cleanup
   hosts: all

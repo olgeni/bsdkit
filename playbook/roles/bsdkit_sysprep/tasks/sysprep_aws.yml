@@ -1,0 +1,68 @@
+---
+# This file was created using 'src/release/tools/ec2.conf' as reference.
+- name: Install packages for AWS platform
+  community.general.pkgng:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - devel/py-awscli
+    - net/isc-dhcp44-client
+    - security/ca_root_nss
+    - sysutils/amazon-ssm-agent
+    - sysutils/ebsnvme-id
+    - sysutils/ec2-scripts
+
+- name: Include aws_rc_conf.yml
+  include_tasks: aws_rc_conf.yml
+
+- name: Include aws_sysctl_conf.yml
+  include_tasks: aws_sysctl_conf.yml
+
+- name: Set KbdInteractiveAuthentication in /etc/ssh/sshd_config
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^KbdInteractiveAuthentication"
+    line: "KbdInteractiveAuthentication no"
+    state: present
+
+- name: Create script /usr/local/libexec/rtsold-M
+  # This file is used in /etc/rc.conf (rtsold_flags)
+  copy:
+    content: |
+      #!/bin/sh
+      /usr/local/sbin/dhclient -6 -nw -N -cf /dev/null $1
+    dest: /usr/local/libexec/rtsold-M
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: Create /etc/autofs/special_efs
+  copy:
+    content: |
+      #!/bin/sh
+
+      if [ $# -eq 0 ]; then
+          # No way to know which EFS filesystems exist and are
+          # accessible to this EC2 instance.
+          exit 0
+      fi
+
+      # Provide instructions on how to mount the requested filesystem.
+      FS=$1
+      REGION=`fetch -qo- http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/[a-z]$//'`
+      echo "-nfsv4,minorversion=1,oneopenown ${FS}.efs.${REGION}.amazonaws.com:/"
+    dest: /etc/autofs/special_efs
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: Update /etc/ntp.conf
+  shell:
+    cmd: |
+      if grep -q '^server 169.254.169.123 iburst' /etc/ntp.conf; then
+          exit 1
+      fi
+      sed -i '' -e 's/^pool/#pool/' -e '1,/^#server/s/^#server.*/server 169.254.169.123 iburst/' /etc/ntp.conf
+  register: ntp_conf_updated
+  failed_when: false
+  changed_when: ntp_conf_updated.rc == 0

@@ -155,8 +155,12 @@ perform_purge() {
     fi
 }
 
+perform_remote_exec() {
+    ./bsdkit remote_exec -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
+}
+
 perform_remote_deploy() {
-    ./bsdkit remote_deploy -h localhost -p ${BSDKIT_VBOX_SSH_PORT} $@
+    ./bsdkit remote_exec -h localhost -p ${BSDKIT_VBOX_SSH_PORT} deploy $@
 }
 
 perform_shell() {
@@ -240,6 +244,10 @@ case ${_command} in
 
     purge)
         perform_purge
+        ;;
+
+    remote_exec)
+        perform_remote_exec $@
         ;;
 
     remote_deploy)

@@ -150,6 +150,10 @@
   set_fact:
     platform_is_aws: "{{ (is_host_install | bool) and (kenv_smbios_bios_vendor.stdout == 'Amazon EC2') }}"
 
+- name: Set platform_is_cloud
+  set_fact:
+    platform_is_cloud: "{{ (platform_is_digitalocean | bool) or (platform_is_cloudsigma | bool) or (platform_is_virtualbox | bool) or (platform_is_vmware | bool) or (platform_is_aws | bool) }}"
+
 - name: Retrieve gateway address
   set_fact:
     gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"

@@ -1,0 +1,9 @@
+---
+- name: Configure /etc/resolvconf.conf
+  copy:
+    content: |
+      resolvconf="NO"
+    dest: /etc/resolvconf.conf
+    owner: root
+    group: wheel
+    mode: "0644"

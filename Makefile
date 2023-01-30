@@ -106,3 +106,9 @@ install-mbr-ufs-gmirror-multi-2:
 install-mbr-ufs-gmirror-multi-3:
 	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi gm0 ada0 ada1 ada2
+
+sysprep-aws:
+	$(CURDIR)/bsdkit-vbox remote_exec sysprep -t aws
+
+sysprep-digitalocean:
+	$(CURDIR)/bsdkit-vbox remote_exec sysprep -t digitalocean

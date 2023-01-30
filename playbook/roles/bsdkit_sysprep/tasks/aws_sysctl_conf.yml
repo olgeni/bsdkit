@@ -1,0 +1,6 @@
+- name: Set net.inet6.ip6.dad_count in /etc/sysctl.conf
+  lineinfile:
+    path: /etc/sysctl.conf
+    regexp: "^net.inet6.ip6.dad_count="
+    line: "net.inet6.ip6.dad_count=\"0\""
+    state: present
