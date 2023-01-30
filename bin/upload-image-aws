@@ -1,0 +1,52 @@
+#!/bin/sh
+
+set -e -u -o pipefail
+
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"eu-central-1"}
+
+if [ -z "${IMAGE_BUCKET}" ]; then
+    echo "IMAGE_BUCKET is not set"
+    exit 1
+fi
+
+if [ -z "${IMAGE_NAME}" ]; then
+    echo "IMAGE_NAME is not set"
+    exit 1
+fi
+
+if [ -z "${IMAGE_DESCRIPTION}" ]; then
+    echo "IMAGE_DESCRIPTION is not set"
+    exit 1
+fi
+
+if [ -z "${VM_PATH}" ]; then
+    echo "VM_PATH is not set"
+    exit 1
+fi
+
+if [ ! -d "${VM_PATH}" ]; then
+    echo "VM_PATH does not exist"
+    exit 1
+fi
+
+SOURCE_FILEPATH="${VM_PATH}/${VM_DISK_NAME}.vdi"
+
+if [ ! -f "${SOURCE_FILEPATH}" ]; then
+    echo "Source file does not exist"
+    exit 1
+fi
+
+IMAGE_FILEPATH="${VM_PATH}/${IMAGE_NAME}.raw"
+
+/usr/local/bin/qemu-img convert -p -f vdi "${SOURCE_FILEPATH}" -O raw "${IMAGE_FILEPATH}"
+
+_credentials=$(mktemp)
+cat >"${_credentials}" <<EOF
+ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+ACCESS_KEY_SECRET=${AWS_SECRET_ACCESS_KEY}
+EOF
+
+bsdec2-image-upload --sriov --ena "${IMAGE_FILEPATH}" "${IMAGE_NAME}" "${IMAGE_DESCRIPTION}" "${AWS_DEFAULT_REGION}" "${IMAGE_BUCKET}" "${_credentials}"
+
+rm "${_credentials}"
+rm "${IMAGE_FILEPATH}"
