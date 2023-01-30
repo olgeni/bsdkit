@@ -8,15 +8,16 @@
         recurse: true
         hidden: true
       register: find_var_db_postgres
+      failed_when: false
 
     - name: Gather facts about PostgreSQL ZFS dataset
       community.general.zfs_facts:
         dataset: "{{ boot_pool }}/var/db/postgres"
-      ignore_errors: true
       register: var_db_postgres_zfs_facts
+      failed_when: false
 
     - name: Create ZFS dataset for PostgreSQL
-      when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is successful
+      when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is succeeded
       community.general.zfs:
         name: "{{ boot_pool }}/var/db/postgres"
         state: present

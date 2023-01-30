@@ -30,11 +30,11 @@
     - name: Gather facts about pkg ZFS dataset
       community.general.zfs_facts:
         dataset: "{{ boot_pool }}/usr/local/pkg"
-      ignore_errors: true
       register: zfs_facts_usr_local_pkg
+      failed_when: false
 
     - name: Remove usr/local/pkg
-      when: zfs_facts_usr_local_pkg is successful
+      when: zfs_facts_usr_local_pkg is succeeded
       block:
         - name: Save /var/db/pkg
           shell: |

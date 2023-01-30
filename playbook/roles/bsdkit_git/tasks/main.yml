@@ -29,12 +29,12 @@
   shell:
     cmd: |
       ls /usr/local/bsdkit/playbook/roles
-  changed_when: false
   register: role_list
-  ignore_errors: true
+  changed_when: false
+  failed_when: false
 
 - name: Link ansible roles
-  when: role_list is success
+  when: role_list.rc == 0
   file:
     src: /usr/local/bsdkit/playbook/roles/{{ item }}
     dest: /usr/local/etc/ansible/roles/{{ item }}

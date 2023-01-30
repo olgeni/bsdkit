@@ -12,11 +12,11 @@
     - name: Gather facts about MySQL ZFS dataset
       community.general.zfs_facts:
         dataset: "{{ boot_pool }}/var/db/mysql"
-      ignore_errors: true
       register: mysql_zfs_facts
+      failed_when: false
 
     - name: Create ZFS dataset for MySQL
-      when: find_var_db_mysql.matched == 0 or mysql_zfs_facts is successful
+      when: find_var_db_mysql.matched == 0 or mysql_zfs_facts is succeeded
       community.general.zfs:
         name: "{{ boot_pool }}/var/db/mysql"
         state: present

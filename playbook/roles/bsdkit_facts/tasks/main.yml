@@ -8,9 +8,9 @@
 - name: Register kenv smbios.system.product
   command:
     cmd: kenv smbios.system.product
-  changed_when: false
-  ignore_errors: true
   register: kenv_smbios_system_product
+  changed_when: false
+  failed_when: false
 
 - name: Display kenv smbios.system.product
   debug:
@@ -19,9 +19,9 @@
 - name: Register kenv smbios.bios.vendor
   command:
     cmd: kenv smbios.bios.vendor
-  changed_when: false
-  ignore_errors: true
   register: kenv_smbios_bios_vendor
+  changed_when: false
+  failed_when: false
 
 - name: Display kenv smbios.bios.vendor
   debug:
@@ -112,11 +112,11 @@
           zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
       register: zpool_get_bootfs
       changed_when: false
-      ignore_errors: true
+      failed_when: false
 
     - name: Set zfs_available (computed)
       set_fact:
-        zfs_available: "{{ ((zpool_get_bootfs is succeeded) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
+        zfs_available: "{{ ((zpool_get_bootfs.rc == 0) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
 
 - name: Set zfs_available (is_chroot_install)
   when: is_chroot_install
@@ -175,7 +175,7 @@
       ifconfig -u -l ether | rs 0 1 | grep -v {{ public_interface }} | head -n 1
   register: ifconfig_ether_output
   changed_when: false
-  ignore_errors: true
+  failed_when: false
   when: public_interface is defined
 
 - name: Retrieve private interface (#2)
