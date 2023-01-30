@@ -158,6 +158,18 @@ reformat_fstab() {
     rm ${_fstab}.0
 }
 
+reformat_rc_conf() {
+    local _rc_conf=$1
+
+    if [ ! -e ${_rc_conf} ]; then
+        error "rc.conf file not found: ${_rc_conf}"
+    fi
+
+    sysrc -a -e > ${_rc_conf}.0
+    install -m 0644 -o root -g wheel ${_rc_conf}.0 ${_rc_conf}
+    rm ${_rc_conf}.0
+}
+
 __check_freebsd() {
     if [ $(uname) != "FreeBSD" ]; then
         error "only works on FreeBSD."
