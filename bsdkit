@@ -49,7 +49,9 @@ autoload throw catch
 : ${FREEBSD_REL_URL:=''} # initialized by __parse_options
 : ${FREEBSD_PKG_URL:=''} # initialized by __parse_options
 
-ZPOOL_CREATE_CMD=(zpool create -o ashift=12)
+DEFAULT_ASHIFT=12
+
+ZPOOL_CREATE_CMD=(zpool create -o ashift=${DEFAULT_ASHIFT})
 ZFS_CREATE_CMD=(zfs create)
 ZFS_CMD=(zfs)
 
