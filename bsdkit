@@ -289,10 +289,6 @@ __valid_url() {
     esac
 }
 
-__check_bsdkit_runtime() {
-    mount -p | grep "/baseroot" > /dev/null 2>&1
-}
-
 __valid_relpath() {
     local _relpath=$1
 
@@ -438,8 +434,8 @@ __gpt_ufs_partition_multi() {
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    if __check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${_destdir}/cdrom
+    if [ -d /cdrom ]; then
+      mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     mount -o async,noatime /dev/gpt/${BSDKIT_LABEL_VAR} ${_destdir}/var
@@ -495,8 +491,8 @@ __gpt_ufs_partition_single() {
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    if __check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${_destdir}/cdrom
+    if [ -d /cdrom ]; then
+      mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -560,8 +556,8 @@ __mbr_ufs_partition_multi() {
     mkdir -p ${_destdir}/usr
     mkdir -p ${_destdir}/var
 
-    if __check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${_destdir}/cdrom
+    if [ -d /cdrom ]; then
+      mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     mount -o async,noatime /dev/ufs/${BSDKIT_LABEL_VAR} ${_destdir}/var
@@ -616,8 +612,8 @@ __mbr_ufs_partition_single() {
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    if __check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${_destdir}/cdrom
+    if [ -d /cdrom ]; then
+      mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -915,8 +911,8 @@ __zfs_create_fs() {
     mkdir -p ${_destdir}/cdrom
     mkdir -p ${_destdir}/etc
 
-    if __check_bsdkit_runtime; then
-        mount -t nullfs /cdrom ${_destdir}/cdrom
+    if [ -d /cdrom ]; then
+      mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -1940,8 +1936,6 @@ install_gpt_ufs() {
 }
 
 install_zfs() {
-    __check_bsdkit_runtime
-
     eval $(__local_options)
     eval $(__parse_options $@)
 
@@ -1969,8 +1963,6 @@ install_zfs() {
 }
 
 install_gpt_zfs() {
-    __check_bsdkit_runtime
-
     eval $(__local_options)
     eval $(__parse_options $@)
 
@@ -1999,8 +1991,6 @@ install_gpt_zfs() {
 }
 
 install_mbr_zfs() {
-    __check_bsdkit_runtime
-
     eval $(__local_options)
     eval $(__parse_options $@)
 
