@@ -6,6 +6,12 @@
       - sysutils/beadm
       - sysutils/checkrestart
       - sysutils/lsblk
+    state: present
+
+- name: Install base packages (bare metal)
+  when: is_host_install and not platform_is_cloud
+  community.general.pkgng:
+    name:
       - sysutils/smartmontools
     state: present
 
