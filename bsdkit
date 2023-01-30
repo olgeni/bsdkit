@@ -84,6 +84,12 @@ is_yes() {
         [Nn][Oo])
             return 1
             ;;
+        [Tt][Rr][Uu][Ee])
+            return 0
+            ;;
+        [Ff][Aa][Ll][Ss][Ee])
+            return 1
+            ;;
         *)
             if [[ $1 == <-> ]]; then
                 [ $1 -ne 0 ]
