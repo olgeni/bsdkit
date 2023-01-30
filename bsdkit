@@ -110,6 +110,30 @@ is_efi() {
     [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
 
+platform_is_digitalocean() {
+    [ "$(kenv -q smbios.system.product)" = "Droplet" ]
+}
+
+platform_is_cloudsigma() {
+    [ "$(kenv -q smbios.system.product)" = "CloudSigma" ]
+}
+
+platform_is_virtualbox() {
+    [ "$(kenv -q smbios.system.product)" = "VirtualBox" ]
+}
+
+platform_is_vmware() {
+    [ "$(kenv -q smbios.system.product)" = "VMware Virtual Platform" ]
+}
+
+platform_is_aws() {
+    [ "$(kenv -q smbios.bios.vendor)" = "Amazon EC2" ]
+}
+
+platform_is_cloud() {
+    platform_is_digitalocean || platform_is_cloudsigma || platform_is_virtualbox || platform_is_vmware || platform_is_aws
+}
+
 __check_freebsd() {
     if [ $(uname) != "FreeBSD" ]; then
         error "only works on FreeBSD."
