@@ -29,6 +29,10 @@ if [ ! -d "${VM_PATH}" ]; then
     exit 1
 fi
 
+GIT_DESCRIPTION=$(git describe --tags --always --dirty)
+
+IMAGE_DESCRIPTION="${IMAGE_DESCRIPTION} (${GIT_DESCRIPTION})"
+
 SOURCE_FILEPATH="${VM_PATH}/${VM_DISK_NAME}.vdi"
 
 if [ ! -f "${SOURCE_FILEPATH}" ]; then
@@ -38,14 +42,44 @@ fi
 
 IMAGE_FILEPATH="${VM_PATH}/${IMAGE_NAME}.raw"
 
-/usr/local/bin/qemu-img convert -p -f vdi "${SOURCE_FILEPATH}" -O raw "${IMAGE_FILEPATH}"
+echo "Image name: ${IMAGE_NAME}"
+echo "Image description: ${IMAGE_DESCRIPTION}"
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+DRY_RUN=false
+
+while getopts ":n" opt; do
+    case $opt in
+    n)
+        DRY_RUN=true
+        ;;
+    \?)
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+    esac
+done
+
+if [ "${DRY_RUN}" = "true" ]; then
+    echo "Dry run, exiting"
+    exit 0
+fi
+
+echo "Stopping VM"
+"${SCRIPT_DIR}"/bsdkit-vbox stop
+
+echo "Converting image"
+qemu-img convert -p -f vdi "${SOURCE_FILEPATH}" -O raw "${IMAGE_FILEPATH}"
 
 _credentials=$(mktemp)
+
 cat >"${_credentials}" <<EOF
 ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 ACCESS_KEY_SECRET=${AWS_SECRET_ACCESS_KEY}
 EOF
 
+echo "Uploading image"
 bsdec2-image-upload --sriov --ena "${IMAGE_FILEPATH}" "${IMAGE_NAME}" "${IMAGE_DESCRIPTION}" "${AWS_DEFAULT_REGION}" "${IMAGE_BUCKET}" "${_credentials}"
 
 rm "${_credentials}"
