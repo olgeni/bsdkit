@@ -1,21 +1,18 @@
 ---
 - name: Add PostgreSQL group
-  lineinfile:
-    dest: /etc/group
-    line: "postgres:*:770:"
-    regexp: "^postgres:"
-  notify: pwd_mkdb
+  group:
+    name: postgres
+    gid: 770
+    state: present
 
 - name: Add PostgreSQL user
-  lineinfile:
-    dest: /etc/master.passwd
-    line: postgres:*:770:770::0:0:PostgreSQL Daemon:/var/db/postgres:/bin/sh
-    regexp: "^postgres:"
-  notify: pwd_mkdb
-
-# Workaround for "pw: user '...' disappeared during update"
-- name: Flush handlers
-  meta: flush_handlers
+  user:
+    name: postgres
+    uid: 770
+    group: postgres
+    home: /var/db/postgres
+    shell: /bin/sh
+    state: present
 
 - name: Create home directory for PostgreSQL
   file:

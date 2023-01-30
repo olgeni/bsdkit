@@ -1,21 +1,18 @@
 ---
 - name: Add MySQL group
-  lineinfile:
-    dest: /etc/group
-    line: "mysql:*:88:"
-    regexp: "^mysql:"
-  notify: pwd_mkdb
+  group:
+    name: mysql
+    gid: 88
+    state: present
 
 - name: Add MySQL user
-  lineinfile:
-    dest: /etc/master.passwd
-    line: mysql:*:88:88::0:0:MySQL Daemon:/var/db/mysql:/usr/sbin/nologin
-    regexp: "^mysql:"
-  notify: pwd_mkdb
-
-# Workaround for "pw: user '...' disappeared during update"
-- name: Flush handlers
-  meta: flush_handlers
+  user:
+    name: mysql
+    uid: 88
+    group: mysql
+    home: /var/db/mysql
+    shell: /bin/sh
+    state: present
 
 - name: Create home directory for MySQL
   file:
