@@ -1,0 +1,26 @@
+---
+- name: Add Consul group
+  group:
+    name: consul
+    gid: 469
+    state: present
+
+- name: Add Consul user
+  user:
+    name: consul
+    uid: 469
+    group: consul
+    home: /var/db/consul
+    shell: /bin/sh
+    comment: "Consul Daemon"
+    state: present
+
+- name: Create home directory for Consul
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: consul
+    group: consul
+  with_items:
+    - /var/db/consul

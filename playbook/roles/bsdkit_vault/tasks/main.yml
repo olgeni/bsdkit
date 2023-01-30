@@ -1,0 +1,26 @@
+---
+- name: Add Vault group
+  group:
+    name: vault
+    gid: 471
+    state: present
+
+- name: Add Vault user
+  user:
+    name: vault
+    uid: 471
+    group: vault
+    home: /var/db/vault
+    shell: /bin/sh
+    comment: "Vault Daemon"
+    state: present
+
+- name: Create home directory for Vault
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: vault
+    group: vault
+  with_items:
+    - /var/db/vault

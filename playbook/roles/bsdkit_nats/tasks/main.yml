@@ -1,0 +1,26 @@
+---
+- name: Add NATS group
+  group:
+    name: nats
+    gid: 305
+    state: present
+
+- name: Add NATS user
+  user:
+    name: nats
+    uid: 305
+    group: nats
+    home: /var/db/nats
+    shell: /bin/sh
+    comment: "NATS Daemon"
+    state: present
+
+- name: Create home directory for NATS
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: nats
+    group: nats
+  with_items:
+    - /var/db/nats

@@ -1,0 +1,26 @@
+---
+- name: Add Nomad group
+  group:
+    name: nomad
+    gid: 472
+    state: present
+
+- name: Add Nomad user
+  user:
+    name: nomad
+    uid: 472
+    group: nomad
+    home: /var/db/nomad
+    shell: /bin/sh
+    comment: "Nomad Daemon"
+    state: present
+
+- name: Create home directory for Nomad
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: nomad
+    group: nomad
+  with_items:
+    - /var/db/nomad
