@@ -90,6 +90,12 @@ is_yes() {
         [Ff][Aa][Ll][Ss][Ee])
             return 1
             ;;
+        [Oo][Nn])
+            return 0
+            ;;
+        [Oo][Ff][Ff])
+            return 1
+            ;;
         *)
             if [[ $1 == <-> ]]; then
                 [ $1 -ne 0 ]
