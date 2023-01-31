@@ -4,6 +4,8 @@ set -e -u -o pipefail
 
 AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"eu-central-1"}
 
+IMAGE_FLAVOR=${IMAGE_FLAVOR:-""}
+
 if [ -z "${IMAGE_BUCKET}" ]; then
     echo "IMAGE_BUCKET is not set"
     exit 1
@@ -29,6 +31,31 @@ if [ ! -d "${VM_PATH}" ]; then
     exit 1
 fi
 
+DRY_RUN=false
+
+while getopts ":f:n" opt; do
+    case $opt in
+    f)
+        IMAGE_FLAVOR="$OPTARG"
+        ;;
+    n)
+        DRY_RUN=true
+        ;;
+    \?)
+        echo "Invalid option: -${OPTARG}" >&2
+        exit 1
+        ;;
+    esac
+done
+
+if [ -n "${IMAGE_FLAVOR}" ]; then
+    IMAGE_DESCRIPTION="${IMAGE_DESCRIPTION} [${IMAGE_FLAVOR}]"
+fi
+
+if [ -n "${IMAGE_FLAVOR}" ]; then
+    IMAGE_NAME="${IMAGE_NAME}-$(echo "${IMAGE_FLAVOR}" | tr '[:upper:]' '[:lower:]')"
+fi
+
 GIT_DESCRIPTION=$(git describe --tags --always --dirty)
 
 IMAGE_DESCRIPTION="${IMAGE_DESCRIPTION} (${GIT_DESCRIPTION})"
@@ -42,24 +69,10 @@ fi
 
 IMAGE_FILEPATH="${VM_PATH}/${IMAGE_NAME}.raw"
 
-echo "Image name: ${IMAGE_NAME}"
-echo "Image description: ${IMAGE_DESCRIPTION}"
-
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
-DRY_RUN=false
-
-while getopts ":n" opt; do
-    case $opt in
-    n)
-        DRY_RUN=true
-        ;;
-    \?)
-        echo "Invalid option: -$OPTARG" >&2
-        exit 1
-        ;;
-    esac
-done
+echo "Image name: ${IMAGE_NAME}"
+echo "Image description: ${IMAGE_DESCRIPTION}"
 
 if [ "${DRY_RUN}" = "true" ]; then
     echo "Dry run, exiting"
