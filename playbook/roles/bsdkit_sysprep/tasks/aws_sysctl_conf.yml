@@ -1,3 +1,4 @@
+---
 - name: Set net.inet6.ip6.dad_count in /etc/sysctl.conf
   lineinfile:
     path: /etc/sysctl.conf

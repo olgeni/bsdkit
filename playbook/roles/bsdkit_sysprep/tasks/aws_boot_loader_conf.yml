@@ -1,3 +1,4 @@
+---
 - name: Set debug.trace_on_panic in /boot/loader.conf
   lineinfile:
     path: /boot/loader.conf

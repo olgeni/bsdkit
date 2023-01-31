@@ -1,3 +1,4 @@
+---
 - name: Set values in /etc/rc.conf for AWS
   lineinfile:
     path: /etc/rc.conf
