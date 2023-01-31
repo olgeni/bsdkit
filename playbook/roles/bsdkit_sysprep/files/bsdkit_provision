@@ -15,25 +15,6 @@ stop_cmd=":"
 rcvar="bsdkit_provision_enable"
 
 bsdkit_provision_start() {
-    _pool=$(/usr/local/bsdkit/bsdkit get_boot_pool)
-
-    # zpool list -v -H -p
-    # rpool 8053063680 3864227840 4188835840 -          - 3         47       1.00 ONLINE -
-    #       nvd0p4     8053063680 3864227840 4188835840 - -          3      47    -      ONLINE
-
-    for _vdev in $(zpool list -v -H -p | awk -v pool="${_pool}" '$1 != pool { print $1 }'); do
-        _device="${_vdev%p*}"
-        _index="${_vdev##*p}"
-
-        gpart recover "${_device}" || :
-
-        if gpart resize -i "${_index}" -a 4096 "${_device}"; then
-            zpool online -e "${_pool}" "${_vdev}"
-        fi
-    done
-
-    zpool initialize "${_pool}"
-
     /usr/local/bsdkit/bsdkit provision
 
     touch /firstboot-reboot
