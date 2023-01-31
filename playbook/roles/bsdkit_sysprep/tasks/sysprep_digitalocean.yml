@@ -1,4 +1,13 @@
 ---
+- name: Include boot_loader_conf_digitalocean.yml
+  include_tasks: boot_loader_conf_digitalocean.yml
+
+- name: Include rc_conf_digitalocean.yml
+  include_tasks: rc_conf_digitalocean.yml
+
+- name: Include sysctl_conf_digitalocean.yml
+  include_tasks: sysctl_conf_digitalocean.yml
+
 - name: Configure /etc/resolvconf.conf
   copy:
     content: |

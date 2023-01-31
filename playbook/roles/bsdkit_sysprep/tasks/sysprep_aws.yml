@@ -1,4 +1,13 @@
 ---
+- name: Include boot_loader_conf_aws.yml
+  include_tasks: boot_loader_conf_aws.yml
+
+- name: Include rc_conf_aws.yml
+  include_tasks: rc_conf_aws.yml
+
+- name: Include sysctl_conf_aws.yml
+  include_tasks: sysctl_conf_aws.yml
+
 # This file was created using 'src/release/tools/ec2.conf' as reference.
 - name: Install packages for AWS platform
   community.general.pkgng:
@@ -11,12 +20,6 @@
     - sysutils/amazon-ssm-agent
     - sysutils/ebsnvme-id
     - sysutils/ec2-scripts
-
-- name: Include aws_rc_conf.yml
-  include_tasks: aws_rc_conf.yml
-
-- name: Include aws_sysctl_conf.yml
-  include_tasks: aws_sysctl_conf.yml
 
 - name: Set KbdInteractiveAuthentication in /etc/ssh/sshd_config
   lineinfile:

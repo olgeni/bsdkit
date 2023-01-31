@@ -1,0 +1,11 @@
+---
+- name: Set values in /etc/rc.conf for DigitalOcean
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: "^{{ item }}="
+    line: "{{ item }}=\"YES\""
+    state: present
+  with_items:
+    - growfs_enable
+  notify:
+    - reformat_rc_conf
