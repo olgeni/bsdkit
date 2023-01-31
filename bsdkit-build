@@ -5,7 +5,7 @@ set -e -u -o pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
-DEFAULT_VERSION=12
+DEFAULT_VERSION=13
 DEFAULT_ARCH=amd64
 
 unset POSIXLY_CORRECT
