@@ -3009,13 +3009,13 @@ update() {
 }
 
 osrelease() {
-    local _destdir=$1
+    local _destdir=${1:-/}
 
     ${_destdir}/bin/freebsd-version -u
 }
 
 osreldate() {
-    local _destdir=$1
+    local _destdir=${1:-/}
 
     if [ -f ${_destdir}/usr/include/sys/param.h ]; then
         awk '/^\#define[[:blank:]]__FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h
