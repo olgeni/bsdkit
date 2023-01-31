@@ -15,6 +15,13 @@
       - sysutils/smartmontools
     state: present
 
+- name: Remove unnecessary packages (cloud)
+  when: is_host_install and platform_is_cloud
+  community.general.pkgng:
+    name:
+      - sysutils/smartmontools
+    state: absent
+
 - name: Install base packages (common)
   community.general.pkgng:
     name:
