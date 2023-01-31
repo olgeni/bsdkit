@@ -41,6 +41,7 @@ autoload throw catch
 : ${BSDKIT_FREEBSD_DISTDIR:="/usr/freebsd-dist"}
 : ${BSDKIT_SSH_PUBLIC_KEY:=""}
 : ${BSDKIT_JAIL_PROXY:=""}
+: ${BSDKIT_SWAP_DEVICE_SIZE:="8"}
 
 # Default release and package URLs
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
@@ -244,6 +245,7 @@ __environment() {
         BSDKIT_FREEBSD_DISTDIR=\"${BSDKIT_FREEBSD_DISTDIR}\" \
         BSDKIT_ROOT_URL=\"${BSDKIT_ROOT_URL}\" \
         BSDKIT_JAIL_PROXY=\"${BSDKIT_JAIL_PROXY}\" \
+        BSDKIT_SWAP_DEVICE_SIZE=\"${BSDKIT_SWAP_DEVICE_SIZE}\" \
         BSDKIT_VERSION=\"${BSDKIT_VERSION}\" \
         BSDKIT_ARCH=\"${BSDKIT_ARCH}\" \
         BSDKIT_TREE=\"${BSDKIT_TREE}\" \
@@ -2955,6 +2957,48 @@ sysprep() {
         -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
         ${=OPTIONS} \
         ${BSDKIT_SRCDIR}/playbook/sysprep.yml
+}
+
+enable_swap_device() {
+    if platform_is_aws; then
+        __enable_swap_device_aws
+    fi
+}
+
+__enable_swap_device_aws() {
+    if [ -z "${BSDKIT_SWAP_DEVICE_SIZE}" ] || [ "${BSDKIT_SWAP_DEVICE_SIZE}" -eq 0 ]; then
+        error "BSDKIT_SWAP_DEVICE_SIZE is not set"
+    fi
+
+    if grep -q '^/dev/gpt/swap' /etc/fstab; then
+        echo "Swap already configured"
+    else
+        for _disk in $(sysctl -n kern.disks); do
+            if gpart list ${_disk} > /dev/null 2>&1; then
+                echo "Device ${_disk} already partitioned"
+                continue
+            fi
+
+            _mediasize=$(geom disk list ${_disk} | awk '$1 == "Mediasize:" { print $2 }')
+            _mediasize=$(expr ${_mediasize} / 1024 / 1024 / 1024)
+
+            if [ ${_mediasize} -gt ${BSDKIT_SWAP_DEVICE_SIZE} ]; then
+                continue
+            fi
+
+            echo "Creating GPT partition table on ${_disk}"
+            gpart create -s gpt ${_disk}
+            echo "Creating swap partition on ${_disk}"
+            gpart add -a 4k -i 1 -t freebsd-swap -l swap ${_disk}
+            echo "Enabling swap on ${_disk}"
+            swapon /dev/gpt/swap
+            echo "/dev/gpt/swap none swap sw 0 0" >> /etc/fstab
+
+            reformat_fstab /etc/fstab
+
+            break
+        done
+    fi
 }
 
 update() {
