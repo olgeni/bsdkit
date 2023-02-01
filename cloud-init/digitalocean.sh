@@ -66,7 +66,7 @@ while ! pkg upgrade -y; do :; done
 
 while ! pkg install -y devel/git sysutils/pv sysutils/ansible shells/zsh; do :; done
 
-git clone https://github.com/olgeni/bsdkit.git
+git clone https://gitlab.com/olgeni/bsdkit.git
 cd bsdkit
 git checkout ${BSDKIT_BRANCH}
 ./bsdkit ansible_local_playbook
