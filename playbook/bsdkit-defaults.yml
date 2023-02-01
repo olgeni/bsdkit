@@ -1,5 +1,6 @@
 ---
 rc_conf: {}
+
 periodic_conf:
   daily_output: /var/log/daily.log
   weekly_output: /var/log/weekly.log
