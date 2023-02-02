@@ -55,10 +55,10 @@
     - role: bsdkit_mysql_zfs
     - role: bsdkit_postgres
     - role: bsdkit_mysql
-    - role: bsdkit_consul_user
-    - role: bsdkit_nomad_user
-    - role: bsdkit_vault_user
-    - role: bsdkit_nats_user
+    - role: bsdkit_consul
+    - role: bsdkit_nomad
+    - role: bsdkit_vault
+    - role: bsdkit_nats
 
 - name: Provisioning (DigitalOcean)
   hosts: all
