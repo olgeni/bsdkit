@@ -28,23 +28,25 @@ if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
     ENVRC="${ENVRC} $(cat envrc.d/*)"
 fi
 
+: ${NATS_DATA_DIR:="/var/db/nats"}
 : ${NATS_USER:="nats"}
 : ${NATS_GROUP:="nats"}
 : ${NATS_ARGS="-c nats.conf"}
 : ${NATS_CERT_FILE:=""} # /usr/local/etc/letsencrypt/live/FQDN/fullchain.pem
 : ${NATS_KEY_FILE:=""}  # /usr/local/etc/letsencrypt/live/FQDN/privkey.pem
 
-mkdir -p data
-mkdir -p data/certs
+mkdir -p ${NATS_DATA_DIR}/certs
 
-chown -R ${NATS_USER}:${NATS_GROUP} data
+NATS_CERTS_DIR="${NATS_DATA_DIR}/certs"
+
+chown -R ${NATS_USER}:${NATS_GROUP} ${NATS_DATA_DIR}
 
 if [ -n "${NATS_CERT_FILE}" ]; then
-    install -m 644 -o nats -g nats "${NATS_CERT_FILE}" data/certs/cert.pem
+    install -m 644 -o nats -g nats "${NATS_CERT_FILE}" "${NATS_CERTS_DIR}/cert.pem"
 fi
 
 if [ -n "${NATS_KEY_FILE}" ]; then
-    install -m 600 -o nats -g nats "${NATS_KEY_FILE}" data/certs/key.pem
+    install -m 600 -o nats -g nats "${NATS_KEY_FILE}" "${NATS_CERTS_DIR}/key.pem"
 fi
 
 exec env -S "${ENVRC}" chpst -u ${NATS_USER}:${NATS_GROUP} ${CHPST_ARGS} /usr/local/bin/nats-server ${NATS_ARGS}
