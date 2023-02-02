@@ -2,8 +2,7 @@
 
 import os
 import sys
-
-# noinspection PyPackageRequirements
+import getopt
 import yaml
 
 
@@ -18,9 +17,14 @@ def str_presenter(dumper, data):
 yaml.add_representer(str, str_presenter)
 yaml.representer.SafeRepresenter.add_representer(str, str_presenter)
 
+KEY_SEPARATOR = "."
+
+if "KEY_SEPARATOR" in os.environ:
+    KEY_SEPARATOR = os.environ["KEY_SEPARATOR"]
+
 
 def set_data_value(data, key, value):
-    key_list = key.split(".")
+    key_list = key.split(KEY_SEPARATOR)
 
     p = None
     d = data
@@ -39,14 +43,18 @@ def set_data_value(data, key, value):
 
 
 def set_file_value(yaml_file, key, value):
-    with open(yaml_file) as f:
-        data = yaml.load(f, Loader=yaml.SafeLoader)
-        set_data_value(data, key, value)
-        yaml.safe_dump(data, open(yaml_file, "w"), default_flow_style=False, indent=4)
+    try:
+        with open(yaml_file) as f:
+            data = yaml.load(f, Loader=yaml.SafeLoader)
+    except FileNotFoundError:
+        data = {}
+
+    set_data_value(data, key, value)
+    yaml.safe_dump(data, open(yaml_file, "w"), default_flow_style=False, indent=4)
 
 
 def get_data_value(data, key):
-    key_list = key.split(".")
+    key_list = key.split(KEY_SEPARATOR)
 
     d = data
 
@@ -81,7 +89,7 @@ def get_file_value(yaml_file, key):
 
 
 def delete_data_value(data, key):
-    key_list = key.split(".")
+    key_list = key.split(KEY_SEPARATOR)
 
     d = data
 
@@ -102,36 +110,53 @@ def delete_file_value(yaml_file, key):
         yaml.dump(data, open(yaml_file, "w"), default_flow_style=False, indent=4)
 
 
-def list_data_keys(data):
+def list_data_keys(data, path):
     def f(__data, __keys, __path):
         if isinstance(__data, dict):
             for k, v in __data.items():
                 if isinstance(v, dict):
                     f(v, __keys, __path + [k])
                 else:
-                    __keys.append(".".join(__path + [k]))
+                    if path is not None:
+                        if len(__path) > 0 and __path == path[: len(__path)]:
+                            __keys.append(KEY_SEPARATOR.join(__path[len(path) :] + [k]))
+                    else:
+                        __keys.append(KEY_SEPARATOR.join(__path + [k]))
         else:
-            __keys.append(".".join(__path))
+            if path is not None:
+                if __path == path[: len(__path)]:
+                    __keys.append(KEY_SEPARATOR.join(__path))
+            else:
+                __keys.append(KEY_SEPARATOR.join(__path))
+
         return __keys
 
-    return list(sorted(f(data, [], []), key=lambda x: (x.split(".")[0], len(x))))
+    return list(sorted(f(data, [], []), key=lambda x: (x.split(KEY_SEPARATOR)[0], len(x))))
 
 
-def list_file_keys(yaml_file):
+def list_file_keys(yaml_file, path):
     with open(yaml_file) as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
-        return list_data_keys(data)
+        return list_data_keys(data, path)
 
 
 if __name__ == "__main__":
-    get_action = lambda: sys.argv[1]
-    get_filepath = lambda: sys.argv[2]
-    get_key = lambda: sys.argv[3]
-    get_value = lambda: sys.argv[4]
+    args = sys.argv[1:]
 
-    if not os.path.isfile(get_filepath()):
-        print("File not found: %s" % get_filepath(), file=sys.stderr)
-        sys.exit(1)
+    try:
+        opts, args = getopt.getopt(args, "s:")
+    except getopt.GetoptError as err:
+        print(err)
+        sys.exit(2)
+
+    for o, a in opts:
+        if o == "-s":
+            KEY_SEPARATOR = a
+
+    get_action = lambda: args[0]
+    get_filepath = lambda: args[1]
+    get_key = lambda: args[2]
+    get_value = lambda: args[3]
 
     try:
         action = get_action()
@@ -150,7 +175,12 @@ if __name__ == "__main__":
         elif action == "del":
             delete_file_value(get_filepath(), get_key())
         elif action == "list":
-            for key in list_file_keys(get_filepath()):
+            try:
+                key_list = list_file_keys(get_filepath(), get_key().split(KEY_SEPARATOR))
+            except IndexError:
+                key_list = list_file_keys(get_filepath(), None)
+
+            for key in key_list:
                 print(key)
     except IndexError:
         print("Usage: %s <set|get|delete|get-keys> <file> <key> [value]" % sys.argv[0], file=sys.stderr)

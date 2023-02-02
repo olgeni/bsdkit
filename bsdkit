@@ -3241,6 +3241,34 @@ rc_get() {
     fi
 }
 
+yaml_set() {
+    local _file=$1
+    local _key=$2
+    local _value=$3
+
+    python3 ${BSDKIT_SRCDIR}/lib/update-yaml.py set ${_file} ${_key} ${_value}
+}
+
+yaml_get() {
+    local _file=$1
+    local _key=$2
+
+    python3 ${BSDKIT_SRCDIR}/lib/update-yaml.py get ${_file} ${_key}
+}
+
+yaml_del() {
+    local _file=$1
+    local _key=$2
+
+    python3 ${BSDKIT_SRCDIR}/lib/update-yaml.py del ${_file} ${_key}
+}
+
+yaml_list() {
+    local _file=$1
+
+    python3 ${BSDKIT_SRCDIR}/lib/update-yaml.py list ${_file}
+}
+
 if [ $# -gt 0 ]; then
     ${(@s/ /)@}
 fi
