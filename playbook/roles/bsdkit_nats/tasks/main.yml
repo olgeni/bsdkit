@@ -15,7 +15,7 @@
     comment: "NATS Daemon"
     state: present
 
-- name: Create home directory for NATS
+- name: Create data directory for NATS
   file:
     path: "{{ item }}"
     state: directory

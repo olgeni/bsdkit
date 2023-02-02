@@ -15,7 +15,7 @@
     comment: "Vault Daemon"
     state: present
 
-- name: Create home directory for Vault
+- name: Create data directory for Vault
   file:
     path: "{{ item }}"
     state: directory

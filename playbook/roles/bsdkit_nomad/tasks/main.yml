@@ -15,7 +15,7 @@
     comment: "Nomad Daemon"
     state: present
 
-- name: Create home directory for Nomad
+- name: Create data directory for Nomad
   file:
     path: "{{ item }}"
     state: directory

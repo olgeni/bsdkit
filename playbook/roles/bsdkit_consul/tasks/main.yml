@@ -15,7 +15,7 @@
     comment: "Consul Daemon"
     state: present
 
-- name: Create home directory for Consul
+- name: Create data directory for Consul
   file:
     path: "{{ item }}"
     state: directory
