@@ -19,7 +19,7 @@
   file:
     path: "{{ item }}"
     state: directory
-    mode: "0755"
+    mode: "0700"
     owner: nats
     group: nats
   with_items:
