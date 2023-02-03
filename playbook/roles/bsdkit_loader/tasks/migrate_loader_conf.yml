@@ -6,9 +6,6 @@
   register: grep_loader_conf_files
   failed_when: false
 
-- debug:
-    msg: "grep_loader_conf_files: {{ grep_loader_conf_files }}"
-
 - name: Migrate loader.conf files
   when: grep_loader_conf_files.rc == 0
   block:
