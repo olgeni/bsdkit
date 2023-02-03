@@ -2,29 +2,28 @@
 - name: bsdkit_loader
   when: is_host_install
   block:
-    - name: Stat /boot/loader.conf
+    - name: Stat /boot/loader.conf.local
       stat:
-        path: /boot/loader.conf
-      register: stat_boot_loader_conf
+        path: /boot/loader.conf.local
+      register: stat_boot_loader_conf_local
 
-    - name: Touch /boot/loader.conf
+    - name: Touch /boot/loader.conf.local
       file:
-        path: /boot/loader.conf
+        path: /boot/loader.conf.local
         state: touch
         mode: "0644"
-      changed_when: false
-      when: not stat_boot_loader_conf.stat.exists
+      when: not stat_boot_loader_conf_local.stat.exists
 
-    - name: Configure loader_conf_files
-      lineinfile:
-        dest: /boot/loader.conf.local
-        line: loader_conf_files="/boot/loader.conf.vendor /boot/device.hints /boot/loader.conf /boot/loader.conf.local"
-        regexp: ^loader_conf_files=
-        insertbefore: BOF
-        create: true
-        mode: "0644"
+    - name: Create /boot/loader.conf.d directory
+      file:
+        path: /boot/loader.conf.d
+        state: directory
+        mode: "0755"
 
-    - name: Install loader.conf.vendor
+    - name: Include tasks from migrate_loader_conf.yml
+      include_tasks: migrate_loader_conf.yml
+
+    - name: Install loader.conf
       copy:
         src: ../ansible/{{ item }}
         dest: /boot/{{ item }}
@@ -32,4 +31,24 @@
         group: wheel
         mode: "0644"
       with_items:
-        - loader.conf.vendor
+        - loader.conf
+
+    - name: Configure loader.conf.local
+      when: loader_conf is defined
+      lineinfile:
+        dest: /boot/loader.conf.local
+        line: '{{ item.key }}="{{ item.value }}"'
+        regexp: ^{{ item.key }} *=
+        create: true
+        mode: "0644"
+        state: present
+      with_items: "{{ loader_conf | dict2items }}"
+
+    - name: Configure loader.conf.local (delete)
+      when: loader_conf_delete is defined
+      lineinfile:
+        dest: /boot/loader.conf.local
+        regexp: ^{{ item.key }} *=
+        mode: "0644"
+        state: absent
+      with_items: "{{ loader_conf_delete | dict2items }}"

@@ -2457,7 +2457,7 @@ build_setup_staging() {
 
     gzip ${_staging}/boot/kernel/kernel
 
-    install -m 0644 -o root -g wheel ${_bsdkit}/ansible/loader.conf.vendor ${_staging}/boot/loader.conf
+    install -m 0644 -o root -g wheel ${_bsdkit}/ansible/loader.conf ${_staging}/boot/loader.conf
 
     cat > ${_staging}/boot/loader.conf.local << EOF
 geom_uzip_load="YES"

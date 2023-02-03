@@ -1,0 +1,83 @@
+---
+- name: Check if /boot/loader.conf.local contains a line starting with "loader_conf_files", using grep
+  shell: grep -q '^loader_conf_files=' /boot/loader.conf.local
+  register: loader_conf_files
+  ignore_errors: yes
+
+- debug:
+    msg: "loader_conf_files: {{ loader_conf_files }}"
+
+- name: Migrate loader.conf files
+  when: loader_conf_files.rc == 0
+  block:
+    - name: Remove lines starting with "loader_conf_files" from /boot/loader.conf.local
+      lineinfile:
+        dest: /boot/loader.conf.local
+        regexp: ^loader_conf_files=
+        state: absent
+
+    - name: Backup /boot/loader.conf
+      copy:
+        src: /boot/loader.conf
+        dest: /root/loader.conf.orig
+        remote_src: true
+        mode: "0644"
+
+    - name: Backup /boot/loader.conf.local
+      copy:
+        src: /boot/loader.conf.local
+        dest: /root/loader.conf.local.orig
+        remote_src: true
+        mode: "0644"
+
+    - name: Copy /boot/loader.conf to /boot/loader.conf.local
+      copy:
+        src: /boot/loader.conf
+        dest: /boot/loader.conf.local
+        remote_src: true
+        owner: root
+        group: wheel
+        mode: "0644"
+
+    - name: Check if /boot/loader.conf.vendor exists
+      stat:
+        path: /boot/loader.conf.vendor
+      register: stat_loader_conf_vendor
+
+    - name: Copy /boot/loader.conf.vendor to /boot/loader.conf
+      when: stat_loader_conf_vendor.stat.exists
+      copy:
+        src: /boot/loader.conf.vendor
+        dest: /boot/loader.conf
+        remote_src: true
+        owner: root
+        group: wheel
+        mode: "0644"
+
+    - name: Remove /boot/loader.conf.vendor
+      file:
+        path: /boot/loader.conf.vendor
+        state: absent
+
+    - name: Migrate settings from /boot/loader.conf to /boot/loader.conf.local
+      shell:
+        cmd: |
+          set -e -u -o pipefail
+
+          _strings=$(mktemp /tmp/XXXXXX)
+          cat /boot/loader.conf | grep -v '^$' > ${_strings}
+
+          _loader_conf_local=$(mktemp /tmp/XXXXXX)
+
+          grep -v --fixed-strings --file ${_strings} /boot/loader.conf.local > ${_loader_conf_local}
+          mv ${_loader_conf_local} /boot/loader.conf.local
+
+          rm -f ${_strings}
+          rm -f ${_loader_conf_local}
+
+    - name: Set permissions on /boot/loader.conf.local
+      file:
+        path: /boot/loader.conf.local
+        owner: root
+        group: wheel
+        mode: "0644"
