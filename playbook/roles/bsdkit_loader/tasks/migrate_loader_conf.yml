@@ -1,8 +1,10 @@
 ---
 - name: Check if /boot/loader.conf.local contains a line starting with "loader_conf_files", using grep
-  shell: grep -q '^loader_conf_files=' /boot/loader.conf.local
+  shell:
+    cmd: |
+      grep -q '^loader_conf_files=' /boot/loader.conf.local
   register: loader_conf_files
-  ignore_errors: yes
+  failed_when: false
 
 - debug:
     msg: "loader_conf_files: {{ loader_conf_files }}"
