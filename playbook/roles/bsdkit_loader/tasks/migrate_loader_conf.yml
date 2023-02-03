@@ -3,14 +3,14 @@
   shell:
     cmd: |
       grep -q '^loader_conf_files=' /boot/loader.conf.local
-  register: loader_conf_files
+  register: grep_loader_conf_files
   failed_when: false
 
 - debug:
-    msg: "loader_conf_files: {{ loader_conf_files }}"
+    msg: "grep_loader_conf_files: {{ grep_loader_conf_files }}"
 
 - name: Migrate loader.conf files
-  when: loader_conf_files.rc == 0
+  when: grep_loader_conf_files.rc == 0
   block:
     - name: Remove lines starting with "loader_conf_files" from /boot/loader.conf.local
       lineinfile:
