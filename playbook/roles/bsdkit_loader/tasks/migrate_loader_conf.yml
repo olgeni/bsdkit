@@ -75,6 +75,8 @@
           rm -f ${_strings}
           rm -f ${_loader_conf_local}
       changed_when: false
+      notify:
+        - reformat_loader_conf_local
 
     - name: Set permissions on /boot/loader.conf.local
       file:
