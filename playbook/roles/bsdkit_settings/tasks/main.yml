@@ -10,22 +10,48 @@
     - always
   stat:
     path: /.bsdkit.yml
-  register: stat_bsdkit_yml
+  register: bsdkit_yml
 
-- name: Load /.bsdkit.yml
-  when: stat_bsdkit_yml.stat.exists
+- name: Move /.bsdkit.yml to /usr/local/etc/bsdkit.yml
+  when: bsdkit_yml.stat.exists
+  tags:
+    - always
+  block:
+    - name: Copy /.bsdkit.yml to /usr/local/etc/bsdkit.yml
+      copy:
+        src: /.bsdkit.yml
+        dest: /usr/local/etc/bsdkit.yml
+        remote_src: yes
+        owner: root
+        group: wheel
+        mode: "0600"
+
+    - name: Remove /.bsdkit.yml
+      file:
+        path: /.bsdkit.yml
+        state: absent
+
+- name: Check if /usr/local/etc/bsdkit.yml exists
+  tags:
+    - always
+  stat:
+    path: /usr/local/etc/bsdkit.yml
+  register: bsdkit_yml
+
+- name: Load /usr/local/etc/bsdkit.yml
+  when: bsdkit_yml.stat.exists
   tags:
     - always
   include_vars:
-    file: /.bsdkit.yml
+    file: /usr/local/etc/bsdkit.yml
 
-- name: Create /.bsdkit.yml
-  when: not stat_bsdkit_yml.stat.exists
+- name: Create /usr/local/etc/bsdkit.yml
+  when: not bsdkit_yml.stat.exists
   tags:
     - always
   copy:
     src: bsdkit-defaults.yml
-    dest: /.bsdkit.yml
+    dest: /usr/local/etc/bsdkit.yml
     owner: root
     group: wheel
     mode: "0600"
