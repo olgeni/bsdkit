@@ -10,10 +10,10 @@
     - always
   stat:
     path: /.bsdkit.yml
-  register: bsdkit_yml
+  register: stat_root_bsdkit_yml
 
 - name: Move /.bsdkit.yml to /usr/local/etc/bsdkit.yml
-  when: bsdkit_yml.stat.exists
+  when: stat_root_bsdkit_yml.stat.exists
   tags:
     - always
   block:
@@ -36,17 +36,17 @@
     - always
   stat:
     path: /usr/local/etc/bsdkit.yml
-  register: bsdkit_yml
+  register: stat_etc_bsdkit_yml
 
 - name: Load /usr/local/etc/bsdkit.yml
-  when: bsdkit_yml.stat.exists
+  when: stat_etc_bsdkit_yml.stat.exists
   tags:
     - always
   include_vars:
     file: /usr/local/etc/bsdkit.yml
 
 - name: Create /usr/local/etc/bsdkit.yml
-  when: not bsdkit_yml.stat.exists
+  when: not stat_etc_bsdkit_yml.stat.exists
   tags:
     - always
   copy:
