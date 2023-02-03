@@ -32,9 +32,10 @@
   shell:
     cmd: |
       set -e -u -o pipefail
-      sysrc -a -e > /etc/.rc.conf
-      cat /etc/.rc.conf > /etc/rc.conf
-      rm -f /etc/.rc.conf
+      _rc_conf=$(mktemp /tmp/XXXXXX)
+      sysrc -a -e > ${_rc_conf}
+      cat ${_rc_conf} > /etc/rc.conf
+      rm -f ${_rc_conf}
 
 - name: reformat_loader_conf_local
   shell:
