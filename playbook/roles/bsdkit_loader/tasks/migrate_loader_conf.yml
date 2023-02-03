@@ -74,7 +74,7 @@
 
           rm -f ${_strings}
           rm -f ${_loader_conf_local}
-      changed_when: false
+      changed_when: true
       notify:
         - reformat_loader_conf_local
 
