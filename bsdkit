@@ -187,6 +187,18 @@ reformat_rc_conf() {
     rm ${_rc_conf}.0
 }
 
+reformat_loader_conf() {
+    local _loader_conf=$1
+
+    if [ ! -e ${_loader_conf} ]; then
+        error "loader.conf file not found: ${_loader_conf}"
+    fi
+
+    sed '/^$/d' ${_loader_conf} | sort > ${_loader_conf}.0
+    install -m 0644 -o root -g wheel ${_loader_conf}.0 ${_loader_conf}
+    rm ${_loader_conf}.0
+}
+
 __check_freebsd() {
     if [ $(uname) != "FreeBSD" ]; then
         error "only works on FreeBSD."
