@@ -65,6 +65,7 @@ ZPOOL_CREATE_CMD=(zpool create -o ashift=${DEFAULT_ASHIFT})
 ZFS_CREATE_CMD=(zfs create)
 ZFS_CMD=(zfs)
 
+BSDKIT_CONFIG=/usr/local/etc/bsdkit.yml
 BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
 ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
@@ -3279,6 +3280,29 @@ yaml_list() {
     local _file=$1
 
     python3 ${BSDKIT_SRCDIR}/lib/update-yaml.py list ${_file}
+}
+
+config_set() {
+    local _key=$1
+    local _value=$2
+
+    yaml_set ${BSDKIT_CONFIG} ${_key} ${_value}
+}
+
+config_get() {
+    local _key=$1
+
+    yaml_get ${BSDKIT_CONFIG} ${_key}
+}
+
+config_del() {
+    local _key=$1
+
+    yaml_del ${BSDKIT_CONFIG} ${_key}
+}
+
+config_list() {
+    yaml_list ${BSDKIT_CONFIG}
 }
 
 if [ $# -gt 0 ]; then
