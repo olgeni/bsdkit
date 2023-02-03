@@ -98,6 +98,9 @@
     content: |
       nameserver 8.8.8.8
     dest: /etc/resolv.conf
+    owner: root
+    group: wheel
+    mode: "0644"
 
 - name: Check enc0 interface
   shell:

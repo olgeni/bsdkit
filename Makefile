@@ -7,6 +7,9 @@ all:
 format:
 	@inplace "shfmt -ci -sr -s -i 4" bsdkit* *.sh cloud-init/*.sh
 
+lint:
+	@ansible-lint -c ansible-lint.yml
+
 start-vm:
 	@$(CURDIR)/bsdkit-vbox start
 

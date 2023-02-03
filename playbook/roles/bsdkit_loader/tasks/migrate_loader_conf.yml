@@ -4,6 +4,7 @@
     cmd: |
       grep -q '^loader_conf_files=' /boot/loader.conf.local
   register: grep_loader_conf_files
+  changed_when: false
   failed_when: false
 
 - name: Migrate loader.conf files
@@ -73,6 +74,7 @@
 
           rm -f ${_strings}
           rm -f ${_loader_conf_local}
+      changed_when: false
 
     - name: Set permissions on /boot/loader.conf.local
       file:

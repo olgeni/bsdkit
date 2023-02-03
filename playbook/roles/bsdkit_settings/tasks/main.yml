@@ -21,7 +21,7 @@
       copy:
         src: /.bsdkit.yml
         dest: /usr/local/etc/bsdkit.yml
-        remote_src: yes
+        remote_src: true
         owner: root
         group: wheel
         mode: "0600"

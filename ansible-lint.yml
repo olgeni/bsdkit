@@ -1,0 +1,6 @@
+skip_list:
+  - fqcn[action-core]
+  - name[casing]
+  - name[template]
+  - no-relative-paths
+  - yaml[line-length]
