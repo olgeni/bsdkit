@@ -3283,6 +3283,10 @@ yaml_list() {
 }
 
 config_set() {
+    if [ $# -lt 2 ]; then
+        error "config_set: missing arguments"
+    fi
+
     local _key=$1
     local _value=$2
 
@@ -3290,12 +3294,20 @@ config_set() {
 }
 
 config_get() {
+    if [ $# -lt 1 ]; then
+        error "config_get: missing arguments"
+    fi
+
     local _key=$1
 
     yaml_get ${BSDKIT_CONFIG} ${_key}
 }
 
 config_del() {
+    if [ $# -lt 1 ]; then
+        error "config_del: missing arguments"
+    fi
+
     local _key=$1
 
     yaml_del ${BSDKIT_CONFIG} ${_key}
