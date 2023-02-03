@@ -43,3 +43,12 @@
     group: wheel
     mode: "0755"
   with_items: "{{ role_list.stdout_lines }}"
+
+- name: Create symlink from /usr/local/bsdkit/bsdkit to /usr/local/sbin/bsdkit
+  file:
+    src: /usr/local/bsdkit/bsdkit
+    dest: /usr/local/sbin/bsdkit
+    state: link
+    owner: root
+    group: wheel
+    mode: "0755"
