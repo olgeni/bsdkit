@@ -4,7 +4,7 @@
   lineinfile:
     dest: /etc/periodic.conf
     line: '{{ item.key }}="{{ item.value }}"'
-    regexp: ^{{ item.key }} *=
+    regexp: "^{{ item.key }} *="
     create: true
     mode: "0644"
     state: present
@@ -14,7 +14,7 @@
   when: periodic_conf_delete is defined
   lineinfile:
     dest: /etc/periodic.conf
-    regexp: ^{{ item.key }} *=
+    regexp: "^{{ item.key }} *="
     create: true
     mode: "0644"
     state: absent
