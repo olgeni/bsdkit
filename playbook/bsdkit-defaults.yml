@@ -27,7 +27,7 @@ periodic_conf_delete: {}
 pw_conf:
   skeleton: /usr/local/share/skel
 
-bsdkit_provision:
 pw_conf_delete: {}
 
+bsdkit:
   update_dns: true
