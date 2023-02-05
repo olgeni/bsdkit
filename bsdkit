@@ -66,7 +66,7 @@ ZFS_CREATE_CMD=(zfs create)
 ZFS_CMD=(zfs)
 
 BSDKIT_CONFIG=/usr/local/etc/bsdkit.yml
-BSDKIT_SRCDIR=$(realpath "$(dirname "$0")")
+BSDKIT_SRCDIR=$(dirname "$(realpath "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
 ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
 
