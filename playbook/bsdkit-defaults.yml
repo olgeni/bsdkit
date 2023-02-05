@@ -28,4 +28,6 @@ pw_conf:
   skeleton: /usr/local/share/skel
 
 bsdkit_provision:
+pw_conf_delete: {}
+
   update_dns: true
