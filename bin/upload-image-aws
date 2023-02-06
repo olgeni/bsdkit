@@ -48,17 +48,19 @@ while getopts ":f:n" opt; do
     esac
 done
 
+GIT_DESCRIPTION=$(git describe --tags --always --dirty)
+
 if [ -n "${IMAGE_FLAVOR}" ]; then
     IMAGE_DESCRIPTION="${IMAGE_DESCRIPTION} [${IMAGE_FLAVOR}]"
 fi
+
+IMAGE_DESCRIPTION="${IMAGE_DESCRIPTION} (${GIT_DESCRIPTION})"
 
 if [ -n "${IMAGE_FLAVOR}" ]; then
     IMAGE_NAME="${IMAGE_NAME}-$(echo "${IMAGE_FLAVOR}" | tr '[:upper:]' '[:lower:]')"
 fi
 
-GIT_DESCRIPTION=$(git describe --tags --always --dirty)
-
-IMAGE_DESCRIPTION="${IMAGE_DESCRIPTION} (${GIT_DESCRIPTION})"
+IMAGE_NAME="${IMAGE_NAME}-${GIT_DESCRIPTION}"
 
 SOURCE_FILEPATH="${VM_PATH}/${VM_DISK_NAME}.vdi"
 
