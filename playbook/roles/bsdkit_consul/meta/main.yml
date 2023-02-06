@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: bsdkit
-  description: bsdkit_nomad
+  description: bsdkit_consul
   company: bsdkit
   license: BSD-2-Clause
   min_ansible_version: "2.1"
