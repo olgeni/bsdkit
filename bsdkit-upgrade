@@ -457,5 +457,23 @@ fi
 
 echo "Upgrade complete."
 
-# gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
-# gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada1
+_disks=$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)
+_found="no"
+
+for _disk in ${(@s/ /)_disks}; do
+    if gpart show ${_disk} 2>/dev/null | grep -q freebsd-zfs; then
+        _found="yes"
+    fi
+done
+
+if is_yes ${_found}; then
+    echo "You may need to run these commands:"
+    echo
+    for _disk in ${(@s/ /)_disks}; do
+        if gpart show ${_disk} 2>/dev/null | grep -q freebsd-zfs; then
+            _index=$(gpart show ${_disk} 2>/dev/null | awk 'BEGIN { result = 1; } $4 == "freebsd-boot" { print $3; result = 0; exit; } END { exit result; }')
+            echo "  gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_index} ${_disk}"
+        fi
+    done
+    echo
+fi
