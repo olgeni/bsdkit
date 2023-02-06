@@ -80,7 +80,7 @@ if [ "${DRY_RUN}" = "true" ]; then
 fi
 
 echo "Stopping VM"
-"${SCRIPT_DIR}"/bsdkit-vbox stop
+"${SCRIPT_DIR}"/../bsdkit-vbox stop
 
 echo "Converting image"
 qemu-img convert -p -f vdi "${SOURCE_FILEPATH}" -O raw "${IMAGE_FILEPATH}"
