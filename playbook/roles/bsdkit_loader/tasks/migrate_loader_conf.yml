@@ -16,14 +16,26 @@
         regexp: ^loader_conf_files=
         state: absent
 
-    - name: Backup /boot/loader.conf
+    - name: Stat /boot/loader.conf
+      stat:
+        path: /boot/loader.conf
+      register: stat_loader_conf
+
+    - name: Stat /boot/loader.conf.local
+      stat:
+        path: /boot/loader.conf.local
+      register: stat_loader_conf_local
+
+    - name: Backup /boot/loader.conf if not empty
+      when: stat_loader_conf.stat.size > 0
       copy:
         src: /boot/loader.conf
         dest: /root/loader.conf.orig
         remote_src: true
         mode: "0644"
 
-    - name: Backup /boot/loader.conf.local
+    - name: Backup /boot/loader.conf.local if not empty
+      when: stat_loader_conf_local.stat.size > 0
       copy:
         src: /boot/loader.conf.local
         dest: /root/loader.conf.local.orig

@@ -52,3 +52,25 @@
         mode: "0644"
         state: absent
       with_items: "{{ loader_conf_delete | dict2items }}"
+
+    - name: Stat /root/loader.conf.orig
+      stat:
+        path: /root/loader.conf.orig
+      register: stat_root_loader_conf_orig
+
+    - name: Stat /root/loader.conf.local.orig
+      stat:
+        path: /root/loader.conf.local.orig
+      register: stat_root_loader_conf_local_orig
+
+    - name: Remove /root/loader.conf.orig if empty
+      when: stat_root_loader_conf_orig.stat.exists and stat_root_loader_conf_orig.stat.size == 0
+      file:
+        path: /root/loader.conf.orig
+        state: absent
+
+    - name: Remove /root/loader.conf.local.orig if empty
+      when: stat_root_loader_conf_local_orig.stat.exists and stat_root_loader_conf_local_orig.stat.size == 0
+      file:
+        path: /root/loader.conf.local.orig
+        state: absent
