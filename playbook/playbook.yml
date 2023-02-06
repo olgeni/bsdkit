@@ -58,7 +58,7 @@
     - role: bsdkit_consul
     - role: bsdkit_nomad
     - role: bsdkit_vault
-    - role: bsdkit_nats
+    - role: bsdkit_ntpd
 
 - name: Provisioning (DigitalOcean)
   hosts: all

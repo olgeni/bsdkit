@@ -18,6 +18,11 @@
     name: sshd
     state: restarted
 
+- name: restart_ntpd
+  service:
+    name: ntpd
+    state: restarted
+
 - name: restart_netif
   service:
     name: netif

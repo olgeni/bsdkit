@@ -1,0 +1,12 @@
+---
+- name: Check if ntpd needs to fetch new files
+  command: /etc/rc.d/ntpd needfetch
+  register: ntpd_needfetch
+  changed_when: false
+  failed_when: false
+
+- name: Fetch new ntpd files
+  command: /etc/rc.d/ntpd fetch
+  when: ntpd_needfetch.rc == 0
+  notify:
+    - restart_ntpd
