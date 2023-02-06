@@ -5,7 +5,7 @@ set -e -u -o pipefail
 autoload throw catch
 
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
-: ${BSDKIT_VERSION:="13.1"}
+: ${BSDKIT_VERSION:=""}
 : ${BSDKIT_ARCH:="amd64"}
 : ${DESTDIR:=""}
 : ${BOOTENV_ENABLE:="default"}
@@ -143,6 +143,10 @@ while getopts "eEn:r:v:a:d:Fpb" OPT; do
 done
 
 shift $((OPTIND - 1))
+
+if [ -z "${BSDKIT_VERSION}" ]; then
+    error "bsdkit version not specified"
+fi
 
 if kenv -q zfs_be_root > /dev/null 2>&1; then
     if [ ${BOOTENV_ENABLE} = "default" ]; then
