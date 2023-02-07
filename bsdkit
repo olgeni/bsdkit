@@ -3017,7 +3017,7 @@ __enable_swap_device_aws() {
 update() {
     [ -d ${BSDKIT_SRCDIR}/.git ] || error "local git repository not found"
 
-    cd ${BSDKIT_SRCDIR} && git fetch
+    cd ${BSDKIT_SRCDIR} && git fetch || error "git fetch failed"
     cd ${BSDKIT_SRCDIR} && git reset --hard origin/master
 }
 
