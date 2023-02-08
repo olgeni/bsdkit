@@ -1,7 +1,13 @@
 ---
-- name: Set net.inet6.ip6.dad_count in /etc/sysctl.conf
+- name: Remove net.inet6.ip6.dad_count from /etc/sysctl.conf
   lineinfile:
     path: /etc/sysctl.conf
+    regexp: '^net.inet6.ip6.dad_count'
+    state: absent
+
+- name: Set net.inet6.ip6.dad_count in /etc/sysctl.conf.local
+  lineinfile:
+    path: /etc/sysctl.conf.local
     regexp: "^net.inet6.ip6.dad_count="
     line: "net.inet6.ip6.dad_count=\"0\""
     state: present
