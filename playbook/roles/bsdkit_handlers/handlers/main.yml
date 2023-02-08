@@ -33,6 +33,11 @@
     name: routing
     state: restarted
 
+- name: restart_sysctl
+  service:
+    name: sysctl
+    state: restarted
+
 - name: reformat_rc_conf
   shell:
     cmd: |

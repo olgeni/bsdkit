@@ -45,6 +45,8 @@
     mode: "0644"
   with_items:
     - sysctl.conf
+  notify:
+    - restart_sysctl
 
 - name: Install /etc/defaults/vendor.conf (host version)
   when: is_host_install
