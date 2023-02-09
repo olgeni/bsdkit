@@ -2930,6 +2930,10 @@ configure() {
     ansible_local_playbook -t configure
 }
 
+upgrade() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade "$@"
+}
+
 provision() {
     if platform_is_digitalocean; then
         ansible_local_playbook -t provision_digitalocean
