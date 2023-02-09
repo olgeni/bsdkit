@@ -43,6 +43,11 @@
     name: hostname
     state: restarted
 
+- name: restart_postgresql
+  service:
+    name: postgresql
+    state: restarted
+
 - name: reformat_rc_conf
   shell:
     cmd: |
