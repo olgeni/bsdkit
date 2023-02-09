@@ -1,0 +1,53 @@
+---
+- name: Retrieve public IP address using ifconfig
+  shell:
+    cmd: |
+      set -o pipefail
+      ifconfig -f inet:dotted {{ public_interface }} | awk '/inet / { print $2; exit }'
+  register: ifconfig_public_ip_address_output
+  changed_when: false
+  failed_when: false
+  when: public_interface is defined
+
+- name: Retrieve public IP netmask using ifconfig
+  shell:
+    cmd: |
+      set -o pipefail
+      ifconfig -f inet:dotted {{ public_interface }} | awk '/inet / { print $4; exit }'
+  register: ifconfig_public_ip_netmask_output
+  changed_when: false
+  failed_when: false
+  when: public_interface is defined
+
+- name: Set public address
+  set_fact:
+    public_address: "{{ ifconfig_public_ip_address_output.stdout }}"
+  vars:
+  when: public_interface is defined
+
+- name: Display public_address
+  debug:
+    var: public_address
+  when: public_address is defined
+
+- name: Set public netmask
+  set_fact:
+    public_netmask: "{{ ifconfig_public_ip_netmask_output.stdout }}"
+  vars:
+  when: public_interface is defined
+
+- name: Display public_netmask
+  debug:
+    var: public_netmask
+  when: public_netmask is defined
+
+- name: Set public network
+  set_fact:
+    public_network: "{{ public_address }}/{{ public_netmask | ansible.utils.ipaddr('prefix') }}"
+  vars:
+  when: public_interface is defined
+
+- name: Display public_network
+  debug:
+    var: public_network
+  when: public_network is defined

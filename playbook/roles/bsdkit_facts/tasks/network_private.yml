@@ -1,0 +1,53 @@
+---
+- name: Retrieve private IP address using ifconfig
+  shell:
+    cmd: |
+      set -o pipefail
+      ifconfig -f inet:dotted {{ private_interface }} | awk '/inet / { print $2; exit }'
+  register: ifconfig_private_ip_address_output
+  changed_when: false
+  failed_when: false
+  when: private_interface is defined
+
+- name: Retrieve private IP netmask using ifconfig
+  shell:
+    cmd: |
+      set -o pipefail
+      ifconfig -f inet:dotted {{ private_interface }} | awk '/inet / { print $4; exit }'
+  register: ifconfig_private_ip_netmask_output
+  changed_when: false
+  failed_when: false
+  when: private_interface is defined
+
+- name: Set private address
+  set_fact:
+    private_address: "{{ ifconfig_private_ip_address_output.stdout }}"
+  vars:
+  when: private_interface is defined
+
+- name: Display private_address
+  debug:
+    var: private_address
+  when: private_address is defined
+
+- name: Set private netmask
+  set_fact:
+    private_netmask: "{{ ifconfig_private_ip_netmask_output.stdout }}"
+  vars:
+  when: private_interface is defined
+
+- name: Display private_netmask
+  debug:
+    var: private_netmask
+  when: private_netmask is defined
+
+- name: Set private network
+  set_fact:
+    private_network: "{{ private_address }}/{{ private_netmask | ansible.utils.ipaddr('prefix') }}"
+  vars:
+  when: private_interface is defined
+
+- name: Display private_network
+  debug:
+    var: private_network
+  when: private_network is defined
