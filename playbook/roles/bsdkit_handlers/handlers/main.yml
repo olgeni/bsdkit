@@ -38,6 +38,11 @@
     name: sysctl
     state: restarted
 
+- name: restart_hostname
+  service:
+    name: hostname
+    state: restarted
+
 - name: reformat_rc_conf
   shell:
     cmd: |
