@@ -21,10 +21,24 @@ autoload throw catch
 : ${_install_tests:="no"}
 : ${_proc_mounted:="no"}
 
+get_current_version() {
+    local _version="$(uname -r | cut -d '-' -f 1)"
+    echo "${_version}"
+}
+
+message() {
+    echo "bsdkit-upgrade: $*"
+}
+
 error() {
     echo "bsdkit-upgrade: $*"
     exit 1
 }
+
+if [[ -z "${BSDKIT_VERSION}" ]]; then
+    BSDKIT_VERSION="$(get_current_version)"
+    message "Using current version: ${BSDKIT_VERSION}"
+fi
 
 cleanup() {
     if is_yes ${BOOTENV_ENABLE}; then
