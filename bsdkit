@@ -2989,6 +2989,10 @@ __enable_swap_device_aws() {
 
     if grep -q '^/dev/gpt/swap' /etc/fstab; then
         echo "Swap already configured"
+    elif [ -e /dev/gpt/swap ]; then
+        echo "Configuring existing swap device"
+        echo "/dev/gpt/swap none swap sw 0 0" >> /etc/fstab
+        reformat_fstab /etc/fstab
     else
         for _disk in $(sysctl -n kern.disks); do
             if gpart list ${_disk} > /dev/null 2>&1; then
