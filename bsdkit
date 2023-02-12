@@ -2992,7 +2992,7 @@ __enable_swap_device_aws() {
     else
         for _disk in $(sysctl -n kern.disks); do
             if gpart list ${_disk} > /dev/null 2>&1; then
-                echo "Device ${_disk} already partitioned"
+                echo "Skipping ${_disk}: already partitioned"
                 continue
             fi
 
