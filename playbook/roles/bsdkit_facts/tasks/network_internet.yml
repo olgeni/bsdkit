@@ -1,0 +1,31 @@
+---
+- name: Query 'myexternalip.com' for public Internet IP address
+  uri:
+    url: "https://myexternalip.com/raw"
+    return_content: true
+  register: myexternalip_response
+  ignore_errors: true
+
+- name: Set internet_address from 'myexternalip.com'
+  set_fact:
+    internet_address: "{{ myexternalip_response['content'] }}"
+  when: myexternalip_response is succeeded
+
+- name: Failover from 'myexternalip.com' to 'ipyfy.org'
+  when: myexternalip_response is failed
+  block:
+    - name: Query ipyfy.org for public Internet IP address
+      uri:
+        url: "https://api.ipify.org/"
+        return_content: true
+      register: ipify_response
+
+    - name: Set internet_address from 'ipyfy.org' (failover)
+      set_fact:
+        internet_address: "{{ ipify_response['content'] }}"
+      when: ipify_response is succeeded
+
+- name: Display internet_address
+  debug:
+    msg: "{{ internet_address }}"
+  when: internet_address is defined

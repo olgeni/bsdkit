@@ -197,3 +197,7 @@
 - name: Include tasks from network_private.yml
   include_tasks: network_private.yml
   when: private_interface is defined
+
+- name: Include tasks from network_internet.yml
+  include_tasks: network_internet.yml
+  when: public_interface is defined
