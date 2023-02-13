@@ -48,6 +48,11 @@
     name: postgresql
     state: restarted
 
+- name: restart_caddy
+  service:
+    name: caddy
+    state: restarted
+
 - name: reformat_rc_conf
   shell:
     cmd: |
