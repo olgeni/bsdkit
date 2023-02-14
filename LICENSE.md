@@ -1,4 +1,4 @@
-Copyright (c) 2016-2020, Giacomo Olgeni
+Copyright (c) 2016-2023, Giacomo Olgeni
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
