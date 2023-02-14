@@ -469,7 +469,9 @@ if is_yes ${BOOTENV_ENABLE}; then
     bectl list
 fi
 
+echo
 echo "Upgrade complete."
+echo
 
 _disks=$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)
 _found="no"
