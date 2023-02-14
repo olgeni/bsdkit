@@ -3197,6 +3197,7 @@ zfs_create_postgresql() {
         mkdir /var/db/postgres.orig
 
         cd /var/db/postgres
+
         find . | cpio -p -d -u -v /var/db/postgres.orig
 
         zfs create \
