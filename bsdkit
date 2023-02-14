@@ -3001,7 +3001,7 @@ __enable_swap_device_aws() {
             fi
 
             _mediasize=$(geom disk list ${_disk} | awk '$1 == "Mediasize:" { print $2 }')
-            _mediasize=$(expr ${_mediasize} / 1024 / 1024 / 1024)
+            _mediasize=$(expr ${_mediasize} / 1073741824)
 
             if [ ${_mediasize} -gt ${BSDKIT_SWAP_DEVICE_SIZE} ]; then
                 continue
