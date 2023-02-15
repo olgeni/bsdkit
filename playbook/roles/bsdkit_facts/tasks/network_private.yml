@@ -22,7 +22,6 @@
 - name: Set private address
   set_fact:
     private_address: "{{ ifconfig_private_ip_address_output.stdout }}"
-  vars:
   when: private_interface is defined
 
 - name: Display private_address

@@ -33,7 +33,6 @@
 - name: Set public netmask
   set_fact:
     public_netmask: "{{ ifconfig_public_ip_netmask_output.stdout }}"
-  vars:
   when: public_interface is defined
 
 - name: Display public_netmask
@@ -44,7 +43,6 @@
 - name: Set public network
   set_fact:
     public_network: "{{ public_address }}/{{ public_netmask | ansible.utils.ipaddr('prefix') }}"
-  vars:
   when: public_interface is defined
 
 - name: Display public_network
