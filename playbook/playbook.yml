@@ -59,6 +59,7 @@
     - role: bsdkit_nomad
     - role: bsdkit_vault
     - role: bsdkit_ntpd
+    - role: bsdkit_fail2ban
 
 - name: Provisioning (DigitalOcean)
   hosts: all

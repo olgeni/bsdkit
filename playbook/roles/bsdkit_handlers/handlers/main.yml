@@ -53,6 +53,11 @@
     name: caddy
     state: restarted
 
+- name: restart_fail2ban
+  service:
+    name: fail2ban
+    state: restarted
+
 - name: reformat_rc_conf
   shell:
     cmd: |
