@@ -2934,6 +2934,18 @@ upgrade() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade "$@"
 }
 
+rewrite_pool() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-rewrite-pool "$@"
+}
+
+rewrite_filesystem() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-rewrite-filesystem "$@"
+}
+
+build() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-build "$@"
+}
+
 provision() {
     if platform_is_digitalocean; then
         ansible_local_playbook -t provision_digitalocean
