@@ -1,3 +1,5 @@
+# A22CBE78-CEC2-43BF-B7B5-17BB4D0BD66C
+
 q-history-search-backward() {
     local cursor=$CURSOR
     zle .history-search-backward "$LBUFFER"
