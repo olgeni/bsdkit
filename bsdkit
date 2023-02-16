@@ -1684,7 +1684,7 @@ __install_setup_runtime() {
         sysutils/ansible
         sysutils/pv
         textproc/jq
-        textproc/yq
+        textproc/go-yq
         # optional
         archivers/zip
         comms/kermit

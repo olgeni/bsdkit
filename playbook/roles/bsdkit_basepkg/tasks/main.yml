@@ -22,6 +22,12 @@
       - sysutils/smartmontools
     state: absent
 
+- name: Remove base packages (common)
+  community.general.pkgng:
+    name:
+      - textproc/yq
+    state: present
+
 - name: Install base packages (common)
   community.general.pkgng:
     name:
@@ -64,5 +70,5 @@
       - textproc/fzf
       - textproc/jq
       - textproc/the_silver_searcher
-      - textproc/yq
+      - textproc/go-yq
     state: present
