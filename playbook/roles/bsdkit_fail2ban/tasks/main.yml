@@ -1,66 +1,69 @@
 ---
-- name: Install security/py-fail2ban
-  community.general.pkgng:
-    name: security/py-fail2ban
-    state: present
+- name: Setup fail2ban
+  when: bsdkit.enable_fail2ban
+  block:
+    - name: Install security/py-fail2ban
+      community.general.pkgng:
+        name: security/py-fail2ban
+        state: present
 
-- name: Create /usr/local/etc/fail2ban/jail.local
-  template:
-    src: jail.local.j2
-    dest: /usr/local/etc/fail2ban/jail.local
-    owner: root
-    group: wheel
-    mode: 0644
-  notify: restart_fail2ban
+    - name: Create /usr/local/etc/fail2ban/jail.local
+      template:
+        src: jail.local.j2
+        dest: /usr/local/etc/fail2ban/jail.local
+        owner: root
+        group: wheel
+        mode: 0644
+      notify: restart_fail2ban
 
-- name: Enable fail2ban
-  service:
-    name: fail2ban
-    enabled: true
-    state: started
+    - name: Enable fail2ban
+      service:
+        name: fail2ban
+        enabled: true
+        state: started
 
-- name: Check if /etc/pf.conf exists
-  stat:
-    path: /etc/pf.conf
-  register: stat_pf_conf
+    - name: Check if /etc/pf.conf exists
+      stat:
+        path: /etc/pf.conf
+      register: stat_pf_conf
 
-- name: Create backup of /etc/pf.conf
-  when: stat_pf_conf.stat.exists
-  copy:
-    src: /etc/pf.conf
-    dest: /etc/pf.conf.orig
-    owner: root
-    group: wheel
-    mode: 0600
+    - name: Create backup of /etc/pf.conf
+      when: stat_pf_conf.stat.exists
+      copy:
+        src: /etc/pf.conf
+        dest: /etc/pf.conf.orig
+        owner: root
+        group: wheel
+        mode: 0600
 
-- name: Add the f2b anchor line to /etc/pf.conf
-  lineinfile:
-    path: /etc/pf.conf
-    line: 'anchor "f2b/*"'
-    insertafter: 'anchor "ssh/*"'
-    state: present
-    create: true
-    owner: root
-    group: wheel
-    mode: 0600
+    - name: Add the f2b anchor line to /etc/pf.conf
+      lineinfile:
+        path: /etc/pf.conf
+        line: 'anchor "f2b/*"'
+        insertafter: 'anchor "ssh/*"'
+        state: present
+        create: true
+        owner: root
+        group: wheel
+        mode: 0600
 
 
-- name: Reload pf.conf
-  command: pfctl -f /etc/pf.conf
-  register: pfctl_result
-  changed_when: pfctl_result.rc == 0
+    - name: Reload pf.conf
+      command: pfctl -f /etc/pf.conf
+      register: pfctl_result
+      changed_when: pfctl_result.rc == 0
 
-- name: Remove backup of pf.conf
-  when: pfctl_result.rc == 0
-  file:
-    path: /etc/pf.conf.orig
-    state: absent
+    - name: Remove backup of pf.conf
+      when: pfctl_result.rc == 0
+      file:
+        path: /etc/pf.conf.orig
+        state: absent
 
-- name: Restore pf.conf if pfctl failed
-  when: pfctl_result.rc != 0
-  copy:
-    src: /etc/pf.conf.orig
-    dest: /etc/pf.conf
-    owner: root
-    group: wheel
-    mode: 0600
+    - name: Restore pf.conf if pfctl failed
+      when: pfctl_result.rc != 0
+      copy:
+        src: /etc/pf.conf.orig
+        dest: /etc/pf.conf
+        owner: root
+        group: wheel
+        mode: 0600
