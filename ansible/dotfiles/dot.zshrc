@@ -118,6 +118,10 @@ autoload -Uz compinit && compinit -C -d ~/.zcompdump
 
 autoload -Uz bashcompinit && bashcompinit
 
+if [ -f /usr/local/bin/aws_completer ]; then
+    complete -C /usr/local/bin/aws_completer aws
+fi
+
 if which direnv > /dev/null 2>&1; then
     source <(direnv hook zsh)
 fi
