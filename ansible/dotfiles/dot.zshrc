@@ -167,9 +167,9 @@ if [ -n "${INSIDE_EMACS}" ]; then
 fi
 
 if [ -z "${INSIDE_EMACS}" ]; then
-    test -e ~/.iterm2_shell_integration.zsh && source ~/.iterm2_shell_integration.zsh
+    test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 fi
 
-if [ -e ~/.zshrc.local ]; then
-    source ~/.zshrc.local
+if [ -e ${HOME}/.zshrc.local ]; then
+    source ${HOME}/.zshrc.local
 fi
