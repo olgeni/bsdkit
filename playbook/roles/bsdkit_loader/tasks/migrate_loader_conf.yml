@@ -84,6 +84,10 @@
           grep -v --fixed-strings --file ${_strings} /boot/loader.conf.local || : > ${_loader_conf_local}
           mv ${_loader_conf_local} /boot/loader.conf.local
 
+          if [ -f /root/loader.conf.local.orig ]; then
+              cat /root/loader.conf.local.orig >> /boot/loader.conf.local
+          fi
+
           rm -f ${_strings}
           rm -f ${_loader_conf_local}
       changed_when: true
