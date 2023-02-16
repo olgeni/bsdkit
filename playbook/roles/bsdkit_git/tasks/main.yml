@@ -11,6 +11,8 @@
     dest: /usr/local/bsdkit/
     single_branch: true
     version: master
+    force: yes
+    update: yes
 
 - name: Create ansible role directory
   file:
