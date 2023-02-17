@@ -5,6 +5,8 @@ set -e -u -o pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
 DEFAULT_VERSION=13
 DEFAULT_ARCH=amd64
 
@@ -90,15 +92,15 @@ shift $((OPTIND - 1))
 
 # ===
 
-OS_SRCDIR=${BSDKIT_PATH}/src/${_version}/src
-OS_RELDIR=${BSDKIT_PATH}/src/${_version}/release-${_arch}
+OS_SRCDIR=${BSDKIT_DATA}/src/${_version}/src
+OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
 OS_MAJOR=$(echo ${_version} | sed -e 's/\..*//')
 
 # ===
 
 build_release() {
-    local _make_conf=${SCRIPT_PATH}/../etc/make.conf
-    local _src_conf=${SCRIPT_PATH}/../etc/src.conf
+    local _make_conf=${BSDKIT_PATH}/etc/make.conf
+    local _src_conf=${BSDKIT_PATH}/etc/src.conf
 
     install -o root -g wheel -m 644 ansible/BSDKIT-${_version}-${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 
@@ -133,7 +135,7 @@ build_release() {
 }
 
 build_staging() {
-    local _target=${BSDKIT_PATH}/release-${_version}-${_arch}
+    local _target=${BSDKIT_DATA}/release-${_version}-${_arch}
 
     if [ -d "${OS_RELDIR}/ftp" ]; then
         rm -f ${_target}/*
@@ -141,41 +143,41 @@ build_staging() {
         cp ${OS_RELDIR}/ftp/* ${_target}
     fi
 
-    ${SCRIPT_PATH}/../bsdkit build_setup_staging \
-        ${BSDKIT_PATH}/staging-${_version}-${_arch} \
+    ${BSDKIT_PATH}/bsdkit build_setup_staging \
+        ${BSDKIT_DATA}/staging-${_version}-${_arch} \
         . \
-        ${BSDKIT_PATH}/release-${_version}-${_arch} \
-        ${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+        ${BSDKIT_DATA}/release-${_version}-${_arch} \
+        ${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
 }
 
 build_iso() {
-    local _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.iso
+    local _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.iso
     local _release="none"
     local _packages="none"
 
     if [ -n "${_with_packages}" ]; then
-        _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.full.iso
-        _release=${BSDKIT_PATH}/release-${_version}-${_arch}
-        _packages=${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+        _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.iso
+        _release=${BSDKIT_DATA}/release-${_version}-${_arch}
+        _packages=${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
     fi
 
-    ${SCRIPT_PATH}/../bsdkit build_setup_iso \
+    ${BSDKIT_PATH}/bsdkit build_setup_iso \
         ${_iso} \
-        ${BSDKIT_PATH}/staging-${_version}-${_arch} \
+        ${BSDKIT_DATA}/staging-${_version}-${_arch} \
         ${_release} \
         ${_packages}
 }
 
 build_usb() {
-    local _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.iso
-    local _usb=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.img
+    local _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.iso
+    local _usb=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.img
 
     if [ -n "${_with_packages}" ]; then
-        _iso=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.full.iso
-        _usb=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.full.img
+        _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.iso
+        _usb=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.img
     fi
 
-    ${SCRIPT_PATH}/../bsdkit build_setup_img ${_iso} ${_usb}
+    ${BSDKIT_PATH}/bsdkit build_setup_img ${_iso} ${_usb}
 }
 
 if [ -n "${_build_release}" ]; then
