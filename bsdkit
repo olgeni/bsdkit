@@ -2311,7 +2311,7 @@ PermitRootLogin yes
 EOF
 
     mkdir -p ${BSDKIT_DESTDIR}/root/bin/
-    install -m 0755 -o root -g wheel bsdkit-rewrite-pool ${BSDKIT_DESTDIR}/root/bin/
+    install -m 0755 -o root -g wheel ${BSDKIT_SRCDIR}/libexec/bsdkit-rewrite-pool ${BSDKIT_DESTDIR}/root/bin/
 
     mkdir -p ${BSDKIT_DESTDIR}/dev
 
