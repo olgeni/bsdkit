@@ -24,3 +24,12 @@
     group: consul
   with_items:
     - /var/db/consul
+
+- name: Create /usr/local/etc/rc.conf.d/consul
+  copy:
+    dest: /usr/local/etc/rc.conf.d/consul
+    content: |
+      consul_datadir=/var/db/consul
+    owner: root
+    group: wheel
+    mode: 0644
