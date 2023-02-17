@@ -97,8 +97,8 @@ OS_MAJOR=$(echo ${_version} | sed -e 's/\..*//')
 # ===
 
 build_release() {
-    local _make_conf=${SCRIPT_PATH}/etc/make.conf
-    local _src_conf=${SCRIPT_PATH}/etc/src.conf
+    local _make_conf=${SCRIPT_PATH}/../etc/make.conf
+    local _src_conf=${SCRIPT_PATH}/../etc/src.conf
 
     install -o root -g wheel -m 644 ansible/BSDKIT-${_version}-${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 
@@ -141,7 +141,7 @@ build_staging() {
         cp ${OS_RELDIR}/ftp/* ${_target}
     fi
 
-    ${SCRIPT_PATH}/bsdkit build_setup_staging \
+    ${SCRIPT_PATH}/../bsdkit build_setup_staging \
         ${BSDKIT_PATH}/staging-${_version}-${_arch} \
         . \
         ${BSDKIT_PATH}/release-${_version}-${_arch} \
@@ -159,7 +159,7 @@ build_iso() {
         _packages=${BSDKIT_PATH}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
     fi
 
-    ${SCRIPT_PATH}/bsdkit build_setup_iso \
+    ${SCRIPT_PATH}/../bsdkit build_setup_iso \
         ${_iso} \
         ${BSDKIT_PATH}/staging-${_version}-${_arch} \
         ${_release} \
@@ -175,7 +175,7 @@ build_usb() {
         _usb=${BSDKIT_PATH}/iso/release-${_version}-${_arch}.full.img
     fi
 
-    ${SCRIPT_PATH}/bsdkit build_setup_img ${_iso} ${_usb}
+    ${SCRIPT_PATH}/../bsdkit build_setup_img ${_iso} ${_usb}
 }
 
 if [ -n "${_build_release}" ]; then
