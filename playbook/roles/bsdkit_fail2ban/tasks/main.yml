@@ -1,6 +1,6 @@
 ---
 - name: Setup fail2ban
-  when: bsdkit.enable_fail2ban
+  when: bsdkit.enable_fail2ban is defined and bsdkit.enable_fail2ban
   block:
     - name: Install security/py-fail2ban
       community.general.pkgng:
