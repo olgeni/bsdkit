@@ -35,11 +35,6 @@ error() {
     exit 1
 }
 
-if [[ -z "${BSDKIT_VERSION}" ]]; then
-    BSDKIT_VERSION="$(get_current_version)"
-    message "Using current version: ${BSDKIT_VERSION}"
-fi
-
 cleanup() {
     if is_yes ${BOOTENV_ENABLE}; then
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/src"; then
@@ -176,7 +171,8 @@ done
 shift $((OPTIND - 1))
 
 if [ -z "${BSDKIT_VERSION}" ]; then
-    error "bsdkit version not specified"
+    BSDKIT_VERSION="$(get_current_version)"
+    message "Using current version: ${BSDKIT_VERSION}"
 fi
 
 if kenv -q zfs_be_root > /dev/null 2>&1; then
