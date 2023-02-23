@@ -71,3 +71,10 @@
     name: ec2-user
     shell: /usr/local/bin/zsh
   when: platform_is_aws and ec2_user_exists is defined and ec2_user_exists.rc == 0
+
+- name: Set root shell
+  tags:
+    - configure
+  user:
+    name: root
+    shell: /bin/csh
