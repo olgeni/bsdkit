@@ -3250,21 +3250,22 @@ yaml_set() {
     local _key=$2
     local _value=$3
 
-    python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py set ${_file} ${_key} ${_value}
+
+    yq -i eval "(.${_key}) = \"${_value}\"" ${_file}
 }
 
 yaml_get() {
     local _file=$1
     local _key=$2
 
-    python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py get ${_file} ${_key}
+    yq eval ".${_key}" ${_file}
 }
 
 yaml_del() {
     local _file=$1
     local _key=$2
 
-    python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py del ${_file} ${_key}
+    yq -i eval "del(.${_key})" ${_file}
 }
 
 yaml_list() {
