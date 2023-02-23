@@ -1,21 +1,15 @@
 ---
 - name: Load bsdkit-defaults.yml
-  tags:
-    - always
   include_vars:
     file: bsdkit-defaults.yml
 
 - name: Check if /.bsdkit.yml exists
-  tags:
-    - always
   stat:
     path: /.bsdkit.yml
   register: stat_root_bsdkit_yml
 
 - name: Move /.bsdkit.yml to /usr/local/etc/bsdkit.yml
   when: stat_root_bsdkit_yml.stat.exists
-  tags:
-    - always
   block:
     - name: Copy /.bsdkit.yml to /usr/local/etc/bsdkit.yml
       copy:
@@ -32,16 +26,12 @@
         state: absent
 
 - name: Check if /usr/local/etc/bsdkit.yml exists
-  tags:
-    - always
   stat:
     path: /usr/local/etc/bsdkit.yml
   register: stat_etc_bsdkit_yml
 
 - name: Touch /usr/local/etc/bsdkit.yml
   when: not stat_etc_bsdkit_yml.stat.exists
-  tags:
-    - always
   file:
     path: /usr/local/etc/bsdkit.yml
     state: touch
@@ -50,8 +40,6 @@
     mode: "0600"
 
 - name: Check if textproc/go-yq is installed
-  tags:
-    - always
   shell:
     cmd: |
       pkg info -e textproc/go-yq
@@ -60,8 +48,6 @@
   failed_when: false
 
 - name: Replace textproc/yq with textproc/go-yq
-  tags:
-    - always
   when: pkg_info_go_yq.rc != 0
   block:
     - name: Remove textproc/yq
@@ -77,8 +63,6 @@
         state: present
 
 - name: Merge configuration files
-  tags:
-    - always
   shell:
     cmd: |
       yq ea '. as $item ireduce ({}; . * $item )' \
@@ -88,8 +72,6 @@
   changed_when: false
 
 - name: Create temporary directory with mktemp
-  tags:
-    - always
   shell:
     cmd: |
       mktemp -d
@@ -97,8 +79,6 @@
   changed_when: false
 
 - name: Create temporary file with contents of bsdkit_merged_yml
-  tags:
-    - always
   copy:
     content: "{{ bsdkit_merged_yml.stdout }}"
     dest: "{{ mktemp.stdout }}/bsdkit.yml"
@@ -109,14 +89,10 @@
 
 - name: Load bsdkit configuration
   when: stat_etc_bsdkit_yml.stat.exists
-  tags:
-    - always
   include_vars:
     file: "{{ mktemp.stdout }}/bsdkit.yml"
 
 - name: Delete temporary configuration directory
-  tags:
-    - always
   file:
     path: "{{ mktemp.stdout }}"
     state: absent

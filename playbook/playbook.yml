@@ -15,6 +15,8 @@
         - always
     - role: bsdkit_etc
     - role: bsdkit_settings
+      tags:
+        - always
     - role: bsdkit_ifconfig
     - role: bsdkit_bsdenv
     - role: bsdkit_pkg
