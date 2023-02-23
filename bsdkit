@@ -3250,6 +3250,9 @@ yaml_set() {
     local _key=$2
     local _value=$3
 
+    if [ ! -e ${_file} ]; then
+        error "yaml_set: ${_file} does not exists"
+    fi
 
     yq -i eval "(.${_key}) = \"${_value}\"" ${_file}
 }
@@ -3258,6 +3261,10 @@ yaml_get() {
     local _file=$1
     local _key=$2
 
+    if [ ! -e ${_file} ]; then
+        error "yaml_get: ${_file} does not exists"
+    fi
+
     yq eval ".${_key}" ${_file}
 }
 
@@ -3265,11 +3272,19 @@ yaml_del() {
     local _file=$1
     local _key=$2
 
+    if [ ! -e ${_file} ]; then
+        error "yaml_del: ${_file} does not exists"
+    fi
+
     yq -i eval "del(.${_key})" ${_file}
 }
 
 yaml_list() {
     local _file=$1
+
+    if [ ! -e ${_file} ]; then
+        error "yaml_list: ${_file} does not exists"
+    fi
 
     python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list ${_file}
 }
