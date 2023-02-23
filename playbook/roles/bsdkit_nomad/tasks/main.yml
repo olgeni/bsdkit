@@ -25,9 +25,9 @@
   with_items:
     - /var/db/nomad
 
-- name: Create /usr/local/etc/rc.conf.d/nomad
+- name: Create /etc/rc.conf.d/nomad
   copy:
-    dest: /usr/local/etc/rc.conf.d/nomad
+    dest: /etc/rc.conf.d/nomad
     content: |
       nomad_dir=/var/db/nomad
     owner: root

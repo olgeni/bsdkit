@@ -25,9 +25,9 @@
   with_items:
     - /var/db/consul
 
-- name: Create /usr/local/etc/rc.conf.d/consul
+- name: Create /etc/rc.conf.d/consul
   copy:
-    dest: /usr/local/etc/rc.conf.d/consul
+    dest: /etc/rc.conf.d/consul
     content: |
       consul_datadir=/var/db/consul
     owner: root
