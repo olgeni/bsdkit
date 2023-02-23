@@ -38,23 +38,89 @@
     path: /usr/local/etc/bsdkit.yml
   register: stat_etc_bsdkit_yml
 
-- name: Load /usr/local/etc/bsdkit.yml
+- name: Touch /usr/local/etc/bsdkit.yml
+  when: not stat_etc_bsdkit_yml.stat.exists
+  tags:
+    - always
+  file:
+    path: /usr/local/etc/bsdkit.yml
+    state: touch
+    owner: root
+    group: wheel
+    mode: "0600"
+
+- name: Check if textproc/go-yq is installed
+  tags:
+    - always
+  shell:
+    cmd: |
+      pkg info -e textproc/go-yq
+  register: pkg_info_go_yq
+  changed_when: false
+  failed_when: false
+
+- name: Replace textproc/yq with textproc/go-yq
+  tags:
+    - always
+  when: pkg_info_go_yq.rc != 0
+  block:
+    - name: Remove textproc/yq
+      community.general.pkgng:
+        name:
+          - textproc/yq
+        state: absent
+
+    - name: Install textproc/go-yq
+      community.general.pkgng:
+        name:
+          - textproc/go-yq
+        state: present
+
+- name: Merge configuration files
+  tags:
+    - always
+  shell:
+    cmd: |
+      yq ea '. as $item ireduce ({}; . * $item )' \
+          /usr/local/bsdkit/playbook/bsdkit-defaults.yml \
+          /usr/local/etc/bsdkit.yml
+  register: bsdkit_merged_yml
+  changed_when: false
+
+- name: Create temporary directory with mktemp
+  tags:
+    - always
+  shell:
+    cmd: |
+      mktemp -d
+  register: mktemp
+  changed_when: false
+
+- name: Create temporary file with contents of bsdkit_merged_yml
+  tags:
+    - always
+  copy:
+    content: "{{ bsdkit_merged_yml.stdout }}"
+    dest: "{{ mktemp.stdout }}/bsdkit.yml"
+    owner: root
+    group: wheel
+    mode: "0600"
+  changed_when: false
+
+- name: Load bsdkit configuration
   when: stat_etc_bsdkit_yml.stat.exists
   tags:
     - always
   include_vars:
-    file: /usr/local/etc/bsdkit.yml
+    file: "{{ mktemp.stdout }}/bsdkit.yml"
 
-- name: Create /usr/local/etc/bsdkit.yml
-  when: not stat_etc_bsdkit_yml.stat.exists
+- name: Delete temporary configuration directory
   tags:
     - always
-  copy:
-    src: bsdkit-defaults.yml
-    dest: /usr/local/etc/bsdkit.yml
-    owner: root
-    group: wheel
-    mode: "0600"
+  file:
+    path: "{{ mktemp.stdout }}"
+    state: absent
+  changed_when: false
 
 - name: Set root shell
   tags:
