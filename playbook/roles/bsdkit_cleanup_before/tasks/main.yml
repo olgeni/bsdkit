@@ -18,3 +18,14 @@
   file:
     path: /var/log/console
     state: absent
+
+- name: Remove fscd_enable from /etc/rc.conf
+  lineinfile:
+    path: /etc/rc.conf
+    regexp: '^fscd_enable'
+    state: absent
+
+- name: Remove sysutils/fsc package
+  pkgng:
+    name: sysutils/fsc
+    state: absent
