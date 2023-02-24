@@ -208,17 +208,13 @@ __check_freebsd() {
 
 __check_ansible() {
     if ! command -v ansible-playbook > /dev/null 2>&1; then
-        error "required command missing (ansible-playbook)."
-        # EX_UNAVAILABLE
-        exit 69
+        pkg install -y sysutils/ansible
     fi
 }
 
 __check_python3() {
     if ! command -v python3 > /dev/null 2>&1; then
-        error "required command missing (python3)."
-        # EX_UNAVAILABLE
-        exit 69
+        pkg install -y lang/python3
     fi
 }
 
