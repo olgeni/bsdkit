@@ -31,7 +31,7 @@
       community.general.zfs_facts:
         dataset: "{{ boot_pool }}/usr/local/pkg"
       register: zfs_facts_usr_local_pkg
-      ignore_errors: true
+      failed_when: false
 
     - name: Check if /var/db/pkg is a symlink
       stat:
@@ -40,7 +40,7 @@
       ignore_errors: true
 
     - name: Remove usr/local/pkg
-      when: zfs_facts_usr_local_pkg is succeeded and not stat_var_db_pkg.stat.islnk
+      when: zfs_facts_usr_local_pkg.name is defined and not stat_var_db_pkg.stat.islnk
       block:
         - name: Save /var/db/pkg
           shell: |

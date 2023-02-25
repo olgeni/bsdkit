@@ -14,10 +14,10 @@
       community.general.zfs_facts:
         dataset: "{{ boot_pool }}/var/db/postgres"
       register: var_db_postgres_zfs_facts
-      ignore_errors: true
+      failed_when: false
 
     - name: Create ZFS dataset for PostgreSQL
-      when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts is succeeded
+      when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts.name is defined
       community.general.zfs:
         name: "{{ boot_pool }}/var/db/postgres"
         state: present
