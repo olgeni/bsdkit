@@ -218,9 +218,16 @@ __check_python3() {
     fi
 }
 
+__check_go_yq() {
+    if ! command -v yq > /dev/null 2>&1; then
+        pkg install -y textproc/go-yq
+    fi
+}
+
 __check_requirements() {
     __check_python3
     __check_ansible
+    __check_go_yq
 }
 
 __environment() {
