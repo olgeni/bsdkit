@@ -47,7 +47,6 @@
         group: wheel
         mode: 0600
 
-
     - name: Reload pf.conf
       command: pfctl -f /etc/pf.conf
       register: pfctl_result
