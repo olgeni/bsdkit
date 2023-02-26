@@ -1,6 +1,6 @@
 #!/usr/local/bin/zsh
 
-set -e -u -o pipefail
+setopt errexit nounset pipefail
 
 autoload throw catch
 
