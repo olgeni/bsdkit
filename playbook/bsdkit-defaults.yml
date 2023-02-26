@@ -29,7 +29,6 @@ pw_conf:
 
 pw_conf_delete: {}
 
-bsdkit:
-  update_dns: true
-  console_syslog: true
-  enable_fail2ban: false
+update_dns: true
+console_syslog: true
+enable_fail2ban: false

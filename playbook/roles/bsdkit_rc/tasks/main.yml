@@ -1,6 +1,6 @@
 ---
 - name: Configure rc.conf
-  when: rc_conf is defined
+  when: bsdkit.rc_conf is defined
   lineinfile:
     dest: /etc/rc.conf
     line: '{{ item.key }}="{{ item.value }}"'
@@ -8,17 +8,17 @@
     create: true
     mode: "0644"
     state: present
-  with_items: "{{ rc_conf | dict2items }}"
+  with_items: "{{ bsdkit.rc_conf | dict2items }}"
   notify:
     - reformat_rc_conf
 
 - name: Configure rc.conf (delete)
-  when: rc_conf_delete is defined
+  when: bsdkit.rc_conf_delete is defined
   lineinfile:
     dest: /etc/rc.conf
     regexp: ^{{ item.key }} *=
     mode: "0644"
     state: absent
-  with_items: "{{ rc_conf_delete | dict2items }}"
+  with_items: "{{ bsdkit.rc_conf_delete | dict2items }}"
   notify:
     - reformat_rc_conf

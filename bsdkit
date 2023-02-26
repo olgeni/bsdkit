@@ -498,7 +498,7 @@ __gpt_ufs_partition_multi() {
     mkdir -p ${_destdir}/var
 
     if [ -d /cdrom ]; then
-      mount -t nullfs /cdrom ${_destdir}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     mount -o async,noatime /dev/gpt/${BSDKIT_LABEL_VAR} ${_destdir}/var
@@ -555,7 +555,7 @@ __gpt_ufs_partition_single() {
     mkdir -p ${_destdir}/etc
 
     if [ -d /cdrom ]; then
-      mount -t nullfs /cdrom ${_destdir}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -620,7 +620,7 @@ __mbr_ufs_partition_multi() {
     mkdir -p ${_destdir}/var
 
     if [ -d /cdrom ]; then
-      mount -t nullfs /cdrom ${_destdir}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     mount -o async,noatime /dev/ufs/${BSDKIT_LABEL_VAR} ${_destdir}/var
@@ -676,7 +676,7 @@ __mbr_ufs_partition_single() {
     mkdir -p ${_destdir}/etc
 
     if [ -d /cdrom ]; then
-      mount -t nullfs /cdrom ${_destdir}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -975,7 +975,7 @@ __zfs_create_fs() {
     mkdir -p ${_destdir}/etc
 
     if [ -d /cdrom ]; then
-      mount -t nullfs /cdrom ${_destdir}/cdrom
+        mount -t nullfs /cdrom ${_destdir}/cdrom
     fi
 
     touch ${_destdir}/etc/fstab
@@ -1812,16 +1812,33 @@ EOF
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
 
+    _jail_root=$(jls -j ${BSDKIT_JAIL_NAME} path)
+
+    __install_facts ${_jail_root}
+
     eval env \
-        ANSIBLE_CONFIG=${_ansible_cfg} \
-        SSH_AUTH_SOCK="" \
-        $(__environment) \
-        BSDKIT_INTERFACE=${_bsdkit_interface} \
-        BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
-        BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-        ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
+         ANSIBLE_CONFIG=${_ansible_cfg} \
+         SSH_AUTH_SOCK="" \
+         $(__environment) \
+         BSDKIT_INTERFACE=${_bsdkit_interface} \
+         BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
+         BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
+         ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
 
     rm -r ${_ansible_root}
+}
+
+__install_facts() {
+    local _destdir=$1
+
+    if [ ! -d ${_destdir} ]; then
+        return 1
+    fi
+
+    if [ ! -f ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact ]; then
+        install -d -o root -g wheel -m 755 ${_destdir}/usr/local/etc/ansible/facts.d
+        yq -o=json ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml > ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact
+    fi
 }
 
 __echo_runtime_jail_conf() {
@@ -2217,10 +2234,34 @@ create_jail() {
 
     BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir} ${=_options[*]}
 
-    if ! is_yes ${_plain}; then
+    install -o root -g wheel -m 644 /etc/resolv.conf ${_destdir}/etc/resolv.conf
+
+    if [ -d /usr/local/etc/pkg/repos ]; then
+        install -o root -g wheel -m 755 -d ${_destdir}/usr/local/etc/pkg/repos
+        install -o root -g wheel -m 644 /usr/local/etc/pkg/repos/* ${_destdir}/usr/local/etc/pkg/repos/
+    fi
+
+    if is_yes ${_plain}; then
+        mount -t devfs devfs ${_destdir}/dev
+
         if is_yes ${_thin}; then
             mount -t nullfs -o ro / ${_destdir}/.base
-            mount -t devfs devfs ${_destdir}/dev
+        fi
+
+        {
+            chroot ${_destdir} env ASSUME_ALWAYS_YES=yes pkg bootstrap
+        } always {
+            umount ${_destdir}/dev
+
+            if is_yes ${_thin}; then
+                umount ${_destdir}/.base
+            fi
+        }
+    else
+        # __do_configure_jail will mount devfs
+
+        if is_yes ${_thin}; then
+            mount -t nullfs -o ro / ${_destdir}/.base
         fi
 
         local _options=()
@@ -2229,12 +2270,13 @@ create_jail() {
             _options+="--plain"
         fi
 
-        __do_configure_jail ${=_options[*]} ${_destdir}
-
-        if is_yes ${_thin}; then
-            umount ${_destdir}/.base
-            umount ${_destdir}/dev
-        fi
+        {
+            __do_configure_jail ${=_options[*]} ${_destdir}
+        } always {
+            if is_yes ${_thin}; then
+                umount ${_destdir}/.base
+            fi
+        }
     fi
 }
 
@@ -2767,12 +2809,12 @@ build_setup_img() {
     rm -f ${_img_file}
 
     mkimg -v \
-        -s gpt \
-        -b /boot/pmbr \
-        -p efi:=${_efi_img} \
-        -p freebsd-boot:=/boot/gptboot \
-        -p freebsd-ufs/${BSDKIT_IMG_DATA_LABEL}:=${_ufs_img} \
-        -o ${_img_file}
+          -s gpt \
+          -b /boot/pmbr \
+          -p efi:=${_efi_img} \
+          -p freebsd-boot:=/boot/gptboot \
+          -p freebsd-ufs/${BSDKIT_IMG_DATA_LABEL}:=${_ufs_img} \
+          -o ${_img_file}
 
     rm -f ${_efi_img}
     rm -f ${_ufs_img}
@@ -2864,9 +2906,9 @@ EOF
 
     # SSH_AUTH_SOCK="" was removed to allow sysprep to run
     eval env \
-        ANSIBLE_CONFIG=${_ansible_cfg} \
-        $(__environment) \
-        ansible-playbook ${_ansible_yml}
+         ANSIBLE_CONFIG=${_ansible_cfg} \
+         $(__environment) \
+         ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
 }
@@ -2903,6 +2945,8 @@ EOF
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
 
+    __install_facts ${BSDKIT_DESTDIR}
+
     mount -t devfs devfs ${BSDKIT_DESTDIR}/dev
 
     {
@@ -2914,15 +2958,23 @@ EOF
              BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
              BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
              BSDKIT_CHROOT=1 \
-             ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
+             ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
     } always {
         umount -f ${BSDKIT_DESTDIR}/dev
+        rm -r ${_ansible_root}
     }
-
-    rm -r ${_ansible_root}
 }
 
 configure() {
+    install -d -o root -g wheel -m 755 /usr/local/etc/ansible/facts.d
+
+    [ -f /usr/local/etc/bsdkit.yml ] || touch /usr/local/etc/bsdkit.yml
+
+    yq -o=json ea '. as $item ireduce ({}; . * $item)' \
+       ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
+       /usr/local/etc/bsdkit.yml \
+       > /usr/local/etc/ansible/facts.d/bsdkit.fact
+
     ansible_local_playbook -t configure
 }
 
@@ -2960,12 +3012,12 @@ sysprep() {
     while getopts ":t:" opt; do
         case ${opt} in
             t)
-              case ${OPTARG} in
-                aws|digitalocean)
-                  ;;
-                *)
-                  error "Invalid platform: ${OPTARG}"
-                  ;;
+                case ${OPTARG} in
+                    aws|digitalocean)
+                    ;;
+                    *)
+                        error "Invalid platform: ${OPTARG}"
+                        ;;
                 esac
 
                 OPTIONS="${OPTIONS} -e sysprep_target=${OPTARG}"

@@ -25,75 +25,7 @@
         path: /.bsdkit.yml
         state: absent
 
-- name: Check if /usr/local/etc/bsdkit.yml exists
-  stat:
-    path: /usr/local/etc/bsdkit.yml
-  register: stat_etc_bsdkit_yml
-
-- name: Touch /usr/local/etc/bsdkit.yml
-  when: not stat_etc_bsdkit_yml.stat.exists
-  file:
-    path: /usr/local/etc/bsdkit.yml
-    state: touch
-    owner: root
-    group: wheel
-    mode: "0600"
-
-- name: Check if textproc/go-yq is installed
-  shell:
-    cmd: |
-      pkg info -e textproc/go-yq
-  register: pkg_info_go_yq
-  changed_when: false
-  failed_when: false
-
-- name: Replace textproc/yq with textproc/go-yq
-  when: pkg_info_go_yq.rc != 0
-  block:
-    - name: Remove textproc/yq
-      community.general.pkgng:
-        name:
-          - textproc/yq
-        state: absent
-
-    - name: Install textproc/go-yq
-      community.general.pkgng:
-        name:
-          - textproc/go-yq
-        state: present
-
-- name: Merge configuration files
-  shell:
-    cmd: |
-      yq ea '. as $item ireduce ({}; . * $item )' \
-          /usr/local/bsdkit/playbook/bsdkit-defaults.yml \
-          /usr/local/etc/bsdkit.yml
-  register: bsdkit_merged_yml
-  changed_when: false
-
-- name: Create temporary directory with mktemp
-  shell:
-    cmd: |
-      mktemp -d
-  register: mktemp
-  changed_when: false
-
-- name: Create temporary file with contents of bsdkit_merged_yml
-  copy:
-    content: "{{ bsdkit_merged_yml.stdout }}"
-    dest: "{{ mktemp.stdout }}/bsdkit.yml"
-    owner: root
-    group: wheel
-    mode: "0600"
-  changed_when: false
-
-- name: Load bsdkit configuration
-  when: stat_etc_bsdkit_yml.stat.exists
-  include_vars:
-    file: "{{ mktemp.stdout }}/bsdkit.yml"
-
-- name: Delete temporary configuration directory
-  file:
-    path: "{{ mktemp.stdout }}"
-    state: absent
-  changed_when: false
+- name: Copy facts from ansible_local.bsdkit to bsdkit
+  when: ansible_local is defined and ansible_local.bsdkit is defined
+  set_fact:
+    bsdkit: "{{ ansible_local.bsdkit }}"
