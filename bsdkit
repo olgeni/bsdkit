@@ -1811,6 +1811,12 @@ __ansible_jail_playbook() {
 [defaults]
 inventory = ${_ansible_hosts}
 host_key_checking = False
+action_warnings = False
+deprecation_warnings = False
+devel_warning = False
+inventory_unparsed_warning = False
+localhost_warning = False
+system_warnings = False
 
 [ssh_connection]
 pipelining = True
@@ -2886,6 +2892,12 @@ remote_exec() {
 [defaults]
 inventory = ${_ansible_hosts}
 host_key_checking = False
+action_warnings = False
+deprecation_warnings = False
+devel_warning = False
+inventory_unparsed_warning = False
+localhost_warning = False
+system_warnings = False
 
 [ssh_connection]
 pipelining = True
@@ -2949,6 +2961,12 @@ ansible_chroot_playbook() {
     cat > ${_ansible_cfg} << EOF
 [defaults]
 inventory = ${_ansible_hosts}
+action_warnings = False
+deprecation_warnings = False
+devel_warning = False
+inventory_unparsed_warning = False
+localhost_warning = False
+system_warnings = False
 EOF
 
     cat > ${_ansible_hosts} << EOF
