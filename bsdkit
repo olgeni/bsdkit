@@ -2226,6 +2226,53 @@ create_iocage_thin() {
     __do_configure_jail ${_destdir}
 }
 
+create_iocage_jail() {
+    __check_requirements
+
+    eval $(__local_options)
+    eval $(__parse_options $@)
+
+    local _opts _opts_args
+
+    zparseopts -F -D -E -a _opts -A _opts_args -thin -plain
+
+    local _thin
+    _thin=$(yes_if ${_opts[(Ie)--thin]})
+
+    local _plain
+    _plain=$(yes_if ${_opts[(Ie)--plain]})
+
+    local _options=()
+
+    if is_yes ${_thin}; then
+        _options+="--thin"
+    fi
+
+    if is_yes ${_plain}; then
+        _options+="--plain"
+    fi
+
+    local _jail_name=$1
+
+    shift
+
+    unset IOCAGE_COLOR
+
+    __check_iocage
+
+    _jail_path=/iocage/jails/${_jail_name}
+    _jail_root=${_jail_path}/root
+
+    iocage create -e --name ${_jail_name}
+    iocage set ip4=inherit ${_jail_name}
+
+    ./bsdkit/bsdkit create_jail ${=_options[*]} ${_jail_root}
+
+    echo "/ ${_jail_root}/.base nullfs ro" > ${_jail_path}/fstab
+
+    cp ${BSDKIT_SRCDIR}/ansible/vendor.conf.jail ${_jail_root}/etc/defaults/vendor.conf
+}
+
 create_jail() {
     __check_requirements
 
