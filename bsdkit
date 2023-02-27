@@ -224,6 +224,12 @@ __check_go_yq() {
     fi
 }
 
+__check_iocage() {
+    if ! command -v iocage > /dev/null 2>&1; then
+        pkg install -y sysutils/iocage
+    fi
+}
+
 __check_requirements() {
     __check_python3
     __check_ansible
@@ -2196,7 +2202,8 @@ create_iocage_thin() {
 
     unset IOCAGE_COLOR
 
-    command -v iocage > /dev/null 2>&1 || error "iocage not found (create_iocage)."
+    __check_iocage
+
     iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
 
     local _iocage_root
