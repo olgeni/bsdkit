@@ -1,0 +1,41 @@
+---
+- name: Setup iocage
+  when: bsdkit.enable_iocage is defined and bsdkit.enable_iocage
+  block:
+    - name: Install sysutils/iocage
+      community.general.pkgng:
+        name: sysutils/iocage
+        state: present
+
+    - name: Activate pool for iocage
+      community.general.zfs:
+        name: "{{ boot_pool }}"
+        state: present
+        extra_zfs_properties:
+          "org.freebsd.ioc:active": "yes"
+
+    - name: Create main iocage dataset
+      community.general.zfs:
+        name: "{{ boot_pool }}/iocage"
+        state: present
+        extra_zfs_properties:
+          aclinherit: passthrough
+          aclmode: passthrough
+          compression: zstd
+          mountpoint: /iocage
+
+    - name: Create child iocage datasets
+      community.general.zfs:
+        name: "{{ boot_pool }}/iocage/{{ item }}"
+        state: present
+        extra_zfs_properties:
+          aclinherit: passthrough
+          aclmode: passthrough
+          compression: zstd
+      with_items:
+        - download
+        - images
+        - jails
+        - log
+        - releases
+        - templates

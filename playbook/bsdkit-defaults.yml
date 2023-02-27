@@ -32,3 +32,4 @@ pw_conf_delete: {}
 update_dns: true
 console_syslog: true
 enable_fail2ban: false
+enable_iocage: false
