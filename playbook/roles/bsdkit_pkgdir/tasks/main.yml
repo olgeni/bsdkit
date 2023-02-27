@@ -9,9 +9,11 @@
 
     - name: Migrate /var/db/pkg to /usr/local/pkg
       when: (stat_var_db_pkg.stat.isdir is defined) and (stat_var_db_pkg.stat.isdir) and (not stat_var_db_pkg.stat.islnk)
-      shell: |
-        set -e -u -o pipefail
-        mkdir /usr/local/pkg/
-        mv /var/db/pkg/* /usr/local/pkg/
-        rmdir /var/db/pkg
-        ln -s -f /usr/local/pkg /var/db/pkg
+      shell:
+        cmd: |
+          set -e -u -o pipefail
+          mkdir /usr/local/pkg/
+          mv /var/db/pkg/* /usr/local/pkg/
+          rmdir /var/db/pkg
+          ln -s -f /usr/local/pkg /var/db/pkg
+      changed_when: false

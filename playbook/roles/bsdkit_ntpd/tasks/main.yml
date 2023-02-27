@@ -6,7 +6,10 @@
   failed_when: false
 
 - name: Fetch new ntpd files
-  command: /etc/rc.d/ntpd fetch
+  command:
+    cmd: |
+      /etc/rc.d/ntpd fetch
   when: ntpd_needfetch.rc == 0
+  changed_when: true
   notify:
     - restart_ntpd

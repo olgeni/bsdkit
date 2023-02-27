@@ -8,3 +8,4 @@
   when: not stat_zoneinfo.stat.exists
   command:
     cmd: tzsetup {{ bsdkit_zoneinfo }}
+  changed_when: false

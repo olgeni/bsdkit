@@ -48,6 +48,7 @@
 
       rmdir /usr/local/etc/sv/
     executable: /usr/local/bin/zsh
+  changed_when: false
 
 - name: Enable service
   service:

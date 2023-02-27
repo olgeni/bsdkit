@@ -13,7 +13,7 @@
         dest: /usr/local/etc/fail2ban/jail.local
         owner: root
         group: wheel
-        mode: 0644
+        mode: "0644"
       notify: restart_fail2ban
 
     - name: Enable fail2ban
@@ -34,7 +34,7 @@
         dest: /etc/pf.conf.orig
         owner: root
         group: wheel
-        mode: 0600
+        mode: "0600"
 
     - name: Add the f2b anchor line to /etc/pf.conf
       lineinfile:
@@ -45,7 +45,7 @@
         create: true
         owner: root
         group: wheel
-        mode: 0600
+        mode: "0600"
 
     - name: Reload pf.conf
       command: pfctl -f /etc/pf.conf
@@ -65,4 +65,4 @@
         dest: /etc/pf.conf
         owner: root
         group: wheel
-        mode: 0600
+        mode: "0600"

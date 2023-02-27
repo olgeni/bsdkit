@@ -68,5 +68,6 @@
           --access-level="{{ gitlab_runner_access_level }}"
       EOF
     warn: false
+  changed_when: false
   notify:
     - restart_gitlab_runner

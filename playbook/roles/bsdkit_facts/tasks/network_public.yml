@@ -22,7 +22,6 @@
 - name: Set public address
   set_fact:
     public_address: "{{ ifconfig_public_ip_address_output.stdout }}"
-  vars:
   when: public_interface is defined
 
 - name: Display public_address

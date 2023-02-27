@@ -32,4 +32,4 @@
       consul_datadir=/var/db/consul
     owner: root
     group: wheel
-    mode: 0644
+    mode: "0644"

@@ -6,8 +6,10 @@
       when: (bsdkit_interface | length > 0) and (bsdkit_ifconfig | length > 0)
       command:
         cmd: sysrc ifconfig_{{ bsdkit_interface }}="{{ bsdkit_ifconfig }}"
+      changed_when: false
 
     - name: Set bsdkit defaultrouter in rc.conf
       when: bsdkit_defaultrouter | length > 0
       command:
         cmd: sysrc defaultrouter="{{ bsdkit_defaultrouter }}"
+      changed_when: false

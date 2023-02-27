@@ -26,6 +26,6 @@
     state: absent
 
 - name: Remove sysutils/fsc package
-  pkgng:
+  community.general.pkgng:
     name: sysutils/fsc
     state: absent

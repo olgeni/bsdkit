@@ -32,7 +32,6 @@
 - name: Set private netmask
   set_fact:
     private_netmask: "{{ ifconfig_private_ip_netmask_output.stdout }}"
-  vars:
   when: private_interface is defined
 
 - name: Display private_netmask
@@ -43,7 +42,6 @@
 - name: Set private network
   set_fact:
     private_network: "{{ private_address }}/{{ private_netmask | ansible.utils.ipaddr('prefix') }}"
-  vars:
   when: private_interface is defined
 
 - name: Display private_network
