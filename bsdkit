@@ -3313,7 +3313,7 @@ yaml_set() {
     local _value=$3
 
     if [ ! -e ${_file} ]; then
-        error "yaml_set: ${_file} does not exists"
+        touch ${_file}
     fi
 
     yq -i eval "(.${_key}) = \"${_value}\"" ${_file}
