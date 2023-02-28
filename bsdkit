@@ -1154,7 +1154,7 @@ make_thin_jail() {
 
     [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
     [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
-    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing rc.d)"
+    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
 
     local _directory_list=(
         "bin" "."
