@@ -1213,7 +1213,7 @@ make_full_jail() {
 
     [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
     [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
-    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing rc.d)"
+    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
 
     [ -d ${_srcdir} ] || error "directory not found: ${_srcdir}"
     [ -e ${_srcdir}/bin/sh ] || error "invalid source directory (missing /bin/sh)"
