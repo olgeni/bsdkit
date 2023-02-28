@@ -1148,6 +1148,10 @@ __fetch_release() {
 }
 
 make_thin_jail() {
+    if [ $# -lt 1 ]; then
+        error "Usage: make_thin_jail <destdir>"
+    fi
+
     local _destdir=$1
 
     _destdir=$(realpath ${_destdir})
