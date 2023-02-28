@@ -1588,7 +1588,7 @@ __do_configure_jail() {
         start_jail ${_destdir}
 
         {
-            __ansible_jail_playbook
+            ansible_jail_playbook
         } always {
             stop_jail ${_destdir}
         }
@@ -1806,7 +1806,7 @@ EOF
     return 0
 }
 
-__ansible_jail_playbook() {
+ansible_jail_playbook() {
     __check_requirements
 
     local _ansible_root
