@@ -1588,7 +1588,7 @@ __do_configure_jail() {
         start_jail ${_destdir}
 
         {
-            ansible_jail_playbook
+            ansible_jail_playbook ${BSDKIT_JAIL_NAME}
         } always {
             stop_jail ${_destdir}
         }
@@ -3008,6 +3008,10 @@ EOF
 ansible_jail_playbook() {
     __check_requirements
 
+    local _jail_name=$1
+
+    shift
+
     local _ansible_root
     _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
 
@@ -3032,14 +3036,14 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
+${_jail_name} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
 EOF
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
 
-    _jail_root=$(jls -j ${BSDKIT_JAIL_NAME} path)
+    _jail_root=$(jls -j ${_jail_name} path)
 
     __install_facts ${_jail_root}
 
@@ -3066,6 +3070,27 @@ configure() {
        > /usr/local/etc/ansible/facts.d/bsdkit.fact
 
     ansible_local_playbook -t configure
+}
+
+configure_jail() {
+    if [ $# -lt 1 ]; then
+        error "Usage: configure_jail <jail_name> [options]"
+    fi
+
+    local _jail_name=$1
+
+    _jail_root=$(jls -j ${_jail_name} path)
+
+    install -d -o root -g wheel -m 755 ${_jail_root}/usr/local/etc/ansible/facts.d
+
+    [ -f ${_jail_root}/usr/local/etc/bsdkit.yml ] || touch ${_jail_root}/usr/local/etc/bsdkit.yml
+
+    yq -o=json ea '. as $item ireduce ({}; . * $item)' \
+       ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
+       ${_jail_root}/usr/local/etc/bsdkit.yml \
+       > ${_jail_root}/usr/local/etc/ansible/facts.d/bsdkit.fact
+
+    ansible_jail_playbook ${_jail_name} -t configure
 }
 
 upgrade() {
