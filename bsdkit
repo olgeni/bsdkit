@@ -1806,56 +1806,6 @@ EOF
     return 0
 }
 
-ansible_jail_playbook() {
-    __check_requirements
-
-    local _ansible_root
-    _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
-
-    local _ansible_cfg=${_ansible_root}/ansible.cfg
-    local _ansible_hosts=${_ansible_root}/ansible_hosts
-
-    cat > ${_ansible_cfg} << EOF
-[defaults]
-inventory = ${_ansible_hosts}
-host_key_checking = False
-action_warnings = False
-deprecation_warnings = False
-devel_warning = False
-inventory_unparsed_warning = False
-localhost_warning = False
-system_warnings = False
-ansible_shell_type = sh
-
-[ssh_connection]
-pipelining = True
-ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
-EOF
-
-    cat > ${_ansible_hosts} << EOF
-${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
-EOF
-
-    _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
-    _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
-    _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
-
-    _jail_root=$(jls -j ${BSDKIT_JAIL_NAME} path)
-
-    __install_facts ${_jail_root}
-
-    eval env \
-         ANSIBLE_CONFIG=${_ansible_cfg} \
-         SSH_AUTH_SOCK="" \
-         $(__environment) \
-         BSDKIT_INTERFACE=${_bsdkit_interface} \
-         BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
-         BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-         ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
-
-    rm -r ${_ansible_root}
-}
-
 __install_facts() {
     local _destdir=$1
 
@@ -3053,6 +3003,56 @@ EOF
         umount -f ${BSDKIT_DESTDIR}/dev
         rm -r ${_ansible_root}
     }
+}
+
+ansible_jail_playbook() {
+    __check_requirements
+
+    local _ansible_root
+    _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
+
+    local _ansible_cfg=${_ansible_root}/ansible.cfg
+    local _ansible_hosts=${_ansible_root}/ansible_hosts
+
+    cat > ${_ansible_cfg} << EOF
+[defaults]
+inventory = ${_ansible_hosts}
+host_key_checking = False
+action_warnings = False
+deprecation_warnings = False
+devel_warning = False
+inventory_unparsed_warning = False
+localhost_warning = False
+system_warnings = False
+ansible_shell_type = sh
+
+[ssh_connection]
+pipelining = True
+ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+EOF
+
+    cat > ${_ansible_hosts} << EOF
+${BSDKIT_JAIL_NAME} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
+EOF
+
+    _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
+    _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
+    _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
+
+    _jail_root=$(jls -j ${BSDKIT_JAIL_NAME} path)
+
+    __install_facts ${_jail_root}
+
+    eval env \
+         ANSIBLE_CONFIG=${_ansible_cfg} \
+         SSH_AUTH_SOCK="" \
+         $(__environment) \
+         BSDKIT_INTERFACE=${_bsdkit_interface} \
+         BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
+         BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
+         ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
+
+    rm -r ${_ansible_root}
 }
 
 configure() {
