@@ -1237,7 +1237,6 @@ make_full_jail() {
 
     local _directory_list=(
         "bin"
-        "boot"
         "lib"
         "libexec"
         "rescue"
@@ -1250,6 +1249,12 @@ make_full_jail() {
         "usr/libexec"
         "usr/sbin"
         "usr/share")
+
+    if is_yes ${BSDKIT_INSTALL_KERNEL}; then
+        _directory_list+="boot"
+    else
+        rm -r -f ${_destdir}/boot
+    fi
 
     if is_yes ${BSDKIT_INSTALL_SRC}; then
         _directory_list+="usr/src"
