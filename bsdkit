@@ -1825,6 +1825,7 @@ devel_warning = False
 inventory_unparsed_warning = False
 localhost_warning = False
 system_warnings = False
+ansible_shell_type = sh
 
 [ssh_connection]
 pipelining = True
@@ -2953,6 +2954,7 @@ devel_warning = False
 inventory_unparsed_warning = False
 localhost_warning = False
 system_warnings = False
+ansible_shell_type = sh
 
 [ssh_connection]
 pipelining = True
@@ -3022,6 +3024,7 @@ devel_warning = False
 inventory_unparsed_warning = False
 localhost_warning = False
 system_warnings = False
+ansible_shell_type = sh
 EOF
 
     cat > ${_ansible_hosts} << EOF
