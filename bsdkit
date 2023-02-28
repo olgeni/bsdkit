@@ -1210,6 +1210,10 @@ make_thin_jail() {
 }
 
 make_full_jail() {
+    if [ $# -lt 2 ]; then
+        error "Usage: make_full_jail <srcdir> <destdir>"
+    fi
+
     local _srcdir=$1
     local _destdir=$2
 
