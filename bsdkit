@@ -2103,6 +2103,7 @@ create_iocage() {
 
 create_iocage_thin() {
     __check_requirements
+    __check_iocage
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2112,8 +2113,6 @@ create_iocage_thin() {
     shift
 
     unset IOCAGE_COLOR
-
-    __check_iocage
 
     iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
 
@@ -2133,6 +2132,7 @@ create_iocage_thin() {
 
 create_iocage_jail() {
     __check_requirements
+    __check_iocage
 
     eval $(__local_options)
     eval $(__parse_options $@)
@@ -2162,8 +2162,6 @@ create_iocage_jail() {
     shift
 
     unset IOCAGE_COLOR
-
-    __check_iocage
 
     _jail_path=/iocage/jails/${_jail_name}
     _jail_root=${_jail_path}/root
