@@ -2070,33 +2070,6 @@ install_mbr_zfs() {
     return 0
 }
 
-create_iocell() {
-    __check_requirements
-
-    eval $(__local_options)
-    eval $(__parse_options $@)
-
-    local _tag=$1
-
-    shift
-
-    command -v iocell > /dev/null 2>&1 || error "iocell not found (create_iocell)."
-
-    local _uuid
-    _uuid=$(iocell create -e tag=${_tag} host_hostname=${_tag} "$@")
-
-    local _mountpoint
-    _mountpoint=$(iocell get mountpoint ${_tag}) || error "iocell could not retrieve mountpoint."
-
-    local _destdir=${_mountpoint}/root
-
-    [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell)."
-
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir}
-
-    __setup_jail ${_destdir}
-}
-
 create_iocage() {
     __check_requirements
 
