@@ -200,12 +200,6 @@ reformat_loader_conf() {
     rm ${_loader_conf}.0
 }
 
-__check_freebsd() {
-    if [ $(uname) != "FreeBSD" ]; then
-        error "only works on FreeBSD."
-    fi
-}
-
 __check_python3() {
     if ! command -v python3 > /dev/null 2>&1; then
         pkg install -y lang/python3
