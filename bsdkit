@@ -206,15 +206,15 @@ __check_freebsd() {
     fi
 }
 
-__check_ansible() {
-    if ! command -v ansible-playbook > /dev/null 2>&1; then
-        pkg install -y sysutils/ansible
-    fi
-}
-
 __check_python3() {
     if ! command -v python3 > /dev/null 2>&1; then
         pkg install -y lang/python3
+    fi
+}
+
+__check_ansible() {
+    if ! command -v ansible-playbook > /dev/null 2>&1; then
+        pkg install -y sysutils/ansible
     fi
 }
 
