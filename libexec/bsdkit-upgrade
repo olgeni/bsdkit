@@ -319,6 +319,10 @@ if is_yes ${_install_src}; then
     ${=CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
 fi
 
+if [ ! -d ${DESTDIR}/etc/rc.d ]; then
+    error "missing ${DESTDIR}/etc/rc.d"
+fi
+
 find ${DESTDIR}/bin \
     ${DESTDIR}/lib \
     ${DESTDIR}/libexec \
