@@ -3406,7 +3406,17 @@ config_del() {
 }
 
 config_list() {
-    yaml_list ${BSDKIT_CONFIG}
+    local _tmpfile
+    _tmpfile=$(mktemp)
+
+    yq ea '. as $item ireduce ({}; . * $item)' \
+       ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
+       /usr/local/etc/bsdkit.yml \
+       > ${_tmpfile}
+
+    yaml_list ${_tmpfile}
+
+    rm -f ${_tmpfile}
 }
 
 if [ $# -gt 0 ]; then
