@@ -2306,22 +2306,6 @@ create_jail() {
     fi
 }
 
-configure_jail() {
-    __check_requirements
-
-    eval $(__local_options)
-    eval $(__parse_options $@)
-
-    local _destdir=$1
-
-    shift
-
-    [ -d ${_destdir} ] || error "jail root does not exist (configure_jail)."
-    [ -f ${_destdir}/bin/sh ] || error "/bin/sh does not exist in jail (configure_jail)."
-
-    __do_setup_jail ${_destdir}
-}
-
 build_md_root_device() {
     local _option
     local _type
