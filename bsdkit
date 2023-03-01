@@ -1564,7 +1564,7 @@ EOF
     return 0
 }
 
-__do_configure_jail() {
+__setup_jail() {
     local _opts _opts_args
 
     zparseopts -F -D -E -a _opts -A _opts_args -plain
@@ -2094,7 +2094,7 @@ create_iocell() {
 
     BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir}
 
-    __do_configure_jail ${_destdir}
+    __setup_jail ${_destdir}
 }
 
 create_iocell_thin() {
@@ -2121,7 +2121,7 @@ create_iocell_thin() {
 
     [ -d ${_destdir} ] || error "iocell root does not exist (create_iocell_thin)."
 
-    __do_configure_jail ${_destdir}
+    __setup_jail ${_destdir}
 }
 
 create_iocage() {
@@ -2152,7 +2152,7 @@ create_iocage() {
 
     BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir}
 
-    __do_configure_jail ${_destdir}
+    __setup_jail ${_destdir}
 }
 
 create_iocage_thin() {
@@ -2182,7 +2182,7 @@ create_iocage_thin() {
 
     [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
 
-    __do_configure_jail ${_destdir}
+    __setup_jail ${_destdir}
 }
 
 create_iocage_jail() {
@@ -2284,7 +2284,7 @@ create_jail() {
             fi
         }
     else
-        # __do_configure_jail will mount devfs
+        # __setup_jail will mount devfs
 
         if is_yes ${_thin}; then
             mount -t nullfs -o ro / ${_destdir}/.base
@@ -2297,7 +2297,7 @@ create_jail() {
         fi
 
         {
-            __do_configure_jail ${=_options[*]} ${_destdir}
+            __setup_jail ${=_options[*]} ${_destdir}
         } always {
             if is_yes ${_thin}; then
                 umount ${_destdir}/.base
@@ -2319,7 +2319,7 @@ configure_jail() {
     [ -d ${_destdir} ] || error "jail root does not exist (configure_jail)."
     [ -f ${_destdir}/bin/sh ] || error "/bin/sh does not exist in jail (configure_jail)."
 
-    __do_configure_jail ${_destdir}
+    __do_setup_jail ${_destdir}
 }
 
 build_md_root_device() {
