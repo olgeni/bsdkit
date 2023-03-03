@@ -215,6 +215,10 @@ __check_ansible() {
 __check_go_yq() {
     if ! command -v yq > /dev/null 2>&1; then
         pkg install -y textproc/go-yq
+    else
+        if pkg info textproc/yq > /dev/null 2>&1; then
+            pkg install -y textproc/go-yq
+        fi
     fi
 }
 
@@ -2982,6 +2986,8 @@ EOF
 }
 
 configure() {
+    __check_go_yq
+
     install -d -o root -g wheel -m 755 /usr/local/etc/ansible/facts.d
 
     [ -f /usr/local/etc/bsdkit.yml ] || touch /usr/local/etc/bsdkit.yml
@@ -2998,6 +3004,8 @@ configure_jail() {
     if [ $# -lt 1 ]; then
         error "Usage: configure_jail <jail_name> [options]"
     fi
+
+    __check_go_yq
 
     local _jail_name=$1
 
