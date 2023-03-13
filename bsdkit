@@ -2172,7 +2172,9 @@ create_iocage_jail() {
 
     ${BSDKIT_SCRIPT} create_jail ${=_options[*]} ${_jail_root}
 
-    echo "/ ${_jail_root}/.base nullfs ro" > ${_jail_path}/fstab
+    if is_yes ${_thin}; then
+        echo "/ ${_jail_root}/.base nullfs ro" > ${_jail_path}/fstab
+    fi
 
     cp ${BSDKIT_SRCDIR}/ansible/vendor.conf.jail ${_jail_root}/etc/defaults/vendor.conf
 }
