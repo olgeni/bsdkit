@@ -1159,36 +1159,36 @@ make_thin_jail() {
     [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
 
     local _directory_list=(
-        "bin" "."
-        "boot" "."
-        "lib" "."
-        "libexec" "."
-        "rescue" "."
-        "sbin" "."
-        "usr/bin" ".."
-        "usr/include" ".."
-        "usr/lib" ".."
-        "usr/lib32" ".."
-        "usr/libdata" ".."
-        "usr/libexec" ".."
-        "usr/sbin" ".."
-        "usr/share" "..")
+        "bin"
+        "boot"
+        "lib"
+        "libexec"
+        "rescue"
+        "sbin"
+        "usr/bin"
+        "usr/include"
+        "usr/lib"
+        "usr/lib32"
+        "usr/libdata"
+        "usr/libexec"
+        "usr/sbin"
+        "usr/share")
 
     if is_yes ${BSDKIT_INSTALL_SRC}; then
-        _directory_list+=("usr/src" "..")
+        _directory_list+=("usr/src")
     else
         rm -r -f ${_destdir}/usr/src
     fi
 
     if is_yes ${BSDKIT_INSTALL_TESTS}; then
-        _directory_list+=("usr/tests" "..")
+        _directory_list+=("usr/tests")
     else
         rm -r -f ${_destdir}/usr/tests
     fi
 
     local _directory
 
-    for _directory _prefix in ${_directory_list}; do
+    for _directory in ${_directory_list}; do
         if [ -d ${_destdir}/${_directory} ]; then
             rm -r -f ${_destdir}/${_directory} > /dev/null 2>&1 || :
             chflags -R noschg ${_destdir}/${_directory} > /dev/null 2>&1 || :
@@ -1200,6 +1200,10 @@ make_thin_jail() {
         if [ -L ${_destdir}/${_directory} ]; then
             rm -f ${_destdir}/${_directory}
         fi
+
+        local _prefix
+
+        _prefix=$(echo ${_directory} | awk -F/ '{ for (i = 1; i <= NF; i++) printf "." }')
 
         ln -s -f ${_prefix}/.base/${_directory} ${_destdir}/${_directory}
     done
