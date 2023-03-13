@@ -2171,7 +2171,7 @@ create_iocage_jail() {
     iocage create -e --name ${_jail_name}
     iocage set ip4=inherit ${_jail_name}
 
-    ./bsdkit/bsdkit create_jail ${=_options[*]} ${_jail_root}
+    ${BSDKIT_SCRIPT} create_jail ${=_options[*]} ${_jail_root}
 
     echo "/ ${_jail_root}/.base nullfs ro" > ${_jail_path}/fstab
 
