@@ -2168,8 +2168,7 @@ create_iocage_jail() {
     _jail_path=/iocage/jails/${_jail_name}
     _jail_root=${_jail_path}/root
 
-    iocage create -e --name ${_jail_name}
-    iocage set ip4=inherit ${_jail_name}
+    iocage create -e --name ${_jail_name} ip4=inherit allow_raw_sockets=1
 
     ${BSDKIT_SCRIPT} create_jail ${=_options[*]} ${_jail_root}
 
