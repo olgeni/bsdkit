@@ -3437,7 +3437,7 @@ if [ $# -gt 0 ]; then
 fi
 
 # References:
-#   https://wiki.freebsd.org/AvgLiveCD
+#   https://wiki.freebsd.org/AndriyGapon/AvgLiveCD
 #   https://wiki.freebsd.org/RootOnZFS/ZFSBootPartition
 
 # Local Variables:
