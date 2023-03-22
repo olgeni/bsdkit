@@ -2132,6 +2132,16 @@ create_iocage_thin() {
     __setup_jail ${_destdir}
 }
 
+is_iocage_jail_path() {
+    local _path=$1
+
+    if [ "${_path#/iocage/jails}" != "${_path}" ] && [ "${_path%/root}" != "${_path}" ]; then
+        return 0
+    fi
+
+    return 1
+}
+
 create_iocage_jail() {
     __check_requirements
     __check_iocage
