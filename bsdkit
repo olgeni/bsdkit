@@ -3271,6 +3271,16 @@ purge_pkg_tempfiles() {
         | fzf -e -m --print0 | xargs -0 rm -v
 }
 
+purge_be() {
+    if [ $(bectl list -H | grep NR | wc -l) -ne 1 ]; then
+        error "cannot find valid boot environment"
+    fi
+
+    bectl list -H \
+        | awk '$2 != "NR" { print $1 }' \
+        | xargs -t -I {} bectl destroy -Fo {}
+}
+
 zfs_create_postgresql() {
     local _pool
     _pool=$(get_boot_pool)
