@@ -3282,6 +3282,17 @@ purge_be() {
         | xargs -t -I {} bectl destroy -Fo {}
 }
 
+start_local() {
+    local services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
+
+    for service in "${services[@]}"
+    do
+        service_name=$(basename "$service")
+        service_start_command="service $service_name start"
+        eval "$service_start_command"
+    done
+}
+
 zfs_create_postgresql() {
     local _pool
     _pool=$(get_boot_pool)
