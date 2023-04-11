@@ -3268,7 +3268,8 @@ purge_pkg_tempfiles() {
 
     find ${_path} -print0 \( -type f -o -type l \) \
         | awk 'BEGIN { RS="\\0" } $0 ~ /\.[a-zA-Z0-9]{12}$/ { print $0 }' \
-        | fzf -e -m --print0 | xargs -0 rm -v
+        | fzf -e -m --print0 \
+        | xargs -0 rm -v
 }
 
 purge_be() {
