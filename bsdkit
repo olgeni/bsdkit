@@ -3289,7 +3289,7 @@ start_local() {
     do
         service_name=$(basename "$service")
         service_start_command="service $service_name start"
-        eval "$service_start_command"
+        eval "$service_start_command" || :
     done
 }
 
@@ -3300,7 +3300,7 @@ stop_local() {
     do
         service_name=$(basename "$service")
         service_stop_command="service $service_name stop"
-        eval "$service_stop_command"
+        eval "$service_stop_command" || :
     done
 }
 
