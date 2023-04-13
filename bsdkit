@@ -397,6 +397,12 @@ __valid_destdir() {
     [ -d ${_destdir} ] && [ ${_destdir} != "/" ] && [ -f ${_destdir}/bin/sh ]
 }
 
+__valid_freebsd_distdir () {
+    local _freebsd_distdir=$1
+
+    [ -n "${_freebsd_distdir}" ] && [ -d "${_freebsd_distdir}" ] && [ "${_freebsd_distdir}" != "/" ]
+}
+
 __valid_bsdkit() {
     local _bsdkit=$1
 
