@@ -3288,6 +3288,12 @@ purge_be() {
         | xargs -t -I {} bectl destroy -Fo {}
 }
 
+purge_distdir () {
+    if __valid_freebsd_distdir "${BSDKIT_FREEBSD_DISTDIR}"; then
+        rm -rf ${BSDKIT_FREEBSD_DISTDIR}
+    fi
+}
+
 start_local() {
     local services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
 
