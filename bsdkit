@@ -3302,8 +3302,7 @@ start_local() {
         _services+=("/usr/local/etc/rc.d/monit")
     fi
 
-    for service in "${_services[@]}"
-    do
+    for service in "${_services[@]}"; do
         _service_name=$(basename "$service")
         _service_start_command="service $_service_name start"
         eval "$_service_start_command" || :
@@ -3318,8 +3317,7 @@ stop_local() {
         _services=("/usr/local/etc/rc.d/monit" ${_services[@]})
     fi
 
-    for service in "${_services[@]}"
-    do
+    for service in "${_services[@]}"; do
         _service_name=$(basename "$service")
         service_stop_command="service $_service_name stop"
         eval "$service_stop_command" || :
