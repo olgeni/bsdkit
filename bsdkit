@@ -1151,154 +1151,6 @@ __fetch_release() {
     done
 }
 
-make_thin_jail() {
-    if [ $# -lt 1 ]; then
-        error "Usage: make_thin_jail <destdir>"
-    fi
-
-    local _destdir=$1
-
-    _destdir=$(realpath ${_destdir})
-
-    [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
-    [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
-    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
-
-    local _directory_list=(
-        "bin"
-        "boot"
-        "lib"
-        "libexec"
-        "rescue"
-        "sbin"
-        "usr/bin"
-        "usr/include"
-        "usr/lib"
-        "usr/lib32"
-        "usr/libdata"
-        "usr/libexec"
-        "usr/sbin"
-        "usr/share")
-
-    if is_yes ${BSDKIT_INSTALL_SRC}; then
-        _directory_list+=("usr/src")
-    else
-        rm -r -f ${_destdir}/usr/src
-    fi
-
-    if is_yes ${BSDKIT_INSTALL_TESTS}; then
-        _directory_list+=("usr/tests")
-    else
-        rm -r -f ${_destdir}/usr/tests
-    fi
-
-    local _directory
-
-    for _directory in ${_directory_list}; do
-        if [ -d ${_destdir}/${_directory} ]; then
-            rm -r -f ${_destdir}/${_directory} > /dev/null 2>&1 || :
-            chflags -R noschg ${_destdir}/${_directory} > /dev/null 2>&1 || :
-            rm -r -f ${_destdir}/${_directory}
-        fi
-
-        echo "${_directory}"
-
-        if [ -L ${_destdir}/${_directory} ]; then
-            rm -f ${_destdir}/${_directory}
-        fi
-
-        local _prefix
-
-        _prefix=$(echo ${_directory} | awk -F/ '{ for (i = 1; i <= NF; i++) printf "." }')
-
-        ln -s -f ${_prefix}/.base/${_directory} ${_destdir}/${_directory}
-    done
-
-    mkdir -p ${_destdir}/.base
-}
-
-make_full_jail() {
-    if [ $# -lt 2 ]; then
-        error "Usage: make_full_jail <srcdir> <destdir>"
-    fi
-
-    local _srcdir=$1
-    local _destdir=$2
-
-    _destdir=$(realpath ${_destdir})
-
-    [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
-    [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
-    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
-
-    [ -d ${_srcdir} ] || error "directory not found: ${_srcdir}"
-    [ -e ${_srcdir}/bin/sh ] || error "invalid source directory (missing /bin/sh)"
-    [ -d ${_destdir}/.base ] || error "directory not found: ${_destdir}/.base"
-
-    local _nullfs
-
-    mount -p -t nullfs | cut -w -f 2 | while read _nullfs; do
-        if [ ${_nullfs} = ${_destdir}/.base ]; then
-            umount -f ${_destdir}/.base
-        fi
-    done
-
-    local _directory_list=(
-        "bin"
-        "lib"
-        "libexec"
-        "rescue"
-        "sbin"
-        "usr/bin"
-        "usr/include"
-        "usr/lib"
-        "usr/lib32"
-        "usr/libdata"
-        "usr/libexec"
-        "usr/sbin"
-        "usr/share")
-
-    if is_yes ${BSDKIT_INSTALL_KERNEL}; then
-        _directory_list+="boot"
-    else
-        rm -r -f ${_destdir}/boot
-    fi
-
-    if is_yes ${BSDKIT_INSTALL_SRC}; then
-        _directory_list+="usr/src"
-    else
-        rm -f ${_destdir}/usr/src
-    fi
-
-    if is_yes ${BSDKIT_INSTALL_TESTS}; then
-        _directory_list+="usr/tests"
-    else
-        rm -f ${_destdir}/usr/tests
-    fi
-
-    pushd -q
-
-    local _directory
-
-    for _directory in ${_directory_list}; do
-        if [ -L ${_destdir}/${_directory} ] || [ -f ${_destdir}/${_directory} ]; then
-            rm -f ${_destdir}/${_directory}
-        fi
-
-        mkdir -p ${_destdir}/${_directory}
-
-        echo -n "${_directory}: "
-
-        cd ${_srcdir}/${_directory} && find . | cpio -pdu ${_destdir}/${_directory}
-    done
-
-    popd -q
-
-    __run_mtree ${_destdir}
-
-    [ -d ${_destdir}/.base ] && rmdir ${_destdir}/.base
-}
-
 __install_release() {
     local _opts _opts_args
 
@@ -2267,6 +2119,154 @@ create_jail() {
             fi
         }
     fi
+}
+
+make_thin_jail() {
+    if [ $# -lt 1 ]; then
+        error "Usage: make_thin_jail <destdir>"
+    fi
+
+    local _destdir=$1
+
+    _destdir=$(realpath ${_destdir})
+
+    [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
+    [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
+    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
+
+    local _directory_list=(
+        "bin"
+        "boot"
+        "lib"
+        "libexec"
+        "rescue"
+        "sbin"
+        "usr/bin"
+        "usr/include"
+        "usr/lib"
+        "usr/lib32"
+        "usr/libdata"
+        "usr/libexec"
+        "usr/sbin"
+        "usr/share")
+
+    if is_yes ${BSDKIT_INSTALL_SRC}; then
+        _directory_list+=("usr/src")
+    else
+        rm -r -f ${_destdir}/usr/src
+    fi
+
+    if is_yes ${BSDKIT_INSTALL_TESTS}; then
+        _directory_list+=("usr/tests")
+    else
+        rm -r -f ${_destdir}/usr/tests
+    fi
+
+    local _directory
+
+    for _directory in ${_directory_list}; do
+        if [ -d ${_destdir}/${_directory} ]; then
+            rm -r -f ${_destdir}/${_directory} > /dev/null 2>&1 || :
+            chflags -R noschg ${_destdir}/${_directory} > /dev/null 2>&1 || :
+            rm -r -f ${_destdir}/${_directory}
+        fi
+
+        echo "${_directory}"
+
+        if [ -L ${_destdir}/${_directory} ]; then
+            rm -f ${_destdir}/${_directory}
+        fi
+
+        local _prefix
+
+        _prefix=$(echo ${_directory} | awk -F/ '{ for (i = 1; i <= NF; i++) printf "." }')
+
+        ln -s -f ${_prefix}/.base/${_directory} ${_destdir}/${_directory}
+    done
+
+    mkdir -p ${_destdir}/.base
+}
+
+make_full_jail() {
+    if [ $# -lt 2 ]; then
+        error "Usage: make_full_jail <srcdir> <destdir>"
+    fi
+
+    local _srcdir=$1
+    local _destdir=$2
+
+    _destdir=$(realpath ${_destdir})
+
+    [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
+    [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
+    [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
+
+    [ -d ${_srcdir} ] || error "directory not found: ${_srcdir}"
+    [ -e ${_srcdir}/bin/sh ] || error "invalid source directory (missing /bin/sh)"
+    [ -d ${_destdir}/.base ] || error "directory not found: ${_destdir}/.base"
+
+    local _nullfs
+
+    mount -p -t nullfs | cut -w -f 2 | while read _nullfs; do
+        if [ ${_nullfs} = ${_destdir}/.base ]; then
+            umount -f ${_destdir}/.base
+        fi
+    done
+
+    local _directory_list=(
+        "bin"
+        "lib"
+        "libexec"
+        "rescue"
+        "sbin"
+        "usr/bin"
+        "usr/include"
+        "usr/lib"
+        "usr/lib32"
+        "usr/libdata"
+        "usr/libexec"
+        "usr/sbin"
+        "usr/share")
+
+    if is_yes ${BSDKIT_INSTALL_KERNEL}; then
+        _directory_list+="boot"
+    else
+        rm -r -f ${_destdir}/boot
+    fi
+
+    if is_yes ${BSDKIT_INSTALL_SRC}; then
+        _directory_list+="usr/src"
+    else
+        rm -f ${_destdir}/usr/src
+    fi
+
+    if is_yes ${BSDKIT_INSTALL_TESTS}; then
+        _directory_list+="usr/tests"
+    else
+        rm -f ${_destdir}/usr/tests
+    fi
+
+    pushd -q
+
+    local _directory
+
+    for _directory in ${_directory_list}; do
+        if [ -L ${_destdir}/${_directory} ] || [ -f ${_destdir}/${_directory} ]; then
+            rm -f ${_destdir}/${_directory}
+        fi
+
+        mkdir -p ${_destdir}/${_directory}
+
+        echo -n "${_directory}: "
+
+        cd ${_srcdir}/${_directory} && find . | cpio -pdu ${_destdir}/${_directory}
+    done
+
+    popd -q
+
+    __run_mtree ${_destdir}
+
+    [ -d ${_destdir}/.base ] && rmdir ${_destdir}/.base
 }
 
 build_md_root_device() {
