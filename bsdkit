@@ -3297,6 +3297,11 @@ purge_distdir () {
 start_local() {
     local _services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
 
+    if [[ "${_services[@]}" =~ "/usr/local/etc/rc.d/monit" ]]; then
+        _services=(${_services[@]/\/usr\/local\/etc\/rc.d\/monit})
+        _services+=("/usr/local/etc/rc.d/monit")
+    fi
+
     for service in "${_services[@]}"
     do
         _service_name=$(basename "$service")
@@ -3307,6 +3312,11 @@ start_local() {
 
 stop_local() {
     local _services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
+
+    if [[ "${_services[@]}" =~ "/usr/local/etc/rc.d/monit" ]]; then
+        _services=(${_services[@]/\/usr\/local\/etc\/rc.d\/monit})
+        _services=("/usr/local/etc/rc.d/monit" ${_services[@]})
+    fi
 
     for service in "${_services[@]}"
     do
