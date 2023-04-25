@@ -3295,23 +3295,23 @@ purge_distdir () {
 }
 
 start_local() {
-    local services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
+    local _services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
 
-    for service in "${services[@]}"
+    for service in "${_services[@]}"
     do
-        service_name=$(basename "$service")
-        service_start_command="service $service_name start"
-        eval "$service_start_command" || :
+        _service_name=$(basename "$service")
+        _service_start_command="service $_service_name start"
+        eval "$_service_start_command" || :
     done
 }
 
 stop_local() {
-    local services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
+    local _services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
 
-    for service in "${services[@]}"
+    for service in "${_services[@]}"
     do
-        service_name=$(basename "$service")
-        service_stop_command="service $service_name stop"
+        _service_name=$(basename "$service")
+        service_stop_command="service $_service_name stop"
         eval "$service_stop_command" || :
     done
 }
