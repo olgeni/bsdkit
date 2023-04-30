@@ -3508,9 +3508,7 @@ config_get() {
         error "config_get: missing arguments"
     fi
 
-    if [ ! -e ${BSDKIT_CONFIG} ]; then
-        touch ${BSDKIT_CONFIG}
-    fi
+    [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
     local _key=$1
 
@@ -3529,9 +3527,7 @@ config_del() {
         error "config_del: missing arguments"
     fi
 
-    if [ ! -e ${BSDKIT_CONFIG} ]; then
-        touch ${BSDKIT_CONFIG}
-    fi
+    [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
     local _key=$1
 
@@ -3541,9 +3537,7 @@ config_del() {
 config_list() {
     __check_py_yaml
 
-    if [ ! -e ${BSDKIT_CONFIG} ]; then
-        touch ${BSDKIT_CONFIG}
-    fi
+    [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
     local _tmpfile
     _tmpfile=$(mktemp)
