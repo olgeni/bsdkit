@@ -3477,6 +3477,10 @@ config_get() {
         error "config_get: missing arguments"
     fi
 
+    if [ ! -e ${BSDKIT_CONFIG} ]; then
+        touch ${BSDKIT_CONFIG}
+    fi
+
     local _key=$1
 
     yaml_get ${BSDKIT_CONFIG} ${_key}
