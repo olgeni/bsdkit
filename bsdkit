@@ -3461,6 +3461,19 @@ yaml_list() {
     python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list ${_file}
 }
 
+__config_merge() {
+    local _file=$1
+
+    if [ ! -e ${_file} ]; then
+        error "config_merge: ${_file} does not exists"
+    fi
+
+    yq ea '. as $item ireduce ({}; . * $item)' \
+       ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
+       ${BSDKIT_CONFIG} \
+       > ${_tmpfile}
+}
+
 config_set() {
     if [ $# -lt 2 ]; then
         error "config_set: missing arguments"
