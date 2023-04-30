@@ -3021,11 +3021,11 @@ configure() {
 
     install -d -o root -g wheel -m 755 /usr/local/etc/ansible/facts.d
 
-    [ -f /usr/local/etc/bsdkit.yml ] || touch /usr/local/etc/bsdkit.yml
+    [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
     yq -o=json ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
-       /usr/local/etc/bsdkit.yml \
+       ${BSDKIT_CONFIG} \
        > /usr/local/etc/ansible/facts.d/bsdkit.fact
 
     ansible_local_playbook -t configure
@@ -3045,11 +3045,11 @@ configure_jail() {
 
     install -d -o root -g wheel -m 755 ${_jail_root}/usr/local/etc/ansible/facts.d
 
-    [ -f ${_jail_root}/usr/local/etc/bsdkit.yml ] || touch ${_jail_root}/usr/local/etc/bsdkit.yml
+    [ -f ${_jail_root}${BSDKIT_CONFIG} ] || touch ${_jail_root}${BSDKIT_CONFIG}
 
     yq -o=json ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
-       ${_jail_root}/usr/local/etc/bsdkit.yml \
+       ${_jail_root}${BSDKIT_CONFIG} \
        > ${_jail_root}/usr/local/etc/ansible/facts.d/bsdkit.fact
 
     ansible_jail_playbook ${_jail_name} -t configure
@@ -3512,7 +3512,7 @@ config_list() {
 
     yq ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
-       /usr/local/etc/bsdkit.yml \
+       ${BSDKIT_CONFIG} \
        > ${_tmpfile}
 
     yaml_list ${_tmpfile}
