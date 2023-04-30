@@ -3498,6 +3498,10 @@ config_list() {
     local _tmpfile
     _tmpfile=$(mktemp)
 
+    if [ ! -e ${BSDKIT_CONFIG} ]; then
+        touch ${BSDKIT_CONFIG}
+    fi
+
     yq ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
        /usr/local/etc/bsdkit.yml \
