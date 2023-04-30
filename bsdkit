@@ -3474,6 +3474,24 @@ __config_merge() {
        > ${_tmpfile}
 }
 
+__config_upgrade_key() {
+    if [ $# -lt 2 ]; then
+        error "config_update_key: missing arguments"
+    fi
+
+    local _old_key=$1
+    local _new_key=$2
+
+    local _value
+    _value=$(config_get ${_old_key})
+
+    if [ "${_value}" != "null" ]; then
+        echo "Upgrading ${_old_key} to ${_new_key}"
+        config_set ${_new_key} ${_value}
+        config_del ${_old_key}
+    fi
+}
+
 config_set() {
     if [ $# -lt 2 ]; then
         error "config_set: missing arguments"
