@@ -71,5 +71,6 @@
       - textproc/fzf
       - textproc/go-yq
       - textproc/jq
+      - textproc/py-pyaml
       - textproc/the_silver_searcher
     state: present

@@ -1563,6 +1563,7 @@ __install_setup_runtime() {
         sysutils/pv
         textproc/go-yq
         textproc/jq
+        textproc/py-pyaml
         # optional
         archivers/zip
         comms/kermit
