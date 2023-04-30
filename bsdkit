@@ -3541,17 +3541,14 @@ config_del() {
 config_list() {
     __check_py_yaml
 
-    local _tmpfile
-    _tmpfile=$(mktemp)
-
     if [ ! -e ${BSDKIT_CONFIG} ]; then
         touch ${BSDKIT_CONFIG}
     fi
 
-    yq ea '. as $item ireduce ({}; . * $item)' \
-       ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
-       ${BSDKIT_CONFIG} \
-       > ${_tmpfile}
+    local _tmpfile
+    _tmpfile=$(mktemp)
+
+    __config_merge ${_tmpfile}
 
     yaml_list ${_tmpfile}
 
