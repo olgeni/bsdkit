@@ -115,12 +115,12 @@
       debug:
         var: metadata_hostname
 
-    - name: Display bsdkit.update_dns
+    - name: Display bsdkit.enable_update_dns
       debug:
-        var: bsdkit.update_dns
+        var: bsdkit.enable_update_dns
 
     - name: Configure /etc/resolv.conf for DigitalOcean
-      when: bsdkit.update_dns
+      when: bsdkit.enable_update_dns
       copy:
         dest: /etc/resolv.conf
         content: |
