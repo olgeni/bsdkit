@@ -43,7 +43,7 @@
   notify: restart_syslogd
 
 - name: Enable '/dev/console' target in /etc/syslog.conf
-  when: bsdkit.console_syslog is defined and bsdkit.console_syslog
+  when: bsdkit.enable_console_syslog is defined and bsdkit.enable_console_syslog
   replace:
     path: /etc/syslog.conf
     regexp: ^#(.*/dev/console$)
@@ -51,7 +51,7 @@
   notify: restart_syslogd
 
 - name: Disable '/dev/console' target in /etc/syslog.conf
-  when: bsdkit.console_syslog is defined and not bsdkit.console_syslog
+  when: bsdkit.enable_console_syslog is defined and not bsdkit.enable_console_syslog
   replace:
     path: /etc/syslog.conf
     regexp: ^([^#].*/dev/console$)
