@@ -68,7 +68,7 @@
       - sysutils/ts
       - textproc/align
       - textproc/fzf
+      - textproc/go-yq
       - textproc/jq
       - textproc/the_silver_searcher
-      - textproc/go-yq
     state: present
