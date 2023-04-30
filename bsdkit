@@ -3491,6 +3491,10 @@ config_del() {
         error "config_del: missing arguments"
     fi
 
+    if [ ! -e ${BSDKIT_CONFIG} ]; then
+        touch ${BSDKIT_CONFIG}
+    fi
+
     local _key=$1
 
     yaml_del ${BSDKIT_CONFIG} ${_key}
