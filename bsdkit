@@ -1553,6 +1553,7 @@ __install_setup_runtime() {
     local _runtime=(
         # required
         devel/git
+        devel/gum
         lang/python
         net/py-netaddr
         ports-mgmt/pkg

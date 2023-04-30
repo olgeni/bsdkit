@@ -36,6 +36,7 @@
       - archivers/zip
       - devel/bsddialog
       - devel/git
+      - devel/gum
       - editors/bvi
       - editors/nano
       - editors/vim
