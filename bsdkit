@@ -3514,7 +3514,14 @@ config_get() {
 
     local _key=$1
 
-    yaml_get ${BSDKIT_CONFIG} ${_key}
+    local _tmpfile
+    _tmpfile=$(mktemp)
+
+    __config_merge ${_tmpfile}
+
+    yaml_get ${_tmpfile} ${_key}
+
+    rm -f ${_tmpfile}
 }
 
 config_del() {
