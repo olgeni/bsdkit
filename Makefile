@@ -1,5 +1,5 @@
 BSDKIT_ROOT_URL?=https://hub.olgeni.com/FreeBSD
-BSDKIT_VERSION?=13.1
+BSDKIT_VERSION?=13.2
 BSDKIT_PKGSET?=nox11
 
 all:

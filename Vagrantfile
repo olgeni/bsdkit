@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
   config.ssh.shell = "/bin/sh"
   config.ssh.forward_agent = true
 
-  config.vm.box = "freebsd/FreeBSD-13.1-RELEASE"
+  config.vm.box = "freebsd/FreeBSD-13.2-RELEASE"
   config.vm.boot_timeout = 3600
 
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
