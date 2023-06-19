@@ -3283,10 +3283,10 @@ purge_local_libdirs() {
 purge_pkg_tempfiles() {
     local _path=$1
 
-    find ${_path} -print0 \( -type f -o -type l \) \
-        | awk 'BEGIN { RS="\\0" } $0 ~ /\.[a-zA-Z0-9]{12}$/ { print $0 }' \
+    find ${_path} -print0 \
+        | awk 'BEGIN { RS="\\0" } $0 ~ /\.pkgtemp\.[^\/]*$/ { print $0 }' \
         | fzf -e -m --print0 \
-        | xargs -0 rm -v
+        | xargs -0 rm -r -v
 }
 
 purge_be() {
