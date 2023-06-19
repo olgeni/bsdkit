@@ -237,8 +237,8 @@ __check_py_pyaml() {
         return 0
     fi
 
-    if ! pkg info -q devel/py-pyaml > /dev/null 2>&1; then
-        pkg install -y devel/py-pyaml
+    if ! pkg info -q textproc/py-pyaml > /dev/null 2>&1; then
+        pkg install -y textproc/py-pyaml
     fi
 }
 
