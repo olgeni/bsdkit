@@ -228,9 +228,9 @@ __check_iocage() {
     fi
 }
 
-__check_py_yaml() {
-    if ! pkg info -q devel/py-yaml > /dev/null 2>&1; then
-        pkg install -y devel/py-yaml
+__check_py_pyaml() {
+    if ! pkg info -q devel/py-pyaml > /dev/null 2>&1; then
+        pkg install -y devel/py-pyaml
     fi
 }
 
@@ -238,7 +238,7 @@ __check_requirements() {
     __check_python3
     __check_ansible
     __check_go_yq
-    __check_py_yaml
+    __check_py_pyaml
 }
 
 __environment() {
@@ -3017,7 +3017,7 @@ EOF
 
 configure() {
     __check_go_yq
-    __check_py_yaml
+    __check_py_pyaml
 
     install -d -o root -g wheel -m 755 /usr/local/etc/ansible/facts.d
 
@@ -3037,7 +3037,7 @@ configure_jail() {
     fi
 
     __check_go_yq
-    __check_py_yaml
+    __check_py_pyaml
 
     local _jail_name=$1
 
@@ -3535,7 +3535,7 @@ config_del() {
 }
 
 config_list() {
-    __check_py_yaml
+    __check_py_pyaml
 
     [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
