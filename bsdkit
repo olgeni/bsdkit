@@ -245,8 +245,6 @@ __check_py_pyaml() {
 __check_requirements() {
     __check_python3
     __check_ansible
-    __check_go_yq
-    __check_py_pyaml
 }
 
 __environment() {
@@ -1684,6 +1682,8 @@ EOF
 }
 
 __install_facts() {
+    __check_go_yq
+
     local _destdir=$1
 
     if [ ! -d ${_destdir} ]; then
@@ -3025,7 +3025,6 @@ EOF
 
 configure() {
     __check_go_yq
-    __check_py_pyaml
 
     install -d -o root -g wheel -m 755 /usr/local/etc/ansible/facts.d
 
@@ -3045,7 +3044,6 @@ configure_jail() {
     fi
 
     __check_go_yq
-    __check_py_pyaml
 
     local _jail_name=$1
 
@@ -3426,6 +3424,8 @@ rc_get() {
 }
 
 yaml_set() {
+    __check_go_yq
+
     local _file=$1
     local _key=$2
     local _value=$3
@@ -3438,6 +3438,8 @@ yaml_set() {
 }
 
 yaml_get() {
+    __check_go_yq
+
     local _file=$1
     local _key=$2
 
@@ -3449,6 +3451,8 @@ yaml_get() {
 }
 
 yaml_del() {
+    __check_go_yq
+
     local _file=$1
     local _key=$2
 
@@ -3460,6 +3464,8 @@ yaml_del() {
 }
 
 yaml_list() {
+    __check_py_pyaml
+
     local _file=$1
 
     if [ ! -e ${_file} ]; then
@@ -3470,6 +3476,8 @@ yaml_list() {
 }
 
 __config_merge() {
+    __check_go_yq
+
     local _file=$1
 
     if [ ! -e ${_file} ]; then
