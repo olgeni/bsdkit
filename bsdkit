@@ -213,6 +213,10 @@ __check_ansible() {
 }
 
 __check_go_yq() {
+    if ! command -v pkg > /dev/null 2>&1; then
+        return 0
+    fi
+
     if ! command -v yq > /dev/null 2>&1; then
         pkg install -y textproc/go-yq
     else
