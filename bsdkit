@@ -233,6 +233,10 @@ __check_iocage() {
 }
 
 __check_py_pyaml() {
+    if ! command -v pkg > /dev/null 2>&1; then
+        return 0
+    fi
+
     if ! pkg info -q devel/py-pyaml > /dev/null 2>&1; then
         pkg install -y devel/py-pyaml
     fi
