@@ -1,4 +1,100 @@
 ---
+- name: Assert ownership and permissions of '/root'
+  file:
+    path: /root
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: Assert ownership and permissions of '/root/.ssh'
+  file:
+    path: /root/.ssh
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0755"
+
+- name: Check if '/root/.ssh/authorized_keys' exists
+  stat:
+    path: /root/.ssh/authorized_keys
+  register: authorized_keys_stat
+
+- name: Assert ownership and permissions of '/root/.ssh/authorized_keys'
+  file:
+    path: /root/.ssh/authorized_keys
+    owner: root
+    group: wheel
+    mode: "0600"
+  when: authorized_keys_stat.stat.exists
+
+- name: Check if '/root/.ssh/know_hosts' exists
+  stat:
+    path: /root/.ssh/know_hosts
+  register: know_hosts_stat
+
+- name: Assert ownership and permissions of '/root/.ssh/know_hosts'
+  file:
+    path: /root/.ssh/know_hosts
+    owner: root
+    group: wheel
+    mode: "0600"
+  when: know_hosts_stat.stat.exists
+
+- name: For all '/root/.ssh/id_*.pub' files, assert ownership and permissions
+  file:
+    path: "{{ item }}"
+    state: file
+    owner: root
+    group: wheel
+    mode: "0644"
+  with_fileglob:
+    - /root/.ssh/id_*.pub
+
+- name: Check if 'id_rsa' exists
+  stat:
+    path: /root/.ssh/id_rsa
+  register: id_rsa_stat
+
+- name: Set 'id_rsa' permissions
+  file:
+    path: /root/.ssh/id_rsa
+    mode: "0600"
+  when: id_rsa_stat.stat.exists
+
+- name: Check if 'id_ed25519' exists
+  stat:
+    path: /root/.ssh/id_ed25519
+  register: id_ed25519_stat
+
+- name: Set 'id_ed25519' permissions
+  file:
+    path: /root/.ssh/id_ed25519
+    mode: "0600"
+  when: id_ed25519_stat.stat.exists
+
+- name: Check if 'id_ecdsa' exists
+  stat:
+    path: /root/.ssh/id_ecdsa
+  register: id_ecdsa_stat
+
+- name: Set 'id_ecdsa' permissions
+  file:
+    path: /root/.ssh/id_ecdsa
+    mode: "0600"
+  when: id_ecdsa_stat.stat.exists
+
+- name: Check if 'id_dsa' exists
+  stat:
+    path: /root/.ssh/id_dsa
+  register: id_dsa_stat
+
+- name: Set 'id_dsa' permissions
+  file:
+    path: /root/.ssh/id_dsa
+    mode: "0600"
+  when: id_dsa_stat.stat.exists
+
 - name: Set 'UseDNS no' in /etc/ssh/sshd_config
   lineinfile:
     dest: /etc/ssh/sshd_config
