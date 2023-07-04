@@ -41,6 +41,12 @@
     mode: "0600"
   when: know_hosts_stat.stat.exists
 
+- name: Find all '/root/.ssh/id_*.pub' files and register their names
+  find:
+    paths: /root/.ssh
+    patterns: "id_*.pub"
+  register: ssh_public_keys
+
 - name: For all '/root/.ssh/id_*.pub' files, assert ownership and permissions
   file:
     path: "{{ item }}"
@@ -48,8 +54,7 @@
     owner: root
     group: wheel
     mode: "0644"
-  with_fileglob:
-    - /root/.ssh/id_*.pub
+  loop: "{{ ssh_public_keys.files | map(attribute='path') | list }}"
 
 - name: Check if 'id_rsa' exists
   stat:
