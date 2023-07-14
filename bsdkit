@@ -2114,7 +2114,7 @@ create_jail() {
 
     local _destdir=$1
 
-    create_jail_destdir ${_destdir}
+    __create_jail_destdir ${_destdir}
 
     BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir} ${=_options[*]}
 
@@ -2394,11 +2394,11 @@ EOF
     fi
 }
 
-create_jail_destdir() {
+__create_jail_destdir() {
     local _destdir=$1
 
     if [ -d ${_destdir} ]; then
-        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (create_jail_destdir)."
+        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (__create_jail_destdir)."
     fi
 
     local _dirname _basename _parent_fs
