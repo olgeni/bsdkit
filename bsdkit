@@ -203,6 +203,10 @@ reformat_rc_conf() {
 }
 
 reformat_loader_conf() {
+    if [ $# -ne 1 ]; then
+        usage "reformat_loader_conf <loader.conf>"
+    fi
+
     local _loader_conf=$1
 
     if [ ! -e ${_loader_conf} ]; then
