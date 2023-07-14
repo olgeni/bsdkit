@@ -3591,7 +3591,7 @@ config_set() {
 
 config_get() {
     if [ $# -lt 1 ]; then
-        error "config_get: missing arguments"
+        usage "config_get <key>"
     fi
 
     [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
