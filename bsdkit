@@ -3441,6 +3441,10 @@ ${_key}=\"${_value}\"
 }
 
 rc_delete() {
+    if [ $# -ne 2 ]; then
+        usage "rc_delete <file> <key>"
+    fi
+
     local _file=$1
     local _key=$2
 
