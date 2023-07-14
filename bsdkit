@@ -2420,6 +2420,10 @@ create_jail_destdir() {
 }
 
 remove_jail() {
+    if [ $# -ne 1 ]; then
+        usage "remove_jail <jail_name>"
+    fi
+
     local _destdir=$1
 
     __valid_destdir ${_destdir}
