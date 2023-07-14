@@ -3287,6 +3287,10 @@ rebuild_zpool_cache() {
 }
 
 purge_libdir() {
+    if [ $# -ne 1 ]; then
+        usage "purge_libdir <directory>"
+    fi
+
     local _directory=$1
 
     for _item in ${_directory}/*(/N); do
