@@ -3421,6 +3421,10 @@ zfs_create_postgresql() {
 }
 
 rc_set() {
+    if [ $# -ne 3 ]; then
+        usage "rc_set <file> <key> <value>"
+    fi
+
     local _file=$1
     local _key=$2
     local _value=$3
