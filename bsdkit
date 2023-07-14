@@ -3580,7 +3580,7 @@ __config_upgrade_key() {
 
 config_set() {
     if [ $# -lt 2 ]; then
-        error "config_set: missing arguments"
+        usage "config_set <key> <value>"
     fi
 
     local _key=$1
