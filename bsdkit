@@ -3478,6 +3478,10 @@ rc_get() {
 }
 
 yaml_set() {
+    if [ $# -ne 3 ]; then
+        usage "yaml_set <file> <key> <value>"
+    fi
+
     __check_go_yq
 
     local _file=$1
