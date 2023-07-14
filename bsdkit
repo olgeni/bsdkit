@@ -187,6 +187,10 @@ reformat_fstab() {
 }
 
 reformat_rc_conf() {
+    if [ $# -ne 1 ]; then
+        usage "reformat_rc_conf <rc.conf>"
+    fi
+
     local _rc_conf=$1
 
     if [ ! -e ${_rc_conf} ]; then
