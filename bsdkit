@@ -3610,7 +3610,7 @@ config_get() {
 
 config_del() {
     if [ $# -lt 1 ]; then
-        error "config_del: missing arguments"
+        usage "config_del <key>"
     fi
 
     [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
