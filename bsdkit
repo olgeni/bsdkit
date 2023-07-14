@@ -3496,6 +3496,10 @@ yaml_set() {
 }
 
 yaml_get() {
+    if [ $# -ne 2 ]; then
+        usage "yaml_get <file> <key>"
+    fi
+
     __check_go_yq
 
     local _file=$1
