@@ -90,6 +90,12 @@ error() {
     exit 1
 }
 
+usage() {
+    # Print a usage message to stderr and exit with a non-zero status.
+    echo "usage: $*" >&2
+    exit 1
+}
+
 is_yes() {
     # Return 0 if the argument is a positive answer, 1 if it is a negative
     case $1 in
