@@ -3513,6 +3513,10 @@ yaml_get() {
 }
 
 yaml_del() {
+    if [ $# -ne 2 ]; then
+        usage "yaml_del <file> <key>"
+    fi
+
     __check_go_yq
 
     local _file=$1
