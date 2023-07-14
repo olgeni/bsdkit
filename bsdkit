@@ -1777,6 +1777,10 @@ start_jail() {
 }
 
 stop_jail() {
+    if [ $# -ne 1 ]; then
+        usage "stop_jail <destdir>"
+    fi
+
     local _destdir=$1
     __valid_destdir ${_destdir}
 
