@@ -3454,6 +3454,10 @@ rc_delete() {
 }
 
 rc_get() {
+    if [ $# -ne 2 ]; then
+        usage "rc_get <file> <key>"
+    fi
+
     local _file=$1
     local _key=$2
 
