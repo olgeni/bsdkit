@@ -171,6 +171,10 @@ platform_is_cloud() {
 }
 
 reformat_fstab() {
+    if [ $# -ne 1 ]; then
+        usage "reformat_fstab <fstab>"
+    fi
+
     local _fstab=$1
 
     if [ ! -e ${_fstab} ]; then
