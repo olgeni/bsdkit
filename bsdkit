@@ -3219,6 +3219,10 @@ osreldate() {
 }
 
 echo_jail_conf() {
+    if [ $# -ne 1 ]; then
+        usage "echo_jail_conf <destdir>"
+    fi
+
     local _destdir=$1
 
     __valid_destdir ${_destdir}
