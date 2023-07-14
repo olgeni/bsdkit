@@ -3530,6 +3530,10 @@ yaml_del() {
 }
 
 yaml_list() {
+    if [ $# -ne 1 ]; then
+        usage "yaml_list <file>"
+    fi
+
     __check_py_pyaml
 
     local _file=$1
