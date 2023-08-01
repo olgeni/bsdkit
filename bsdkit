@@ -3337,6 +3337,19 @@ purge_pkg_tempfiles() {
         | xargs -0 rm -r -v
 }
 
+check_pkg_tempfiles() {
+    if [ $# -ne 1 ]; then
+        usage "check_pkg_tempfiles <path>"
+    fi
+
+    local _path=$1
+
+    if ! find ${_path} -print0 \
+            | awk 'BEGIN { RS="\\0"; exit_code = 0; } $0 ~ /\.pkgtemp\.[^\/]*$/ { exit_code = 1; } END { exit exit_code; }'; then
+        error "check_pkg_tempfiles: found temporary files."
+    fi
+}
+
 purge_be() {
     if [ $(bectl list -H | grep NR | wc -l) -ne 1 ]; then
         error "cannot find valid boot environment"
