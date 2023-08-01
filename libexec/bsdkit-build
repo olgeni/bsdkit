@@ -5,17 +5,17 @@ set -e -u -o pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+error() {
+    echo "[${SCRIPT_NAME}] $*" >&2
+    exit 1
+}
+
 BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 
 DEFAULT_VERSION=13
 DEFAULT_ARCH=amd64
 
 unset POSIXLY_CORRECT
-
-error() {
-    echo "${SCRIPT_NAME}: $@"
-    exit 1
-}
 
 if [ $(whoami) != "root" ]; then
     error "must be executed as root."

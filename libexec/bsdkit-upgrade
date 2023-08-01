@@ -2,6 +2,14 @@
 
 set -e -u -o pipefail
 
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+error() {
+    echo "[${SCRIPT_NAME}] $*" >&2
+    exit 1
+}
+
 autoload throw catch
 
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
@@ -27,12 +35,7 @@ get_current_version() {
 }
 
 message() {
-    echo "bsdkit-upgrade: $*"
-}
-
-error() {
-    echo "bsdkit-upgrade: $*"
-    exit 1
+    echo "[bsdkit-upgrade] $*"
 }
 
 cleanup() {

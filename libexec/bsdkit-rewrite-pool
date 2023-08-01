@@ -4,8 +4,11 @@
 
 set -e -u -o pipefail
 
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
 error() {
-    echo "bsdkit-rewrite-pool: $*"
+    echo "[${SCRIPT_NAME}] $*" >&2
     exit 1
 }
 

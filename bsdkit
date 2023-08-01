@@ -70,6 +70,15 @@ BSDKIT_SRCDIR=$(dirname "$(realpath "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
 ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
 
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+error() {
+    # Print an error message to stderr and exit with a non-zero status.
+    echo "[${SCRIPT_NAME}] $*" >&2
+    exit 1
+}
+
 if command -v pv > /dev/null 2>&1; then
     CAT_CMD=(pv -i ${BSDKIT_PV_UPDATE_DELAY})
 else
@@ -83,12 +92,6 @@ fi
 if [ -z ${BSDKIT_SSH_PUBLIC_KEY} ] && [ -e ~/.ssh/id_rsa.pub ]; then
     BSDKIT_SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)"
 fi
-
-error() {
-    # Print an error message to stderr and exit with a non-zero status.
-    echo "bsdkit: $*" >&2
-    exit 1
-}
 
 usage() {
     # Print a usage message to stderr and exit with a non-zero status.
