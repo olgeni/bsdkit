@@ -150,6 +150,7 @@ case $(uname) in
     Darwin)
         # PATH is taken care of in /etc/paths
         export PATH=$PATH:~/bin:~/.local/bin
+        ulimit -n 65535
         ;;
     FreeBSD)
         export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/bin:/usr/local/sbin:~/bin:~/.local/bin
