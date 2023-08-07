@@ -34,9 +34,9 @@ Options and arguments:
     -P: build images with packages
     -R: build release
     -S: build staging
-    -I: build iso image
-    -U: build usb image
-    -A: build release/staging/iso/usb
+    -I: build ISO image
+    -U: build USB image
+    -A: build release/staging/ISO/USB
 
 EOF
 fi
