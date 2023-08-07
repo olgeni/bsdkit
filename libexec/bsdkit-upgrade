@@ -337,7 +337,7 @@ find ${DESTDIR}/bin \
     -exec chflags noschg {} \;
 
 if [ -f ${_srcdir}/Makefile ]; then
-    etcupdate -p -s ${_srcdir} -D ${DESTDIR}/
+    etcupdate -F -p -s ${_srcdir} -D ${DESTDIR}/
 fi
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
