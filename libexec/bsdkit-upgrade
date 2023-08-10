@@ -306,9 +306,7 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
     _srcdir=${DESTDIR}/usr/src
 fi
 
-if [ -f ${_srcdir}/Makefile ]; then
-    etcupdate resolve -s ${_srcdir} -D ${DESTDIR}/
-fi
+etcupdate resolve -D ${DESTDIR}/
 
 export PATH=/rescue:${PATH}
 
