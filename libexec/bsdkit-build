@@ -126,6 +126,8 @@ build_release() {
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         install DESTDIR=${OS_RELDIR}
 
+    etcupdate build -s ${OS_SRCDIR} ${OS_RELDIR}/ftp/etcupdate.tar.bz2
+
     env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         clean
