@@ -116,6 +116,14 @@
     insertafter: EOF
   # notify: restart_sshd
 
+- name: Set 'PermitUserEnvironment yes' in /etc/ssh/sshd_config
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: PermitUserEnvironment yes
+    regexp: ^PermitUserEnvironment
+    insertafter: EOF
+  # notify: restart_sshd
+
 - name: Create ssh directory for root
   file:
     path: /root/.ssh
