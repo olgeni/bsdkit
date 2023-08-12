@@ -106,6 +106,7 @@
     line: UseDNS no
     regexp: ^UseDNS
     insertafter: EOF
+    validate: /usr/sbin/sshd -t -f %s
   # notify: restart_sshd
 
 - name: Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config
@@ -114,6 +115,7 @@
     line: PermitRootLogin without-password
     regexp: ^PermitRootLogin
     insertafter: EOF
+    validate: /usr/sbin/sshd -t -f %s
   # notify: restart_sshd
 
 - name: Set 'PermitUserEnvironment yes' in /etc/ssh/sshd_config
@@ -122,6 +124,7 @@
     line: PermitUserEnvironment yes
     regexp: ^PermitUserEnvironment
     insertafter: EOF
+    validate: /usr/sbin/sshd -t -f %s
   # notify: restart_sshd
 
 - name: Create ssh directory for root
