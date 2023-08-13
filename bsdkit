@@ -3587,10 +3587,23 @@ __config_upgrade_key() {
     local _value
     _value=$(config_get ${_old_key})
 
+    if [ $? -ne 0 ]; then
+        error "Failed to get the value of ${_old_key}"
+    fi
+
     if [ "${_value}" != "null" ]; then
         echo "Upgrading ${_old_key} to ${_new_key}"
         config_set ${_new_key} ${_value}
+
+        if [ $? -ne 0 ]; then
+            error "Failed to set the value of ${_new_key}"
+        fi
+
         config_del ${_old_key}
+
+        if [ $? -ne 0 ]; then
+            error "Failed to delete the key ${_old_key}"
+        fi
     fi
 }
 
