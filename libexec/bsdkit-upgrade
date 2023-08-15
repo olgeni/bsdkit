@@ -337,10 +337,10 @@ find ${DESTDIR}/bin \
     -flags -schg \
     -exec chflags noschg {} \;
 
-if [ -f ${_srcdir}/Makefile ]; then
-    etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
-elif [ -f ${_release}/etcupdate.tar.bz2 ]; then
+if [ -f ${_release}/etcupdate.tar.bz2 ]; then
     etcupdate -F -p -D ${DESTDIR}/ -t ${_release}/etcupdate.tar.bz2
+elif [ -f ${_srcdir}/Makefile ]; then
+    etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
 fi
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
@@ -393,12 +393,12 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     fi
 done
 
-if [ -f ${_srcdir}/Makefile ]; then
-    echo "Running: etcupdate (src)"
-    etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
-elif [ -f ${_release}/etcupdate.tar.bz2 ]; then
+if [ -f ${_release}/etcupdate.tar.bz2 ]; then
     echo "Running: etcupdate (tar)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -t ${_release}/etcupdate.tar.bz2
+elif [ -f ${_srcdir}/Makefile ]; then
+    echo "Running: etcupdate (src)"
+    etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
 fi
 
 echo "Running: mtree"
