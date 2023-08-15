@@ -73,8 +73,11 @@ ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+message() {
+    echo "[${SCRIPT_NAME}] $*"
+}
+
 error() {
-    # Print an error message to stderr and exit with a non-zero status.
     echo "[${SCRIPT_NAME}] $*" >&2
     exit 1
 }

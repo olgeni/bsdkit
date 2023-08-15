@@ -5,6 +5,10 @@ set -e -u -o pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+message() {
+    echo "[${SCRIPT_NAME}] $*"
+}
+
 error() {
     echo "[${SCRIPT_NAME}] $*" >&2
     exit 1
@@ -32,10 +36,6 @@ autoload throw catch
 get_current_version() {
     local _version="$(uname -r | cut -d '-' -f 1)"
     echo "${_version}"
-}
-
-message() {
-    echo "[bsdkit-upgrade] $*"
 }
 
 cleanup() {
