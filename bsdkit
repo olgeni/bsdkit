@@ -2217,16 +2217,17 @@ make_thin_jail() {
         "usr/libdata"
         "usr/libexec"
         "usr/sbin"
-        "usr/share")
+        "usr/share"
+    )
 
     if is_yes ${BSDKIT_INSTALL_SRC}; then
-        _directory_list+=("usr/src")
+        _directory_list+="usr/src"
     else
         rm -r -f ${_destdir}/usr/src
     fi
 
     if is_yes ${BSDKIT_INSTALL_TESTS}; then
-        _directory_list+=("usr/tests")
+        _directory_list+="usr/tests"
     else
         rm -r -f ${_destdir}/usr/tests
     fi
