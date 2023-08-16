@@ -1235,50 +1235,56 @@ __install_release() {
         local _extract="NO"
         local _options=()
 
+        local excluded_files=()
+
+        local thin_exclude_list=(
+            "bin"
+            "boot"
+            "lib"
+            "libexec"
+            "rescue"
+            "sbin"
+            "usr/bin"
+            "usr/include"
+            "usr/lib"
+            "usr/lib32"
+            "usr/libdata"
+            "usr/libexec"
+            "usr/sbin"
+            "usr/share"
+            "usr/src"
+            "usr/tests"
+        )
+
+        local test_exclude_list=(
+            "usr/tests"
+        )
+
         if is_yes ${_thin}; then
-            _options+="--exclude ./bin"
-            _options+="--exclude ./boot"
-            _options+="--exclude ./lib"
-            _options+="--exclude ./libexec"
-            _options+="--exclude ./rescue"
-            _options+="--exclude ./sbin"
-            _options+="--exclude ./usr/bin"
-            _options+="--exclude ./usr/include"
-            _options+="--exclude ./usr/lib"
-            _options+="--exclude ./usr/lib32"
-            _options+="--exclude ./usr/libdata"
-            _options+="--exclude ./usr/libexec"
-            _options+="--exclude ./usr/sbin"
-            _options+="--exclude ./usr/share"
-            _options+="--exclude ./usr/src"
-            _options+="--exclude ./usr/tests"
+            for item in ${thin_exclude_list[@]}; do
+                excluded_files+=${item}
+            done
         fi
 
         if ! is_yes ${BSDKIT_INSTALL_TESTS}; then
-            _options+="--exclude ./usr/tests"
+            for item in ${test_exclude_list[@]}; do
+                excluded_files+=${item}
+            done
         fi
 
+        for item in ${excluded_files[@]}; do
+            _options+="--exclude ./${item} "
+        done
+
         case ${_package} in
-            kernel_dbg)
-                if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="YES"
-                fi
-                ;;
-
-            base_dbg)
-                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="YES"
-                fi
-                ;;
-
-            lib32_dbg)
-                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="YES"
-                fi
-                ;;
-
             kernel)
                 if is_yes ${BSDKIT_INSTALL_KERNEL}; then
+                    _extract="YES"
+                fi
+                ;;
+
+            kernel_dbg)
+                if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
                     _extract="YES"
                 fi
                 ;;
@@ -1287,13 +1293,26 @@ __install_release() {
                 _extract="YES"
                 ;;
 
+            base_dbg)
+                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _extract="YES"
+                fi
+                ;;
+
             lib32)
                 _options+="--exclude ./etc"
                 _extract="YES"
                 ;;
 
+            lib32_dbg)
+                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                    _extract="YES"
+                fi
+                ;;
+
             src)
                 if is_yes ${BSDKIT_INSTALL_SRC}; then
+                    # undo the effect of earlier exclusion
                     _options+="--include ./usr/src"
                     _extract="YES"
                 fi
@@ -1301,6 +1320,7 @@ __install_release() {
 
             tests)
                 if is_yes ${BSDKIT_INSTALL_TESTS}; then
+                    # undo the effect of earlier exclusion
                     _options+="--include ./usr/tests"
                     _extract="YES"
                 fi
