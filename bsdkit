@@ -3406,7 +3406,7 @@ start_local() {
 
     if [[ "${_services[@]}" =~ "/usr/local/etc/rc.d/monit" ]]; then
         _services=(${_services[@]/\/usr\/local\/etc\/rc.d\/monit})
-        _services+=("/usr/local/etc/rc.d/monit")
+        _services+="/usr/local/etc/rc.d/monit"
     fi
 
     for service in "${_services[@]}"; do
