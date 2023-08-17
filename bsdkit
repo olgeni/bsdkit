@@ -3386,12 +3386,8 @@ check_pkg_tempfiles() {
 }
 
 purge_be() {
-    if [ $(bectl list -H | grep NR | wc -l) -ne 1 ]; then
-        error "cannot find valid boot environment"
-    fi
-
     bectl list -H \
-        | awk '$2 != "NR" { print $1 }' \
+        | awk '$2 != "NR" && $2 != "R" && $2 != "N" { print $1 }' \
         | xargs -t -I {} bectl destroy -Fo {}
 }
 
