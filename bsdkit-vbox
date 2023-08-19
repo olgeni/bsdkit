@@ -145,8 +145,12 @@ perform_destroy() {
     fi
 }
 
-perform_snapshot() {
+perform_take_snapshot() {
     VBoxManage snapshot ${BSDKIT_VBOX_NAME} take "$(date +%Y%m%d-%H%M%S)"
+}
+
+perform_list_snapshots() {
+    VBoxManage snapshot ${BSDKIT_VBOX_NAME} list
 }
 
 perform_purge() {
@@ -241,8 +245,12 @@ case ${_command} in
         perform_destroy
         ;;
 
-    snapshot)
-        perform_snapshot
+    take-snapshot)
+        perform_take_snapshot
+        ;;
+
+    list-snapshots)
+        perform_list_snapshots
         ;;
 
     purge)

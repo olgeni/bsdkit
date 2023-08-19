@@ -33,6 +33,12 @@ destroy-vm:
 	@$(CURDIR)/bsdkit-vbox poweroff || :
 	@$(CURDIR)/bsdkit-vbox destroy || :
 
+take-snapshot:
+	@$(CURDIR)/bsdkit-vbox take-snapshot
+
+list-snapshots:
+	@$(CURDIR)/bsdkit-vbox list-snapshots
+
 sync-vm:
 	@$(CURDIR)/bsdkit-vbox sync_vm
 
