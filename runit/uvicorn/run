@@ -33,9 +33,11 @@ fi
 : ${UVICORN_ARGS=""}
 : ${UVICORN_APP:="app:app"}
 : ${UVICORN_VENV:="${UVICORN_PATH}/.venv"}
+: ${UVICORN_PYTHON:="python3"}
+: ${UVICORN_PYTHON_FLAGS=""}
 
 cd ${UVICORN_PATH}
 
 . ${UVICORN_VENV}/bin/activate
 
-exec env -S "${ENVRC}" chpst -u ${UVICORN_USER} ${CHPST_ARGS} uvicorn ${UVICORN_ARGS} ${UVICORN_APP}
+exec env -S "${ENVRC}" chpst -u ${UVICORN_USER} ${CHPST_ARGS} ${UVICORN_PYTHON} ${UVICORN_PYTHON_FLAGS} -m uvicorn ${UVICORN_ARGS} ${UVICORN_APP}
