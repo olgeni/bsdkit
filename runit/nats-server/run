@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# B41FC276-D139-405E-A31E-16940C01A972
+# b41fc276-d139-405e-a31e-16940c01a972
 
 set -e -u -o pipefail
 
