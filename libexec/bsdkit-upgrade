@@ -320,6 +320,24 @@ if is_yes ${_install_src}; then
         rm -r -f ${_file}
     done
 
+    # In the Zsh shell, `${=VAR_NAME}` is a parameter expansion that
+    # performs word splitting on the value of `VAR_NAME`.
+
+    # In the case of `${=CAT_CMD}`, it means that the value of `CAT_CMD`
+    # will be subject to word splitting. This is often used when the value
+    # of `CAT_CMD` contains multiple words or filenames separated by
+    # whitespaces. The word splitting will break the value into separate
+    # words, which can be useful when passing them as arguments to a
+    # command.
+
+    # For example, if `CAT_CMD` is defined as `"/bin/cat -n"`, then
+    # `${=CAT_CMD}` will result in `"/bin/cat"` and `"-n"` being treated as
+    # separate words, which can be useful when using the value as arguments
+    # to a command or in a command substitution.
+
+    # It's worth noting that `${=VAR_NAME}` is specific to Zsh and is not
+    # available in other shells like Bash.
+
     ${=CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
 fi
 
