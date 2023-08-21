@@ -133,6 +133,7 @@
     block: |
       AcceptEnv GITHUB_*
       AcceptEnv GITLAB_*
+      AcceptEnv NPM_*
       AcceptEnv OPENAI_API_KEY
     marker: "# {mark} ANSIBLE MANAGED BLOCK (AcceptEnv)"
     validate: /usr/sbin/sshd -t -f %s
