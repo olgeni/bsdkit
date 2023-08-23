@@ -42,7 +42,8 @@
 - name: Set public network
   set_fact:
     public_network: "{{ public_address }}/{{ public_netmask | ansible.utils.ipaddr('prefix') }}"
-  when: public_interface is defined
+  when: |
+    public_address is defined and public_address != '' and public_netmask is defined and public_netmask != ''
 
 - name: Display public_network
   debug:
