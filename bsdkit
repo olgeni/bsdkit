@@ -43,6 +43,10 @@ autoload throw catch
 : ${BSDKIT_JAIL_PROXY:=""}
 : ${BSDKIT_SWAP_DEVICE_SIZE:="8"}
 
+# Ansible
+: ${ANSIBLE_DISPLAY_OK_HOSTS:="true"}
+: ${ANSIBLE_DISPLAY_SKIPPED_HOSTS:="true"}
+
 # Default release and package URLs
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:="13.2"}
@@ -307,7 +311,9 @@ __environment() {
         BSDKIT_ARCH=\"${BSDKIT_ARCH}\" \
         BSDKIT_TREE=\"${BSDKIT_TREE}\" \
         BSDKIT_PKGSET=\"${BSDKIT_PKGSET}\" \
-        BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\"
+        BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\" \
+        ANSIBLE_DISPLAY_OK_HOSTS=\"${ANSIBLE_DISPLAY_OK_HOSTS}\" \
+        ANSIBLE_DISPLAY_SKIPPED_HOSTS=\"${ANSIBLE_DISPLAY_SKIPPED_HOSTS}\"
 }
 
 __parse_url() {
@@ -2865,6 +2871,20 @@ build_setup_img() {
 
     rm -f ${_efi_img}
     rm -f ${_ufs_img}
+}
+
+with-quiet() {
+    env \
+        ANSIBLE_DISPLAY_OK_HOSTS=false \
+        ANSIBLE_DISPLAY_SKIPPED_HOSTS=false \
+        ${BSDKIT_SCRIPT} ${(@s/ /)@}
+}
+
+with-verbose() {
+    env \
+        ANSIBLE_DISPLAY_OK_HOSTS=true \
+        ANSIBLE_DISPLAY_SKIPPED_HOSTS=true \
+        ${BSDKIT_SCRIPT} ${(@s/ /)@}
 }
 
 deploy() {
