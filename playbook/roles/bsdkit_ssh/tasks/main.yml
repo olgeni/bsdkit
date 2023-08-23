@@ -5,7 +5,7 @@
     state: directory
     owner: root
     group: wheel
-    mode: "0755"
+    mode: "0750"
 
 - name: Assert ownership and permissions of '/root/.ssh'
   file:
