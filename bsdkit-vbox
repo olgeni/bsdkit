@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 set -e -u -o pipefail
 
@@ -134,6 +134,7 @@ perform_destroy() {
                 --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
                 --medium none >/dev/null 2>&1 || :
             VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete >/dev/null 2>&1 || :
+
             rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
             _sata_port=$((_sata_port + 1))
