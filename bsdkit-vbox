@@ -25,6 +25,10 @@ which nc > /dev/null 2>&1 || error 'nc not found'
 : ${BSDKIT_LAST_DISK="3"}
 : ${BSDKIT_LAST_DISK_LIMIT="8"}
 
+IDE_CONTROLLER_NAME="IDE Controller"
+SATA_CONTROLLER_NAME="SATA Controller"
+VIRTIO_CONTROLLER_NAME="VirtIO Controller"
+
 perform_create() {
     [ -f "${BSDKIT_VBOX_ISO}" ] || error "ISO file does not exist."
 
@@ -39,32 +43,39 @@ perform_create() {
         --vrdeproperty "VNCPassword=${BSDKIT_VBOX_VNC_PASSWORD}" \
         --vrde on
 
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --memory ${BSDKIT_VBOX_MEMORY}
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --vram ${BSDKIT_VBOX_VRAM}
-
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --keyboard usb
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --mouse usbtablet
+    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} \
+               --memory ${BSDKIT_VBOX_MEMORY} \
+               --vram ${BSDKIT_VBOX_VRAM} \
+               --keyboard usb \
+               --mouse usbtablet
 
     if [ -n "${BSDKIT_VBOX_EFI}" ]; then
         # bios|efi|efi32|efi64
         VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --firmware efi
     fi
 
-    VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name "IDE Controller" --add ide --hostiocache on
-    VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name "SATA Controller" --add sata --hostiocache on
+    VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name ${IDE_CONTROLLER_NAME} --add ide --hostiocache on
+    VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name ${SATA_CONTROLLER_NAME} --add sata --hostiocache on
+    VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name ${VIRTIO_CONTROLLER_NAME} --add virtio --hostiocache on
 
     _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
 
     local _sata_port
     _sata_port=0
 
-    for _i in $(seq 0 ${BSDKIT_LAST_DISK}); do
-        VBoxManage createmedium disk --size ${BSDKIT_VBOX_DISK_SIZE} --format VDI \
-            --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+    for _i in $(seq 0 ${BSDKIT_LAST_DISK})
+    do
+        VBoxManage createmedium disk \
+                   --size ${BSDKIT_VBOX_DISK_SIZE} \
+                   --format VDI \
+                   --filename "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
         VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-            --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
-            --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+                   --storagectl ${VIRTIO_CONTROLLER_NAME} \
+                   --port ${_sata_port} \
+                   --device 0 \
+                   --type hdd \
+                   --medium "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
 
         _sata_port=$((_sata_port + 1))
     done
@@ -72,10 +83,11 @@ perform_create() {
     # VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --nic1 bridged --bridgeadapter1 re0
     # VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 delete ssh
 
-    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --natpf1 ssh,tcp,,${BSDKIT_VBOX_SSH_PORT},,22
+    VBoxManage modifyvm ${BSDKIT_VBOX_NAME} \
+               --natpf1 ssh,tcp,,${BSDKIT_VBOX_SSH_PORT},,22
 
     VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-        --storagectl "IDE Controller" \
+        --storagectl ${IDE_CONTROLLER_NAME} \
         --port 0 \
         --device 0 \
         --type dvddrive \
@@ -85,7 +97,8 @@ perform_create() {
 perform_start() {
     VBoxManage startvm --type ${BSDKIT_VBOX_GUI_TYPE} ${BSDKIT_VBOX_NAME}
 
-    while ! nc -w 1 localhost ${BSDKIT_VBOX_SSH_PORT} | grep SSH > /dev/null 2>&1; do
+    while ! nc -w 1 localhost ${BSDKIT_VBOX_SSH_PORT} | grep SSH > /dev/null 2>&1
+    do
         sleep 1
     done
 }
@@ -94,11 +107,19 @@ perform_stop() {
     if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
         VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
 
-        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1
+        do
             sleep 1
         done
 
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive > /dev/null 2>&1; do
+        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
+                --storagectl ${IDE_CONTROLLER_NAME} \
+                --port 0 \
+                --device 0 \
+                --medium emptydrive \
+                > /dev/null 2>&1
+        do
+            echo "perform_stop: waiting for emptydrive"
             sleep 1
         done
     fi
@@ -110,11 +131,19 @@ perform_poweroff() {
 
         sleep 1
 
-        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1
+        do
             sleep 1
         done
 
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} --storagectl "IDE Controller" --port 0 --device 0 --medium emptydrive > /dev/null 2>&1; do
+        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
+                --storagectl ${IDE_CONTROLLER_NAME} \
+                --port 0 \
+                --device 0 \
+                --medium emptydrive \
+                > /dev/null 2>&1
+        do
+            echo "perform_poweroff: waiting for emptydrive"
             sleep 1
         done
     fi
@@ -129,10 +158,15 @@ perform_destroy() {
         local _sata_port
         _sata_port=0
 
-        for _i in $(seq 0 ${BSDKIT_LAST_DISK_LIMIT}); do
+        for _i in $(seq 0 ${BSDKIT_LAST_DISK_LIMIT})
+        do
             VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-                --storagectl "SATA Controller" --port ${_sata_port} --device 0 --type hdd \
-                --medium none >/dev/null 2>&1 || :
+                       --storagectl ${VIRTIO_CONTROLLER_NAME} \
+                       --port ${_sata_port} \
+                       --device 0 \
+                       --type hdd \
+                       --medium none >/dev/null 2>&1 || :
+
             VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete >/dev/null 2>&1 || :
 
             rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
@@ -200,7 +234,8 @@ perform_logtail() {
 }
 
 OPTIND=1
-while getopts "i:p:e" OPT; do
+while getopts "i:p:e" OPT
+do
     case ${OPT} in
         i)
             BSDKIT_VBOX_ISO="${OPTARG}"
