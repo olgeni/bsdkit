@@ -3388,6 +3388,7 @@ purge_libdir() {
 
 purge_local_libdirs() {
     purge_libdir /usr/local/lib/ruby
+    purge_libdir /usr/local/lib/ruby/gems
     purge_libdir /usr/local/lib/ruby/site_ruby
     purge_libdir /usr/local/lib/ruby/vendor_ruby
     purge_libdir /usr/local/lib/perl5
