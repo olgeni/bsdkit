@@ -3253,8 +3253,22 @@ __enable_swap_device_aws() {
 update() {
     [ -d ${BSDKIT_SRCDIR}/.git ] || error "local git repository not found"
 
-    cd ${BSDKIT_SRCDIR} && git fetch || error "git fetch failed"
-    cd ${BSDKIT_SRCDIR} && git reset --hard origin/master
+    cd ${BSDKIT_SRCDIR}
+
+    local _current_hash=$(git rev-parse --short HEAD)
+
+    git fetch || error "git fetch failed."
+
+    local _remote_hash=$(git rev-parse --short origin/master)
+
+    if [ ${_current_hash} = ${_remote_hash} ]; then
+        message "already up-to-date."
+        return 0
+    fi
+
+    git reset --hard ${_remote_hash} || error "git reset failed."
+
+    git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
 }
 
 osrelease() {
