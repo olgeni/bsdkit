@@ -3732,6 +3732,25 @@ config_upgrade() {
     __config_upgrade_key "console_syslog" "enable_console_syslog"
 }
 
+destroy_snapshots() {
+    if ! command -v fzf > /dev/null 2>&1; then
+        error "required command missing (fzf)"
+        return 69
+    fi
+
+    local _snapshot
+
+    zfs list -H -o name -t snap \
+        | awk -F@ '{ print $2 "|" $0 }' \
+        | sort --reverse \
+        | column -t -s\| \
+        | fzf --exact --multi --no-sort --height=50% --print0 \
+        | while IFS=$'\0' read -r -d '' _snapshot; do
+
+        zfs destroy -v $(echo ${_snapshot} | cut -w -f2-64)
+    done
+}
+
 if [ $# -gt 0 ]; then
     ${(@s/ /)@}
 fi
