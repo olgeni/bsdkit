@@ -106,18 +106,22 @@ osmajor() {
 rebuild_port() {
     local _port="$1"
 
-    if pkg info -q ${_port}; then
-        if [ $(osmajor /) = $(osmajor ${BOOTENV_MOUNT}) -a -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
-            mount -t devfs devfs ${BOOTENV_MOUNT}/dev
-
-            pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
-            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean all deinstall install
-            chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean
-            pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
-
-            umount -f ${BOOTENV_MOUNT}/dev
-        fi
+    if ! pkg info -q ${_port}; then
+        return 0
     fi
+
+    if ! [ $(osmajor /) = $(osmajor ${BOOTENV_MOUNT}) -a -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
+        return 0
+    fi
+
+    mount -t devfs devfs ${BOOTENV_MOUNT}/dev
+
+    pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
+    chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean all deinstall install
+    chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean
+    pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
+
+    umount -f ${BOOTENV_MOUNT}/dev
 }
 
 trap cleanup EXIT
