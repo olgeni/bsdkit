@@ -100,6 +100,31 @@
     mode: "0600"
   when: id_dsa_stat.stat.exists
 
+- name: Check if /etc/ssh/ssh_host_ecdsa_key.pub exists
+  stat:
+    path: /etc/ssh/ssh_host_ecdsa_key.pub
+  register: ssh_host_ecdsa_key_pub_stat
+
+- name: Check if /etc/ssh/ssh_host_ed25519_key.pub exists
+  stat:
+    path: /etc/ssh/ssh_host_ed25519_key.pub
+  register: ssh_host_ed25519_key_pub_stat
+
+- name: Check if /etc/ssh/ssh_host_rsa_key.pub exists
+  stat:
+    path: /etc/ssh/ssh_host_rsa_key.pub
+  register: ssh_host_rsa_key_pub_stat
+
+- name: Generate SSH host keys
+  command:
+    cmd: service sshd keygen
+  when: >
+    (
+      not ssh_host_ecdsa_key_pub_stat.stat.exists
+      or not ssh_host_ed25519_key_pub_stat.stat.exists
+      or not ssh_host_rsa_key_pub_stat.stat.exists
+    )
+
 - name: Set 'UseDNS no' in /etc/ssh/sshd_config
   lineinfile:
     dest: /etc/ssh/sshd_config
