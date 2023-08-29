@@ -1,0 +1,14 @@
+---
+- name: Link /usr/share/examples/jails/jng to /usr/local/sbin/
+  file:
+    src: /usr/share/examples/jails/jng
+    dest: /usr/local/sbin/jib
+    state: link
+    force: yes
+
+- name: Link /usr/src/share/examples/jails/jng to /usr/local/sbin/
+  file:
+    src: /usr/src/share/examples/jails/jng
+    dest: /usr/local/sbin/jng
+    state: link
+    force: yes

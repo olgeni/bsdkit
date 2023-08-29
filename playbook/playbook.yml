@@ -63,6 +63,7 @@
     - role: bsdkit_ntpd
     - role: bsdkit_fail2ban
     - role: bsdkit_iocage
+    - role: bsdkit_jail
 
 - name: Provisioning (DigitalOcean)
   hosts: all
