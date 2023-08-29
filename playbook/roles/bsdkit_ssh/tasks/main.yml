@@ -132,7 +132,7 @@
     regexp: ^UseDNS
     insertafter: EOF
     validate: /usr/sbin/sshd -t -f %s
-  # notify: restart_sshd
+  notify: restart_sshd
 
 - name: Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config
   lineinfile:
@@ -141,7 +141,7 @@
     regexp: ^PermitRootLogin
     insertafter: EOF
     validate: /usr/sbin/sshd -t -f %s
-  # notify: restart_sshd
+  notify: restart_sshd
 
 - name: Set 'PermitUserEnvironment yes' in /etc/ssh/sshd_config
   lineinfile:
@@ -150,7 +150,7 @@
     regexp: ^PermitUserEnvironment
     insertafter: EOF
     validate: /usr/sbin/sshd -t -f %s
-  # notify: restart_sshd
+  notify: restart_sshd
 
 - name: Set 'AcceptEnv' block in /etc/ssh/sshd_config
   blockinfile:
@@ -162,7 +162,7 @@
       AcceptEnv OPENAI_API_KEY
     marker: "# {mark} ANSIBLE MANAGED BLOCK (AcceptEnv)"
     validate: /usr/sbin/sshd -t -f %s
-  # notify: restart_sshd
+  notify: restart_sshd
 
 - name: Create SSH directory for root
   file:
