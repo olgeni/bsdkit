@@ -1,14 +1,12 @@
 ---
-- name: Link /usr/share/examples/jails/jng to /usr/local/sbin/
-  file:
-    src: /usr/share/examples/jails/jng
+- name: Copy /usr/share/examples/jails/jib to /usr/local/sbin/
+  copy:
+    src: /usr/share/examples/jails/jib
     dest: /usr/local/sbin/jib
-    state: link
-    force: yes
+    mode: 0755
 
-- name: Link /usr/src/share/examples/jails/jng to /usr/local/sbin/
-  file:
-    src: /usr/src/share/examples/jails/jng
+- name: Copy /usr/share/examples/jails/jng to /usr/local/sbin/
+  copy:
+    src: /usr/share/examples/jails/jng
     dest: /usr/local/sbin/jng
-    state: link
-    force: yes
+    mode: 0755
