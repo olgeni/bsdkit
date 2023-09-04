@@ -74,6 +74,16 @@ BSDKIT_SRCDIR=$(dirname "$(realpath "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
 ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
 
+SERVICE_RESTART_BLACKLIST=(
+    "runsvdir"
+    "vm"
+    "iocage"
+    "dev_aws_disk"
+    "ec2_configinit"
+    "ec2_fetchkey"
+    "ec2_loghostkey"
+)
+
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
@@ -3433,32 +3443,50 @@ purge_distdir () {
 }
 
 start_local() {
-    local _services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
+    local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
 
-    if [[ "${_services[@]}" =~ "/usr/local/etc/rc.d/monit" ]]; then
-        _services=(${_services[@]/\/usr\/local\/etc\/rc.d\/monit})
-        _services+="/usr/local/etc/rc.d/monit"
+    for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
+        if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
+            echo "Skipping ${_blacklisted_service}"
+            _service_list=(${_service_list[@]/$_blacklisted_service})
+        fi
+    done
+
+    # make sure that monit is started last
+    if [[ "${_service_list[@]}" =~ "monit" ]]; then
+        _service_list=(${_service_list[@]/monit})
+        _service_list+="monit"
     fi
 
-    for service in "${_services[@]}"; do
-        _service_name=$(basename "$service")
-        _service_start_command="service $_service_name start"
-        eval "$_service_start_command" || :
+    local _service
+
+    for _service in "${_service_list[@]}"; do
+        message "starting ${_service}"
+        service ${_service} start || :
     done
 }
 
 stop_local() {
-    local _services=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | awk '{print $1}')}")
+    local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
 
-    if [[ "${_services[@]}" =~ "/usr/local/etc/rc.d/monit" ]]; then
-        _services=(${_services[@]/\/usr\/local\/etc\/rc.d\/monit})
-        _services=("/usr/local/etc/rc.d/monit" ${_services[@]})
+    for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
+        if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
+            echo "Skipping ${_blacklisted_service}"
+            _service_list=(${_service_list[@]/$_blacklisted_service})
+        fi
+    done
+
+    # make sure that monit is stopped first
+    if [[ "${_service_list[@]}" =~ "monit" ]]; then
+        _service_list=(${_service_list[@]/monit})
+        _service_list=("monit" ${_service_list[@]})
     fi
 
-    for service in "${_services[@]}"; do
-        _service_name=$(basename "$service")
-        service_stop_command="service $_service_name stop"
-        eval "$service_stop_command" || :
+    local _service
+
+    for _service in "${_service_list[@]}"; do
+        message "stopping ${_service}"
+        service ${_service} stop || :
     done
 }
 
