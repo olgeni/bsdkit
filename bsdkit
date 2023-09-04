@@ -3490,6 +3490,38 @@ stop_local() {
     done
 }
 
+restart_local() {
+    local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
+
+    for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
+        if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
+            echo "Skipping ${_blacklisted_service}"
+            _service_list=(${_service_list[@]/$_blacklisted_service})
+        fi
+    done
+
+    local _monit=NO
+
+    if [[ "${_service_list[@]}" =~ "monit" ]]; then
+        message "stopping monit"
+        _monit=YES
+        _service_list=(${_service_list[@]/monit})
+        service monit stop || :
+    fi
+
+    local _service
+
+    for _service in "${_service_list[@]}"; do
+        message "restarting ${_service}"
+        service ${_service} restart || :
+    done
+
+    if is_yes ${_monit}; then
+        message "starting monit"
+        service monit start || :
+    fi
+}
+
 zfs_create_postgresql() {
     local _pool
     _pool=$(get_boot_pool)
