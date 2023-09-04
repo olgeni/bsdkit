@@ -6,11 +6,19 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 message() {
-    echo "[${SCRIPT_NAME}] $*"
+    if [ -t 1 ]; then
+        echo -e "\033[36m[${SCRIPT_NAME}] $*\033[0m"
+    else
+        echo "[${SCRIPT_NAME}] $*"
+    fi
 }
 
 error() {
-    echo "[${SCRIPT_NAME}] $*" >&2
+    if [ -t 2 ]; then
+        echo -e "\033[31m[${SCRIPT_NAME}] $*\033[0m" >&2
+    else
+        echo "[${SCRIPT_NAME}] $*" >&2
+    fi
     exit 1
 }
 
