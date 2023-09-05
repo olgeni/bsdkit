@@ -2218,7 +2218,7 @@ create_jail() {
 
 make_thin_jail() {
     if [ $# -lt 1 ]; then
-        error "Usage: make_thin_jail <destdir>"
+        usage "make_thin_jail <destdir>"
     fi
 
     local _destdir=$1
@@ -2285,7 +2285,7 @@ make_thin_jail() {
 
 make_full_jail() {
     if [ $# -lt 2 ]; then
-        error "Usage: make_full_jail <srcdir> <destdir>"
+        usage "make_full_jail <srcdir> <destdir>"
     fi
 
     local _srcdir=$1
@@ -3137,7 +3137,7 @@ configure() {
 
 configure_jail() {
     if [ $# -lt 1 ]; then
-        error "Usage: configure_jail <jail_name> [options]"
+        usage "configure_jail <jail_name> [options]"
     fi
 
     __check_go_yq
