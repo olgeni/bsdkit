@@ -5,9 +5,11 @@ set -e -u -o pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+autoload colors && colors
+
 message() {
     if [ -t 1 ]; then
-        echo -e "\033[36m[${SCRIPT_NAME}] $*\033[0m"
+        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg[cyan]} $*${reset_color}"
     else
         echo "[${SCRIPT_NAME}] $*"
     fi
@@ -15,7 +17,7 @@ message() {
 
 error() {
     if [ -t 2 ]; then
-        echo -e "\033[31m[${SCRIPT_NAME}] $*\033[0m" >&2
+        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg_bold[red]} $*${reset_color}" >&2
     else
         echo "[${SCRIPT_NAME}] $*" >&2
     fi
