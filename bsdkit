@@ -2,8 +2,6 @@
 
 setopt errreturn nounset pipefail
 
-autoload throw catch
-
 : ${BSDKIT_DESTDIR:="/mnt"}
 : ${BSDKIT_PV_UPDATE_DELAY:="0.1"}
 : ${BSDKIT_JAIL_NAME:="bsdkit"}
@@ -87,24 +85,7 @@ SERVICE_RESTART_BLACKLIST=(
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
-autoload colors && colors
-
-message() {
-    if [ -t 1 ]; then
-        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg[cyan]} $*${reset_color}"
-    else
-        echo "[${SCRIPT_NAME}] $*"
-    fi
-}
-
-error() {
-    if [ -t 2 ]; then
-        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg_bold[red]} $*${reset_color}" >&2
-    else
-        echo "[${SCRIPT_NAME}] $*" >&2
-    fi
-    exit 1
-}
+source ${SCRIPT_PATH}/libexec/colors.inc
 
 if command -v pv > /dev/null 2>&1; then
     CAT_CMD=(pv -i ${BSDKIT_PV_UPDATE_DELAY})

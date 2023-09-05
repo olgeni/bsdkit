@@ -1,30 +1,16 @@
 #!/usr/bin/env zsh
 
-set -e -u -o pipefail
+setopt errreturn nounset pipefail
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
-autoload colors && colors
+source ${SCRIPT_PATH}/colors.inc
 
-message() {
-    if [ -t 1 ]; then
-        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg[cyan]} $*${reset_color}"
-    else
-        echo "[${SCRIPT_NAME}] $*"
-    fi
-}
-
-error() {
-    if [ -t 2 ]; then
-        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg_bold[red]} $*${reset_color}" >&2
-    else
-        echo "[${SCRIPT_NAME}] $*" >&2
-    fi
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "must be executed on FreeBSD."
     exit 1
-}
-
-autoload throw catch
+fi
 
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:=""}
