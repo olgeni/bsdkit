@@ -3362,6 +3362,12 @@ ruby_version() {
     fi
 }
 
+perl_version() {
+    if whence -p perl > /dev/null 2>&1; then
+        perl -e 'print(sprintf("%d.%d\n", $^V->{version}[0], $^V->{version}[1]))'
+    fi
+}
+
 purge_libdir() {
     if [ $# -ne 1 ]; then
         usage "purge_libdir <directory>"
