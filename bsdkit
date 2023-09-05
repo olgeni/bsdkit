@@ -3356,6 +3356,12 @@ rebuild_zpool_cache() {
     zpool set cachefile=/etc/zfs/zpool.cache $(get_boot_pool)
 }
 
+ruby_version() {
+    if whence -p ruby > /dev/null 2>&1; then
+        ruby --version | awk '{print $2}' | cut -d '.' -f 1-2
+    fi
+}
+
 purge_libdir() {
     if [ $# -ne 1 ]; then
         usage "purge_libdir <directory>"
