@@ -66,6 +66,7 @@ DEFAULT_ASHIFT=12
 ZPOOL_CREATE_CMD=(zpool create -o ashift=${DEFAULT_ASHIFT})
 ZFS_CREATE_CMD=(zfs create)
 ZFS_CMD=(zfs)
+ZFS_COMPRESSION_ALGORITHM=zstd
 
 BSDKIT_CONFIG=/usr/local/etc/bsdkit.yml
 BSDKIT_SRCDIR=$(dirname "$(realpath "$0")")
@@ -998,11 +999,8 @@ __zfs_create_zpool_cache() {
 }
 
 __zfs_compression() {
-    if [ $(uname -K) -ge 1300000 ]; then
-        echo zstd
-    else
-        echo lz4
-    fi
+    # OS version check is "[ $(uname -K) -ge 1400000 ]"
+    echo ${ZFS_COMPRESSION_ALGORITHM}
 }
 
 __zfs_create_fs() {
@@ -3845,6 +3843,18 @@ destroy_snapshots() {
         | while IFS=$'\0' read -r -d '' _snapshot; do
 
         zfs destroy -v $(echo ${_snapshot} | cut -w -f2-64)
+    done
+}
+
+zfs_update_compression() {
+    _zfs_compression_algorithm=${1:-${ZFS_COMPRESSION_ALGORITHM}}
+
+    zfs get -H -o value,name -s local compression \
+        | awk "\$1 != \"off\" && \$1 != \"${_zfs_compression_algorithm}\" { print \$2 }" \
+        | while IFS= read -r _dataset; do
+
+        message "updating compression for ${_dataset} to ${_zfs_compression_algorithm}"
+        zfs set compression=${ZFS_COMPRESSION_ALGORITHM} ${_dataset}
     done
 }
 
