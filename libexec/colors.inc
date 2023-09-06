@@ -10,6 +10,14 @@ message() {
     fi
 }
 
+warning() {
+    if [ -t 2 ]; then
+        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg[yellow]} $*${reset_color}" >&2
+    else
+        echo "[${SCRIPT_NAME}] $*" >&2
+    fi
+}
+
 error() {
     if [ -t 2 ]; then
         echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg_bold[red]} $*${reset_color}" >&2
