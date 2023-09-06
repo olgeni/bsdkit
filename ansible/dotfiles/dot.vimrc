@@ -19,6 +19,7 @@ set linebreak
 set mouse=r
 set nobackup
 set nojoinspaces
+set noswapfile
 set noundofile
 set ruler
 set shiftwidth=2
