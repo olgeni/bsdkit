@@ -3225,7 +3225,7 @@ __enable_swap_device_aws() {
     else
         for _disk in $(sysctl -n kern.disks); do
             if gpart list ${_disk} > /dev/null 2>&1; then
-                echo "Skipping ${_disk}: already partitioned"
+                echo "skipping ${_disk}: already partitioned"
                 continue
             fi
 
@@ -3450,7 +3450,7 @@ start_local() {
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
-            echo "Skipping ${_blacklisted_service}"
+            message "skipping ${_blacklisted_service}"
             _service_list=(${_service_list[@]/$_blacklisted_service})
         fi
     done
@@ -3474,7 +3474,7 @@ stop_local() {
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
-            echo "Skipping ${_blacklisted_service}"
+            message "skipping ${_blacklisted_service}"
             _service_list=(${_service_list[@]/$_blacklisted_service})
         fi
     done
@@ -3498,7 +3498,7 @@ restart_local() {
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
-            echo "Skipping ${_blacklisted_service}"
+            message "skipping ${_blacklisted_service}"
             _service_list=(${_service_list[@]/$_blacklisted_service})
         fi
     done
@@ -3718,7 +3718,7 @@ __config_upgrade_key() {
     fi
 
     if [ "${_value}" != "null" ]; then
-        echo "Upgrading ${_old_key} to ${_new_key}"
+        message "Upgrading ${_old_key} to ${_new_key}"
         config_set ${_new_key} ${_value}
 
         if [ $? -ne 0 ]; then
