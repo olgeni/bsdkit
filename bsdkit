@@ -72,6 +72,17 @@ BSDKIT_SRCDIR=$(dirname "$(realpath "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
 ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
 
+RUBY_LIBDIR_LIST=(
+    "/usr/local/lib/ruby"
+    "/usr/local/lib/ruby/gems"
+    "/usr/local/lib/ruby/site_ruby"
+    "/usr/local/lib/ruby/vendor_ruby"
+)
+
+PERL_LIBDIR_LIST=(
+    "/usr/local/lib/perl5"
+)
+
 SERVICE_RESTART_BLACKLIST=(
     "runsvdir"
     "vm"
@@ -3400,11 +3411,34 @@ purge_libdir() {
 }
 
 purge_local_libdirs() {
-    purge_libdir /usr/local/lib/ruby
-    purge_libdir /usr/local/lib/ruby/gems
-    purge_libdir /usr/local/lib/ruby/site_ruby
-    purge_libdir /usr/local/lib/ruby/vendor_ruby
-    purge_libdir /usr/local/lib/perl5
+    local _ruby_version=$(ruby_version)
+    local _perl_version=$(perl_version)
+
+    for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
+        purge_libdir ${_ruby_libdir}
+    done
+
+    for _perl_libdir in ${PERL_LIBDIR_LIST[@]}; do
+        purge_libdir ${_perl_libdir}
+    done
+
+    if [ -n "${_ruby_version}" ]; then
+        for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
+            if ! [ -d ${_ruby_libdir}/${_ruby_version} ]; then
+                message "creating ${_ruby_libdir}/${_ruby_version}"
+                mkdir -p ${_ruby_libdir}/${_ruby_version}
+            fi
+        done
+    fi
+
+    if [ -n "${_perl_version}" ]; then
+        for _perl_libdir in ${PERL_LIBDIR_LIST[@]}; do
+            if ! [ -d ${_perl_libdir}/${_perl_version} ]; then
+                message "creating ${_perl_libdir}/${_perl_version}"
+                mkdir -p ${_perl_libdir}/${_perl_version}
+            fi
+        done
+    fi
 }
 
 purge_pkg_tempfiles() {
