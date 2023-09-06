@@ -6,6 +6,7 @@ let skip_defaults_vim=1
 
 set autoindent
 set autoread
+set background=dark
 set backspace=indent,eol,start
 set breakat=80
 set breakindent
