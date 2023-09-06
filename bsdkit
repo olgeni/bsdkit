@@ -1189,7 +1189,7 @@ __fetch_release() {
             local _sha256_local=""
 
             if [ -f ${_local_relpath}/${_filename} ]; then
-                echo "Checking: ${_filename}"
+                message "Checking: ${_filename}"
                 _sha256_local=$(${CAT_CMD} ${_local_relpath}/${_filename} | sha256 -q)
             else
                 _sha256_local="0"
@@ -1197,7 +1197,7 @@ __fetch_release() {
 
             while [ ${_sha256} != ${_sha256_local} ]; do
                 fetch -o ${_local_relpath}/${_filename} ${_relpath}/${_filename}
-                echo "Checking: ${_filename}"
+                message "Checking: ${_filename}"
                 _sha256_local=$(${CAT_CMD} ${_local_relpath}/${_filename} | sha256 -q)
             done
         fi
@@ -1237,7 +1237,7 @@ __install_release() {
             _local_relpath_root=${_destdir}/${BSDKIT_FREEBSD_DISTDIR}
             _local_relpath=${_local_relpath_root}/${_release_tag}
 
-            echo "Using ${_local_relpath_root}"
+            message "Using ${_local_relpath_root}"
 
             mkdir -p ${_local_relpath}
         fi
@@ -1350,7 +1350,7 @@ __install_release() {
         esac
 
         if is_yes ${_extract}; then
-            echo "Extracting: ${_filename}"
+            message "Extracting: ${_filename}"
             ${CAT_CMD} ${_relpath}/${_filename} | tar -x -p -U -C ${_destdir} -f - ${=_options[*]}
         fi
 
@@ -2257,8 +2257,6 @@ make_thin_jail() {
             rm -r -f ${_destdir}/${_directory}
         fi
 
-        echo "${_directory}"
-
         if [ -L ${_destdir}/${_directory} ]; then
             rm -f ${_destdir}/${_directory}
         fi
@@ -2343,7 +2341,7 @@ make_full_jail() {
 
         mkdir -p ${_destdir}/${_directory}
 
-        echo -n "${_directory}: "
+        message "Processing ${_directory}"
 
         cd ${_srcdir}/${_directory} && find . | cpio -pdu ${_destdir}/${_directory}
     done
@@ -2709,7 +2707,7 @@ EOF
     chmod -x ${_staging}/base.ufs.uzip
 
     while ! umount -f ${_tmp}; do
-        echo "Waiting for ${_tmp} (tmp)"
+        message "Waiting for ${_tmp} (tmp)"
         sleep 3
     done
 
@@ -2900,7 +2898,7 @@ with-verbose() {
 deploy() {
     __check_requirements
 
-    echo "Running: $*"
+    message "Running: $*"
 
     ${(@s/ /)@}
 
@@ -2932,7 +2930,7 @@ remote_exec() {
     [ -n ${_remote_address} ]
     [ -n ${_remote_port} ]
 
-    echo "Running: $*"
+    message "Running: $*"
 
     local _ansible_root
     _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
@@ -3226,15 +3224,15 @@ __enable_swap_device_aws() {
     fi
 
     if grep -q '^/dev/gpt/swap' /etc/fstab; then
-        echo "Swap already configured"
+        message "Swap already configured"
     elif [ -e /dev/gpt/swap ]; then
-        echo "Configuring existing swap device"
+        message "Configuring existing swap device"
         echo "/dev/gpt/swap none swap sw 0 0" >> /etc/fstab
         reformat_fstab /etc/fstab
     else
         for _disk in $(sysctl -n kern.disks); do
             if gpart list ${_disk} > /dev/null 2>&1; then
-                echo "skipping ${_disk}: already partitioned"
+                message "Skipping ${_disk}: already partitioned"
                 continue
             fi
 
@@ -3245,11 +3243,11 @@ __enable_swap_device_aws() {
                 continue
             fi
 
-            echo "Creating GPT partition table on ${_disk}"
+            message "Creating GPT partition table on ${_disk}"
             gpart create -s gpt ${_disk}
-            echo "Creating swap partition on ${_disk}"
+            message "Creating swap partition on ${_disk}"
             gpart add -a 4k -i 1 -t freebsd-swap -l swap ${_disk}
-            echo "Enabling swap on ${_disk}"
+            message "Enabling swap on ${_disk}"
             swapon /dev/gpt/swap
             echo "/dev/gpt/swap none swap sw 0 0" >> /etc/fstab
 
@@ -3272,7 +3270,7 @@ update() {
     local _remote_hash=$(git rev-parse --short origin/master)
 
     if [ ${_current_hash} = ${_remote_hash} ]; then
-        message "already up-to-date."
+        message "Already up-to-date."
         return 0
     fi
 
@@ -3394,13 +3392,13 @@ purge_libdir() {
                 if [ $(find ${_item} -type f | wc -l) -eq 1 ]; then
                     case $(find ${_item} -type f) in
                         */mandoc.db)
-                            message "removing ${_item} (mandoc)"
+                            message "Removing ${_item} (mandoc)"
                             rm -r -f ${_item}
                             ;;
                         *) ;;
                     esac
                 elif [ $(find ${_item} -type f | wc -l) -eq 0 ]; then
-                    message "removing ${_item} (empty)"
+                    message "Removing ${_item} (empty)"
                     rm -r -f ${_item}
                 fi
                 ;;
@@ -3423,7 +3421,7 @@ purge_local_libdirs() {
     if [ -n "${_ruby_version}" ]; then
         for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
             if ! [ -d ${_ruby_libdir}/${_ruby_version} ]; then
-                message "creating ${_ruby_libdir}/${_ruby_version}"
+                message "Creating ${_ruby_libdir}/${_ruby_version}"
                 mkdir -p ${_ruby_libdir}/${_ruby_version}
             fi
         done
@@ -3432,7 +3430,7 @@ purge_local_libdirs() {
     if [ -n "${_perl_version}" ]; then
         for _perl_libdir in ${PERL_LIBDIR_LIST[@]}; do
             if ! [ -d ${_perl_libdir}/${_perl_version} ]; then
-                message "creating ${_perl_libdir}/${_perl_version}"
+                message "Creating ${_perl_libdir}/${_perl_version}"
                 mkdir -p ${_perl_libdir}/${_perl_version}
             fi
         done
@@ -3482,7 +3480,7 @@ start_local() {
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
-            message "skipping ${_blacklisted_service}"
+            message "Skipping service: ${_blacklisted_service}"
             _service_list=(${_service_list[@]/$_blacklisted_service})
         fi
     done
@@ -3496,7 +3494,7 @@ start_local() {
     local _service
 
     for _service in "${_service_list[@]}"; do
-        message "starting ${_service}"
+        message "Starting service: ${_service}"
         service ${_service} start || :
     done
 }
@@ -3506,7 +3504,7 @@ stop_local() {
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
-            message "skipping ${_blacklisted_service}"
+            message "Skipping service: ${_blacklisted_service}"
             _service_list=(${_service_list[@]/$_blacklisted_service})
         fi
     done
@@ -3520,7 +3518,7 @@ stop_local() {
     local _service
 
     for _service in "${_service_list[@]}"; do
-        message "stopping ${_service}"
+        message "Stopping service: ${_service}"
         service ${_service} stop || :
     done
 }
@@ -3530,7 +3528,7 @@ restart_local() {
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
-            message "skipping ${_blacklisted_service}"
+            message "Skipping service: ${_blacklisted_service}"
             _service_list=(${_service_list[@]/$_blacklisted_service})
         fi
     done
@@ -3538,7 +3536,7 @@ restart_local() {
     local _monit=NO
 
     if [[ "${_service_list[@]}" =~ "monit" ]]; then
-        message "stopping monit"
+        message "Stopping service: monit"
         _monit=YES
         _service_list=(${_service_list[@]/monit})
         service monit stop || :
@@ -3547,12 +3545,12 @@ restart_local() {
     local _service
 
     for _service in "${_service_list[@]}"; do
-        message "restarting ${_service}"
+        message "Restarting service: ${_service}"
         service ${_service} restart || :
     done
 
     if is_yes ${_monit}; then
-        message "starting monit"
+        message "Starting service: monit"
         service monit start || :
     fi
 }
@@ -3853,7 +3851,7 @@ zfs_update_compression() {
         | awk "\$1 != \"off\" && \$1 != \"${_zfs_compression_algorithm}\" { print \$2 }" \
         | while IFS= read -r _dataset; do
 
-        message "updating compression for ${_dataset} to ${_zfs_compression_algorithm}"
+        message "Updating compression for ${_dataset} to ${_zfs_compression_algorithm}"
         zfs set compression=${ZFS_COMPRESSION_ALGORITHM} ${_dataset}
     done
 }
