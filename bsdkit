@@ -3825,7 +3825,7 @@ config_upgrade() {
     __config_upgrade_key "console_syslog" "enable_console_syslog"
 }
 
-zfs_destroy_snapshots() {
+destroy_zfs_snapshots() {
     if ! command -v fzf > /dev/null 2>&1; then
         error "required command missing (fzf)"
         return 69
