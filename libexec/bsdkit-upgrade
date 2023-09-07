@@ -179,7 +179,7 @@ if [ -z "${BSDKIT_VERSION}" ]; then
 fi
 
 if kenv -q zfs_be_root > /dev/null 2>&1; then
-    if [ ${BOOTENV_ENABLE} = "default" ]; then
+    if [ "${BOOTENV_ENABLE}" = "default" ]; then
         if [ -z "${DESTDIR}" ]; then
             BOOTENV_ENABLE="yes"
         else
