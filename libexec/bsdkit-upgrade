@@ -431,7 +431,9 @@ if [ -f ${DESTDIR}/etc/mtree/BSD.lib32.dist ]; then
 fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.include.dist ]; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
+    if [ -d ${DESTDIR}/usr/include ]; then
+        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
+    fi
 fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist ]; then
