@@ -2,6 +2,8 @@
 
 setopt errreturn nounset pipefail
 
+setopt pushdsilent
+
 : ${BSDKIT_DESTDIR:="/mnt"}
 : ${BSDKIT_PV_UPDATE_DELAY:="0.1"}
 : ${BSDKIT_JAIL_NAME:="bsdkit"}
@@ -3555,40 +3557,58 @@ restart_local() {
     fi
 }
 
-zfs_create_postgresql() {
+zfs_migrate_postgresql() {
     local _pool
     _pool=$(get_boot_pool)
 
-    local _exists="NO"
+    local _postgres_directory=/var/db/postgres
 
-    zfs get -H -o value name ${_pool}/var/db/postgres > /dev/null 2>&1 && _exists="YES"
+    if zfs get -H -o value name ${_pool}${_postgres_directory} > /dev/null 2>&1; then
+        message "PostgreSQL dataset already exists."
+        return 0
+    fi
 
-    if ! is_yes ${_exists}; then
-        if [ -d /var/db/postgres.orig ]; then
-            return 1
-        fi
+    if [ -e ${_postgres_directory}.orig ]; then
+        message "Found leftover PostgreSQL directory: \"${_postgres_directory}.orig\"."
+        return 1
+    fi
 
-        mkdir /var/db/postgres.orig
+    local _running=NO
 
-        cd /var/db/postgres
+    if service postgresql status > /dev/null 2>&1; then
+        message "PostgreSQL is running."
+        _running=YES
+    fi
 
-        find . | cpio -p -d -u -v /var/db/postgres.orig
+    if is_yes ${_running}; then
+        message "Stopping PostgreSQL."
+        service postgresql stop
+    fi
 
-        zfs create \
-            -o compression=$(__zfs_compression) \
-            -o atime=off \
-            -o redundant_metadata=most \
-            ${_pool}/var/db/postgres
+    message "Moving PostgreSQL directory to \"${_postgres_directory}.orig\"."
+    mv ${_postgres_directory} ${_postgres_directory}.orig
 
-        install -o postgres -g postgres -m 755 -d /var/db/postgres
+    message "Creating new PostgreSQL dataset."
+    zfs create \
+        -o compression=$(__zfs_compression) \
+        -o atime=off \
+        -o redundant_metadata=most \
+        ${_pool}${_postgres_directory}
 
-        cd /var/db/postgres.orig
+    message "Setting permissions on \"${_postgres_directory}\"."
+    install -o postgres -g postgres -m 755 -d ${_postgres_directory}
 
-        find . | cpio -p -d -u -v /var/db/postgres
+    message "Copying PostgreSQL data."
+    pushd ${_postgres_directory}.orig
+    find . | cpio -p -d -u -v ${_postgres_directory}
+    popd
 
-        cd /var/db
+    message "Removing \"${_postgres_directory}.orig\"."
+    rm -r -f ${_postgres_directory}.orig
 
-        rm -r -f /var/db/postgres.orig
+    if is_yes ${_running}; then
+        message "Starting PostgreSQL."
+        service postgresql start
     fi
 }
 
