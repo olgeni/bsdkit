@@ -495,9 +495,7 @@ if is_yes ${BOOTENV_ENABLE}; then
     bectl list
 fi
 
-echo
 message "Upgrade complete."
-echo
 
 if [ -z "${DESTDIR}" ]; then
     _disks=$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)
