@@ -446,6 +446,12 @@ if [ -f ${DESTDIR}/etc/mtree/BSD.tests.dist ]; then
     fi
 fi
 
+if [ -f ${DESTDIR}/etc/mtree/BSD.debug.dist ]; then
+    if [ -d ${DESTDIR}/usr/lib/debug ]; then
+        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.debug.dist -p ${DESTDIR}/usr/lib
+    fi
+fi
+
 if is_yes ${BOOTENV_ENABLE}; then
     _mountpoint_list=()
 
