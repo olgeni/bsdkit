@@ -3852,7 +3852,7 @@ update_zfs_compression() {
         | while IFS= read -r _dataset; do
 
         message "Updating compression for ${_dataset} to ${_zfs_compression_algorithm}"
-        zfs set compression=${ZFS_COMPRESSION_ALGORITHM} ${_dataset}
+        zfs set compression=${_zfs_compression_algorithm} ${_dataset}
     done
 }
 
