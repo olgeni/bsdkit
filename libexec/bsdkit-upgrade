@@ -251,7 +251,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     fi
 
     if [ -f "${_filename}" ]; then
-        echo "Checking ${_filename}"
+        message "Checking ${_filename}"
         _sha256_local=$(${=CAT_CMD} "${_filename}" | sha256 -q)
     else
         _sha256_local="0"
@@ -314,7 +314,7 @@ etcupdate resolve -D ${DESTDIR}/
 export PATH=/rescue:${PATH}
 
 if is_yes ${_install_src}; then
-    echo "Extracting: src.txz"
+    message "Extracting: src.txz"
 
     for _file in ${DESTDIR}/usr/src/*; do
         rm -r -f ${_file}
@@ -406,20 +406,20 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     esac
 
     if is_yes ${_extract}; then
-        echo "Extracting: ${_filename}"
+        message "Extracting: ${_filename}"
         ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]}
     fi
 done
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
-    echo "Running: etcupdate (tar)"
+    message "Running: etcupdate (tar)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
 elif [ -f ${_srcdir}/Makefile ]; then
-    echo "Running: etcupdate (src)"
+    message "Running: etcupdate (src)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
 fi
 
-echo "Running: mtree"
+message "Running: mtree"
 
 mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
 mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist -p ${DESTDIR}/usr
@@ -455,7 +455,7 @@ chroot ${DESTDIR}/ newaliases
 if [ -f ${_srcdir}/Makefile ]; then
     cd ${_srcdir}
 
-    echo "Running: delete-old"
+    message "Running: delete-old"
 
     {
         set +o pipefail
@@ -463,7 +463,7 @@ if [ -f ${_srcdir}/Makefile ]; then
         set -o pipefail
     }
 
-    # echo "Running: delete-old-libs"
+    # message "Running: delete-old-libs"
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 fi
 
@@ -496,7 +496,7 @@ if is_yes ${BOOTENV_ENABLE}; then
 fi
 
 echo
-echo "Upgrade complete."
+message "Upgrade complete."
 echo
 
 if [ -z "${DESTDIR}" ]; then
@@ -510,7 +510,7 @@ if [ -z "${DESTDIR}" ]; then
     done
 
     if is_yes ${_found}; then
-        echo "You may need to run these commands:"
+        message "If using hardware RAID, you might need to run these commands:"
         echo
         for _disk in ${(@s/ /)_disks}; do
             if gpart show ${_disk} 2>/dev/null | grep -q freebsd-zfs; then
