@@ -424,12 +424,6 @@ message "Running: mtree"
 mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
 mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist -p ${DESTDIR}/usr
 
-if is_yes ${BOOTENV_ENABLE}; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p /var
-else
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
-fi
-
 if [ -f ${DESTDIR}/etc/mtree/BSD.lib32.dist ]; then
     if [ -d ${DESTDIR}/usr/lib32 ]; then
         mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.lib32.dist -p ${DESTDIR}/usr
@@ -448,6 +442,26 @@ if [ -f ${DESTDIR}/etc/mtree/BSD.tests.dist ]; then
     if [ -d ${DESTDIR}/usr/tests ]; then
         mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.tests.dist -p ${DESTDIR}/usr/tests
     fi
+fi
+
+if is_yes ${BOOTENV_ENABLE}; then
+    _mountpoint_list=()
+
+    mount -p | awk '$2 ~ "^/var(/|$)" { print $2 }' | while read _mountpoint; do
+        _mountpoint_list+=(${_mountpoint})
+    done
+
+    for ((i=1; i<=${#_mountpoint_list[@]}; i++)); do
+        mount -t nullfs ${_mountpoint_list[i]} ${BOOTENV_MOUNT}${_mountpoint_list[i]}
+    done
+
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
+
+    for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
+        umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
+    done
+else
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
 fi
 
 chroot ${DESTDIR}/ newaliases
