@@ -3844,7 +3844,7 @@ zfs_destroy_snapshots() {
     done
 }
 
-zfs_update_compression() {
+update_zfs_compression() {
     _zfs_compression_algorithm=${1:-${ZFS_COMPRESSION_ALGORITHM}}
 
     zfs get -H -o value,name -s local compression \
