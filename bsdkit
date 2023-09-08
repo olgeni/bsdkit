@@ -3612,6 +3612,61 @@ zfs_migrate_postgresql() {
     fi
 }
 
+zfs_migrate_mysql() {
+    local _pool
+    _pool=$(get_boot_pool)
+
+    local _mysql_directory=/var/db/mysql
+
+    if zfs get -H -o value name ${_pool}${_mysql_directory} > /dev/null 2>&1; then
+        message "MySQL dataset already exists."
+        return 0
+    fi
+
+    if [ -e ${_mysql_directory}.orig ]; then
+        message "Found leftover MySQL directory: \"${_mysql_directory}.orig\"."
+        return 1
+    fi
+
+    local _running=NO
+
+    if service mysql-server status > /dev/null 2>&1; then
+        message "MySQL is running."
+        _running=YES
+    fi
+
+    if is_yes ${_running}; then
+        message "Stopping MySQL."
+        service mysql-server stop
+    fi
+
+    message "Moving MySQL directory to \"${_mysql_directory}.orig\"."
+    mv ${_mysql_directory} ${_mysql_directory}.orig
+
+    message "Creating new MySQL dataset."
+    zfs create \
+        -o compression=$(__zfs_compression) \
+        -o atime=off \
+        -o redundant_metadata=most \
+        ${_pool}${_mysql_directory}
+
+    message "Setting permissions on \"${_mysql_directory}\"."
+    install -o mysql -g mysql -m 755 -d ${_mysql_directory}
+
+    message "Copying MySQL data."
+    pushd ${_mysql_directory}.orig
+    find . | cpio -p -d -u -v ${_mysql_directory}
+    popd
+
+    message "Removing \"${_mysql_directory}.orig\"."
+    rm -r -f ${_mysql_directory}.orig
+
+    if is_yes ${_running}; then
+        message "Starting MySQL."
+        service mysql-server start
+    fi
+}
+
 rc_set() {
     if [ $# -ne 3 ]; then
         usage "rc_set <file> <key> <value>"
