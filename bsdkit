@@ -1777,8 +1777,8 @@ ${BSDKIT_JAIL_NAME} {
         allow.raw_sockets;
         allow.sysvipc;
 
-        osrelease = "$(osrelease ${_destdir})";
         osreldate = "$(osreldate ${_destdir})";
+        osrelease = "$(get_osrelease ${_destdir})";
 
         path = "${_destdir%/}";
         host.hostname = "${BSDKIT_JAIL_NAME}";
@@ -3281,7 +3281,7 @@ update() {
     git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
 }
 
-osrelease() {
+get_osrelease() {
     local _destdir=${1:-/}
 
     ${_destdir}/bin/freebsd-version -u
@@ -3348,8 +3348,8 @@ ${_jail_name} {
         allow.raw_sockets;
         allow.sysvipc;
 
-        osrelease = "$(osrelease ${_destdir})";
         osreldate = "$(osreldate ${_destdir})";
+        osrelease = "$(get_osrelease ${_destdir})";
 
         path = "${_destdir%/}";
         host.hostname = "\${name}";
