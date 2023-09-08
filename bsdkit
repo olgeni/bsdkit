@@ -3588,6 +3588,7 @@ zfs_migrate_postgresql() {
     message "Moving PostgreSQL directory to \"${_postgres_directory}.orig\"."
     mv ${_postgres_directory} ${_postgres_directory}.orig
 
+    # Properties will be set by Ansible.
     message "Creating new PostgreSQL dataset."
     zfs create \
         -o compression=$(__zfs_compression) \
@@ -3643,6 +3644,7 @@ zfs_migrate_mysql() {
     message "Moving MySQL directory to \"${_mysql_directory}.orig\"."
     mv ${_mysql_directory} ${_mysql_directory}.orig
 
+    # Properties will be set by Ansible.
     message "Creating new MySQL dataset."
     zfs create \
         -o compression=$(__zfs_compression) \
