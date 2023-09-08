@@ -1777,8 +1777,8 @@ ${BSDKIT_JAIL_NAME} {
         allow.raw_sockets;
         allow.sysvipc;
 
-        osreldate = "$(osreldate ${_destdir})";
         osrelease = "$(get_osrelease ${_destdir})";
+        osreldate = "$(get_osreldate ${_destdir})";
 
         path = "${_destdir%/}";
         host.hostname = "${BSDKIT_JAIL_NAME}";
@@ -3287,7 +3287,7 @@ get_osrelease() {
     ${_destdir}/bin/freebsd-version -u
 }
 
-osreldate() {
+get_osreldate() {
     local _destdir=${1:-/}
 
     if [ -f ${_destdir}/usr/include/sys/param.h ]; then
@@ -3348,8 +3348,8 @@ ${_jail_name} {
         allow.raw_sockets;
         allow.sysvipc;
 
-        osreldate = "$(osreldate ${_destdir})";
         osrelease = "$(get_osrelease ${_destdir})";
+        osreldate = "$(get_osreldate ${_destdir})";
 
         path = "${_destdir%/}";
         host.hostname = "\${name}";
