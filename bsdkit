@@ -3297,6 +3297,27 @@ osreldate() {
     fi
 }
 
+get_release_name() {
+    local _srcdir=${1:-/usr/src}
+
+    local _newvers_file="${_srcdir}/sys/conf/newvers.sh"
+    local _release_name=""
+
+    if [[ -f "${_newvers_file}" ]]; then
+        local _contents=$(<"${_newvers_file}")
+
+        local _revision=$(echo "${_contents}" | grep -oE 'REVISION="([^"]+)"' | cut -d'"' -f2)
+        local _branch=$(echo "${_contents}" | grep -oE 'BRANCH="([^"]+)"' | cut -d'"' -f2)
+
+        _release_name="${_revision}-${_branch}"
+    else
+        error "${_newvers_file} does not exist."
+        return 1
+    fi
+
+    echo "${_release_name}"
+}
+
 echo_jail_conf() {
     if [ $# -ne 1 ]; then
         usage "echo_jail_conf <destdir>"
