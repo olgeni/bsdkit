@@ -3579,6 +3579,13 @@ restart_local() {
 }
 
 zfs_migrate_postgresql() {
+    if sysctl -n security.jail.jailed > /dev/null 2>&1; then
+        if [ $(sysctl -n security.jail.jailed) -eq 1 ]; then
+            message "PostgreSQL migration not supported in jail."
+            return 1
+        fi
+    fi
+
     local _pool
     _pool=$(get_boot_pool)
 
