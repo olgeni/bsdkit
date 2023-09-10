@@ -3297,7 +3297,7 @@ get_osreldate() {
     fi
 }
 
-get_release_name() {
+get_src_release_name() {
     local _srcdir=${1:-/usr/src}
 
     local _newvers_file="${_srcdir}/sys/conf/newvers.sh"
