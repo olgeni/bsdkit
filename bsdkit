@@ -3642,6 +3642,13 @@ zfs_migrate_postgresql() {
 }
 
 zfs_migrate_mysql() {
+    if sysctl -n security.jail.jailed > /dev/null 2>&1; then
+        if [ $(sysctl -n security.jail.jailed) -eq 1 ]; then
+            message "MySQL migration not supported in jail."
+            return 1
+        fi
+    fi
+
     local _pool
     _pool=$(get_boot_pool)
 
