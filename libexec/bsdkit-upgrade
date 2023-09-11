@@ -8,7 +8,7 @@ SCRIPT_NAME="$(basename $0)"
 source ${SCRIPT_PATH}/colors.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
-    error "must be executed on FreeBSD."
+    error "Must be executed on FreeBSD."
     exit 1
 fi
 
@@ -29,27 +29,37 @@ fi
 : ${_install_tests:="no"}
 : ${_proc_mounted:="no"}
 
+_mountpoint_list=()
+
 get_current_version() {
     local _version="$(uname -r | cut -d '-' -f 1)"
     echo "${_version}"
 }
 
+is_mount_point() {
+    local _directory=$1
+
+    mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
+}
+
 cleanup() {
     if is_yes ${BOOTENV_ENABLE}; then
-        if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/src"; then
-            umount -f ${BOOTENV_MOUNT}/usr/src || :
-        fi
-
-        if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/ports"; then
-            umount -f ${BOOTENV_MOUNT}/usr/ports || :
-        fi
+        for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
+            if is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
+                umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
+            fi
+        done
 
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/dev"; then
-            umount -f ${BOOTENV_MOUNT}/dev || :
+            if is_mount_point ${BOOTENV_MOUNT}/dev; then
+                umount -f ${BOOTENV_MOUNT}/dev
+            fi
         fi
 
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
-            umount -f ${BOOTENV_MOUNT} || :
+            if is_mount_point ${BOOTENV_MOUNT}; then
+                bectl umount -f ${BOOTENV_NAME}
+            fi
         fi
     else
         if [ -z "${DESTDIR}" ]; then
@@ -285,12 +295,20 @@ if is_yes ${BOOTENV_ENABLE}; then
     bectl mount ${BOOTENV_NAME} ${BOOTENV_MOUNT}
 
     if mount | cut -w -f 3 | fgrep -q "/usr/src"; then
-        mount -t nullfs /usr/src ${BOOTENV_MOUNT}/usr/src
+        _mountpoint_list+=("/usr/src")
     fi
 
     if mount | cut -w -f 3 | fgrep -q "/usr/ports"; then
-        mount -t nullfs /usr/ports ${BOOTENV_MOUNT}/usr/ports
+        _mountpoint_list+=("/usr/ports")
     fi
+
+    mount -p | awk '$2 ~ "^/var(/|$)" { print $2 }' | while read _mountpoint; do
+        _mountpoint_list+=(${_mountpoint})
+    done
+
+    for ((i=1; i<=${#_mountpoint_list[@]}; i++)); do
+        mount -t nullfs ${_mountpoint_list[i]} ${BOOTENV_MOUNT}${_mountpoint_list[i]}
+    done
 
     mount -t devfs devfs ${BOOTENV_MOUNT}/dev
 
@@ -312,34 +330,6 @@ fi
 etcupdate resolve -D ${DESTDIR}/
 
 export PATH=/rescue:${PATH}
-
-if is_yes ${_install_src}; then
-    message "Extracting: src.txz"
-
-    for _file in ${DESTDIR}/usr/src/*; do
-        rm -r -f ${_file}
-    done
-
-    # In the Zsh shell, `${=VAR_NAME}` is a parameter expansion that
-    # performs word splitting on the value of `VAR_NAME`.
-
-    # In the case of `${=CAT_CMD}`, it means that the value of `CAT_CMD`
-    # will be subject to word splitting. This is often used when the value
-    # of `CAT_CMD` contains multiple words or filenames separated by
-    # whitespaces. The word splitting will break the value into separate
-    # words, which can be useful when passing them as arguments to a
-    # command.
-
-    # For example, if `CAT_CMD` is defined as `"/bin/cat -n"`, then
-    # `${=CAT_CMD}` will result in `"/bin/cat"` and `"-n"` being treated as
-    # separate words, which can be useful when using the value as arguments
-    # to a command or in a command substitution.
-
-    # It's worth noting that `${=VAR_NAME}` is specific to Zsh and is not
-    # available in other shells like Bash.
-
-    ${=CAT_CMD} ${_distdir}/src.txz | tar -x -z -U -C ${DESTDIR}/ -f -
-fi
 
 if [ ! -d ${DESTDIR}/etc/rc.d ]; then
     error "missing ${DESTDIR}/etc/rc.d"
@@ -373,6 +363,10 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         continue
     fi
 
+    if ! is_yes ${_install_src} && [ ${_package} = "src" ]; then
+        continue
+    fi
+
     case ${_package} in
         kernel*)
             if [ -f "${DESTDIR}/boot/kernel/kernel" ]; then
@@ -398,7 +392,13 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
         ports) ;;
 
-        src) ;;
+        src)
+            message "Removing previous source tree"
+            for _file in ${DESTDIR}/usr/src/*; do
+                rm -r -f ${_file}
+            done
+            _extract="yes"
+            ;;
 
         *)
             _extract="yes"
@@ -407,6 +407,10 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
     if is_yes ${_extract}; then
         message "Extracting: ${_filename}"
+
+        # In the Zsh shell, `${=VAR_NAME}` is a parameter expansion that
+        # performs word splitting on the value of `VAR_NAME`.
+
         ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]}
     fi
 done
@@ -421,8 +425,21 @@ fi
 
 message "Running: mtree"
 
-mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
-mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist -p ${DESTDIR}/usr
+if [ -f ${DESTDIR}/etc/mtree/BSD.root.dist ]; then
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
+fi
+
+if [ -f ${DESTDIR}/etc/mtree/BSD.usr.dist ]; then
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist -p ${DESTDIR}/usr
+fi
+
+if [ -f ${DESTDIR}/etc/mtree/BSD.var.dist ]; then
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
+fi
+
+if [ -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist ]; then
+    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist -p ${DESTDIR}/
+fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.lib32.dist ]; then
     if [ -d ${DESTDIR}/usr/lib32 ]; then
@@ -434,10 +451,6 @@ if [ -f ${DESTDIR}/etc/mtree/BSD.include.dist ]; then
     if [ -d ${DESTDIR}/usr/include ]; then
         mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
     fi
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist ]; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist -p ${DESTDIR}/
 fi
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.tests.dist ]; then
@@ -452,26 +465,7 @@ if [ -f ${DESTDIR}/etc/mtree/BSD.debug.dist ]; then
     fi
 fi
 
-if is_yes ${BOOTENV_ENABLE}; then
-    _mountpoint_list=()
-
-    mount -p | awk '$2 ~ "^/var(/|$)" { print $2 }' | while read _mountpoint; do
-        _mountpoint_list+=(${_mountpoint})
-    done
-
-    for ((i=1; i<=${#_mountpoint_list[@]}; i++)); do
-        mount -t nullfs ${_mountpoint_list[i]} ${BOOTENV_MOUNT}${_mountpoint_list[i]}
-    done
-
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
-
-    for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
-        umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
-    done
-else
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
-fi
-
+message "Running: newaliases"
 chroot ${DESTDIR}/ newaliases
 
 if [ -f ${_srcdir}/Makefile ]; then
@@ -504,13 +498,11 @@ if is_yes ${BOOTENV_ENABLE}; then
         done
     fi
 
-    if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/src"; then
-        umount -f ${BOOTENV_MOUNT}/usr/src
-    fi
-
-    if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/usr/ports"; then
-        umount -f ${BOOTENV_MOUNT}/usr/ports
-    fi
+    for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
+        if is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
+            umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
+        fi
+    done
 
     bectl umount -f ${BOOTENV_NAME}
     bectl activate ${BOOTENV_NAME}
