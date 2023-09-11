@@ -12,6 +12,8 @@ if [ "$(uname -s)" != "FreeBSD" ]; then
     exit 1
 fi
 
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:=""}
 : ${BSDKIT_ARCH:="amd64"}
@@ -31,33 +33,22 @@ fi
 
 _mountpoint_list=()
 
-get_current_version() {
-    local _version="$(uname -r | cut -d '-' -f 1)"
-    echo "${_version}"
-}
-
-is_mount_point() {
-    local _directory=$1
-
-    mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
-}
-
 cleanup() {
     if is_yes ${BOOTENV_ENABLE}; then
         for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
-            if is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
+            if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
                 umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
             fi
         done
 
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/dev"; then
-            if is_mount_point ${BOOTENV_MOUNT}/dev; then
+            if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}/dev; then
                 umount -f ${BOOTENV_MOUNT}/dev
             fi
         fi
 
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
-            if is_mount_point ${BOOTENV_MOUNT}; then
+            if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}; then
                 bectl umount -f ${BOOTENV_NAME}
             fi
         fi
@@ -184,7 +175,7 @@ done
 shift $((OPTIND - 1))
 
 if [ -z "${BSDKIT_VERSION}" ]; then
-    BSDKIT_VERSION="$(get_current_version)"
+    BSDKIT_VERSION="$(${BSDKIT_PATH}/bsdkit get_os_version)"
     message "Using current version: ${BSDKIT_VERSION}"
 fi
 
@@ -505,7 +496,7 @@ if is_yes ${BOOTENV_ENABLE}; then
     fi
 
     for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
-        if is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
+        if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
             umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
         fi
     done

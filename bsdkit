@@ -3281,6 +3281,17 @@ update() {
     git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
 }
 
+is_mount_point() {
+    local _directory=$1
+
+    mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
+}
+
+get_os_version() {
+    local _version="$(uname -r | cut -d '-' -f 1)"
+    echo "${_version}"
+}
+
 get_osrelease() {
     local _destdir=${1:-/}
 
