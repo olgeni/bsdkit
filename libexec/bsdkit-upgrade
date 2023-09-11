@@ -188,6 +188,12 @@ if [ -z "${BSDKIT_VERSION}" ]; then
     message "Using current version: ${BSDKIT_VERSION}"
 fi
 
+if sysctl -n security.jail.jailed > /dev/null 2>&1; then
+    if [ "$(sysctl -n security.jail.jailed)" = "1" ]; then
+        BOOTEENV_ENABLE="no"
+    fi
+fi
+
 if kenv -q zfs_be_root > /dev/null 2>&1; then
     if [ "${BOOTENV_ENABLE}" = "default" ]; then
         if [ -z "${DESTDIR}" ]; then
