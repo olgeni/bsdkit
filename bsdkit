@@ -4025,6 +4025,37 @@ update_mtree() {
     fi
 }
 
+zfs_raid_hint() {
+    _disks=$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)
+    _found="no"
+
+    for _disk in ${(@s/ /)_disks}; do
+        if gpart show ${_disk} 2>/dev/null | grep -q freebsd-zfs; then
+            _found="yes"
+        fi
+    done
+
+    if is_yes ${_found}; then
+        message "If using hardware RAID, you might need to run these commands:"
+        echo
+        for _disk in ${(@s/ /)_disks}; do
+            if gpart show ${_disk} 2>/dev/null | grep -q freebsd-zfs; then
+                _last_sector_offset=$(expr $(sudo diskinfo /dev/${_disk} | awk '{ print $4 }') - 1)
+                _index=$(gpart show ${_disk} 2>/dev/null | awk 'BEGIN { result = 1; } $4 == "freebsd-boot" { print $3; result = 0; exit; } END { exit result; }')
+                echo "  sysctl -q kern.geom.debugflags=0x10"
+                echo "  dd if=/dev/${_disk} of=sector.bin iseek=${_last_sector_offset}"
+                echo "  gpart recover ${_disk}"
+                echo "  gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i ${_index} ${_disk}"
+                echo "  dd if=sector.bin of=/dev/${_disk} oseek=${_last_sector_offset}"
+                echo "  sysctl -q kern.geom.debugflags=0x00"
+                echo
+            fi
+        done
+        echo "  rm sector.bin"
+        echo
+    fi
+}
+
 if [ $# -gt 0 ]; then
     ${(@s/ /)@}
 fi
