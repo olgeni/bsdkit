@@ -509,7 +509,7 @@ fi
 
 message "Upgrade complete."
 
-if [ -z "${DESTDIR}" ]; then
+if is_yes ${BOOTENV_ENABLE} || [ -z "${DESTDIR}" ]; then
     _disks=$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)
     _found="no"
 
