@@ -3135,11 +3135,12 @@ configure_jail() {
     local _jail_name=$1
 
     if ! jls -j ${_jail_name} name > /dev/null 2>&1; then
+        message "Jail ${_jail_name} does not exist, using ioc-${_jail_name}"
         _jail_name="ioc-${_jail_name}"
     fi
 
     if ! jls -j ${_jail_name} name > /dev/null 2>&1; then
-        error "jail ${_jail_name} does not exist"
+        error "Jail ${_jail_name} does not exist"
     fi
 
     _jail_root=$(jls -j ${_jail_name} path)
