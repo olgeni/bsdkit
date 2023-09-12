@@ -398,6 +398,8 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             for _file in ${DESTDIR}/usr/src/*; do
                 rm -r -f ${_file}
             done
+
+            _options+="--no-same-owner"
             _extract="yes"
             ;;
 
