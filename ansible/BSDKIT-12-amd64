@@ -1,3 +1,5 @@
+# BSDKIT-12-amd64
+
 include		GENERIC
 
 ident		BSDKIT

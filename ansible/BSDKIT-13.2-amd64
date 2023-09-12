@@ -1,3 +1,5 @@
+# BSDKIT-13.2-amd64
+
 include		GENERIC
 
 ident		BSDKIT
