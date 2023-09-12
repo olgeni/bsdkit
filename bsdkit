@@ -3268,7 +3268,9 @@ update() {
 
     local _current_hash=$(git rev-parse --short HEAD)
 
-    git fetch || error "git fetch failed."
+    git fetch --no-tags || error "git fetch failed."
+
+    git tag --list | xargs git tag -d
 
     local _remote_hash=$(git rev-parse --short origin/master)
 
