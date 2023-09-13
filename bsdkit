@@ -91,6 +91,7 @@ SERVICE_RESTART_BLACKLIST=(
     "ec2_configinit"
     "ec2_fetchkey"
     "ec2_loghostkey"
+    "immortaldir"
     "iocage"
     "runsvdir"
     "vm"
