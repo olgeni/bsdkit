@@ -87,13 +87,13 @@ PERL_LIBDIR_LIST=(
 )
 
 SERVICE_RESTART_BLACKLIST=(
-    "runsvdir"
-    "vm"
-    "iocage"
     "dev_aws_disk"
     "ec2_configinit"
     "ec2_fetchkey"
     "ec2_loghostkey"
+    "iocage"
+    "runsvdir"
+    "vm"
 )
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
