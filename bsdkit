@@ -95,6 +95,7 @@ SERVICE_RESTART_BLACKLIST=(
     "iocage"
     "runsvdir"
     "vm"
+    "xdm"
 )
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
