@@ -14,7 +14,7 @@ set clipboard=exclude:.*
 set cryptmethod=blowfish2
 set encoding=utf8
 set fileencoding=utf8
-set hlsearch
+set nohlsearch
 set incsearch
 set linebreak
 set mouse=r
