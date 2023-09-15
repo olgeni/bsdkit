@@ -357,6 +357,8 @@ EOF
 }
 
 __parse_options() {
+    local _opts _opts_args
+
     zparseopts -D -E -a _opts -A _opts_args r: v: a: p: z:
 
     local _option
