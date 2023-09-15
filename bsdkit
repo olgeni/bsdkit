@@ -3274,7 +3274,7 @@ update() {
 
     git fetch --no-tags || error "git fetch failed."
 
-    git tag --list | xargs git tag -d
+    git tag --list | xargs git tag -d > /dev/null 2>&1
 
     local _remote_hash=$(git rev-parse --short origin/master)
 
