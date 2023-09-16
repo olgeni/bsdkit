@@ -1629,57 +1629,66 @@ __install_setup_runtime() {
     __valid_bsdkit ${_bsdkit}
     __valid_pkgpath ${_pkgpath}
 
+    # Synchronize with 33c82d0f-f01e-4032-b489-3ecdad22ca16
     local _runtime=(
         # required
         devel/git
-        devel/gum
-        lang/python
-        net/py-netaddr
-        ports-mgmt/pkg
         security/ca_root_nss
         shells/zsh
-        sysutils/ansible
         sysutils/pv
+        textproc/fzf
         textproc/go-yq
         textproc/jq
         textproc/py-pyaml
+
         # optional
         archivers/zip
-        comms/kermit
         devel/bsddialog
-        devel/git
+        devel/gum
         editors/bvi
         editors/nano
         editors/vim
         ftp/curl
         ftp/lftp
+        misc/buffer
         misc/gnu-watch
+        misc/mbuffer
         misc/mc
+        misc/retry
         net/croc
-        net/rclone
         net/rsync
-        net/zerotier
-        security/openvpn
+        net/socat
         sysutils/clone
         sysutils/cpdup
-        sysutils/ddrescue
         sysutils/filemon
+        sysutils/htop
+        sysutils/lsblk
+        sysutils/ncdu
+        sysutils/renameutils
+        sysutils/smenu
+        sysutils/spiped
+        sysutils/tmux
+        sysutils/ts
+
+        # uncategorized
+        comms/kermit
+        lang/python
+        net/py-netaddr
+        net/rclone
+        net/zerotier
+        ports-mgmt/pkg
+        security/openvpn
+        sysutils/ansible
+        sysutils/ddrescue
         sysutils/flashrom
         sysutils/fusefs-exfat
         sysutils/fusefs-ext2
         sysutils/fusefs-ntfs
         sysutils/hextools
         sysutils/hfsutils
-        sysutils/htop
         sysutils/ipmitool
-        sysutils/lsblk
         sysutils/memtester
-        sysutils/ncdu
-        sysutils/renameutils
         sysutils/smartmontools
-        sysutils/smenu
-        sysutils/tmux
-        textproc/fzf
         www/go-www
         www/tinyproxy
         # disabled

@@ -30,12 +30,21 @@
 
 - name: Install base packages (common)
   community.general.pkgng:
+    # Synchronize with 33c82d0f-f01e-4032-b489-3ecdad22ca16
     name:
-      # - net/py-netaddr
-      # - sysutils/ansible
+      # required
+      - devel/git
+      - security/ca_root_nss
+      - shells/zsh
+      - sysutils/pv
+      - textproc/fzf
+      - textproc/go-yq
+      - textproc/jq
+      - textproc/py-pyaml
+
+      # optional
       - archivers/zip
       - devel/bsddialog
-      - devel/git
       - devel/gum
       - editors/bvi
       - editors/nano
@@ -44,33 +53,30 @@
       - ftp/lftp
       - misc/buffer
       - misc/gnu-watch
-      - misc/inplace
       - misc/mbuffer
       - misc/mc
+      - misc/retry
       - net/croc
       - net/rsync
       - net/socat
-      - security/ca_root_nss
-      - security/gnupg
-      - shells/bash
-      - shells/zsh
       - sysutils/clone
       - sysutils/cpdup
-      - sysutils/direnv
       - sysutils/filemon
       - sysutils/htop
+      - sysutils/lsblk
       - sysutils/ncdu
-      - sysutils/pv
       - sysutils/renameutils
-      - sysutils/runit
       - sysutils/smenu
       - sysutils/spiped
       - sysutils/tmux
       - sysutils/ts
+
+      # uncategorized
+      - misc/inplace
+      - security/gnupg
+      - shells/bash
+      - sysutils/direnv
+      - sysutils/runit
       - textproc/align
-      - textproc/fzf
-      - textproc/go-yq
-      - textproc/jq
-      - textproc/py-pyaml
       - textproc/the_silver_searcher
     state: present
