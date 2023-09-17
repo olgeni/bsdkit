@@ -8,13 +8,18 @@ SCRIPT_NAME="$(basename $0)"
 source ${SCRIPT_PATH}/colors.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
-    error "must be executed on FreeBSD."
+    error "Must be executed on FreeBSD."
     exit 1
 fi
 
 BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 
 # ===========================================================================
+
+usage() {
+    echo "Usage: ${SCRIPT_NAME} -s <source version> -t <target version>"
+    exit 0
+}
 
 zparseopts -F -D -E -a _opts -A _opts_args \
     s:=SOURCE_VERSION_OPTION \
@@ -24,13 +29,11 @@ SOURCE_VERSION=${SOURCE_VERSION_OPTION[2]}
 TARGET_VERSION=${TARGET_VERSION_OPTION[2]}
 
 if [ -z ${SOURCE_VERSION+x} ]; then
-    echo "Usage: ${SCRIPT_NAME} -s <source version> -t <target version>"
-    exit 1
+    usage
 fi
 
 if [ -z ${TARGET_VERSION+x} ]; then
-    echo "Usage: ${SCRIPT_NAME} -s <source version> -t <target version>"
-    exit 1
+    usage
 fi
 
 if [ "${SOURCE_VERSION}" = "${TARGET_VERSION}" ]; then
@@ -63,9 +66,6 @@ export PGHOME=/var/db/postgres
 export SOURCE_PGDATA=${PGHOME}/data${SOURCE_VERSION}
 export TARGET_PGDATA=${PGHOME}/data${TARGET_VERSION}
 
-# CREATE ROLE postgres;
-# ALTER ROLE postgres WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS;
-
 message "Fetching packages for version ${SOURCE_VERSION} (server)"
 pkg fetch -y -o /tmp/ postgresql${SOURCE_VERSION}-server > /dev/null 2>&1
 message "Fetching packages for version ${SOURCE_VERSION} (contrib)"
@@ -96,23 +96,14 @@ message "Fetching remaining packages"
 pkg upgrade --yes --fetch-only
 pkg upgrade --yes --fetch-only --glob postgresql\*
 
-# if [ -n "${LD_LIBRARY_PATH+x}" ]; then
-#     SOURCE_LD_LIBRARY_PATH=${SOURCE_LIBDIR}:${SOURCE_LIBDIR}/postgresql:${LD_LIBRARY_PATH}
-#     TARGET_LD_LIBRARY_PATH=${TARGET_LIBDIR}:${TARGET_LIBDIR}/postgresql:${LD_LIBRARY_PATH}
-# else
-#     SOURCE_LD_LIBRARY_PATH=${SOURCE_LIBDIR}:${SOURCE_LIBDIR}/postgresql
-#     TARGET_LD_LIBRARY_PATH=${TARGET_LIBDIR}:${TARGET_LIBDIR}/postgresql
-# fi
-#
-# export LD_LIBRARY_PATH=${TARGET_LD_LIBRARY_PATH}
+if ! ${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" template1 > /dev/null 2>&1; then
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}"
+fi
 
 message "Dumping database to ~/dump.sql"
+env ${TARGET_BINDIR}/pg_dumpall -U ${POSTGRES_USER} > ~/dump.sql
 
-env \
-    PATH=${TARGET_BINDIR}:${PATH} \
-    ${TARGET_BINDIR}/pg_dumpall -U ${POSTGRES_USER} > ~/dump.sql
-
-# hotfix
+# to restart the old cluster:
 # su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl stop -D ${SOURCE_PGDATA}" || :
 # su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}" || :
 
@@ -163,13 +154,22 @@ su postgres -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options}"
 
 rm -f -v /tmp/.s.PGSQL.*(N)
 
+_is_source_contrib_installed=$(pkg query -g %n "postgresql${SOURCE_VERSION}-contrib" || :)
+
 for _package in $(pkg query -g %n "postgresql${SOURCE_VERSION}-*"); do
-    message "Changing name of ${_package} to postgresql${TARGET_VERSION}${i#postgresql${SOURCE_VERSION}}"
+    message "Changing name of ${_package} to postgresql${TARGET_VERSION}${_package#postgresql${SOURCE_VERSION}}"
     pkg set -y --change-name ${_package}:postgresql${TARGET_VERSION}${_package#postgresql${SOURCE_VERSION}}
 done
 
 message "Upgrading packages"
 pkg upgrade --yes --glob postgresql\*
+
+_is_target_contrib_installed=$(pkg query -g %n "postgresql${TARGET_VERSION}-contrib" || :)
+
+if [ -n "${_is_source_contrib_installed}" ] && [ -z "${_is_target_contrib_installed}" ]; then
+    message "Installing contrib"
+    pkg install --yes postgresql${TARGET_VERSION}-contrib
+fi
 
 message "Starting database"
 service postgresql onestart
@@ -180,9 +180,6 @@ fi
 
 message "Running vacuumdb"
 su postgres -c "cd ~postgres && vacuumdb --all --analyze-in-stages"
-
-message "Removing old database"
-rm -r -f ${SOURCE_PGDATA}
 
 message "Removing helper files"
 rm -f ~postgres/analyze_new_cluster.sh
@@ -196,3 +193,5 @@ rm -f ~postgres/pg_upgrade_utility.log
 message "Removing temporary files"
 rm -r -f ${PGPREFIX_SOURCE}
 rm -r -f ${PGPREFIX_TARGET}
+
+message "Previous data is available in ${SOURCE_PGDATA}."

@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-# shellcheck disable=SC3043
-
 setopt errreturn nounset pipefail
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
@@ -10,9 +8,13 @@ SCRIPT_NAME="$(basename $0)"
 source ${SCRIPT_PATH}/colors.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
-    error "must be executed on FreeBSD."
+    error "Must be executed on FreeBSD."
     exit 1
 fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+# ===========================================================================
 
 filter_properties() {
     awk '
