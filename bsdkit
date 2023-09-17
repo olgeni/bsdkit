@@ -1215,6 +1215,13 @@ __install_release() {
 
     zparseopts -F -D -E -a _opts -A _opts_args -thin
 
+    # In Zsh, `[(I)...]` option search in the `_opts` associative array for
+    # the index of a particular value, here `--thin`.
+
+    # If `--thin` is found within the `_opts` array, `[(Ie)--thin]` returns
+    # the index that matches the `--thin` value, or 0 if it's not found in
+    # `_opts`.
+
     local _thin
     _thin=$(yes_if ${_opts[(Ie)--thin]})
 
