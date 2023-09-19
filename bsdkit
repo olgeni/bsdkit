@@ -3177,8 +3177,8 @@ configure_jail() {
     ansible_jail_playbook ${_jail_name} -t configure
 }
 
-upgrade() {
-    ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade "$@"
+upgrade_os() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-os "$@"
 }
 
 upgrade_postgresql() {
