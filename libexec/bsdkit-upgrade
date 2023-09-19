@@ -233,13 +233,13 @@ mkdir -p ${_distdir}
 cd ${_distdir}
 
 message "Fetching MANIFEST file"
-fetch -q ${_release}/MANIFEST
+fetch -q ${_release}/MANIFEST || error "Failed to fetch MANIFEST file"
 
 message "Fetching RELEASE file"
-fetch -q ${_release}/RELEASE
+fetch -q ${_release}/RELEASE || error "Failed to fetch RELEASE file"
 
 message "Fetching etcupdate data"
-fetch -q ${_release}/etcupdate.tar.bz2
+fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate data"
 
 # base-dbg.txz    [sha256]  [size]  base_dbg    "Base system (Debugging)"                     off
 # base.txz        [sha256]  [size]  base        "Base system (MANDATORY)"                     on
