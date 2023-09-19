@@ -3181,6 +3181,10 @@ upgrade() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade "$@"
 }
 
+upgrade_postgresql() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-postgresql "$@"
+}
+
 rewrite_pool() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-rewrite-pool "$@"
 }
