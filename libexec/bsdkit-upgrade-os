@@ -238,8 +238,8 @@ fetch -q ${_release}/MANIFEST || error "Failed to fetch MANIFEST file"
 message "Fetching RELEASE file"
 fetch -q ${_release}/RELEASE || error "Failed to fetch RELEASE file"
 
-message "Fetching etcupdate data"
-fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate data"
+message "Fetching etcupdate.tar.bz2 file"
+fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.bz2 file"
 
 # base-dbg.txz    [sha256]  [size]  base_dbg    "Base system (Debugging)"                     off
 # base.txz        [sha256]  [size]  base        "Base system (MANDATORY)"                     on
