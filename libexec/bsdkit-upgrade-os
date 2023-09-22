@@ -232,13 +232,13 @@ mkdir -p ${_distdir}
 
 cd ${_distdir}
 
-message "Fetching MANIFEST file"
+message "Fetching: MANIFEST file"
 fetch -q ${_release}/MANIFEST || error "Failed to fetch MANIFEST file"
 
-message "Fetching RELEASE file"
+message "Fetching: RELEASE file"
 fetch -q ${_release}/RELEASE || error "Failed to fetch RELEASE file"
 
-message "Fetching etcupdate.tar.bz2 file"
+message "Fetching: etcupdate.tar.bz2 file"
 fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.bz2 file"
 
 # base-dbg.txz    [sha256]  [size]  base_dbg    "Base system (Debugging)"                     off
@@ -283,7 +283,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 done
 
 if is_yes ${FETCH_ONLY}; then
-    message "Fetch complete"
+    message "Release downloaded successfully"
     exit 0
 fi
 
