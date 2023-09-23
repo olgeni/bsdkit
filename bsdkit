@@ -3537,7 +3537,15 @@ check_pkg_tempfiles() {
 purge_be() {
     bectl list -H \
         | awk '$2 != "NR" && $2 != "R" && $2 != "N" { print $1 }' \
-        | xargs -t -I {} bectl destroy -Fo {}
+        | while read _bootenv; do
+        message "Destroying boot environment: ${_bootenv}"
+        if ! bectl destroy -Fo ${_bootenv} 2> /dev/null; then
+            message "Destroying boot environment: ${_bootenv} (without origin)"
+            if ! bectl destroy -F ${_bootenv}; then
+                warning "Failed to destroy boot environment: ${_bootenv}"
+            fi
+        fi
+    done
 }
 
 purge_distdir () {
