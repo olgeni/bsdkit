@@ -400,9 +400,14 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         ports) ;;
 
         src)
-            message "Removing previous source tree"
-            for _file in ${DESTDIR}/usr/src/*; do
-                rm -r -f ${_file}
+            message "Preparing source tree for upgrade"
+
+            chflags -R nouarch ${DESTDIR}/usr/src/
+
+            for _arch in i386 amd64; do
+                if [ -f ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT ]; then
+                    chflags uarch ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT
+                fi
             done
 
             _options+="--no-same-owner"
@@ -422,6 +427,16 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
         ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]}
     fi
+
+    case ${_package} in
+        src)
+            message "Removing stale files from source tree"
+            find ${DESTDIR}/usr/src -flags nouarch -delete -print
+            ;;
+
+        *)
+            ;;
+    esac
 done
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
