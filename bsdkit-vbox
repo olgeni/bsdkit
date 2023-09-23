@@ -215,7 +215,7 @@ perform_shell() {
 perform_sync_vm() {
     _key=$(mktemp /tmp/XXXXXX)
     ./bsdkit echo_bsdkit_private_key > ${_key}
-    rsync -av -e "ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT}" . root@localhost:/root/bsdkit/
+    rsync -a -v --delete -e "ssh -i ${_key} -p ${BSDKIT_VBOX_SSH_PORT}" . root@localhost:/root/bsdkit/
     rm -f ${_key}
 }
 
