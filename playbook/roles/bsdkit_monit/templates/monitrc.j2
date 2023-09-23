@@ -1,0 +1,87 @@
+# da7ec388-8086-439f-b9b5-0d0cdff0dd54
+
+set daemon {{ bsdkit.monit.daemon_interval }}
+   with start delay {{ bsdkit.monit.daemon_start_delay }}
+
+{% if bsdkit.monit.log_file != '' %}
+set log {{ bsdkit.monit.log_file }}
+{% else %}
+{% endif %}
+
+set pidfile {{ bsdkit.monit.pid_file }}
+set idfile {{ bsdkit.monit.id_file }}
+set statefile {{ bsdkit.monit.state_file }}
+
+set limits {
+    programOutput:     {{ bsdkit.monit.limits.program_output }}
+    sendExpectBuffer:  {{ bsdkit.monit.limits.send_expect_buffer }}
+    fileContentBuffer: {{ bsdkit.monit.limits.file_content_buffer }}
+    httpContentBuffer: {{ bsdkit.monit.limits.http_content_buffer }}
+    networkTimeout:    {{ bsdkit.monit.limits.network_timeout }}
+    programTimeout:    {{ bsdkit.monit.limits.program_timeout }}
+    stopTimeout:       {{ bsdkit.monit.limits.stop_timeout }}
+    startTimeout:      {{ bsdkit.monit.limits.start_timeout }}
+    restartTimeout:    {{ bsdkit.monit.limits.restart_timeout }}
+}
+
+set ssl {
+    # verify SSL certificates (disabled by default but STRONGLY RECOMMENDED)
+    verify: {{ bsdkit.monit.ssl.verify }}
+    # allow self signed SSL certificates (reject by default)
+    selfsigned: {{ bsdkit.monit.ssl.selfsigned }}
+}
+
+{% if bsdkit.monit.mailserver.host != '' %}
+set mailserver {{ bsdkit.monit.mailserver.host }}
+{% if bsdkit.monit.mailserver.port != '' %}
+    port {{ bsdkit.monit.mailserver.port }}
+{% endif %}
+{% if bsdkit.monit.mailserver.username != '' %}
+    username {{ bsdkit.monit.mailserver.username }}
+{% endif %}
+{% if bsdkit.monit.mailserver.password != '' %}
+    password {{ bsdkit.monit.mailserver.password }}
+{% endif %}
+{% endif -%}
+
+set eventqueue
+    # set the base directory where events will be stored
+    basedir {{ bsdkit.monit.eventqueue.basedir }}
+    # optionally limit the queue size
+    slots {{ bsdkit.monit.eventqueue.slots }}
+
+{% if bsdkit.monit.httpd.port != '' %}
+set httpd port {{ bsdkit.monit.httpd.port }}
+    use address {{ bsdkit.monit.httpd.address }}
+{% for host in bsdkit.monit.httpd.allow_hosts.split(',') %}
+    allow {{ host.strip() }}
+{% endfor %}
+{% for user in bsdkit.monit.httpd.allow_users.split(',') %}
+    allow {{ user.strip() }}
+{% endfor %}
+{% endif %}
+
+set onreboot {{ bsdkit.monit.on_reboot }} # start, nostart, laststart
+
+check system $HOST
+{% if bsdkit.monit.system.loadavg_1min_per_core > 0 %}
+    if loadavg (1min) per core > {{ bsdkit.monit.system.loadavg_1min_per_core }} for {{ bsdkit.monit.system.loadavg_1min_cycles }} cycles then alert
+{% endif %}
+{% if bsdkit.monit.system.loadavg_5min_per_core > 0 %}
+    if loadavg (5min) per core > {{ bsdkit.monit.system.loadavg_5min_per_core }} for {{ bsdkit.monit.system.loadavg_5min_cycles }} cycles then alert
+{% endif %}
+{% if bsdkit.monit.system.loadavg_15min_per_core > 0 %}
+    if loadavg (15min) per core > {{ bsdkit.monit.system.loadavg_15min_per_core }} for {{ bsdkit.monit.system.loadavg_15min_cycles }} cycles then alert
+{% endif %}
+{% if bsdkit.monit.system.cpu_usage != '' %}
+    if cpu usage > {{ bsdkit.monit.system.cpu_usage }} for {{ bsdkit.monit.system.cpu_usage_cycles }} cycles then alert
+{% endif %}
+{% if bsdkit.monit.system.memory_usage != '' %}
+    if memory usage > {{ bsdkit.monit.system.memory_usage }} then alert
+{% endif %}
+{% if bsdkit.monit.system.swap_usage != '' %}
+    if swap usage > {{ bsdkit.monit.system.swap_usage }} then alert
+{% endif %}
+
+include /usr/local/etc/bsdkit-monit.d/*
+include /usr/local/etc/monit.d/*

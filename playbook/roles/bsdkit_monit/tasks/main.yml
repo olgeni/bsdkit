@@ -1,0 +1,141 @@
+---
+- name: Install monit package
+  community.general.pkgng:
+    name: sysutils/monit
+    state: present
+
+- name: Create /usr/local/etc/monit.d
+  file:
+    path: /usr/local/etc/monit.d
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0700"
+
+- name: Create /usr/local/etc/bsdkit-monit.d
+  file:
+    path: /usr/local/etc/bsdkit-monit.d
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0700"
+
+- name: Create /var/monit
+  file:
+    path: /var/monit
+    state: directory
+    owner: root
+    group: wheel
+    mode: "0700"
+
+- name: Check if /usr/local/etc/monitrc exists
+  stat:
+    path: /usr/local/etc/monitrc
+  register: stat_monitrc
+
+- name: Check if /usr/local/etc/monitrc contains marker
+  command: grep -q "da7ec388-8086-439f-b9b5-0d0cdff0dd54" /usr/local/etc/monitrc
+  register: grep_monitrc
+  changed_when: false
+  failed_when: grep_monitrc.rc == 2
+  when: stat_monitrc.stat.exists
+
+- name: Set manage_monitrc
+  set_fact:
+    manage_monitrc: "{{ stat_monitrc.stat.exists == false or (grep_monitrc is defined and grep_monitrc.rc == 0) }}"
+  changed_when: false
+
+- name: Create /usr/local/etc/monitrc
+  template:
+    src: monitrc.j2
+    dest: /usr/local/etc/monitrc
+    owner: root
+    group: wheel
+    mode: "0600"
+  when: manage_monitrc == true
+  notify:
+    - reload_monit
+
+- name: Create /usr/local/etc/bsdkit-monitrc (template)
+  template:
+    src: monitrc.j2
+    dest: /usr/local/etc/bsdkit-monitrc
+    owner: root
+    group: wheel
+    mode: "0600"
+  when: manage_monitrc == false
+
+- name: Remove /usr/local/etc/bsdkit-monitrc (template)
+  file:
+    path: /usr/local/etc/bsdkit-monitrc
+    state: absent
+  when: manage_monitrc == true
+
+- name: Configure monit service
+  include_tasks: monit-service.yml
+  loop:
+    - service: apache24
+      process: httpd
+      pid_file: /var/run/httpd.pid
+
+    - service: caddy
+      process: caddy
+      pid_file: /var/run/caddy/caddy.pid
+
+    - service: cron
+      process: cron
+      pid_file: /var/run/cron.pid
+
+    - service: devd
+      process: devd
+      pid_file: /var/run/devd.pid
+
+    - service: fail2ban
+      process: fail2ban
+      pid_file: /var/run/fail2ban/fail2ban.pid
+
+    - service: gitlab_runner
+      process: gitlab-runner
+      pid_file: /var/run/gitlab_runner.pid
+
+    - service: mysql-server
+      process: mysqld
+      pid_file: /var/db/mysql/{{ ansible_nodename }}.pid
+
+    - service: ntpd
+      process: ntpd
+      pid_file: /var/db/ntp/ntpd.pid
+
+    - service: openvpn
+      process: openvpn
+      pid_file: /var/run/openvpn.pid
+
+    - service: php-fpm
+      process: php-fpm
+      pid_file: /var/run/php-fpm.pid
+
+    - service: postgresql
+      process: postgresql
+      matching: /usr/local/bin/postgres
+
+    - service: smartd
+      process: smartd
+      pid_file: /var/run/smartd.pid
+
+    - service: sshd
+      process: sshd
+      pid_file: /var/run/sshd.pid
+
+    - service: syslogd
+      process: syslogd
+      pid_file: /var/run/syslog.pid
+
+    - service: znapzend
+      process: znapzend
+      pid_file: /var/run/znapzend.pid
+
+- name: Enable monit service
+  service:
+    name: monit
+    state: started
+    enabled: true

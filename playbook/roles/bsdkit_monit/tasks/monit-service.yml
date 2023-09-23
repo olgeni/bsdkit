@@ -1,0 +1,26 @@
+- name: Retrieve rcvar value for {{ item.service }}
+  shell: |
+    rcvar="$(service {{ item.service }} rcvar | grep "enable=" | cut -d= -f1)"
+    [ "$(sysrc -n ${rcvar})" = "YES" ]
+  register: sysrc_item_enable
+  changed_when: false
+  failed_when: false
+
+- name: Enable monit for {{ item.service }}
+  template:
+    src: service-monitrc.j2
+    dest: /usr/local/etc/bsdkit-monit.d/bsdkit-{{ item.service }}
+    owner: root
+    group: wheel
+    mode: "0600"
+  when: sysrc_item_enable.rc == 0
+  notify:
+    - reload_monit
+
+- name: Disable monit for {{ item.service }}
+  file:
+    path: /usr/local/etc/bsdkit-monit.d/bsdkit-{{ item.service }}
+    state: absent
+  when: sysrc_item_enable.rc != 0
+  notify:
+    - reload_monit

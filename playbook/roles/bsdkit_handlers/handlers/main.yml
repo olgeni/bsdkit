@@ -58,6 +58,15 @@
     name: fail2ban
     state: restarted
 
+- name: restart_monit
+  service:
+    name: monit
+    state: restarted
+
+- name: reload_monit
+  shell:
+    cmd: monit reload
+
 - name: reformat_rc_conf
   shell:
     cmd: |

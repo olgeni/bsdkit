@@ -76,6 +76,7 @@
       - security/gnupg
       - shells/bash
       - sysutils/direnv
+      - sysutils/monit
       - sysutils/runit
       - textproc/align
       - textproc/the_silver_searcher

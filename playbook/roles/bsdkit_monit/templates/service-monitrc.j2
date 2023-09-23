@@ -1,0 +1,10 @@
+{% if item.pid_file is defined or item.matching is defined %}
+{% if item.pid_file is defined %}
+check process {{ item.service }} with pidfile {{ item.pid_file }}
+{% elif item.matching is defined %}
+check process {{ item.service }} matching "{{ item.matching }}"
+{% endif %}
+    start program "/usr/sbin/service {{ item.service }} start"
+    stop program "/usr/sbin/service {{ item.service }} stop"
+    restart program "/usr/sbin/service {{ item.service }} restart"
+{% endif %}

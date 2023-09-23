@@ -64,6 +64,9 @@
     - role: bsdkit_fail2ban
     - role: bsdkit_iocage
     - role: bsdkit_jail
+    - role: bsdkit_monit
+      tags:
+        - monit
 
 - name: Provisioning (DigitalOcean)
   hosts: all

@@ -33,3 +33,49 @@ enable_update_dns: true
 enable_console_syslog: true
 enable_fail2ban: false
 enable_iocage: false
+
+monit:
+  daemon_interval: 30
+  daemon_start_delay: 30
+  log_file: syslog
+  pid_file: /var/run/monit.pid
+  id_file: /var/.monit.id
+  state_file: /var/.monit.state
+  on_reboot: start
+  limits:
+    program_output: 512 B
+    send_expect_buffer: 256 B
+    file_content_buffer: 512 B
+    http_content_buffer: 1 MB
+    network_timeout: 5 s
+    program_timeout: 300 s
+    stop_timeout: 30 s
+    start_timeout: 30 s
+    restart_timeout: 30 s
+  ssl:
+    verify: enable
+    selfsigned: allow
+  mailserver:
+    host: ""
+    port: ""
+    username: ""
+    password: ""
+  eventqueue:
+    basedir: /var/monit
+    slots: 100
+  httpd:
+    port: 2812
+    address: localhost
+    allow_hosts: localhost
+    allow_users: admin:monit
+  system:
+    loadavg_1min_per_core: 2
+    loadavg_1min_cycles: 5
+    loadavg_5min_per_core: 2
+    loadavg_5min_cycles: 5
+    loadavg_15min_per_core: 2
+    loadavg_15min_cycles: 5
+    cpu_usage: 95%
+    cpu_usage_cycles: 10
+    memory_usage: 75%
+    swap_usage: 25%

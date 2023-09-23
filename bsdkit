@@ -3130,7 +3130,7 @@ EOF
     rm -r ${_ansible_root}
 }
 
-configure() {
+__build_facts() {
     __check_go_yq
 
     install -d -o root -g wheel -m 755 /usr/local/etc/ansible/facts.d
@@ -3141,8 +3141,18 @@ configure() {
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
        ${BSDKIT_CONFIG} \
        > /usr/local/etc/ansible/facts.d/bsdkit.fact
+}
+
+configure() {
+    __build_facts
 
     ansible_local_playbook -t configure
+}
+
+monit() {
+    __build_facts
+
+    ansible_local_playbook -t monit
 }
 
 configure_jail() {
