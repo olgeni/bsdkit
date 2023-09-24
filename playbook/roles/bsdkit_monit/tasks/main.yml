@@ -102,6 +102,10 @@
       process: mysqld
       pid_file: /var/db/mysql/{{ ansible_nodename }}.pid
 
+    - service: nginx
+      process: nginx
+      pid_file: /var/run/nginx.pid
+
     - service: ntpd
       process: ntpd
       pid_file: /var/db/ntp/ntpd.pid
