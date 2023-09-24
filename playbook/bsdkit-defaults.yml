@@ -62,7 +62,7 @@ monit:
     password: ""
   eventqueue:
     basedir: /var/monit
-    slots: 100
+    slots: 16
   httpd:
     port: 2812
     address: localhost
