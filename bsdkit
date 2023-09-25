@@ -3155,6 +3155,14 @@ monit() {
     ansible_local_playbook -t monit
 }
 
+status() {
+    if ! command -v monit > /dev/null 2>&1; then
+        error "monit is not installed"
+    fi
+
+    monit -B summary
+}
+
 configure_jail() {
     if [ $# -lt 1 ]; then
         usage "configure_jail <jail_name> [options]"
