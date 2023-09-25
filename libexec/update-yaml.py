@@ -110,34 +110,54 @@ def delete_file_value(yaml_file, key):
         yaml.dump(data, open(yaml_file, "w"), default_flow_style=False, indent=4)
 
 
-def list_data_keys(data, path):
-    def f(__data, __keys, __path):
-        if isinstance(__data, dict):
-            for k, v in __data.items():
+def list_data_keys(data, path=None):
+    keys = []
+    path = path or []
+
+    def f(data, current_path):
+        if isinstance(data, dict):
+            for k, v in data.items():
+                new_path = current_path + [k]
                 if isinstance(v, dict):
-                    f(v, __keys, __path + [k])
+                    f(v, new_path)
                 else:
-                    if path is not None:
-                        if len(__path) > 0 and __path == path[: len(__path)]:
-                            __keys.append(KEY_SEPARATOR.join(__path[len(path) :] + [k]))
-                    else:
-                        __keys.append(KEY_SEPARATOR.join(__path + [k]))
+                    keys.append(KEY_SEPARATOR.join(new_path))
         else:
-            if path is not None:
-                if __path == path[: len(__path)]:
-                    __keys.append(KEY_SEPARATOR.join(__path))
-            else:
-                __keys.append(KEY_SEPARATOR.join(__path))
+            keys.append(KEY_SEPARATOR.join(current_path))
 
-        return __keys
+    f(data, path)
+    return sorted(keys, key=lambda x: x.split(KEY_SEPARATOR))
 
-    return list(sorted(f(data, [], []), key=lambda x: (x.split(KEY_SEPARATOR)[0], len(x))))
+
+def list_data_items(data, path=None):
+    keys_values = []
+    path = path or []
+
+    def f(data, current_path):
+        if isinstance(data, dict):
+            for k, v in data.items():
+                new_path = current_path + [k]
+                if isinstance(v, dict):
+                    f(v, new_path)
+                else:
+                    keys_values.append((KEY_SEPARATOR.join(new_path), v))
+        else:
+            keys_values.append((KEY_SEPARATOR.join(current_path), data))
+
+    f(data, path)
+    return sorted(keys_values, key=lambda x: x[0].split(KEY_SEPARATOR))
 
 
 def list_file_keys(yaml_file, path):
     with open(yaml_file) as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
         return list_data_keys(data, path)
+
+
+def list_file_items(yaml_file, path):
+    with open(yaml_file) as f:
+        data = yaml.load(f, Loader=yaml.SafeLoader)
+        return list_data_items(data, path)
 
 
 if __name__ == "__main__":
@@ -174,7 +194,7 @@ if __name__ == "__main__":
             print(get_file_value(get_filepath(), get_key()).rstrip())
         elif action == "del":
             delete_file_value(get_filepath(), get_key())
-        elif action == "list":
+        elif action == "list-keys":
             try:
                 key_list = list_file_keys(get_filepath(), get_key().split(KEY_SEPARATOR))
             except IndexError:
@@ -182,6 +202,14 @@ if __name__ == "__main__":
 
             for key in key_list:
                 print(key)
+        elif action == "list-items":
+            try:
+                key_list = list_file_items(get_filepath(), get_key().split(KEY_SEPARATOR))
+            except IndexError:
+                key_list = list_file_items(get_filepath(), None)
+
+            for key, value in key_list:
+                print("%s: %s" % (key, value))
     except IndexError:
-        print("Usage: %s <set|get|delete|get-keys> <file> <key> [value]" % sys.argv[0], file=sys.stderr)
+        print("Usage: %s <set|get|del|list-keys|list-items> <file> [key] [value]" % sys.argv[0], file=sys.stderr)
         sys.exit(1)

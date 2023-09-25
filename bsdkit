@@ -3877,9 +3877,9 @@ yaml_del() {
     yq -i eval "del(.${_key})" ${_file}
 }
 
-yaml_list() {
+yaml_list_keys() {
     if [ $# -ne 1 ]; then
-        usage "yaml_list <file>"
+        usage "yaml_list_keys <file>"
     fi
 
     __check_py_pyaml
@@ -3887,10 +3887,26 @@ yaml_list() {
     local _file=$1
 
     if [ ! -e ${_file} ]; then
-        error "yaml_list: ${_file} does not exists"
+        error "yaml_list_keys: ${_file} does not exists"
     fi
 
-    python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list ${_file}
+    python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list-keys ${_file}
+}
+
+yaml_list_items() {
+    if [ $# -ne 1 ]; then
+        usage "yaml_list_items <file>"
+    fi
+
+    __check_py_pyaml
+
+    local _file=$1
+
+    if [ ! -e ${_file} ]; then
+        error "yaml_list_items: ${_file} does not exists"
+    fi
+
+    python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list-items ${_file}
 }
 
 __config_merge() {
@@ -3981,6 +3997,21 @@ config_del() {
     yaml_del ${BSDKIT_CONFIG} ${_key}
 }
 
+config_keys() {
+    __check_py_pyaml
+
+    [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
+
+    local _tmpfile
+    _tmpfile=$(mktemp)
+
+    __config_merge ${_tmpfile}
+
+    yaml_list_keys ${_tmpfile}
+
+    rm -f ${_tmpfile}
+}
+
 config_list() {
     __check_py_pyaml
 
@@ -3991,7 +4022,7 @@ config_list() {
 
     __config_merge ${_tmpfile}
 
-    yaml_list ${_tmpfile}
+    yaml_list_items ${_tmpfile}
 
     rm -f ${_tmpfile}
 }
