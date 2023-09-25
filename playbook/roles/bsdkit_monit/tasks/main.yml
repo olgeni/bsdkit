@@ -82,6 +82,10 @@
       process: caddy
       pid_file: /var/run/caddy/caddy.pid
 
+    - service: charon
+      process: charon
+      pid_file: /var/run/charon.pid
+
     - service: cron
       process: cron
       pid_file: /var/run/cron.pid
