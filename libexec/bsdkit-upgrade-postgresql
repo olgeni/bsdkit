@@ -70,6 +70,10 @@ if [ ! -d ${SOURCE_PGDATA} ]; then
     error "Source data directory does not exist"
 fi
 
+if [ -e ${TARGET_PGDATA} ]; then
+    error "Target data directory already exists"
+fi
+
 message "Fetching packages for version ${SOURCE_VERSION} (server)"
 pkg fetch -y -o /tmp/ postgresql${SOURCE_VERSION}-server > /dev/null 2>&1
 message "Fetching packages for version ${SOURCE_VERSION} (contrib)"
