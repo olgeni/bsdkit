@@ -79,3 +79,6 @@ monit:
     cpu_usage_cycles: 10
     memory_usage: 75%
     swap_usage: 25%
+  filesystem:
+    rootfs:
+      space_usage: 90%
