@@ -3149,7 +3149,7 @@ configure() {
     ansible_local_playbook -t configure
 }
 
-monit() {
+monit_setup() {
     __build_facts
 
     ansible_local_playbook -t monit
