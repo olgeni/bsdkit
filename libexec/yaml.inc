@@ -103,6 +103,10 @@ yaml_list_keys() {
         error "yaml_list_keys: ${_file} does not exists"
     fi
 
+    if [ ! -e ${BSDKIT_SRCDIR}/libexec/update-yaml.py ]; then
+        error "yaml_list_keys: ${BSDKIT_SRCDIR}/libexec/update-yaml.py does not exists"
+    fi
+
     python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list-keys ${_file}
 }
 
@@ -117,6 +121,10 @@ yaml_list_items() {
 
     if [ ! -e ${_file} ]; then
         error "yaml_list_items: ${_file} does not exists"
+    fi
+
+    if [ ! -e ${BSDKIT_SRCDIR}/libexec/update-yaml.py ]; then
+        error "yaml_list_items: ${BSDKIT_SRCDIR}/libexec/update-yaml.py does not exists"
     fi
 
     python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list-items ${_file}
