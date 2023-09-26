@@ -50,6 +50,46 @@ yaml_del() {
     yq -i eval "del(.${_key})" ${_file}
 }
 
+yaml_add() {
+    if [ $# -ne 3 ]; then
+        usage "yaml_append <file> <key> <value>"
+    fi
+
+    __check_go_yq
+
+    local _file=$1
+    local _key=$2
+    local _value=$3
+
+    if [ ! -e ${_file} ]; then
+        touch ${_file}
+    fi
+
+    yq eval ".${_key}[] | select(. == \"${_value}\")" ${_file}
+
+    if ! yq eval ".${_key}[] | select(. == \"${_value}\")" ${_file} | grep -q -e .; then
+        yq -i eval ".${_key} += [\"${_value}\"]" ${_file}
+    fi
+}
+
+yaml_remove() {
+    if [ $# -ne 3 ]; then
+        usage "yaml_remove <file> <key> <value>"
+    fi
+
+    __check_go_yq
+
+    local _file=$1
+    local _key=$2
+    local _value=$3
+
+    if [ ! -e ${_file} ]; then
+        touch ${_file}
+    fi
+
+    yq -i eval "del(.${_key}[] | select(. == \"${_value}\"))" ${_file}
+}
+
 yaml_list_keys() {
     if [ $# -ne 1 ]; then
         usage "yaml_list_keys <file>"
