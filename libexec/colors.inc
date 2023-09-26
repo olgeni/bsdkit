@@ -1,3 +1,5 @@
+BSDKIT_COLORS_INC_INCLUDED=1
+
 whence -w colors >/dev/null || {
     autoload colors && colors
 }

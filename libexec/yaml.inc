@@ -1,3 +1,5 @@
+BSDKIT_YAML_INC_INCLUDED=1
+
 yaml_set() {
     if [ $# -ne 3 ]; then
         usage "yaml_set <file> <key> <value>"
