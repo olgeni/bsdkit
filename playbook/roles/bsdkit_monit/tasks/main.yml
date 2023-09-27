@@ -130,6 +130,10 @@
       process: postgresql
       matching: /usr/local/bin/postgres
 
+    - service: runsvdir
+      process: runsvdir
+      matching: /usr/local/sbin/runsvdir
+
     - service: smartd
       process: smartd
       pid_file: /var/run/smartd.pid
