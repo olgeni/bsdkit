@@ -102,6 +102,10 @@
       process: gitlab-runner
       pid_file: /var/run/gitlab_runner.pid
 
+    - service: inetd
+      process: inetd
+      pid_file: /var/run/inetd.pids
+
     - service: mysql-server
       process: mysqld
       pid_file: /var/db/mysql/{{ ansible_nodename }}.pid
