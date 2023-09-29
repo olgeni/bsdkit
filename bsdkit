@@ -3132,36 +3132,38 @@ EOF
 }
 
 __build_facts() {
+    local _destdir=${1:-""}
+
     __check_go_yq
 
-    install -d -o root -g wheel -m 755 /usr/local/etc/ansible/facts.d
+    install -d -o root -g wheel -m 755 ${_destdir}/usr/local/etc/ansible/facts.d
 
-    [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
+    [ -f ${_destdir}${BSDKIT_CONFIG} ] || touch ${_destdir}${BSDKIT_CONFIG}
 
     yq -o=json ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
-       ${BSDKIT_CONFIG} \
-       > /usr/local/etc/ansible/facts.d/bsdkit.fact
+       ${_destdir}${BSDKIT_CONFIG} \
+       > ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact
+}
+
+__find_jail() {
+    local _jail_name=$1
+
+    if ! jls -j ${_jail_name} name > /dev/null 2>&1; then
+        _jail_name="ioc-${_jail_name}"
+    fi
+
+    if ! jls -j ${_jail_name} name > /dev/null 2>&1; then
+        error "Jail ${_jail_name} does not exist"
+    fi
+
+    echo ${_jail_name}
 }
 
 configure() {
     __build_facts
 
     ansible_local_playbook -t configure
-}
-
-monit_setup() {
-    __build_facts
-
-    ansible_local_playbook -t monit
-}
-
-status() {
-    if ! command -v monit > /dev/null 2>&1; then
-        error "monit is not installed"
-    fi
-
-    monit -B summary
 }
 
 configure_jail() {
@@ -3171,29 +3173,41 @@ configure_jail() {
 
     __check_go_yq
 
-    local _jail_name=$1
+    local _jail_name=$(__find_jail $1)
+    local _jail_root=$(jls -j ${_jail_name} path)
 
-    if ! jls -j ${_jail_name} name > /dev/null 2>&1; then
-        message "Jail ${_jail_name} does not exist, using ioc-${_jail_name}"
-        _jail_name="ioc-${_jail_name}"
-    fi
-
-    if ! jls -j ${_jail_name} name > /dev/null 2>&1; then
-        error "Jail ${_jail_name} does not exist"
-    fi
-
-    _jail_root=$(jls -j ${_jail_name} path)
-
-    install -d -o root -g wheel -m 755 ${_jail_root}/usr/local/etc/ansible/facts.d
-
-    [ -f ${_jail_root}${BSDKIT_CONFIG} ] || touch ${_jail_root}${BSDKIT_CONFIG}
-
-    yq -o=json ea '. as $item ireduce ({}; . * $item)' \
-       ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
-       ${_jail_root}${BSDKIT_CONFIG} \
-       > ${_jail_root}/usr/local/etc/ansible/facts.d/bsdkit.fact
+    __build_facts ${_jail_root}
 
     ansible_jail_playbook ${_jail_name} -t configure
+}
+
+monit_setup() {
+    __build_facts
+
+    ansible_local_playbook -t monit
+}
+
+monit_setup_jail() {
+    if [ $# -lt 1 ]; then
+        usage "monit_setup_jail <jail_name>"
+    fi
+
+    __check_go_yq
+
+    local _jail_name=$(__find_jail $1)
+    local _jail_root=$(jls -j ${_jail_name} path)
+
+    __build_facts ${_jail_root}
+
+    ansible_jail_playbook ${_jail_name} -t monit
+}
+
+status() {
+    if ! command -v monit > /dev/null 2>&1; then
+        error "monit is not installed"
+    fi
+
+    monit -B summary
 }
 
 upgrade_os() {
