@@ -342,7 +342,8 @@ if [ ! -d ${DESTDIR}/etc/rc.d ]; then
     error "missing ${DESTDIR}/etc/rc.d"
 fi
 
-find ${DESTDIR}/bin \
+find \
+    ${DESTDIR}/bin \
     ${DESTDIR}/lib \
     ${DESTDIR}/libexec \
     ${DESTDIR}/sbin \
