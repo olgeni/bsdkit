@@ -126,7 +126,7 @@ rebuild_port() {
 trap cleanup EXIT
 
 if which -s pv > /dev/null 2>&1; then
-    CAT_CMD="pv -i ${PV_UPDATE_DELAY}"
+    CAT_CMD="pv -i ${PV_UPDATE_DELAY} -c -w 75"
 else
     CAT_CMD="/bin/cat"
 fi
