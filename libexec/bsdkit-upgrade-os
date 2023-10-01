@@ -133,13 +133,13 @@ remove_nouarch_files() {
     find -s ${_directory} -flags nouarch -type d | sed -n '1!G;h;$p' >> ${_directory_list}
 
     cat ${_file_list} | while read _filename; do
-        message "Removing: ${_filename}"
+        message "Removing ${_filename}"
         rm -f ${_filename}
     done
 
     cat ${_directory_list} | while read _directory; do
         if [ -z "$(ls -A ${_directory})" ]; then
-            message "Removing: ${_directory}"
+            message "Removing ${_directory}"
             rmdir ${_directory}
         fi
     done
@@ -257,13 +257,13 @@ mkdir -p ${_distdir}
 
 cd ${_distdir}
 
-message "Fetching: MANIFEST file"
+message "Fetching MANIFEST file"
 fetch -q ${_release}/MANIFEST || error "Failed to fetch MANIFEST file"
 
-message "Fetching: RELEASE file"
+message "Fetching RELEASE file"
 fetch -q ${_release}/RELEASE || error "Failed to fetch RELEASE file"
 
-message "Fetching: etcupdate.tar.bz2 file"
+message "Fetching etcupdate.tar.bz2 file"
 fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.bz2 file"
 
 # base-dbg.txz    [sha256]  [size]  base_dbg    "Base system (Debugging)"                     off
@@ -295,7 +295,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     fi
 
     if [ -f "${_filename}" ]; then
-        message "Checking: ${_filename}"
+        message "Checking ${_filename}"
         _sha256_local=$(${=CAT_CMD} "${_filename}" | sha256 -q)
     else
         _sha256_local="0"
@@ -474,7 +474,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     esac
 
     if is_yes ${_extract}; then
-        message "Extracting: ${_filename}"
+        message "Extracting ${_filename}"
 
         # In the Zsh shell, `${=VAR_NAME}` is a parameter expansion that
         # performs word splitting on the value of `VAR_NAME`.
@@ -494,10 +494,10 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 done
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
-    message "Running: etcupdate (tar)"
+    message "Running etcupdate (tar)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
 elif [ -f ${_srcdir}/Makefile ]; then
-    message "Running: etcupdate (src)"
+    message "Running etcupdate (src)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
 fi
 
@@ -505,7 +505,7 @@ for _directory in ${_readonly_directory_list}; do
     remove_nouarch_files ${DESTDIR}/${_directory}
 done
 
-message "Running: mtree"
+message "Running mtree"
 
 if [ -f ${DESTDIR}/etc/mtree/BSD.root.dist ]; then
     mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
@@ -547,13 +547,13 @@ if [ -f ${DESTDIR}/etc/mtree/BSD.debug.dist ]; then
     fi
 fi
 
-message "Running: newaliases"
+message "Running newaliases"
 chroot ${DESTDIR}/ newaliases
 
 if [ -f ${_srcdir}/Makefile ]; then
     cd ${_srcdir}
 
-    message "Running: delete-old"
+    message "Running delete-old"
 
     {
         set +o pipefail
@@ -561,7 +561,7 @@ if [ -f ${_srcdir}/Makefile ]; then
         set -o pipefail
     }
 
-    # message "Running: delete-old-libs"
+    # message "Running delete-old-libs"
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 fi
 
