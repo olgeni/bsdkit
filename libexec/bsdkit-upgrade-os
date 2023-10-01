@@ -123,6 +123,31 @@ rebuild_port() {
     umount -f ${BOOTENV_MOUNT}/dev
 }
 
+remove_nouarch_files() {
+    local _directory="$1"
+
+    local _file_list=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
+    local _directory_list=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
+
+    find -s ${_directory} -flags nouarch -type f >> ${_file_list}
+    find -s ${_directory} -flags nouarch -type d | sed -n '1!G;h;$p' >> ${_directory_list}
+
+    cat ${_file_list} | while read _filename; do
+        message "Removing: ${_filename}"
+        rm -f ${_filename}
+    done
+
+    cat ${_directory_list} | while read _directory; do
+        if [ -z "$(ls -A ${_directory})" ]; then
+            message "Removing: ${_directory}"
+            rmdir ${_directory}
+        fi
+    done
+
+    rm -f ${_file_list}
+    rm -f ${_directory_list}
+}
+
 trap cleanup EXIT
 
 if which -s pv > /dev/null 2>&1; then
@@ -359,6 +384,34 @@ elif [ -f ${_srcdir}/Makefile ]; then
     etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
 fi
 
+_readonly_directory_list=(
+    "bin"
+    "boot"
+    "lib"
+    "libexec"
+    "rescue"
+    "sbin"
+    "usr/bin"
+    "usr/include"
+    "usr/lib"
+    "usr/lib32"
+    "usr/libdata"
+    "usr/libexec"
+    "usr/sbin"
+    "usr/share"
+)
+
+for _directory in ${_readonly_directory_list}; do
+    chflags -R nouarch ${DESTDIR}/${_directory}
+done
+
+chflags -R uarch \
+        ${DESTDIR}/boot/loader.conf \
+        ${DESTDIR}/boot/loader.conf.local \
+        ${DESTDIR}/boot/loader.conf.d
+
+chflags -R uarch ${DESTDIR}/boot/modules/*
+
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     _extract="no"
     _options=()
@@ -432,7 +485,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     case ${_package} in
         src)
             message "Removing stale files from source tree"
-            find ${DESTDIR}/usr/src -flags nouarch -delete -print
+            remove_nouarch_files ${DESTDIR}/usr/src
             ;;
 
         *)
@@ -447,6 +500,10 @@ elif [ -f ${_srcdir}/Makefile ]; then
     message "Running: etcupdate (src)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
 fi
+
+for _directory in ${_readonly_directory_list}; do
+    remove_nouarch_files ${DESTDIR}/${_directory}
+done
 
 message "Running: mtree"
 
