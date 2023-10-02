@@ -402,15 +402,20 @@ _readonly_directory_list=(
 )
 
 for _directory in ${_readonly_directory_list}; do
-    chflags -R nouarch ${DESTDIR}/${_directory}
+    if [ -d ${DESTDIR}/${_directory} ]; then
+        chflags -R uarch ${DESTDIR}/${_directory}
+    fi
 done
 
-chflags -R uarch \
-        ${DESTDIR}/boot/loader.conf \
-        ${DESTDIR}/boot/loader.conf.local \
-        ${DESTDIR}/boot/loader.conf.d
+for _directory in /boot/loader.conf /boot/loader.conf.local /boot/loader.conf.d; do
+    if [ -e ${DESTDIR}${_directory} ]; then
+        chflags -R uarch ${DESTDIR}${_directory}
+    fi
+done
 
-chflags -R uarch ${DESTDIR}/boot/modules/*
+if [ -n "$(ls -A ${DESTDIR}/boot/modules)" ]; then
+    chflags -R uarch ${DESTDIR}/boot/modules/*
+fi
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     _extract="no"
