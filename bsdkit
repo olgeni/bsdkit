@@ -2333,7 +2333,8 @@ make_full_jail() {
         "usr/libdata"
         "usr/libexec"
         "usr/sbin"
-        "usr/share")
+        "usr/share"
+    )
 
     if is_yes ${BSDKIT_INSTALL_KERNEL}; then
         _directory_list+="boot"
