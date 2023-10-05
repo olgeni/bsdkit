@@ -399,6 +399,8 @@ _readonly_directory_list=(
     "usr/libexec"
     "usr/sbin"
     "usr/share"
+    "usr/src"
+    "usr/tests"
 )
 
 for _directory in ${_readonly_directory_list}; do
@@ -459,10 +461,6 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         ports) ;;
 
         src)
-            message "Preparing source tree for upgrade"
-
-            chflags -R nouarch ${DESTDIR}/usr/src/
-
             for _arch in i386 amd64; do
                 if [ -f ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT ]; then
                     chflags uarch ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT
@@ -486,16 +484,6 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
         ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]}
     fi
-
-    case ${_package} in
-        src)
-            message "Removing stale files from source tree"
-            remove_nouarch_files ${DESTDIR}/usr/src
-            ;;
-
-        *)
-            ;;
-    esac
 done
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
@@ -505,6 +493,8 @@ elif [ -f ${_srcdir}/Makefile ]; then
     message "Running etcupdate (src)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
 fi
+
+message "Removing obsolete files"
 
 for _directory in ${_readonly_directory_list}; do
     remove_nouarch_files ${DESTDIR}/${_directory}
