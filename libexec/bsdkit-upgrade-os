@@ -497,7 +497,9 @@ fi
 message "Removing obsolete files"
 
 for _directory in ${_readonly_directory_list}; do
-    remove_nouarch_files ${DESTDIR}/${_directory}
+    if [ -d ${DESTDIR}/${_directory} ]; then
+        remove_nouarch_files ${DESTDIR}/${_directory}
+    fi
 done
 
 message "Running mtree"
