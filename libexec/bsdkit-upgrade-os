@@ -126,6 +126,10 @@ rebuild_port() {
 remove_nouarch_files() {
     local _directory="$1"
 
+    if [ ! -d ${_directory} ]; then
+        return 0
+    fi
+
     local _file_list=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
     local _directory_list=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
 
