@@ -241,7 +241,7 @@ reformat_loader_conf() {
         error "loader.conf file not found: ${_loader_conf}"
     fi
 
-    sed '/^$/d' ${_loader_conf} | sort > ${_loader_conf}.0
+    sed -e '/^$/d' -e '/^[[:space:]]*#/d' ${_loader_conf} | sort > ${_loader_conf}.0
     install -m 0644 -o root -g wheel ${_loader_conf}.0 ${_loader_conf}
     rm ${_loader_conf}.0
 }
