@@ -246,6 +246,22 @@ reformat_loader_conf() {
     rm ${_loader_conf}.0
 }
 
+reformat_sysctl_conf() {
+    if [ $# -ne 1 ]; then
+        usage "reformat_sysctl_conf <sysctl.conf>"
+    fi
+
+    local _sysctl_conf=$1
+
+    if [ ! -e ${_sysctl_conf} ]; then
+        error "sysctl.conf file not found: ${_sysctl_conf}"
+    fi
+
+    sed -e '/^$/d' -e '/^[[:space:]]*#/d' ${_sysctl_conf} | sort > ${_sysctl_conf}.0
+    install -m 0644 -o root -g wheel ${_sysctl_conf}.0 ${_sysctl_conf}
+    rm ${_sysctl_conf}.0
+}
+
 __check_python3() {
     if ! command -v python3 > /dev/null 2>&1; then
         pkg install -y lang/python3
