@@ -84,3 +84,12 @@
       sed -e '/^$/d' -e '/^[[:space:]]*#/d' /boot/loader.conf.local | sort > ${_loader_conf_local}
       cat ${_loader_conf_local} > /boot/loader.conf.local
       rm -f ${_loader_conf_local}
+
+- name: reformat_sysctl_conf_local
+  shell:
+    cmd: |
+      set -e -u -o pipefail
+      _sysctl_conf_local=$(mktemp /tmp/XXXXXX)
+      sed -e '/^$/d' -e '/^[[:space:]]*#/d' /etc/sysctl.conf.local | sort > ${_sysctl_conf_local}
+      cat ${_sysctl_conf_local} > /etc/sysctl.conf.local
+      rm -f ${_sysctl_conf_local}
