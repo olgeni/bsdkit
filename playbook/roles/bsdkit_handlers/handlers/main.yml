@@ -81,6 +81,6 @@
     cmd: |
       set -e -u -o pipefail
       _loader_conf_local=$(mktemp /tmp/XXXXXX)
-      sed '/^$/d' /boot/loader.conf.local | sort > ${_loader_conf_local}
+      sed -e '/^$/d' -e '/^[[:space:]]*#/d' /boot/loader.conf.local | sort > ${_loader_conf_local}
       cat ${_loader_conf_local} > /boot/loader.conf.local
       rm -f ${_loader_conf_local}
