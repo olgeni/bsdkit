@@ -156,12 +156,15 @@ is_yes() {
 }
 
 yes_if() {
-    # Return "YES" if the argument is a positive answer, "NO" if it is a negative answer.
-    if is_yes $1; then
-        echo "YES"
-    else
-        echo "NO"
-    fi
+    # Return YES if all arguments are positive answers, NO otherwise
+    local _arg
+    for _arg in "$@"; do
+        if ! is_yes "$_arg"; then
+            echo "NO"
+            return
+        fi
+    done
+    echo "YES"
 }
 
 is_bios() {
