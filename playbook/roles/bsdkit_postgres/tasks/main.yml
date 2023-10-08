@@ -16,14 +16,19 @@
 
 - name: Create home directory for PostgreSQL
   file:
-    path: "{{ item }}"
+    path: /var/db/postgres
     state: directory
     mode: "0755"
     owner: postgres
     group: postgres
-  with_items:
-    - /var/db/postgres
-    - /var/db/postgres/.ssh
+
+- name: Create ssh directory for PostgreSQL
+  file:
+    path: /var/db/postgres/.ssh
+    state: directory
+    mode: "0700"
+    owner: postgres
+    group: postgres
 
 - name: Create ssh identity for PostgreSQL
   community.crypto.openssh_keypair:
