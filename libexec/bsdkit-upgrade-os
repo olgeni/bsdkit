@@ -205,6 +205,10 @@ done
 
 shift $((OPTIND - 1))
 
+if [ -d ${DESTDIR}/.base ]; then
+    error "Destination directory is thin jail"
+fi
+
 if [ -z "${BSDKIT_VERSION}" ]; then
     BSDKIT_VERSION="$(${BSDKIT_PATH}/bsdkit get_os_version)"
     message "Using current version: ${BSDKIT_VERSION}"
