@@ -1,0 +1,13 @@
+---
+- name: Remove obsolete keys from /etc/sysctl.conf
+  when: is_host_install
+  lineinfile:
+    path: /etc/sysctl.conf
+    state: absent
+    regexp: '^\s*#?\s*{{ item | regex_escape() }}\b'
+  loop:
+    - vfs.zfs.arc_free_target
+    - vm.pageout_oom_seq
+    - vm.v_free_min
+    - vm.v_free_severe
+    - vm.v_free_target

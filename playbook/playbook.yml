@@ -30,6 +30,7 @@
     - role: bsdkit_cleanup_before
     - role: bsdkit_basepkg
     - role: bsdkit_loader
+    - role: bsdkit_sysctl
     - role: bsdkit_kernconf
     - role: bsdkit_zoneinfo
     - role: bsdkit_pw
