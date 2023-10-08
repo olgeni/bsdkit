@@ -81,4 +81,5 @@ monit:
     swap_usage: 25%
   filesystem:
     rootfs:
+      path: /
       space_usage: 90%

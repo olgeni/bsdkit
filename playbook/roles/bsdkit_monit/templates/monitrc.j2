@@ -83,10 +83,12 @@ check system System
     if swap usage > {{ bsdkit.monit.system.swap_usage }} then alert
 {% endif %}
 
-check filesystem rootfs with path /
-{% if bsdkit.monit.filesystem.rootfs.space_usage != '' %}
-    if space usage > {{ bsdkit.monit.filesystem.rootfs.space_usage }} then alert
+{% for key in bsdkit.monit.filesystem.keys() %}
+check filesystem {{ key }} with path {{ bsdkit.monit.filesystem[key].path }}
+{% if bsdkit.monit.filesystem[key].space_usage != '' %}
+    if space usage > {{ bsdkit.monit.filesystem[key].space_usage }} then alert
 {% endif %}
+{% endfor %}
 
 include /usr/local/etc/bsdkit-monit.d/*
 include /usr/local/etc/monit.d/*
