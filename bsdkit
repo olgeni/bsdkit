@@ -2184,6 +2184,16 @@ create_jail() {
 
     zparseopts -F -D -E -a _opts -A _opts_args -thin -plain
 
+    # In this code snippet, `(Ie)` is a parameter expansion flag in the Zsh
+    # shell. The `I` flag gives the index of the first (or, with a numeric
+    # argument, the n-th) array element matching a given pattern, and the
+    # `e` option makes the matching case-insensitive.
+
+    # Therefore, `${_opts[(Ie)--thin]}` is checking for the
+    # case-insensitive presence of `--thin` option in the `_opts`
+    # associative array. If `--thin` is found in the `_opts` array, the
+    # expression will return its index, otherwise, it will return 0.
+
     local _thin
     _thin=$(yes_if ${_opts[(Ie)--thin]})
 
