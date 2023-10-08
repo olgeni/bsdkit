@@ -63,7 +63,7 @@ set httpd port {{ bsdkit.monit.httpd.port }}
 
 set onreboot {{ bsdkit.monit.on_reboot }} # start, nostart, laststart
 
-check system $HOST
+check system System
 {% if bsdkit.monit.system.loadavg_1min_per_core > 0 %}
     if loadavg (1min) per core > {{ bsdkit.monit.system.loadavg_1min_per_core }} for {{ bsdkit.monit.system.loadavg_1min_cycles }} cycles then alert
 {% endif %}
