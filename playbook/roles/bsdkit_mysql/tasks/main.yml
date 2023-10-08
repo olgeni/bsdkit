@@ -28,6 +28,22 @@
   changed_when: false
   failed_when: false
 
+- name: Check if legacy MySQL PID file exists
+  stat:
+    path: /var/db/mysql/{{ ansible_nodename }}.pid
+  register: stat_mysql_pidfile
+  changed_when: false
+  failed_when: false
+
+- name: Migrate legacy MySQL pidfile
+  copy:
+    src: /var/db/mysql/{{ ansible_nodename }}.pid
+    dest: /var/db/mysql/mysqld.pid
+    owner: mysql
+    group: mysql
+    mode: "0640"
+  when: stat_mysql_pidfile.stat.exists
+
 - name: Create /etc/rc.conf.d/mysql
   copy:
     dest: /etc/rc.conf.d/mysql
