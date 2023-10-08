@@ -1301,22 +1301,10 @@ __install_release() {
             "usr/libexec"
             "usr/sbin"
             "usr/share"
-            "usr/src"
-            "usr/tests"
-        )
-
-        local test_exclude_list=(
-            "usr/tests"
         )
 
         if is_yes ${_thin}; then
             for item in ${thin_exclude_list[@]}; do
-                excluded_files+=${item}
-            done
-        fi
-
-        if ! is_yes ${BSDKIT_INSTALL_TESTS}; then
-            for item in ${test_exclude_list[@]}; do
                 excluded_files+=${item}
             done
         fi
@@ -1327,15 +1315,11 @@ __install_release() {
 
         case ${_package} in
             kernel)
-                if is_yes ${BSDKIT_INSTALL_KERNEL}; then
-                    _extract="YES"
-                fi
+                _extract=$(yes_if ${BSDKIT_INSTALL_KERNEL})
                 ;;
 
             kernel_dbg)
-                if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="YES"
-                fi
+                _extract=$(yes_if ${BSDKIT_INSTALL_KERNEL} ${BSDKIT_INSTALL_DEBUG})
                 ;;
 
             base)
@@ -1343,9 +1327,7 @@ __install_release() {
                 ;;
 
             base_dbg)
-                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="YES"
-                fi
+                _extract=$(yes_if ${BSDKIT_INSTALL_DEBUG})
                 ;;
 
             lib32)
@@ -1354,25 +1336,15 @@ __install_release() {
                 ;;
 
             lib32_dbg)
-                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
-                    _extract="YES"
-                fi
+                _extract=$(yes_if ${BSDKIT_INSTALL_DEBUG})
                 ;;
 
             src)
-                if is_yes ${BSDKIT_INSTALL_SRC}; then
-                    # undo the effect of earlier exclusion
-                    _options+="--include ./usr/src"
-                    _extract="YES"
-                fi
+                _extract=$(yes_if ${BSDKIT_INSTALL_SRC})
                 ;;
 
             tests)
-                if is_yes ${BSDKIT_INSTALL_TESTS}; then
-                    # undo the effect of earlier exclusion
-                    _options+="--include ./usr/tests"
-                    _extract="YES"
-                fi
+                _extract=$(yes_if ${BSDKIT_INSTALL_TESTS})
                 ;;
 
             ports)
@@ -1381,6 +1353,14 @@ __install_release() {
             *)
                 ;;
         esac
+
+        if ! is_yes ${BSDKIT_INSTALL_SRC}; then
+            _options+="--exclude ./usr/src"
+        fi
+
+        if ! is_yes ${BSDKIT_INSTALL_TESTS}; then
+            _options+="--exclude ./usr/tests"
+        fi
 
         if is_yes ${_extract}; then
             message "Extracting: ${_filename}"
@@ -2270,6 +2250,7 @@ make_thin_jail() {
     [ ${_destdir} != "/" ] || error "invalid destination directory ('/')"
     [ -d ${_destdir} ] || error "directory not found: ${_destdir}"
     [ -d ${_destdir}/etc/rc.d ] || error "invalid destination directory (missing etc/rc.d)"
+    [ -d ${_destdir}/.base ] && error "invalid destination directory (already a thin jail)"
 
     local _directory_list=(
         "bin"
@@ -2288,21 +2269,33 @@ make_thin_jail() {
         "usr/share"
     )
 
+    if ! is_yes ${BSDKIT_INSTALL_KERNEL}; then
+        _directory_list=(${_directory_list[@]/boot/})
+        rm -r -f ${_destdir}/boot
+    fi
+
     if is_yes ${BSDKIT_INSTALL_SRC}; then
-        _directory_list+="usr/src"
+        if [ -d ${_destdir}/usr/src ]; then
+            _directory_list+="usr/src"
+        fi
     else
         rm -r -f ${_destdir}/usr/src
     fi
 
     if is_yes ${BSDKIT_INSTALL_TESTS}; then
-        _directory_list+="usr/tests"
+        if [ -d ${_destdir}/usr/tests ]; then
+            _directory_list+="usr/tests"
+        fi
     else
         rm -r -f ${_destdir}/usr/tests
     fi
 
     local _directory
+    local _prefix
 
     for _directory in ${_directory_list}; do
+        message "Processing ${_directory}"
+
         if [ -d ${_destdir}/${_directory} ]; then
             rm -r -f ${_destdir}/${_directory} > /dev/null 2>&1 || :
             chflags -R noschg ${_destdir}/${_directory} > /dev/null 2>&1 || :
@@ -2312,8 +2305,6 @@ make_thin_jail() {
         if [ -L ${_destdir}/${_directory} ]; then
             rm -f ${_destdir}/${_directory}
         fi
-
-        local _prefix
 
         _prefix=$(echo ${_directory} | awk -F/ '{ for (i = 1; i <= NF; i++) printf "." }')
 
@@ -2351,6 +2342,7 @@ make_full_jail() {
 
     local _directory_list=(
         "bin"
+        "boot"
         "lib"
         "libexec"
         "rescue"
@@ -2365,22 +2357,30 @@ make_full_jail() {
         "usr/share"
     )
 
-    if is_yes ${BSDKIT_INSTALL_KERNEL}; then
-        _directory_list+="boot"
-    else
+    if ! is_yes ${BSDKIT_INSTALL_KERNEL}; then
+        _directory_list=(${_directory_list[@]/boot/})
+        rm -r -f ${_destdir}/boot
+    fi
+
+    if ! is_yes ${BSDKIT_INSTALL_KERNEL}; then
+        _directory_list=(${_directory_list[@]/boot/})
         rm -r -f ${_destdir}/boot
     fi
 
     if is_yes ${BSDKIT_INSTALL_SRC}; then
-        _directory_list+="usr/src"
+        if [ -d ${_destdir}/usr/src ]; then
+            _directory_list+="usr/src"
+        fi
     else
-        rm -f ${_destdir}/usr/src
+        rm -r -f ${_destdir}/usr/src
     fi
 
     if is_yes ${BSDKIT_INSTALL_TESTS}; then
-        _directory_list+="usr/tests"
+        if [ -d ${_destdir}/usr/tests ]; then
+            _directory_list+="usr/tests"
+        fi
     else
-        rm -f ${_destdir}/usr/tests
+        rm -r -f ${_destdir}/usr/tests
     fi
 
     pushd -q
@@ -2402,6 +2402,10 @@ make_full_jail() {
     popd -q
 
     __run_mtree ${_destdir}
+
+    if is_mount_point ${_destdir}/.base; then
+        umount -f ${_destdir}/.base
+    fi
 
     [ -d ${_destdir}/.base ] && rmdir ${_destdir}/.base
 }
