@@ -77,4 +77,4 @@
     - configure
   user:
     name: root
-    shell: /bin/csh
+    shell: /bin/sh
