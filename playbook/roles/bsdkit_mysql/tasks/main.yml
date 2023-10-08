@@ -28,6 +28,15 @@
   changed_when: false
   failed_when: false
 
+- name: Create /etc/rc.conf.d/mysql
+  copy:
+    dest: /etc/rc.conf.d/mysql
+    content: |
+      mysql_pidfile=/var/db/mysql/mysqld.pid
+    owner: root
+    group: wheel
+    mode: "0644"
+
 - name: Configure SSH identity for MySQL
   when: ls_mysql_db_dir.stdout != ""
   block:

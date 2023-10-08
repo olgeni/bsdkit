@@ -108,7 +108,7 @@
 
     - service: mysql-server
       process: mysqld
-      pid_file: /var/db/mysql/{{ ansible_nodename }}.pid
+      pid_file: /var/db/mysql/mysqld.pid
 
     - service: named
       process: named
