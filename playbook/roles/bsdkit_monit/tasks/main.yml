@@ -104,7 +104,7 @@
 
     - service: inetd
       process: inetd
-      pid_file: /var/run/inetd.pids
+      pid_file: /var/run/inetd.pid
 
     - service: mysql-server
       process: mysqld
