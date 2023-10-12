@@ -21,7 +21,7 @@ usage() {
     exit 0
 }
 
-zparseopts -F -D -E -a _opts -A _opts_args \
+zparseopts -F -D -E -K -a _opts -A _opts_args \
     s:=SOURCE_VERSION_OPTION \
     t:=TARGET_VERSION_OPTION
 

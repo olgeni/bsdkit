@@ -379,7 +379,7 @@ EOF
 __parse_options() {
     local _opts _opts_args
 
-    zparseopts -D -E -a _opts -A _opts_args r: v: a: p: z:
+    zparseopts -D -E -K -a _opts -A _opts_args r: v: a: p: z:
 
     local _option
 
@@ -1233,7 +1233,7 @@ __fetch_release() {
 __install_release() {
     local _opts _opts_args
 
-    zparseopts -F -D -E -a _opts -A _opts_args -thin
+    zparseopts -F -D -E -K -a _opts -A _opts_args -thin
 
     # In Zsh, `[(I)...]` option search in the `_opts` associative array for
     # the index of a particular value, here `--thin`.
@@ -1513,7 +1513,7 @@ EOF
 __setup_jail() {
     local _opts _opts_args
 
-    zparseopts -F -D -E -a _opts -A _opts_args -plain
+    zparseopts -F -D -E -K -a _opts -A _opts_args -plain
 
     local _plain
     _plain=$(yes_if ${_opts[(Ie)--plain]})
@@ -2116,7 +2116,7 @@ create_iocage_jail() {
 
     local _opts _opts_args
 
-    zparseopts -F -D -E -a _opts -A _opts_args -thin -plain
+    zparseopts -F -D -E -K -a _opts -A _opts_args -thin -plain
 
     local _thin
     _thin=$(yes_if ${_opts[(Ie)--thin]})
@@ -2162,7 +2162,7 @@ create_jail() {
 
     local _opts _opts_args
 
-    zparseopts -F -D -E -a _opts -A _opts_args -thin -plain
+    zparseopts -F -D -E -K -a _opts -A _opts_args -thin -plain
 
     # In this code snippet, `(Ie)` is a parameter expansion flag in the Zsh
     # shell. The `I` flag gives the index of the first (or, with a numeric
