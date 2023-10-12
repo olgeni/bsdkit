@@ -3574,6 +3574,18 @@ purge_pkg_tempfiles() {
 
     find ${_path} -print0 \
         | awk 'BEGIN { RS="\\0" } $0 ~ /\.pkgtemp\.[^\/]*$/ { print $0 }' \
+        | xargs rm -r -v
+}
+
+purge_pkg_tempfiles_interactive() {
+    if [ $# -ne 1 ]; then
+        usage "purge_pkg_tempfiles_interactive <path>"
+    fi
+
+    local _path=$1
+
+    find ${_path} -print0 \
+        | awk 'BEGIN { RS="\\0" } $0 ~ /\.pkgtemp\.[^\/]*$/ { print $0 }' \
         | fzf -e -m --print0 \
         | xargs -0 rm -r -v
 }
