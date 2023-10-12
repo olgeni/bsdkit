@@ -180,8 +180,24 @@ perform_destroy() {
     fi
 }
 
+get_last_snapshot_name() {
+    VBoxManage snapshot ${BSDKIT_VBOX_NAME} list | awk '/Name:/ { print $2 }' | tail -n 1
+}
+
 perform_take_snapshot() {
     VBoxManage snapshot ${BSDKIT_VBOX_NAME} take "$(date +%Y%m%d-%H%M%S)"
+}
+
+perform_delete_snapshot() {
+    local _last_snapshot_name=$(get_last_snapshot_name)
+
+    VBoxManage snapshot ${BSDKIT_VBOX_NAME} delete ${_last_snapshot_name}
+}
+
+perform_restore_snapshot() {
+    local _last_snapshot_name=$(get_last_snapshot_name)
+
+    VBoxManage snapshot ${BSDKIT_VBOX_NAME} restore ${_last_snapshot_name}
 }
 
 perform_list_snapshots() {
@@ -283,6 +299,14 @@ case ${_command} in
 
     take-snapshot)
         perform_take_snapshot
+        ;;
+
+    delete-snapshot)
+        perform_delete_snapshot
+        ;;
+
+    restore-snapshot)
+        perform_restore_snapshot
         ;;
 
     list-snapshots)

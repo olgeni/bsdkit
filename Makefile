@@ -43,6 +43,12 @@ take-snapshot:
 list-snapshots:
 	@$(CURDIR)/bsdkit-vbox list-snapshots
 
+restore-snapshot:
+	@$(CURDIR)/bsdkit-vbox restore-snapshot
+
+delete-snapshot:
+	@$(CURDIR)/bsdkit-vbox delete-snapshot
+
 sync-vm:
 	@$(CURDIR)/bsdkit-vbox sync_vm
 
