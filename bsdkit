@@ -379,6 +379,18 @@ EOF
 __parse_options() {
     local _opts _opts_args
 
+    # -F: Halts at first undefined spec, emitting an error message; doesn't
+    #     perform option removal or extraction.
+    #
+    # -D: Removes all matched options from the input parameters, including
+    #     initial '-' or '--'.
+    #
+    # -E: Modifies parsing to include unrecognized specs, stopping only at
+    #     undefined '-' or '--'.
+    #
+    # -K: Retains arrays unaffected if no corresponding spec matches;
+    #     otherwise, overwrites the array upon spec match.
+
     zparseopts -D -E -K -a _opts -A _opts_args r: v: a: p: z:
 
     local _option
