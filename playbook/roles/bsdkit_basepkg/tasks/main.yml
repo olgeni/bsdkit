@@ -74,6 +74,7 @@
       # uncategorized
       - misc/inplace
       - security/gnupg
+      - security/portacl-rc
       - shells/bash
       - sysutils/direnv
       - sysutils/monit
