@@ -66,3 +66,12 @@
         owner: root
         group: wheel
         mode: "0600"
+
+    - name: bsdkit-allowipv6.conf
+      template:
+        src: bsdkit-allowipv6.conf.j2
+        dest: /usr/local/etc/fail2ban/fail2ban.d/bsdkit-allowipv6.conf
+        owner: root
+        group: wheel
+        mode: "0644"
+      notify: restart_fail2ban
