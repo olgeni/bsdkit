@@ -74,85 +74,105 @@
 - name: Configure monit service
   include_tasks: monit-service.yml
   loop:
-    - service: apache24
-      process: httpd
-      pid_file: /var/run/httpd.pid
-
-    - service: caddy
-      process: caddy
-      pid_file: /var/run/caddy/caddy.pid
-
-    - service: charon
-      process: charon
-      pid_file: /var/run/charon.pid
-
-    - service: cron
-      process: cron
-      pid_file: /var/run/cron.pid
-
     - service: devd
       process: devd
       pid_file: /var/run/devd.pid
-
-    - service: fail2ban
-      process: fail2ban
-      pid_file: /var/run/fail2ban/fail2ban.pid
-
-    - service: gitlab_runner
-      process: gitlab-runner
-      pid_file: /var/run/gitlab_runner.pid
-
-    - service: inetd
-      process: inetd
-      pid_file: /var/run/inetd.pid
-
-    - service: mysql-server
-      process: mysqld
-      pid_file: /var/db/mysql/mysqld.pid
-
-    - service: named
-      process: named
-      pid_file: /var/run/named/pid
-
-    - service: nginx
-      process: nginx
-      pid_file: /var/run/nginx.pid
-
-    - service: ntpd
-      process: ntpd
-      pid_file: /var/db/ntp/ntpd.pid
-
-    - service: openvpn
-      process: openvpn
-      pid_file: /var/run/openvpn.pid
-
-    - service: php-fpm
-      process: php-fpm
-      pid_file: /var/run/php-fpm.pid
-
-    - service: postgresql
-      process: postgresql
-      matching: /usr/local/bin/postgres
-
-    - service: runsvdir
-      process: runsvdir
-      matching: /usr/local/sbin/runsvdir
+      host_only: true
 
     - service: smartd
       process: smartd
       pid_file: /var/run/smartd.pid
+      host_only: true
+
+    - service: apache24
+      process: httpd
+      pid_file: /var/run/httpd.pid
+      host_only: false
+
+    - service: caddy
+      process: caddy
+      pid_file: /var/run/caddy/caddy.pid
+      host_only: false
+
+    - service: charon
+      process: charon
+      pid_file: /var/run/charon.pid
+      host_only: false
+
+    - service: cron
+      process: cron
+      pid_file: /var/run/cron.pid
+      host_only: false
+
+    - service: fail2ban
+      process: fail2ban
+      pid_file: /var/run/fail2ban/fail2ban.pid
+      host_only: false
+
+    - service: gitlab_runner
+      process: gitlab-runner
+      pid_file: /var/run/gitlab_runner.pid
+      host_only: false
+
+    - service: inetd
+      process: inetd
+      pid_file: /var/run/inetd.pid
+      host_only: false
+
+    - service: mysql-server
+      process: mysqld
+      pid_file: /var/db/mysql/mysqld.pid
+      host_only: false
+
+    - service: named
+      process: named
+      pid_file: /var/run/named/pid
+      host_only: false
+
+    - service: nginx
+      process: nginx
+      pid_file: /var/run/nginx.pid
+      host_only: false
+
+    - service: ntpd
+      process: ntpd
+      pid_file: /var/db/ntp/ntpd.pid
+      host_only: false
+
+    - service: openvpn
+      process: openvpn
+      pid_file: /var/run/openvpn.pid
+      host_only: false
+
+    - service: php-fpm
+      process: php-fpm
+      pid_file: /var/run/php-fpm.pid
+      host_only: false
+
+    - service: postgresql
+      process: postgresql
+      matching: /usr/local/bin/postgres
+      host_only: false
+
+    - service: runsvdir
+      process: runsvdir
+      matching: /usr/local/sbin/runsvdir
+      host_only: false
 
     - service: sshd
       process: sshd
       pid_file: /var/run/sshd.pid
+      host_only: false
 
     - service: syslogd
       process: syslogd
       pid_file: /var/run/syslog.pid
+      host_only: false
 
     - service: znapzend
       process: znapzend
       pid_file: /var/run/znapzend.pid
+      host_only: false
 
 - name: Enable monit service
   service:

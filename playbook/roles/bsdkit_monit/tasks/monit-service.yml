@@ -13,7 +13,7 @@
     owner: root
     group: wheel
     mode: "0600"
-  when: sysrc_item_enable.rc == 0
+  when: sysrc_item_enable.rc == 0 and ((item["host_only"] and (not security_jail_jailed)) or (not item["host_only"]))
   notify:
     - reload_monit
 
@@ -21,6 +21,6 @@
   file:
     path: /usr/local/etc/bsdkit-monit.d/bsdkit-{{ item.service }}
     state: absent
-  when: sysrc_item_enable.rc != 0
+  when: not (sysrc_item_enable.rc == 0 and ((item["host_only"] and (not security_jail_jailed)) or (not item["host_only"])))
   notify:
     - reload_monit
