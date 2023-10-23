@@ -83,12 +83,14 @@ check system System
     if swap usage > {{ bsdkit.monit.system.swap_usage }} then alert
 {% endif %}
 
+{% if not security_jail_jailed %}
 {% for key in bsdkit.monit.filesystem.keys() %}
 check filesystem {{ key }} with path {{ bsdkit.monit.filesystem[key].path }}
 {% if bsdkit.monit.filesystem[key].space_usage != '' %}
     if space usage > {{ bsdkit.monit.filesystem[key].space_usage }} then alert
 {% endif %}
 {% endfor %}
+{% endif %}
 
 include /usr/local/etc/bsdkit-monit.d/*
 include /usr/local/etc/monit.d/*
