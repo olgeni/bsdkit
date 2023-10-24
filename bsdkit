@@ -1274,13 +1274,13 @@ __install_release() {
         local _release_tag=${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
         _local_relpath_root=${BSDKIT_FREEBSD_DISTDIR}
-        _local_relpath=${_local_relpath_root}/${_release_tag}
+        _local_relpath=${_local_relpath_root%/}/${_release_tag}
 
         if ! mkdir -p ${_local_relpath}; then
             _delete="YES"
 
-            _local_relpath_root=${_destdir}/${BSDKIT_FREEBSD_DISTDIR}
-            _local_relpath=${_local_relpath_root}/${_release_tag}
+            _local_relpath_root=${_destdir%/}/${BSDKIT_FREEBSD_DISTDIR}
+            _local_relpath=${_local_relpath_root%/}/${_release_tag}
 
             message "Using ${_local_relpath_root}"
 
