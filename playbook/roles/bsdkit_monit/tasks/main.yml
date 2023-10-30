@@ -154,6 +154,11 @@
       matching: /usr/local/bin/postgres
       host_only: false
 
+    - service: redis
+      process: redis
+      pid_file: /var/run/redis/redis.pid
+      host_only: false
+
     - service: runsvdir
       process: runsvdir
       matching: /usr/local/sbin/runsvdir
