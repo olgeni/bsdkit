@@ -3384,7 +3384,9 @@ update() {
 
     git reset --hard ${_remote_hash} || error "git reset failed."
 
-    git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
+    if [ -t 1 ]; then
+        GIT_PAGER=cat git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
+    fi
 }
 
 is_mount_point() {
