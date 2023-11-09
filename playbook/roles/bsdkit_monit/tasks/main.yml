@@ -169,6 +169,11 @@
       matching: /usr/local/sbin/runsvdir
       host_only: false
 
+    - service: sa-spamd
+      process: spamd
+      pid_file: /var/run/spamd/spamd.pid
+      host_only: false
+
     - service: sshd
       process: sshd
       pid_file: /var/run/sshd.pid
