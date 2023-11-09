@@ -99,6 +99,11 @@
       pid_file: /var/run/charon.pid
       host_only: false
 
+    - service: croc
+      process: croc
+      pid_file: /var/run/croc.pid
+      host_only: false
+
     - service: cron
       process: cron
       pid_file: /var/run/cron.pid
