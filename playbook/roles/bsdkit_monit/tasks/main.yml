@@ -139,6 +139,11 @@
       pid_file: /var/db/ntp/ntpd.pid
       host_only: false
 
+    - service: milter-opendkim
+      process: opendkim
+      pid_file: /var/run/milteropendkim/pid
+      host_only: false
+
     - service: openvpn
       process: openvpn
       pid_file: /var/run/openvpn.pid
