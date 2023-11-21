@@ -147,7 +147,10 @@ build_staging() {
     local _target=${BSDKIT_DATA}/release-${_version}-${_arch}
 
     if [ -d "${OS_RELDIR}/ftp" ]; then
-        rm -f ${_target}/*
+        if [ -d "${_target}" ]; then
+            rm -r -f ${_target}
+        fi
+
         mkdir -p ${_target}
         cp ${OS_RELDIR}/ftp/* ${_target}
     fi
