@@ -525,7 +525,31 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         # In the Zsh shell, `${=VAR_NAME}` is a parameter expansion that
         # performs word splitting on the value of `VAR_NAME`.
 
-        ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]}
+        local _stderr_log=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
+
+        if ! ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]} 2> ${_stderr_log}; then
+            if [ ${_package} = "src" ]; then
+                warning "Failed to extract ${_filename}, retrying"
+                cat ${_stderr_log}
+
+                # Sample error: "/usr/src/sys/contrib/openzfs/cmd/zvol_wait: Could not unlink"
+
+                local _target
+
+                cat ${_stderr_log} | grep "Could not unlink" | awk -F ": " '{print $1}' | while read -r _target; do
+                    warning "Removing ${_target} due to 'Could not unlink' error"
+                    rm -r -f ${DESTDIR}/${_target}
+                done
+
+                if ! ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]} 2> ${_stderr_log}; then
+                    error "Failed to extract ${_filename}"
+                fi
+            else
+                error "Failed to extract ${_filename}"
+            fi
+        fi
+
+        rm -f ${_stderr_log}
     fi
 done
 
