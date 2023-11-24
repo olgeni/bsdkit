@@ -392,7 +392,9 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
     _srcdir=${DESTDIR}/usr/src
 fi
 
-etcupdate resolve -D ${DESTDIR}/
+if [ -t 0 ]; then
+    etcupdate resolve -D ${DESTDIR}/
+fi
 
 export PATH=/rescue:${PATH}
 
@@ -415,6 +417,10 @@ if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
     etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
 elif [ -f ${_srcdir}/Makefile ]; then
     etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
+fi
+
+if [ -t 0 ]; then
+    etcupdate resolve -p -D ${DESTDIR}/
 fi
 
 _readonly_directory_list=(
