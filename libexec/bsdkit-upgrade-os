@@ -527,22 +527,31 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
         local _stderr_log=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
 
-        if ! ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]} 2> ${_stderr_log}; then
-            warning "Failed to extract ${_filename}, retrying"
-            cat ${_stderr_log}
+        local _attempt_limit=2
+        local _attempt_count=0
 
-            # Sample error: "/usr/src/sys/contrib/openzfs/cmd/zvol_wait: Could not unlink"
+        while [ ${_attempt_count} -lt ${_attempt_limit} ]; do
+            if ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]} 2> ${_stderr_log}; then
+                break
+            else
+                warning "Failed to extract ${_filename}, retrying"
+                cat ${_stderr_log}
 
-            local _target
+                # Sample error: "/usr/src/sys/contrib/openzfs/cmd/zvol_wait: Could not unlink"
+                local _target
 
-            cat ${_stderr_log} | grep "Could not unlink" | awk -F ": " '{print $1}' | while read -r _target; do
-                warning "Removing ${_target} due to 'Could not unlink' error"
-                rm -r -f ${DESTDIR}/${_target}
-            done
+                grep "Could not unlink" ${_stderr_log} | awk -F ": " '{print $1}' | while read -r _target; do
+                    warning "Removing ${_target} due to 'Could not unlink' error"
+                    rm -r -f ${DESTDIR}/${_target}
+                done
 
-            if ! ${=CAT_CMD} ${_distdir}/${_filename} | tar -x -p -U -C ${DESTDIR}/ -f - ${=_options[*]} 2> ${_stderr_log}; then
-                error "Failed to extract ${_filename}"
+                _attempt_count=$(( _attempt_count + 1 ))
+                continue
             fi
+        done
+
+        if [ ${_attempt_count} -eq ${_attempt_limit} ]; then
+            error "Failed to extract ${_filename} after ${_attempt_limit} attempts"
         fi
 
         rm -f ${_stderr_log}
