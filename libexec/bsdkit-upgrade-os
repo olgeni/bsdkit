@@ -631,6 +631,15 @@ if [ -f ${_srcdir}/Makefile ]; then
     # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
 fi
 
+# Remove obsolete mixer state files when upgrading to FreeBSD 14.
+for _file in ${DESTDIR}/var/db/mixer*-state(N); do
+    # Content is like "vol 75:75 pcm 75:75..."
+    if awk 'NR == 1 && $1 == "vol" { exit 0; }' ${_file} > /dev/null 2>&1; then
+        warning "Removing obsolete mixer state file: ${_file}"
+        rm -f ${_file}
+    fi
+done
+
 if is_yes ${BOOTENV_ENABLE}; then
     if is_yes ${UPGRADE_PACKAGES}; then
         if pkg -c ${BOOTENV_MOUNT} update --repository bsdkit --force; then
