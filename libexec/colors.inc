@@ -5,26 +5,32 @@ whence -w colors >/dev/null || {
 }
 
 message() {
+    _script_name="${SCRIPT_NAME:-console}"
+
     if [ -t 1 ]; then
-        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg[cyan]} $*${reset_color}"
+        echo "${fg_bold[white]}[${_script_name}]${reset_color}${fg[cyan]} $*${reset_color}"
     else
-        echo "[${SCRIPT_NAME}] $*"
+        echo "[${_script_name}] $*"
     fi
 }
 
 warning() {
+    _script_name="${SCRIPT_NAME:-console}"
+
     if [ -t 2 ]; then
-        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg[yellow]} $*${reset_color}" >&2
+        echo "${fg_bold[white]}[${_script_name}]${reset_color}${fg[yellow]} $*${reset_color}" >&2
     else
-        echo "[${SCRIPT_NAME}] $*" >&2
+        echo "[${_script_name}] $*" >&2
     fi
 }
 
 error() {
+    _script_name="${SCRIPT_NAME:-console}"
+
     if [ -t 2 ]; then
-        echo "${fg_bold[white]}[${SCRIPT_NAME}]${reset_color}${fg_bold[red]} $*${reset_color}" >&2
+        echo "${fg_bold[white]}[${_script_name}]${reset_color}${fg_bold[red]} $*${reset_color}" >&2
     else
-        echo "[${SCRIPT_NAME}] $*" >&2
+        echo "[${_script_name}] $*" >&2
     fi
     exit 1
 }
