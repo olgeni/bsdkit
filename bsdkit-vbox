@@ -105,6 +105,7 @@ perform_stop() {
         return
     fi
 
+    message "Sending ACPI power button signal"
     VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
 
     local _timeout=10
@@ -113,6 +114,7 @@ perform_stop() {
 
     while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
         if [ ${SECONDS} -ge ${_timeout} ]; then
+            message "Sending ACPI power button signal failed, forcing poweroff"
             VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
             break
         fi
@@ -126,7 +128,7 @@ perform_stop() {
             --medium emptydrive \
             > /dev/null 2>&1
     do
-        echo "perform_stop: waiting for emptydrive"
+        message "Waiting for emptydrive operation to complete"
         sleep 1
     done
 }
@@ -136,12 +138,14 @@ perform_poweroff() {
         return
     fi
 
+    message "Stopping VM"
     VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
 
     sleep 1
 
     while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1
     do
+        message "Waiting for VM to stop"
         sleep 1
     done
 
@@ -152,7 +156,7 @@ perform_poweroff() {
             --medium emptydrive \
             > /dev/null 2>&1
     do
-        echo "perform_poweroff: waiting for emptydrive"
+        message "Waiting for emptydrive operation to complete"
         sleep 1
     done
 }
@@ -162,6 +166,7 @@ perform_destroy() {
         return
     fi
 
+    message "Destroying VM"
     perform_purge
 
     _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
