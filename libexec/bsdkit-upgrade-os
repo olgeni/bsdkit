@@ -177,6 +177,44 @@ remove_nouarch_files() {
     rm -f ${_directory_list}
 }
 
+update_efi_boot_loader() {
+    _efi_mount_point="${DESTDIR}/boot/efi"
+
+    mkdir -p "${_efi_mount_point}"
+
+    _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
+
+    for _disk in ${(s/ /)_disks}; do
+        _efi_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w efi | awk '{ print $3 }' || :)
+
+        if [ -z "${_efi_partitions}" ]; then
+            continue
+        else
+            for _partition in ${(s/ /)_efi_partitions}; do
+                message "Checking EFI partition ${_partition}"
+
+                umount -f "/dev/${_partition}" >/dev/null 2>&1 || :
+
+                if ! mount -t msdosfs "/dev/${_partition}" "${_efi_mount_point}" >/dev/null 2>&1; then
+                    warning "Failed to mount EFI partition ${_partition}"
+                    continue
+                fi
+
+                if [ -d "${_efi_mount_point}/efi/boot" ]; then
+                    message "Upgrading EFI boot loader on ${_partition}"
+                    install -v "${DESTDIR}/boot/loader.efi" "${_efi_mount_point}/efi/boot/bootx64.efi"
+                else
+                    warning "EFI directory not found for ${_partition}"
+                fi
+
+                if ! umount "${_efi_mount_point}" >/dev/null 2>&1; then
+                    error "Failed to unmount EFI partition ${_partition}"
+                fi
+            done
+        fi
+    done
+}
+
 trap cleanup EXIT
 
 if which -s pv > /dev/null 2>&1; then
@@ -659,7 +697,13 @@ if is_yes ${BOOTENV_ENABLE}; then
             rebuild_port ${_port}
         done
     fi
+fi
 
+if sysctl machdep.bootmethod | grep -q 'UEFI'; then
+    update_efi_boot_loader
+fi
+
+if is_yes ${BOOTENV_ENABLE}; then
     for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
         if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
             umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
