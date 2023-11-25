@@ -5,10 +5,7 @@ set -e -u -o pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
-error() {
-    echo "[${SCRIPT_NAME}] $*" >&2
-    exit 1
-}
+source ${SCRIPT_PATH}/libexec/colors.inc
 
 which nc > /dev/null 2>&1 || error 'nc not found'
 
