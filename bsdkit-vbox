@@ -101,87 +101,93 @@ perform_start() {
 }
 
 perform_stop() {
-    if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
-        VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
-
-        local _timeout=10
-
-        SECONDS=0
-
-        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
-            if [ ${SECONDS} -ge ${_timeout} ]; then
-                VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
-                break
-            fi
-            sleep 1
-        done
-
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-                --storagectl ${IDE_CONTROLLER_NAME} \
-                --port 0 \
-                --device 0 \
-                --medium emptydrive \
-                > /dev/null 2>&1
-        do
-            echo "perform_stop: waiting for emptydrive"
-            sleep 1
-        done
+    if ! VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+        return
     fi
+
+    VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
+
+    local _timeout=10
+
+    SECONDS=0
+
+    while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+        if [ ${SECONDS} -ge ${_timeout} ]; then
+            VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
+            break
+        fi
+        sleep 1
+    done
+
+    while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
+            --storagectl ${IDE_CONTROLLER_NAME} \
+            --port 0 \
+            --device 0 \
+            --medium emptydrive \
+            > /dev/null 2>&1
+    do
+        echo "perform_stop: waiting for emptydrive"
+        sleep 1
+    done
 }
 
 perform_poweroff() {
-    if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
-        VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
-
-        sleep 1
-
-        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1
-        do
-            sleep 1
-        done
-
-        while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-                --storagectl ${IDE_CONTROLLER_NAME} \
-                --port 0 \
-                --device 0 \
-                --medium emptydrive \
-                > /dev/null 2>&1
-        do
-            echo "perform_poweroff: waiting for emptydrive"
-            sleep 1
-        done
+    if ! VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+        return
     fi
+
+    VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
+
+    sleep 1
+
+    while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1
+    do
+        sleep 1
+    done
+
+    while ! VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
+            --storagectl ${IDE_CONTROLLER_NAME} \
+            --port 0 \
+            --device 0 \
+            --medium emptydrive \
+            > /dev/null 2>&1
+    do
+        echo "perform_poweroff: waiting for emptydrive"
+        sleep 1
+    done
 }
 
 perform_destroy() {
-    if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
-        perform_purge
-
-        _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
-
-        local _sata_port
-        _sata_port=0
-
-        for _i in $(seq 0 ${BSDKIT_LAST_DISK_LIMIT})
-        do
-            VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
-                       --storagectl ${VIRTIO_CONTROLLER_NAME} \
-                       --port ${_sata_port} \
-                       --device 0 \
-                       --type hdd \
-                       --medium none >/dev/null 2>&1 || :
-
-            VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete >/dev/null 2>&1 || :
-
-            rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
-
-            _sata_port=$((_sata_port + 1))
-        done
-
-        VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
-
-        rm -r -f "${_vm_path}/Logs"
+    if ! VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
+        return
     fi
+
+    perform_purge
+
+    _vm_path=$(dirname "$(VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | grep "^CfgFile=" | sed -e 's/.*="//' -e 's/"$//')")
+
+    local _sata_port
+    _sata_port=0
+
+    for _i in $(seq 0 ${BSDKIT_LAST_DISK_LIMIT})
+    do
+        VBoxManage storageattach ${BSDKIT_VBOX_NAME} \
+                   --storagectl ${VIRTIO_CONTROLLER_NAME} \
+                   --port ${_sata_port} \
+                   --device 0 \
+                   --type hdd \
+                   --medium none >/dev/null 2>&1 || :
+
+        VBoxManage closemedium disk "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi" --delete >/dev/null 2>&1 || :
+
+        rm -f "${_vm_path}/${BSDKIT_VBOX_NAME}-${_i}.vdi"
+
+        _sata_port=$((_sata_port + 1))
+    done
+
+    VBoxManage unregistervm --delete ${BSDKIT_VBOX_NAME}
+
+    rm -r -f "${_vm_path}/Logs"
 }
 
 get_last_snapshot_name() {
