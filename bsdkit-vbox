@@ -107,8 +107,15 @@ perform_stop() {
     if VBoxManage showvminfo ${BSDKIT_VBOX_NAME} > /dev/null 2>&1; then
         VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
 
-        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1
-        do
+        local _timeout=10
+
+        SECONDS=0
+
+        while VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; do
+            if [ ${SECONDS} -ge ${_timeout} ]; then
+                VBoxManage controlvm ${BSDKIT_VBOX_NAME} poweroff || :
+                break
+            fi
             sleep 1
         done
 
