@@ -192,10 +192,30 @@ update_efi_boot_loader() {
         esac
 
         _efi_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w efi | awk '{ print $3 }' || :)
+        _freebsd_boot_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-boot | awk '{ print $3 }' || :)
+        _freebsd_zfs_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-zfs | awk '{ print $3 }' || :)
 
-        if [ -z "${_efi_partitions}" ]; then
-            continue
-        else
+        if [ -n "${_freebsd_boot_partitions}" ]; then
+            for _partition in ${(s/ /)_freebsd_boot_partitions}; do
+                message "Checking freebsd-boot partition ${_partition}"
+
+                local _index=$(echo ${_partition} | sed -E 's/.*p([0-9]+)$/\1/')
+
+                if [ -z "${_index}" ]; then
+                    error "Failed to determine partition index (${_partition})"
+                fi
+
+                if [ -n "${_freebsd_zfs_partitions}" ]; then
+                    message "Upgrading boot loader on ${_partition} (gptzfsboot)"
+                    gpart bootcode -b "${DESTDIR}/boot/pmbr" -p "${DESTDIR}/boot/gptzfsboot" -i ${_index} "${_disk}"
+                else
+                    message "Upgrading boot loader on ${_partition} (gptboot)"
+                    gpart bootcode -b "${DESTDIR}/boot/pmbr" -p "${DESTDIR}/boot/gptboot" -i ${_index} "${_disk}"
+                fi
+            done
+        fi
+
+        if [ -n "${_efi_partitions}" ]; then
             for _partition in ${(s/ /)_efi_partitions}; do
                 message "Checking EFI partition ${_partition}"
 
