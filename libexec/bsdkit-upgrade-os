@@ -185,6 +185,12 @@ update_efi_boot_loader() {
     _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
 
     for _disk in ${(s/ /)_disks}; do
+        case "${_disk}" in
+            cd[0-9]*)
+                continue
+                ;;
+        esac
+
         _efi_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w efi | awk '{ print $3 }' || :)
 
         if [ -z "${_efi_partitions}" ]; then
