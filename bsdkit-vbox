@@ -6,6 +6,7 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/libexec/colors.inc
+source ${SCRIPT_PATH}/libexec/is_yes.inc
 
 which nc > /dev/null 2>&1 || error 'nc not found'
 
@@ -17,7 +18,7 @@ which nc > /dev/null 2>&1 || error 'nc not found'
 : ${BSDKIT_VBOX_VNC_PASSWORD:="bsdkit"}
 : ${BSDKIT_VBOX_GUI_TYPE:="separate"}
 : ${BSDKIT_VBOX_ISO:=""}
-: ${BSDKIT_VBOX_EFI:=""}
+: ${BSDKIT_VBOX_EFI:="no"}
 : ${BSDKIT_VBOX_DISK_SIZE:="30000"}
 : ${BSDKIT_LAST_DISK="3"}
 : ${BSDKIT_LAST_DISK_LIMIT="8"}
@@ -46,9 +47,10 @@ perform_create() {
                --keyboard usb \
                --mouse usbtablet
 
-    if [ -n "${BSDKIT_VBOX_EFI}" ]; then
-        # bios|efi|efi32|efi64
+    if is_yes "${BSDKIT_VBOX_EFI}"; then
         VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --firmware efi
+    else
+        VBoxManage modifyvm ${BSDKIT_VBOX_NAME} --firmware bios
     fi
 
     VBoxManage storagectl ${BSDKIT_VBOX_NAME} --name ${IDE_CONTROLLER_NAME} --add ide --hostiocache on
