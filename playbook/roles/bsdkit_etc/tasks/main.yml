@@ -1,15 +1,27 @@
 ---
-- name: Touch files
+- name: Check if /etc/rc.conf exists
+  stat:
+    path: /etc/rc.conf
+  register: stat_rc_conf
+
+- name: Touch /etc/rc.conf
   file:
-    path: "{{ item }}"
+    path: /etc/rc.conf
     state: touch
     mode: "0644"
-  changed_when: false
-  loop:
-    - /etc/rc.conf
-    - /etc/rc.conf.local
-    - /etc/sysctl.conf
-    - /etc/sysctl.conf.local
+  when: not stat_rc_conf.stat.exists
+
+- name: Check if /etc/rc.conf.local exists
+  stat:
+    path: /etc/rc.conf.local
+  register: stat_rc_conf_local
+
+- name: Touch /etc/rc.conf.local
+  file:
+    path: /etc/rc.conf.local
+    state: touch
+    mode: "0644"
+  when: not stat_rc_conf_local.stat.exists
 
 - name: Create /usr/local/etc
   tags:
@@ -34,19 +46,6 @@
     - csh.cshrc
     - make.conf
     - src.conf
-
-- name: Install sysctl.conf
-  when: is_host_install
-  copy:
-    src: ../ansible/{{ item }}
-    dest: /etc/{{ item }}
-    owner: root
-    group: wheel
-    mode: "0644"
-  with_items:
-    - sysctl.conf
-  notify:
-    - restart_sysctl
 
 - name: Install /etc/defaults/vendor.conf (host version)
   when: is_host_install
