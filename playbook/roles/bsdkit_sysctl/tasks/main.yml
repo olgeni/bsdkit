@@ -1,13 +1,25 @@
 ---
-- name: Remove obsolete keys from /etc/sysctl.conf
+- name: Install sysctl.conf
   when: is_host_install
-  lineinfile:
-    path: /etc/sysctl.conf
-    state: absent
-    regexp: '^\s*#?\s*{{ item | regex_escape() }}\b'
-  loop:
-    - vfs.zfs.arc_free_target
-    - vm.pageout_oom_seq
-    - vm.v_free_min
-    - vm.v_free_severe
-    - vm.v_free_target
+  copy:
+    src: ../ansible/sysctl.conf
+    dest: /etc/sysctl.conf
+    owner: root
+    group: wheel
+    mode: "0644"
+  notify:
+    - restart_sysctl
+
+- name: Check if /etc/sysctl.conf.local exists
+  when: is_host_install
+  stat:
+    path: /etc/sysctl.conf.local
+  register: stat_sysctl_conf_local
+
+- name: Touch /etc/sysctl.conf.local
+  when: is_host_install
+  file:
+    path: /etc/sysctl.conf.local
+    state: touch
+    mode: "0644"
+  when: not stat_sysctl_conf_local.stat.exists
