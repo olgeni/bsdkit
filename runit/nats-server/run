@@ -35,6 +35,14 @@ fi
 : ${NATS_CERT_FILE:=""} # /usr/local/etc/letsencrypt/live/FQDN/fullchain.pem
 : ${NATS_KEY_FILE:=""}  # /usr/local/etc/letsencrypt/live/FQDN/privkey.pem
 
+if ! echo "${NATS_CERT_FILE}" | grep -q "/" > /dev/null; then
+    NATS_CERT_FILE="/usr/local/etc/letsencrypt/live/${NATS_CERT_FILE}/fullchain.pem"
+fi
+
+if ! echo "${NATS_KEY_FILE}" | grep -q "/" > /dev/null; then
+    NATS_KEY_FILE="/usr/local/etc/letsencrypt/live/${NATS_KEY_FILE}/privkey.pem"
+fi
+
 mkdir -p ${NATS_DATA_DIR}/certs
 
 NATS_CERTS_DIR="${NATS_DATA_DIR}/certs"
