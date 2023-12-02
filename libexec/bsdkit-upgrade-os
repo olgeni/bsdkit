@@ -177,7 +177,7 @@ remove_nouarch_files() {
     rm -f ${_directory_list}
 }
 
-update_efi_boot_loader() {
+update_boot_loader() {
     _efi_mount_point="${DESTDIR}/boot/efi"
 
     mkdir -p "${_efi_mount_point}"
@@ -726,7 +726,7 @@ if is_yes ${BOOTENV_ENABLE}; then
 fi
 
 if sysctl machdep.bootmethod | grep -q 'UEFI'; then
-    update_efi_boot_loader
+    update_boot_loader
 fi
 
 if is_yes ${BOOTENV_ENABLE}; then
