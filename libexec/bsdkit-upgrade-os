@@ -725,9 +725,7 @@ if is_yes ${BOOTENV_ENABLE}; then
     fi
 fi
 
-if sysctl machdep.bootmethod | grep -q 'UEFI'; then
-    update_boot_loader
-fi
+update_boot_loader
 
 if is_yes ${BOOTENV_ENABLE}; then
     for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
