@@ -9,5 +9,5 @@
   lineinfile:
     path: /etc/sysctl.conf.local
     regexp: "^net.inet6.ip6.dad_count="
-    line: "net.inet6.ip6.dad_count=\"0\""
+    line: "net.inet6.ip6.dad_count=0"
     state: present
