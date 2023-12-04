@@ -552,6 +552,9 @@ __install_efi_loader() {
     mount -t msdos ${_device} /tmp/efi
     mkdir -p /tmp/efi/efi/boot
     install /boot/loader.efi /tmp/efi/efi/boot/bootx64.efi
+
+    echo "BOOTx64.efi" > /tmp/efi/efi/boot/startup.nsh
+
     umount /tmp/efi
 }
 
