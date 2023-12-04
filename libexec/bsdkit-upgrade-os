@@ -228,7 +228,8 @@ update_boot_loader() {
 
                 if [ -d "${_efi_mount_point}/efi/boot" ]; then
                     message "Upgrading EFI boot loader on ${_partition}"
-                    install -v "${DESTDIR}/boot/loader.efi" "${_efi_mount_point}/efi/boot/bootx64.efi"
+                    install -v "${DESTDIR}/boot/loader.efi" "${_efi_mount_point}/efi/boot/bootx64.efi.new"
+                    mv "${_efi_mount_point}/efi/boot/bootx64.efi.new" "${_efi_mount_point}/efi/boot/bootx64.efi"
                 else
                     warning "EFI directory not found for ${_partition}"
                 fi
