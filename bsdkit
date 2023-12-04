@@ -548,14 +548,16 @@ __install_efi_loader() {
 
     newfs_msdos -L efi -F 16 -c 2 ${_device}
 
-    mkdir -p /tmp/efi
-    mount -t msdos ${_device} /tmp/efi
-    mkdir -p /tmp/efi/efi/boot
-    install /boot/loader.efi /tmp/efi/efi/boot/bootx64.efi
+    local _efi_tmp_dir=$(mktemp -d)
 
-    echo "BOOTx64.efi" > /tmp/efi/efi/boot/startup.nsh
+    mount -t msdos ${_device} ${_efi_tmp_dir}
+    mkdir -p ${_efi_tmp_dir}/efi/boot
+    install /boot/loader.efi ${_efi_tmp_dir}/efi/boot/bootx64.efi
 
-    umount /tmp/efi
+    echo "BOOTx64.efi" > ${_efi_tmp_dir}/efi/boot/startup.nsh
+
+    umount ${_efi_tmp_dir}
+    rmdir ${_efi_tmp_dir}
 }
 
 __gpt_ufs_partition_multi() {
