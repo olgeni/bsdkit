@@ -13,6 +13,7 @@
     home: /var/db/mysql
     shell: /bin/sh
     state: present
+    createhome: false
 
 - name: Create home directory for MySQL
   file:
@@ -23,10 +24,16 @@
     group: mysql
 
 - name: Check if /var/db/mysql is empty
-  shell: ls -A /var/db/mysql
-  register: ls_mysql_db_dir
+  find:
+    paths: /var/db/mysql
+    file_type: any
+  register: find_mysql_db_dir
   changed_when: false
-  failed_when: false
+
+- name: Set fact if /var/db/mysql is empty
+  set_fact:
+    mysql_db_dir_empty: "{{ find_mysql_db_dir.matched == 0 }}"
+  changed_when: false
 
 - name: Check if legacy MySQL PID file exists
   stat:
@@ -54,7 +61,7 @@
     mode: "0644"
 
 - name: Configure SSH identity for MySQL
-  when: ls_mysql_db_dir.stdout != ""
+  when: not mysql_db_dir_empty
   block:
     - name: Create SSH directory for MySQL
       file:

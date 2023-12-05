@@ -13,6 +13,7 @@
     home: /var/db/postgres
     shell: /bin/sh
     state: present
+    create_home: false
 
 - name: Create home directory for PostgreSQL
   file:
