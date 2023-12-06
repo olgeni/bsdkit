@@ -29,3 +29,13 @@
   community.general.pkgng:
     name: sysutils/fsc
     state: absent
+
+- name: Check if FreeBSD version is 14 or above
+  set_fact:
+    is_freebsd_14_or_above: "{{ ansible_distribution_version is version('14.0', '>=') }}"
+
+- name: Remove /var/db/portsnap if FreeBSD version is 14 or above
+  file:
+    path: /var/db/portsnap
+    state: absent
+  when: is_freebsd_14_or_above
