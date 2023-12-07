@@ -2903,10 +2903,13 @@ build_setup_img() {
     local _efi_dir
     _efi_dir=$(mktemp -d /tmp/efi.XXXXXX)
 
-    tar -x -f ${_iso_file} -C ${_efi_dir} boot/loader.efi
+    tar -x -f ${_iso_file} -C ${_efi_dir} boot/loader_lua.efi boot/loader.efi
 
     mkdir -p ${_efi_dir}/efi/boot
-    mv ${_efi_dir}/boot/loader.efi ${_efi_dir}/efi/boot/bootx64.efi
+    install ${_efi_dir}/boot/loader.efi ${_efi_dir}/efi/boot/bootx64.efi
+
+    rm -f ${_efi_dir}/boot/loader_lua.efi
+    rm -f ${_efi_dir}/boot/loader.efi
     rmdir ${_efi_dir}/boot
 
     local _efi_img
