@@ -3214,7 +3214,30 @@ __find_jail() {
     echo ${_jail_name}
 }
 
+__ansible_pre_cleanup() {
+    local _path="/usr/local/lib/python*/site-packages/"
+
+    for _dir in ${_path}; do
+        if [ -d "${_dir}" ]; then
+            find "${_dir}" -type d -name '__pycache__' | while read _directory; do
+                for _file in ${(N)"${_directory}"/*.pyc}; do
+                    if ! pkg which "${_file}" > /dev/null 2>&1; then
+                        rm -f "${_file}"
+                        message "Removed file ${_file}"
+                    fi
+                done
+
+                if [ "$(find "${_directory}" -type f | wc -l)" = "0" ]; then
+                    rmdir "${_directory}"
+                    message "Removed directory ${_directory}"
+                fi
+            done
+        fi
+    done
+}
+
 configure() {
+    __ansible_pre_cleanup
     __build_facts
 
     ansible_local_playbook -t configure
