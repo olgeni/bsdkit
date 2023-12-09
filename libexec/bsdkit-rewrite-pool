@@ -6,6 +6,9 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/colors.inc
+source ${SCRIPT_PATH}/hr_to_bytes.inc
+source ${SCRIPT_PATH}/is_yes.inc
+source ${SCRIPT_PATH}/yaml.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."

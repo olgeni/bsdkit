@@ -6,6 +6,9 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/colors.inc
+source ${SCRIPT_PATH}/hr_to_bytes.inc
+source ${SCRIPT_PATH}/is_yes.inc
+source ${SCRIPT_PATH}/yaml.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."
@@ -89,37 +92,6 @@ cleanup() {
             fi
         fi
     fi
-}
-
-is_yes() {
-    # Return 0 if the argument is a positive answer, 1 if it is a negative
-    case $1 in
-        [Yy][Ee][Ss])
-            return 0
-            ;;
-        [Nn][Oo])
-            return 1
-            ;;
-        [Tt][Rr][Uu][Ee])
-            return 0
-            ;;
-        [Ff][Aa][Ll][Ss][Ee])
-            return 1
-            ;;
-        [Oo][Nn])
-            return 0
-            ;;
-        [Oo][Ff][Ff])
-            return 1
-            ;;
-        *)
-            if [[ $1 == <-> ]]; then
-                [ $1 -ne 0 ]
-            else
-                return 2
-            fi
-            ;;
-    esac
 }
 
 osmajor() {
