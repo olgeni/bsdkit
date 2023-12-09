@@ -26,6 +26,7 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 : ${FETCH_ONLY:="no"}
 : ${UPGRADE_PACKAGES:="no"}
 : ${REBUILD_PORTS:="no"}
+: ${ETCUPDATE_AUTORESOLVE:="no"}
 : ${PV_UPDATE_DELAY:="0.1"}
 
 : ${_install_src:="no"}
@@ -259,37 +260,40 @@ if mount | cut -w -f 3 | fgrep -q "/proc"; then
 fi
 
 OPTIND=1
-while getopts "eEn:r:v:a:d:Fpb" OPT; do
+while getopts "a:b:d:eEFmn:p:r:v:" OPT; do
     case ${OPT} in
+        a)
+            BSDKIT_ARCH=${OPTARG}
+            ;;
+        b)
+            REBUILD_PORTS="yes"
+            ;;
+        d)
+            DESTDIR=${OPTARG%/}
+            ;;
         e)
             BOOTENV_ENABLE=yes
             ;;
         E)
             BOOTENV_ENABLE=no
             ;;
+        F)
+            FETCH_ONLY="yes"
+            ;;
+        m)
+            ETCUPDATE_AUTORESOLVE="yes"
+            ;;
         n)
             BOOTENV_NAME=${OPTARG}
+            ;;
+        p)
+            UPGRADE_PACKAGES="yes"
             ;;
         r)
             BSDKIT_ROOT_URL=${OPTARG}
             ;;
         v)
             BSDKIT_VERSION=${OPTARG}
-            ;;
-        a)
-            BSDKIT_ARCH=${OPTARG}
-            ;;
-        d)
-            DESTDIR=${OPTARG%/}
-            ;;
-        F)
-            FETCH_ONLY="yes"
-            ;;
-        p)
-            UPGRADE_PACKAGES="yes"
-            ;;
-        b)
-            REBUILD_PORTS="yes"
             ;;
         *)
             exit 64 # EX_USAGE
@@ -462,7 +466,11 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
 fi
 
 if [ -t 0 ]; then
-    etcupdate resolve -D ${DESTDIR}/
+    if is_yes ${ETCUPDATE_AUTORESOLVE}; then
+        yes mf | etcupdate resolve -D ${DESTDIR}/
+    else
+        etcupdate resolve -D ${DESTDIR}/
+    fi
 fi
 
 export PATH=/rescue:${PATH}
@@ -483,9 +491,17 @@ find \
     -exec chflags noschg {} \;
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
-    etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
+    if is_yes ${ETCUPDATE_AUTORESOLVE}; then
+        yes mf | etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
+    else
+        etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
+    fi
 elif [ -f ${_srcdir}/Makefile ]; then
-    etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
+    if is_yes ${ETCUPDATE_AUTORESOLVE}; then
+        yes mf | etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
+    else
+        etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
+    fi
 fi
 
 if [ -t 0 ]; then
