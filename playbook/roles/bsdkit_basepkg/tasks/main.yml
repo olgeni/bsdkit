@@ -1,20 +1,4 @@
 ---
-- name: Install base packages (host)
-  when: is_host_install
-  community.general.pkgng:
-    name:
-      - sysutils/beadm
-      - sysutils/checkrestart
-      - sysutils/lsblk
-    state: present
-
-- name: Install base packages (bare metal)
-  when: is_host_install and not platform_is_cloud
-  community.general.pkgng:
-    name:
-      - sysutils/smartmontools
-    state: present
-
 - name: Remove unnecessary packages (cloud)
   when: is_host_install and platform_is_cloud
   community.general.pkgng:
@@ -28,10 +12,9 @@
       - textproc/yq
     state: absent
 
-- name: Install base packages (common)
-  community.general.pkgng:
-    # Synchronize with 33c82d0f-f01e-4032-b489-3ecdad22ca16
-    name:
+- name: Define list of base packages (common)
+  set_fact:
+    bsdkit_common_base_packages:
       # required
       - devel/git
       - security/ca_root_nss
@@ -81,4 +64,49 @@
       - sysutils/runit
       - textproc/align
       - textproc/the_silver_searcher
+
+- name: Define list of base packages (host)
+  set_fact:
+    bsdkit_host_packages:
+      - sysutils/beadm
+      - sysutils/checkrestart
+      - sysutils/lsblk
+
+- name: Define list of base packages (bare metal)
+  set_fact:
+    bsdkit_bare_metal_packages:
+      - sysutils/smartmontools
+
+- name: Install base packages (common)
+  community.general.pkgng:
+    name: "{{ bsdkit_common_base_packages }}"
     state: present
+
+- name: Install base packages (host)
+  when: is_host_install
+  community.general.pkgng:
+    name: "{{ bsdkit_host_packages }}"
+    state: present
+
+- name: Install base packages (bare metal)
+  when: is_host_install and not platform_is_cloud
+  community.general.pkgng:
+    name: "{{ bsdkit_bare_metal_packages }}"
+    state: present
+
+- name: Mark packages as non-removable (common)
+  command: "pkg set -A 0 {{ item }}"
+  loop: "{{ bsdkit_common_base_packages }}"
+  changed_when: false
+
+- name: Mark packages as non-removable (host)
+  when: is_host_install
+  command: "pkg set -A 0 {{ item }}"
+  loop: "{{ bsdkit_host_packages }}"
+  changed_when: false
+
+- name: Mark packages as non-removable (bare metal)
+  when: is_host_install and not platform_is_cloud
+  command: "pkg set -A 0 {{ item }}"
+  loop: "{{ bsdkit_bare_metal_packages }}"
+  changed_when: false
