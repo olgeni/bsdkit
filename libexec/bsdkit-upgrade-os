@@ -202,7 +202,7 @@ update_boot_loader() {
                 if [ -d "${_efi_mount_point}/efi/boot" ]; then
                     message "Upgrading EFI boot loader on ${_partition}"
                     install -v "${DESTDIR}/boot/loader.efi" "${_efi_mount_point}/efi/boot/bootx64.efi.new"
-                    mv "${_efi_mount_point}/efi/boot/bootx64.efi.new" "${_efi_mount_point}/efi/boot/bootx64.efi"
+                    mv -v "${_efi_mount_point}/efi/boot/bootx64.efi.new" "${_efi_mount_point}/efi/boot/bootx64.efi"
 
                     if [ ! -f "${_efi_mount_point}/efi/boot/startup.nsh" ]; then
                         echo "BOOTx64.efi" > "${_efi_mount_point}/efi/boot/startup.nsh"
