@@ -24,6 +24,73 @@ usage() {
     exit 0
 }
 
+postgresql_is_running() {
+    local _is_running=$(psql -U postgres -d template1 -c "SELECT 1;" -t -A)
+
+    if [ "${_is_running}" = "1" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+postgresql_is_in_recovery() {
+    local _in_recovery=$(psql -U postgres -d template1 -c "SELECT pg_is_in_recovery();" -t -A)
+
+    [ "${_in_recovery}" = "t" ]
+}
+
+postgresql_has_standby_signal() {
+    local _directory="$1"
+
+    [ -f "${_directory}/standby.signal" ]
+}
+
+perform_pg_basebackup() {
+    if postgresql_is_running; then
+        error "PostgreSQL is running. Please stop it first."
+    fi
+
+    local _source_directory="/var/db/postgres/data14"
+    local _target_directory="/var/db/postgres/data15"
+
+    local conf_file="${_source_directory}/postgresql.auto.conf"
+    local conn_info=$(grep "primary_conninfo" "$conf_file" | cut -d '=' -f2-)
+
+    local _host=$(echo $conn_info | sed -e "s/.*host=\([^ ]*\).*/\1/")
+    local _port=$(echo $conn_info | sed -e "s/.*port=\([^ ]*\).*/\1/")
+    local _user=$(echo $conn_info | sed -e "s/.*user=\([^ ]*\).*/\1/")
+
+    _host=${_host//\'/}
+
+    if [ -z "$_{host}" ]; then
+        error "No host defined in ${conf_file}"
+    fi
+
+    _port=${_port//\'/}
+
+    if [ -z "$_{port}" ]; then
+        error "No port defined in ${conf_file}"
+    fi
+
+    _user=${_user//\'/}
+
+    if [ -z "$_{user}" ]; then
+        error "No user defined in ${conf_file}"
+    fi
+
+    message "Performing pg_basebackup with host=${_host}, port=${_port}, user=${_user}"
+
+    pg_basebackup --pgdata="${_target_directory}" \
+        --wal-method=stream \
+        --progress \
+        --verbose \
+        --write-recovery-conf \
+        --host="${_host}" \
+        --username="${_user}" \
+        --port="${_port}"
+}
+
 zparseopts -F -D -E -K -a _opts -A _opts_args \
     s:=SOURCE_VERSION_OPTION \
     t:=TARGET_VERSION_OPTION
