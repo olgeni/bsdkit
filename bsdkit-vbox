@@ -107,6 +107,11 @@ perform_stop() {
         return
     fi
 
+    if ! VBoxManage showvminfo ${BSDKIT_VBOX_NAME} --machinereadable | fgrep 'VMState="running"' > /dev/null 2>&1; then
+        message "Virtual machine is not running"
+        return
+    fi
+
     message "Sending ACPI power button signal"
     VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
 
