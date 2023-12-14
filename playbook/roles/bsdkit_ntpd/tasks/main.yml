@@ -1,4 +1,12 @@
 ---
+- name: Update /etc/rc.conf.d/ntpd
+  lineinfile:
+    path: /etc/rc.conf.d/ntpd
+    regexp: '^ntp_leapfile_sources='
+    line: 'ntp_leapfile_sources="{{ ntp_leapfile_sources }}"'
+    state: present
+    create: true
+
 - name: Check if ntpd is enabled
   shell:
     cmd: |

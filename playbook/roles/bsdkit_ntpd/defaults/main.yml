@@ -1,1 +1,2 @@
 ---
+ntp_leapfile_sources: "https://data.iana.org/time-zones/tzdb/leap-seconds.list"
