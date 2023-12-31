@@ -718,7 +718,9 @@ if is_yes ${BOOTENV_ENABLE}; then
     fi
 fi
 
-update_boot_loader
+if [ -n "${DESTDIR}" ]; then
+    update_boot_loader
+fi
 
 if is_yes ${BOOTENV_ENABLE}; then
     for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
