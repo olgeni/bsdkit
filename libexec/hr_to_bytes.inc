@@ -1,3 +1,5 @@
+# -*- mode: sh -*-
+
 [[ -z "${BSDKIT_HR_TO_BYTES_INCLUDED=""}" ]] && {
     BSDKIT_HR_TO_BYTES_INCLUDED="yes"
 

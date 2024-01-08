@@ -1,3 +1,5 @@
+# -*- mode: sh -*-
+
 [[ -z "${BSDKIT_COLORS_INCLUDED=""}" ]] && {
     BSDKIT_COLORS_INCLUDED=1
 

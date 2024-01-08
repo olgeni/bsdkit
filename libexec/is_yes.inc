@@ -1,3 +1,5 @@
+# -*- mode: sh -*-
+
 [[ -z "${BSDKIT_IS_YES_INCLUDED=""}" ]] && {
     BSDKIT_IS_YES_INCLUDED="yes"
 
