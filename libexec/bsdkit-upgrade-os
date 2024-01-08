@@ -151,11 +151,23 @@ remove_nouarch_files() {
 }
 
 update_boot_loader() {
+    _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
+
+    for _disk in ${(s/ /)_disks}; do
+        case "${_disk}" in
+            cd[0-9]*)
+                continue
+                ;;
+        esac
+
+        if echo "$(gpart show "${_disk}" 2>/dev/null)" | grep -qF '[CORRUPT]'; then
+            error "GPT on disk ${_disk} is marked as CORRUPT"
+        fi
+    done
+
     _efi_mount_point="${DESTDIR}/boot/efi"
 
     mkdir -p "${_efi_mount_point}"
-
-    _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
 
     for _disk in ${(s/ /)_disks}; do
         case "${_disk}" in
