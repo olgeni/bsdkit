@@ -240,7 +240,7 @@ else
 fi
 
 if mount | cut -w -f 3 | fgrep -q "/proc"; then
-    _proc_mounted=yes
+    _proc_mounted="yes"
 fi
 
 OPTIND=1
@@ -256,10 +256,10 @@ while getopts "a:b:d:eEFmn:p:r:v:" OPT; do
             DESTDIR=${OPTARG%/}
             ;;
         e)
-            BOOTENV_ENABLE=yes
+            BOOTENV_ENABLE="yes"
             ;;
         E)
-            BOOTENV_ENABLE=no
+            BOOTENV_ENABLE="no"
             ;;
         F)
             FETCH_ONLY="yes"
@@ -328,15 +328,15 @@ if ! is_yes ${FETCH_ONLY}; then
 fi
 
 if [ -f ${DESTDIR}/usr/src/Makefile ]; then
-    _install_src=yes
+    _install_src="yes"
 fi
 
 if [ -f ${DESTDIR}/usr/lib/debug/bin/sh.debug ]; then
-    _install_debug=yes
+    _install_debug="yes"
 fi
 
 if [ -f ${DESTDIR}/usr/tests/Kyuafile ]; then
-    _install_tests=yes
+    _install_tests="yes"
 fi
 
 _release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
