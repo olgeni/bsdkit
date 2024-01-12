@@ -730,7 +730,9 @@ if is_yes ${BOOTENV_ENABLE}; then
     fi
 fi
 
-if [ -n "${DESTDIR}" ]; then
+if [ -z "${DESTDIR}" ]; then
+    update_boot_loader
+elif [ "${DESTDIR}" = "${BOOTENV_MOUNT}" ] && is_yes ${BOOTENV_ENABLE}; then
     update_boot_loader
 fi
 
