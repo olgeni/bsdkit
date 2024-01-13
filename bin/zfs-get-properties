@@ -2,7 +2,7 @@
 
 set -e -u -o pipefail
 
-filter_properties() {
+filter-properties() {
     awk '
 BEGIN {
   read_only["available"] = 1;
@@ -45,5 +45,5 @@ BEGIN {
 }
 
 zfs get -r -s local,received -H all "$1" \
-    | filter_properties \
+    | filter-properties \
     | awk '{ print "zfs set " $2 "=\"" $3 "\" " $1 " || :"; }'

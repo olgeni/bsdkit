@@ -69,7 +69,7 @@ while ! pkg install -y devel/git sysutils/pv sysutils/ansible shells/zsh; do :; 
 git clone https://gitlab.com/olgeni/bsdkit.git
 cd bsdkit
 git checkout ${BSDKIT_BRANCH}
-./bsdkit ansible_local_playbook
+./bsdkit ansible-local-playbook
 
 if route get default | grep "interface:" > /dev/null 2>&1; then
     _iface=$(route get default | awk '/interface:/ { print $2 }')

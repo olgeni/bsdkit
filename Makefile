@@ -50,7 +50,7 @@ delete-snapshot:
 	@$(CURDIR)/bsdkit-vbox delete-snapshot
 
 sync-vm:
-	@$(CURDIR)/bsdkit-vbox sync_vm
+	@$(CURDIR)/bsdkit-vbox sync-vm
 
 logcat:
 	@$(CURDIR)/bsdkit-vbox logcat
@@ -59,78 +59,78 @@ shell:
 	@$(CURDIR)/bsdkit-vbox shell
 
 install-gpt-zfs-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-gpt-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0}
 
 install-gpt-zfs-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-gpt-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0} ${DISK1}
 
 install-gpt-zfs-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-gpt-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0} ${DISK1} ${DISK2}
 
 install-mbr-zfs-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0}
 
 install-mbr-zfs-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0} ${DISK1}
 
 install-mbr-zfs-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0} ${DISK1} ${DISK2}
 
 install-zfs-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0}
 
 install-zfs-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0} ${DISK1}
 
 install-zfs-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_zfs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-zfs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} ${DISK0} ${DISK1} ${DISK2}
 
 install-mbr-ufs-single-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-ufs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single ${DISK0}
 
 install-gpt-ufs-single-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-gpt-ufs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single ${DISK0}
 
 install-gpt-ufs-multi-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_gpt_ufs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-gpt-ufs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi ${DISK0}
 
 install-mbr-ufs-multi-1:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-ufs -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi ${DISK0}
 
 install-mbr-ufs-gmirror-single-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-ufs-gmirror -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single gm0 ${DISK0} ${DISK1}
 
 install-mbr-ufs-gmirror-single-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-ufs-gmirror -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} single gm0 ${DISK0} ${DISK1} ${DISK2}
 
 install-mbr-ufs-gmirror-multi-2:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-ufs-gmirror -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi gm0 ${DISK0} ${DISK1}
 
 install-mbr-ufs-gmirror-multi-3:
-	$(CURDIR)/bsdkit-vbox remote_deploy install_mbr_ufs_gmirror -r ${BSDKIT_ROOT_URL} \
+	$(CURDIR)/bsdkit-vbox remote-deploy install-mbr-ufs-gmirror -r ${BSDKIT_ROOT_URL} \
 		-z ${BSDKIT_PKGSET} -v ${BSDKIT_VERSION} multi gm0 ${DISK0} ${DISK1} ${DISK2}
 
 sysprep-aws:
-	$(CURDIR)/bsdkit-vbox remote_exec sysprep -t aws
+	$(CURDIR)/bsdkit-vbox remote-exec sysprep -t aws
 
 sysprep-digitalocean:
-	$(CURDIR)/bsdkit-vbox remote_exec sysprep -t digitalocean
+	$(CURDIR)/bsdkit-vbox remote-exec sysprep -t digitalocean
 
 image-aws-zfs: rebuild-vm install-gpt-zfs-1 restart-vm sync-vm sysprep-aws
 

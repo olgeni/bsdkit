@@ -6,8 +6,8 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/colors.inc
-source ${SCRIPT_PATH}/hr_to_bytes.inc
-source ${SCRIPT_PATH}/is_yes.inc
+source ${SCRIPT_PATH}/hr-to-bytes.inc
+source ${SCRIPT_PATH}/is-yes.inc
 source ${SCRIPT_PATH}/yaml.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
@@ -106,7 +106,7 @@ OS_MAJOR=$(echo ${_version} | sed -e 's/\..*//')
 
 # ===
 
-build_release() {
+build-release() {
     local _make_conf=${BSDKIT_PATH}/etc/make.conf
     local _src_conf=${BSDKIT_PATH}/etc/src.conf
 
@@ -133,7 +133,7 @@ build_release() {
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         install DESTDIR=${OS_RELDIR}
 
-    ${BSDKIT_PATH}/bsdkit get_src_release_name ${OS_SRCDIR} > ${OS_RELDIR}/ftp/RELEASE
+    ${BSDKIT_PATH}/bsdkit get-src-release-name ${OS_SRCDIR} > ${OS_RELDIR}/ftp/RELEASE
 
     etcupdate build -s ${OS_SRCDIR} ${OS_RELDIR}/ftp/etcupdate.tar.bz2
 
@@ -146,7 +146,7 @@ build_release() {
     rm -f ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 }
 
-build_staging() {
+build-staging() {
     local _target=${BSDKIT_DATA}/release-${_version}-${_arch}
 
     if [ -d "${OS_RELDIR}/ftp" ]; then
@@ -158,14 +158,14 @@ build_staging() {
         cp ${OS_RELDIR}/ftp/* ${_target}
     fi
 
-    ${BSDKIT_PATH}/bsdkit build_setup_staging \
+    ${BSDKIT_PATH}/bsdkit build-setup-staging \
         ${BSDKIT_DATA}/staging-${_version}-${_arch} \
         . \
         ${BSDKIT_DATA}/release-${_version}-${_arch} \
         ${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
 }
 
-build_iso() {
+build-iso() {
     local _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.iso
     local _release="none"
     local _packages="none"
@@ -176,14 +176,14 @@ build_iso() {
         _packages=${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
     fi
 
-    ${BSDKIT_PATH}/bsdkit build_setup_iso \
+    ${BSDKIT_PATH}/bsdkit build-setup-iso \
         ${_iso} \
         ${BSDKIT_DATA}/staging-${_version}-${_arch} \
         ${_release} \
         ${_packages}
 }
 
-build_usb() {
+build-usb() {
     local _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.iso
     local _usb=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.img
 
@@ -192,21 +192,21 @@ build_usb() {
         _usb=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.img
     fi
 
-    ${BSDKIT_PATH}/bsdkit build_setup_img ${_iso} ${_usb}
+    ${BSDKIT_PATH}/bsdkit build-setup-img ${_iso} ${_usb}
 }
 
 if [ -n "${_build_release}" ]; then
-    build_release
+    build-release
 fi
 
 if [ -n "${_build_staging}" ]; then
-    build_staging
+    build-staging
 fi
 
 if [ -n "${_build_iso}" ]; then
-    build_iso
+    build-iso
 fi
 
 if [ -n "${_build_usb}" ]; then
-    build_usb
+    build-usb
 fi

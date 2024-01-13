@@ -16,7 +16,7 @@ rcvar="bsdkit_provision_enable"
 
 bsdkit_provision_start() {
     /usr/local/bsdkit/bsdkit update
-    /usr/local/bsdkit/bsdkit enable_swap_device
+    /usr/local/bsdkit/bsdkit enable-swap-device
     /usr/local/bsdkit/bsdkit provision
 
     touch /firstboot-reboot

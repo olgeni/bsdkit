@@ -3,7 +3,7 @@
 [[ -z "${BSDKIT_IS_YES_INCLUDED=""}" ]] && {
     BSDKIT_IS_YES_INCLUDED="yes"
 
-    is_yes() {
+    is-yes() {
         # Return 0 if the argument is a positive answer, 1 if it is a negative
         case $1 in
             [Yy][Ee][Ss])
@@ -34,11 +34,11 @@
         esac
     }
 
-    yes_if() {
+    yes-if() {
         # Return YES if all arguments are positive answers, NO otherwise
         local _arg
         for _arg in "$@"; do
-            if ! is_yes "$_arg"; then
+            if ! is-yes "$_arg"; then
                 echo "NO"
                 return
             fi

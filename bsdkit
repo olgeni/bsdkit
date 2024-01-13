@@ -59,8 +59,8 @@ setopt pushdsilent
 : ${FREEBSD_PKG_URL_TEMPLATE:='%%ROOT_URL%%/packages-${ABI}-%%TREE%%-%%PKGSET%%'}
 
 # Default FreeBSD release and package URLs
-: ${FREEBSD_REL_URL:=''} # initialized by __parse_options
-: ${FREEBSD_PKG_URL:=''} # initialized by __parse_options
+: ${FREEBSD_REL_URL:=''} # initialized by __parse-options
+: ${FREEBSD_PKG_URL:=''} # initialized by __parse-options
 
 # Default ZFS options
 DEFAULT_ASHIFT=12
@@ -102,8 +102,8 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/libexec/colors.inc
-source ${SCRIPT_PATH}/libexec/hr_to_bytes.inc
-source ${SCRIPT_PATH}/libexec/is_yes.inc
+source ${SCRIPT_PATH}/libexec/hr-to-bytes.inc
+source ${SCRIPT_PATH}/libexec/is-yes.inc
 source ${SCRIPT_PATH}/libexec/yaml.inc
 
 if command -v pv > /dev/null 2>&1; then
@@ -126,43 +126,43 @@ usage() {
     exit 1
 }
 
-is_bios() {
+is-bios() {
     # Return 0 if the system is booted in BIOS mode
     [ "$(sysctl -n machdep.bootmethod)" = "BIOS" ]
 }
 
-is_efi() {
+is-efi() {
     # Return 0 if the system is booted in UEFI mode
     [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
 }
 
-platform_is_digitalocean() {
+platform-is-digitalocean() {
     [ "$(kenv -q smbios.system.product)" = "Droplet" ]
 }
 
-platform_is_cloudsigma() {
+platform-is-cloudsigma() {
     [ "$(kenv -q smbios.system.product)" = "CloudSigma" ]
 }
 
-platform_is_virtualbox() {
+platform-is-virtualbox() {
     [ "$(kenv -q smbios.system.product)" = "VirtualBox" ]
 }
 
-platform_is_vmware() {
+platform-is-vmware() {
     [ "$(kenv -q smbios.system.product)" = "VMware Virtual Platform" ]
 }
 
-platform_is_aws() {
+platform-is-aws() {
     [ "$(kenv -q smbios.bios.vendor)" = "Amazon EC2" ]
 }
 
-platform_is_cloud() {
-    platform_is_digitalocean || platform_is_cloudsigma || platform_is_virtualbox || platform_is_vmware || platform_is_aws
+platform-is-cloud() {
+    platform-is-digitalocean || platform-is-cloudsigma || platform-is-virtualbox || platform-is-vmware || platform-is-aws
 }
 
-reformat_fstab() {
+reformat-fstab() {
     if [ $# -ne 1 ]; then
-        usage "reformat_fstab <fstab>"
+        usage "reformat-fstab <fstab>"
     fi
 
     local _fstab=$1
@@ -176,9 +176,9 @@ reformat_fstab() {
     rm ${_fstab}.0
 }
 
-reformat_rc_conf() {
+reformat-rc-conf() {
     if [ $# -ne 1 ]; then
-        usage "reformat_rc_conf <rc.conf>"
+        usage "reformat-rc-conf <rc.conf>"
     fi
 
     local _rc_conf=$1
@@ -192,9 +192,9 @@ reformat_rc_conf() {
     rm ${_rc_conf}.0
 }
 
-reformat_loader_conf() {
+reformat-loader-conf() {
     if [ $# -ne 1 ]; then
-        usage "reformat_loader_conf <loader.conf>"
+        usage "reformat-loader-conf <loader.conf>"
     fi
 
     local _loader_conf=$1
@@ -208,9 +208,9 @@ reformat_loader_conf() {
     rm ${_loader_conf}.0
 }
 
-reformat_sysctl_conf() {
+reformat-sysctl-conf() {
     if [ $# -ne 1 ]; then
-        usage "reformat_sysctl_conf <sysctl.conf>"
+        usage "reformat-sysctl-conf <sysctl.conf>"
     fi
 
     local _sysctl_conf=$1
@@ -224,19 +224,19 @@ reformat_sysctl_conf() {
     rm ${_sysctl_conf}.0
 }
 
-__check_python3() {
+__check-python3() {
     if ! command -v python3 > /dev/null 2>&1; then
         pkg install -y lang/python3
     fi
 }
 
-__check_ansible() {
+__check-ansible() {
     if ! command -v ansible-playbook > /dev/null 2>&1; then
         pkg install -y sysutils/ansible
     fi
 }
 
-__check_go_yq() {
+__check-go-yq() {
     if ! command -v pkg > /dev/null 2>&1; then
         return 0
     fi
@@ -250,13 +250,13 @@ __check_go_yq() {
     fi
 }
 
-__check_iocage() {
+__check-iocage() {
     if ! command -v iocage > /dev/null 2>&1; then
         pkg install -y sysutils/iocage
     fi
 }
 
-__check_py_pyaml() {
+__check-py-pyaml() {
     if ! command -v pkg > /dev/null 2>&1; then
         return 0
     fi
@@ -266,9 +266,9 @@ __check_py_pyaml() {
     fi
 }
 
-__check_requirements() {
-    __check_python3
-    __check_ansible
+__check-requirements() {
+    __check-python3
+    __check-ansible
 }
 
 __environment() {
@@ -312,7 +312,7 @@ __environment() {
         ANSIBLE_DISPLAY_SKIPPED_HOSTS=\"${ANSIBLE_DISPLAY_SKIPPED_HOSTS}\"
 }
 
-__parse_url() {
+__parse-url() {
     local _url=$1
 
     echo ${_url} | sed \
@@ -323,7 +323,7 @@ __parse_url() {
         -e "s|%%PKGSET%%|${BSDKIT_PKGSET}|g"
 }
 
-__local_options() {
+__local-options() {
     cat << EOF
 local BSDKIT_ROOT_URL='${BSDKIT_ROOT_URL}';
 local BSDKIT_VERSION='${BSDKIT_VERSION}';
@@ -335,7 +335,7 @@ local FREEBSD_PKG_URL='${FREEBSD_PKG_URL}';
 EOF
 }
 
-__parse_options() {
+__parse-options() {
     local _opts _opts_args
 
     # -F: Halts at first undefined spec, emitting an error message; doesn't
@@ -376,8 +376,8 @@ __parse_options() {
         esac
     done
 
-    FREEBSD_REL_URL=$(__parse_url ${FREEBSD_REL_URL_TEMPLATE})
-    FREEBSD_PKG_URL=$(__parse_url ${FREEBSD_PKG_URL_TEMPLATE})
+    FREEBSD_REL_URL=$(__parse-url ${FREEBSD_REL_URL_TEMPLATE})
+    FREEBSD_PKG_URL=$(__parse-url ${FREEBSD_PKG_URL_TEMPLATE})
 
     cat << EOF
 BSDKIT_ROOT_URL='${BSDKIT_ROOT_URL}';
@@ -391,7 +391,7 @@ set -- $*;
 EOF
 }
 
-__valid_url() {
+__valid-url() {
     local _url=$1
 
     case ${_url} in
@@ -416,10 +416,10 @@ __valid_url() {
     esac
 }
 
-__valid_relpath() {
+__valid-relpath() {
     local _relpath=$1
 
-    __valid_url ${_relpath} && return 0
+    __valid-url ${_relpath} && return 0
 
     [ -d ${_relpath} ]
     [ -f ${_relpath}/base.txz ]
@@ -427,16 +427,16 @@ __valid_relpath() {
     return 0
 }
 
-__valid_pkgpath() {
+__valid-pkgpath() {
     local _pkgpath=$1
 
-    __valid_url ${_pkgpath} && return 0
+    __valid-url ${_pkgpath} && return 0
 
     [ -d ${_pkgpath} ]
     [ -f ${_pkgpath}/packagesite.txz ]
 }
 
-__valid_staging() {
+__valid-staging() {
     local _staging=$1
 
     [ -f ${_staging}/base.ufs.uzip ]
@@ -444,25 +444,25 @@ __valid_staging() {
     [ -f ${_staging}/memroot.ufs.gz ]
 }
 
-__valid_destdir() {
+__valid-destdir() {
     local _destdir=$1
 
     [ -d ${_destdir} ] && [ ${_destdir} != "/" ] && [ -f ${_destdir}/bin/sh ]
 }
 
-__valid_freebsd_distdir() {
+__valid-freebsd-distdir() {
     local _freebsd_distdir=$1
 
     [ -n "${_freebsd_distdir}" ] && [ -d "${_freebsd_distdir}" ] && [ "${_freebsd_distdir}" != "/" ]
 }
 
-__valid_bsdkit() {
+__valid-bsdkit() {
     local _bsdkit=$1
 
     [ -d ${_bsdkit} ] && [ -f ${_bsdkit}/bsdkit ]
 }
 
-__valid_class() {
+__valid-class() {
     local _class=$1
 
     case ${_class} in
@@ -478,7 +478,7 @@ __valid_class() {
     esac
 }
 
-__gmirror_configure() {
+__gmirror-configure() {
     local _mirror=$1
 
     shift
@@ -500,7 +500,7 @@ __gmirror_configure() {
     return 0
 }
 
-__install_efi_loader() {
+__install-efi-loader() {
     local _device=$1
 
     # FreeBSD < 13.0: gpart bootcode -p /boot/boot1.efifat -i ${_p} ${_device}
@@ -519,7 +519,7 @@ __install_efi_loader() {
     rmdir ${_efi_tmp_dir}
 }
 
-__gpt_ufs_partition_multi() {
+__gpt-ufs-partition-multi() {
     local _destdir=$1
     local _device=$2
 
@@ -539,10 +539,10 @@ __gpt_ufs_partition_multi() {
     _p=$((_p + 1))
 
     gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
-    __install_efi_loader /dev/${_device}p${_p}
+    __install-efi-loader /dev/${_device}p${_p}
     _p=$((_p + 1))
 
-    if __has_swap; then
+    if __has-swap; then
         gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP} ${_device}
         _p=$((_p + 1))
         swapon /dev/gpt/${BSDKIT_LABEL_SWAP}
@@ -589,12 +589,12 @@ __gpt_ufs_partition_multi() {
         echo "/dev/ufs/${BSDKIT_LABEL_USR}  /usr ufs rw 2 2"
     } >> ${_destdir}/etc/fstab
 
-    __link_home ${_destdir}
+    __link-home ${_destdir}
 
     return 0
 }
 
-__gpt_ufs_partition_single() {
+__gpt-ufs-partition-single() {
     local _destdir=$1
     local _device=$2
 
@@ -614,7 +614,7 @@ __gpt_ufs_partition_single() {
     _p=$((_p + 1))
 
     gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI} ${_device}
-    __install_efi_loader /dev/${_device}p${_p}
+    __install-efi-loader /dev/${_device}p${_p}
     _p=$((_p + 1))
 
     gpart add -a 4k -i ${_p} -t freebsd-ufs -l ${BSDKIT_LABEL_ROOT} ${_device}
@@ -637,12 +637,12 @@ __gpt_ufs_partition_single() {
 
     echo "/dev/ufs/${BSDKIT_LABEL_ROOT} / ufs rw 1 1" >> ${_destdir}/etc/fstab
 
-    __link_home ${_destdir}
+    __link-home ${_destdir}
 
     return 0
 }
 
-__mbr_ufs_partition_multi() {
+__mbr-ufs-partition-multi() {
     local _destdir=$1
     local _device=$2
 
@@ -667,7 +667,7 @@ __mbr_ufs_partition_multi() {
 
     gpart add -a 4k -i 1 -s ${BSDKIT_PART_SIZE_ROOT} -t freebsd-ufs ${_device}s1 # a
 
-    if __has_swap; then
+    if __has-swap; then
         gpart add -a 4k -i 2 -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap ${_device}s1 # b
         swapon /dev/${_device}s1b
     fi
@@ -711,12 +711,12 @@ __mbr_ufs_partition_multi() {
         echo "/dev/ufs/${BSDKIT_LABEL_USR}  /usr ufs rw 2 2"
     } >> ${_destdir}/etc/fstab
 
-    __link_home ${_destdir}
+    __link-home ${_destdir}
 
     return 0
 }
 
-__mbr_ufs_partition_single() {
+__mbr-ufs-partition-single() {
     local _destdir=$1
     local _device=$2
 
@@ -760,12 +760,12 @@ __mbr_ufs_partition_single() {
         echo "/dev/ufs/${BSDKIT_LABEL_ROOT} / ufs rw 1 1"
     } >> ${_destdir}/etc/fstab
 
-    __link_home ${_destdir}
+    __link-home ${_destdir}
 
     return 0
 }
 
-__zfs_create_pool() {
+__zfs-create-pool() {
     local _destdir=$1
 
     shift 1
@@ -812,7 +812,7 @@ __zfs_create_pool() {
                 raidz1 ${_devices[1]} ${_devices[2]} ${_devices[3]}
             ;;
         *)
-            error "unsupported number of devices in pool (__zfs_create_pool)."
+            error "unsupported number of devices in pool (__zfs-create-pool)."
             ;;
     esac
 
@@ -820,7 +820,7 @@ __zfs_create_pool() {
         ${ZFS_CMD} set xattr=sa ${BSDKIT_ZFS_POOL}
     fi
 
-    if __has_swap; then
+    if __has-swap; then
         ${ZFS_CREATE_CMD} \
             -o checksum=off \
             -o compression=off \
@@ -835,7 +835,7 @@ __zfs_create_pool() {
     return 0
 }
 
-__zfs_create_gpt_pool() {
+__zfs-create-gpt-pool() {
     local _destdir=$1
 
     shift 1
@@ -861,10 +861,10 @@ __zfs_create_gpt_pool() {
         _p=$((_p + 1))
 
         gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_EFI} -t efi -l ${BSDKIT_LABEL_EFI}${_device_index} ${_device}
-        __install_efi_loader /dev/${_device}p${_p}
+        __install-efi-loader /dev/${_device}p${_p}
         _p=$((_p + 1))
 
-        if __has_swap; then
+        if __has-swap; then
             gpart add -a 4k -i ${_p} -s ${BSDKIT_PART_SIZE_SWAP} -t freebsd-swap -l ${BSDKIT_LABEL_SWAP}${_device_index} ${_device}
             _p=$((_p + 1))
             swapon /dev/gpt/${BSDKIT_LABEL_SWAP}${_device_index}
@@ -905,7 +905,7 @@ __zfs_create_gpt_pool() {
                 raidz1 ${_devices[1]}${_suffix} ${_devices[2]}${_suffix} ${_devices[3]}${_suffix}
             ;;
         *)
-            error "unsupported number of devices in pool (__zfs_create_gpt_pool)."
+            error "unsupported number of devices in pool (__zfs-create-gpt-pool)."
             ;;
     esac
 
@@ -916,7 +916,7 @@ __zfs_create_gpt_pool() {
     return 0
 }
 
-__zfs_create_mbr_pool() {
+__zfs-create-mbr-pool() {
     local _destdir=$1
 
     shift 1
@@ -945,7 +945,7 @@ __zfs_create_mbr_pool() {
         # do not align partitions here
         gpart add -a 4k -i 1 -s ${_autorootsize}M -t freebsd-zfs ${_device}s1 # a
 
-        if __has_swap; then
+        if __has-swap; then
             gpart add -a 4k -i 2 -t freebsd-swap ${_device}s1 # b
             swapon /dev/${_device}s1b
         fi
@@ -981,7 +981,7 @@ __zfs_create_mbr_pool() {
                 raidz1 ${_devices[1]}${_suffix} ${_devices[2]}${_suffix} ${_devices[3]}${_suffix}
             ;;
         *)
-            error "unsupported number of devices in pool (__zfs_create_mbr_pool)."
+            error "unsupported number of devices in pool (__zfs-create-mbr-pool)."
             ;;
     esac
 
@@ -992,7 +992,7 @@ __zfs_create_mbr_pool() {
     return 0
 }
 
-__zfs_create_zpool_cache() {
+__zfs-create-zpool-cache() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1000,12 +1000,12 @@ __zfs_create_zpool_cache() {
     zpool set cachefile=${_destdir}/etc/zfs/zpool.cache ${BSDKIT_ZFS_POOL}
 }
 
-__zfs_compression() {
+__zfs-compression() {
     # OS version check is "[ $(uname -K) -ge 1400000 ]"
     echo ${ZFS_COMPRESSION_ALGORITHM}
 }
 
-__zfs_create_fs() {
+__zfs-create-fs() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1025,14 +1025,14 @@ __zfs_create_fs() {
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/usr/local
     ${ZFS_CREATE_CMD} -o canmount=off ${BSDKIT_ZFS_POOL}/var/db
 
-    ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/usr/src
-    ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/usr/obj
-    ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/usr/ports
+    ${ZFS_CREATE_CMD} -o compression=$(__zfs-compression) ${BSDKIT_ZFS_POOL}/usr/src
+    ${ZFS_CREATE_CMD} -o compression=$(__zfs-compression) ${BSDKIT_ZFS_POOL}/usr/obj
+    ${ZFS_CREATE_CMD} -o compression=$(__zfs-compression) ${BSDKIT_ZFS_POOL}/usr/ports
 
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/var/audit
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/var/crash
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) ${BSDKIT_ZFS_POOL}/var/log
-    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs_compression) -o atime=on ${BSDKIT_ZFS_POOL}/var/mail
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs-compression) ${BSDKIT_ZFS_POOL}/var/audit
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs-compression) ${BSDKIT_ZFS_POOL}/var/crash
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs-compression) ${BSDKIT_ZFS_POOL}/var/log
+    ${ZFS_CREATE_CMD} -o exec=off -o compression=$(__zfs-compression) -o atime=on ${BSDKIT_ZFS_POOL}/var/mail
 
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/var/tmp
     ${ZFS_CREATE_CMD} -o setuid=off ${BSDKIT_ZFS_POOL}/usr/home
@@ -1052,24 +1052,24 @@ __zfs_create_fs() {
 
     touch ${_destdir}/etc/fstab
 
-    __link_home ${_destdir}
+    __link-home ${_destdir}
 
     zpool set bootfs=${BSDKIT_ZFS_POOL}/ROOT/default ${BSDKIT_ZFS_POOL}
 
     return 0
 }
 
-__link_home() {
+__link-home() {
     local _destdir=$1
 
     mkdir -p ${_destdir}/usr/home
     ln -s -f usr/home ${_destdir}/home
 }
 
-__swap_setup() {
+__swap-setup() {
     local _destdir=$1
 
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     local _swap
 
@@ -1080,8 +1080,8 @@ __swap_setup() {
     return 0
 }
 
-__procfs_setup() {
-    if ! is_yes ${BSDKIT_PROCFS_ENABLE}; then
+__procfs-setup() {
+    if ! is-yes ${BSDKIT_PROCFS_ENABLE}; then
         return 0
     fi
 
@@ -1094,8 +1094,8 @@ __procfs_setup() {
     return 0
 }
 
-__fdescfs_setup() {
-    if ! is_yes ${BSDKIT_FDESCFS_ENABLE}; then
+__fdescfs-setup() {
+    if ! is-yes ${BSDKIT_FDESCFS_ENABLE}; then
         return 0
     fi
 
@@ -1108,16 +1108,16 @@ __fdescfs_setup() {
     return 0
 }
 
-__has_swap() {
+__has-swap() {
     [ ${BSDKIT_PART_SIZE_SWAP} = 0 ] && return 1
 
     return 0
 }
 
-__finalize_fstab() {
+__finalize-fstab() {
     local _destdir=$1
 
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     local _fstab=${_destdir}/etc/fstab
 
@@ -1125,10 +1125,10 @@ __finalize_fstab() {
     echo "#tmpfs /compat/linux/dev/shm tmpfs rw,mode=1777 0 0" >> ${_destdir}/etc/fstab
     echo "#md0 none swap sw,late,file=/var/swap 0 0" >> ${_destdir}/etc/fstab
 
-    reformat_fstab ${_fstab}
+    reformat-fstab ${_fstab}
 }
 
-__fetch_release() {
+__fetch-release() {
     local _relpath=$1
     local _local_relpath=$2
 
@@ -1139,25 +1139,25 @@ __fetch_release() {
 
         case ${_package} in
             kernel_dbg)
-                if is_yes ${BSDKIT_INSTALL_KERNEL} && is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                if is-yes ${BSDKIT_INSTALL_KERNEL} && is-yes ${BSDKIT_INSTALL_DEBUG}; then
                     _fetch="YES"
                 fi
                 ;;
 
             base_dbg)
-                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                if is-yes ${BSDKIT_INSTALL_DEBUG}; then
                     _fetch="YES"
                 fi
                 ;;
 
             lib32_dbg)
-                if is_yes ${BSDKIT_INSTALL_DEBUG}; then
+                if is-yes ${BSDKIT_INSTALL_DEBUG}; then
                     _fetch="YES"
                 fi
                 ;;
 
             kernel)
-                if is_yes ${BSDKIT_INSTALL_KERNEL}; then
+                if is-yes ${BSDKIT_INSTALL_KERNEL}; then
                     _fetch="YES"
                 fi
                 ;;
@@ -1171,13 +1171,13 @@ __fetch_release() {
                 ;;
 
             src)
-                if is_yes ${BSDKIT_INSTALL_SRC}; then
+                if is-yes ${BSDKIT_INSTALL_SRC}; then
                     _fetch="YES"
                 fi
                 ;;
 
             tests)
-                if is_yes ${BSDKIT_INSTALL_TESTS}; then
+                if is-yes ${BSDKIT_INSTALL_TESTS}; then
                     _fetch="YES"
                 fi
                 ;;
@@ -1187,7 +1187,7 @@ __fetch_release() {
             *) ;;
         esac
 
-        if is_yes ${_fetch}; then
+        if is-yes ${_fetch}; then
             local _sha256_local=""
 
             if [ -f ${_local_relpath}/${_filename} ]; then
@@ -1206,7 +1206,7 @@ __fetch_release() {
     done
 }
 
-__install_release() {
+__install-release() {
     local _opts _opts_args
 
     zparseopts -F -D -E -K -a _opts -A _opts_args -thin
@@ -1219,19 +1219,19 @@ __install_release() {
     # `_opts`.
 
     local _thin
-    _thin=$(yes_if ${_opts[(Ie)--thin]})
+    _thin=$(yes-if ${_opts[(Ie)--thin]})
 
     local _relpath=$1
     local _destdir=$2
 
-    __valid_relpath ${_relpath}
+    __valid-relpath ${_relpath}
 
     [ -d ${_destdir} ]
     [ ${_destdir} != "/" ]
 
     local _delete="NO"
 
-    if __valid_url ${_relpath}; then
+    if __valid-url ${_relpath}; then
         local _local_relpath_root
         local _local_relpath
 
@@ -1251,7 +1251,7 @@ __install_release() {
             mkdir -p ${_local_relpath}
         fi
 
-        __fetch_release ${_relpath} ${_local_relpath}
+        __fetch-release ${_relpath} ${_local_relpath}
 
         _relpath=${_local_relpath}
     fi
@@ -1279,7 +1279,7 @@ __install_release() {
             "usr/share"
         )
 
-        if is_yes ${_thin}; then
+        if is-yes ${_thin}; then
             for item in ${thin_exclude_list[@]}; do
                 excluded_files+=${item}
             done
@@ -1291,11 +1291,11 @@ __install_release() {
 
         case ${_package} in
             kernel)
-                _extract=$(yes_if ${BSDKIT_INSTALL_KERNEL})
+                _extract=$(yes-if ${BSDKIT_INSTALL_KERNEL})
                 ;;
 
             kernel_dbg)
-                _extract=$(yes_if ${BSDKIT_INSTALL_KERNEL} ${BSDKIT_INSTALL_DEBUG})
+                _extract=$(yes-if ${BSDKIT_INSTALL_KERNEL} ${BSDKIT_INSTALL_DEBUG})
                 ;;
 
             base)
@@ -1303,7 +1303,7 @@ __install_release() {
                 ;;
 
             base_dbg)
-                _extract=$(yes_if ${BSDKIT_INSTALL_DEBUG})
+                _extract=$(yes-if ${BSDKIT_INSTALL_DEBUG})
                 ;;
 
             lib32)
@@ -1312,15 +1312,15 @@ __install_release() {
                 ;;
 
             lib32_dbg)
-                _extract=$(yes_if ${BSDKIT_INSTALL_DEBUG})
+                _extract=$(yes-if ${BSDKIT_INSTALL_DEBUG})
                 ;;
 
             src)
-                _extract=$(yes_if ${BSDKIT_INSTALL_SRC})
+                _extract=$(yes-if ${BSDKIT_INSTALL_SRC})
                 ;;
 
             tests)
-                _extract=$(yes_if ${BSDKIT_INSTALL_TESTS})
+                _extract=$(yes-if ${BSDKIT_INSTALL_TESTS})
                 ;;
 
             ports)
@@ -1330,15 +1330,15 @@ __install_release() {
                 ;;
         esac
 
-        if ! is_yes ${BSDKIT_INSTALL_SRC}; then
+        if ! is-yes ${BSDKIT_INSTALL_SRC}; then
             _options+="--exclude ./usr/src"
         fi
 
-        if ! is_yes ${BSDKIT_INSTALL_TESTS}; then
+        if ! is-yes ${BSDKIT_INSTALL_TESTS}; then
             _options+="--exclude ./usr/tests"
         fi
 
-        if is_yes ${_extract}; then
+        if is-yes ${_extract}; then
             message "Extracting: ${_filename}"
             ${CAT_CMD} ${_relpath}/${_filename} | tar -x -p -U -C ${_destdir} -f - ${=_options[*]}
         fi
@@ -1346,7 +1346,7 @@ __install_release() {
         sync
     done
 
-    if is_yes ${_thin}; then
+    if is-yes ${_thin}; then
         mkdir ${_destdir}/.base
 
         ln -s -f .base/bin ${_destdir}/bin
@@ -1365,15 +1365,15 @@ __install_release() {
         ln -s -f ../.base/usr/sbin ${_destdir}/usr/sbin
         ln -s -f ../.base/usr/share ${_destdir}/usr/share
 
-        if is_yes ${BSDKIT_INSTALL_SRC}; then
+        if is-yes ${BSDKIT_INSTALL_SRC}; then
             ln -s -f ../.base/usr/src ${_destdir}/usr/src
         fi
 
-        if is_yes ${BSDKIT_INSTALL_TESTS}; then
+        if is-yes ${BSDKIT_INSTALL_TESTS}; then
             ln -s -f ../.base/usr/tests ${_destdir}/usr/tests
         fi
     else
-        __run_mtree ${_destdir}
+        __run-mtree ${_destdir}
 
         {
             mount -t devfs devfs ${_destdir}/dev
@@ -1383,7 +1383,7 @@ __install_release() {
         }
     fi
 
-    if is_yes ${_delete}; then
+    if is-yes ${_delete}; then
         rm -f ${_local_relpath}/*
         rmdir ${_local_relpath}
         rmdir ${_local_relpath_root}
@@ -1392,7 +1392,7 @@ __install_release() {
     return 0
 }
 
-__run_mtree() {
+__run-mtree() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1415,7 +1415,7 @@ __run_mtree() {
     fi
 }
 
-__install_resolv_conf() {
+__install-resolv-conf() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1426,7 +1426,7 @@ __install_resolv_conf() {
     fi
 }
 
-__install_ca_root_nss() {
+__install-ca-root-nss() {
     local _destdir=$1
 
     [ -d ${_destdir} ]
@@ -1438,10 +1438,10 @@ __install_ca_root_nss() {
     fi
 }
 
-__customize_base() {
+__customize-base() {
     local _destdir=$1
 
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     # openssl passwd -1 -stdin
     chroot ${_destdir} chpass -p '$1$t/ql/hHd$NBbpjIdMc8Zg6.omS2XmB/' root
@@ -1450,7 +1450,7 @@ __customize_base() {
 
     mkdir -p ${_destdir}/root/.ssh
 
-    echo_bsdkit_authorized_keys > ${_destdir}/root/.ssh/authorized_keys
+    echo-bsdkit-authorized-keys > ${_destdir}/root/.ssh/authorized_keys
 
     chown -R root:wheel ${_destdir}/root
 
@@ -1466,8 +1466,8 @@ EOF
 
     mkdir -p ${_destdir}/etc/rc.conf.d
 
-    __install_resolv_conf ${_destdir}
-    __install_ca_root_nss ${_destdir}
+    __install-resolv-conf ${_destdir}
+    __install-ca-root-nss ${_destdir}
 
     mkdir -p ${_destdir}/usr/local/etc/pkg/repos
 
@@ -1486,43 +1486,43 @@ EOF
     return 0
 }
 
-__setup_jail() {
+__setup-jail() {
     local _opts _opts_args
 
     zparseopts -F -D -E -K -a _opts -A _opts_args -plain
 
     local _plain
-    _plain=$(yes_if ${_opts[(Ie)--plain]})
+    _plain=$(yes-if ${_opts[(Ie)--plain]})
 
     local _destdir=$1
 
-    __link_home ${_destdir}
+    __link-home ${_destdir}
 
     mkdir -p ${_destdir}/usr/ports
 
-    __customize_base ${_destdir}
+    __customize-base ${_destdir}
 
     if [ -f /etc/hosts ] && [ ! -f ${_destdir}/etc/hosts ]; then
         install -m 0644 -o root -g wheel /etc/hosts ${_destdir}/etc/hosts
     fi
 
-    if ! is_yes ${_plain}; then
-        start_jail ${_destdir}
+    if ! is-yes ${_plain}; then
+        start-jail ${_destdir}
 
         {
-            ansible_jail_playbook ${BSDKIT_JAIL_NAME}
+            ansible-jail-playbook ${BSDKIT_JAIL_NAME}
         } always {
-            stop_jail ${_destdir}
+            stop-jail ${_destdir}
         }
     fi
 
     return 0
 }
 
-__make_read_only() {
+__make-read-only() {
     local _destdir=$1
 
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     local _file
 
@@ -1603,14 +1603,14 @@ EOF
     return 0
 }
 
-__install_setup_runtime() {
+__install-setup-runtime() {
     local _destdir=$1
     local _bsdkit=$2
     local _pkgpath=$3
 
-    __valid_destdir ${_destdir}
-    __valid_bsdkit ${_bsdkit}
-    __valid_pkgpath ${_pkgpath}
+    __valid-destdir ${_destdir}
+    __valid-bsdkit ${_bsdkit}
+    __valid-pkgpath ${_pkgpath}
 
     # Synchronize with 33c82d0f-f01e-4032-b489-3ecdad22ca16
     local _runtime=(
@@ -1739,8 +1739,8 @@ EOF
     return 0
 }
 
-__install_facts() {
-    __check_go_yq
+__install-facts() {
+    __check-go-yq
 
     local _destdir=$1
 
@@ -1754,10 +1754,10 @@ __install_facts() {
     fi
 }
 
-__echo_runtime_jail_conf() {
+__echo-runtime-jail-conf() {
     local _destdir=$1
 
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     cat > ${_jail_conf} << EOF
 exec.clean;
@@ -1773,66 +1773,66 @@ ${BSDKIT_JAIL_NAME} {
         allow.raw_sockets;
         allow.sysvipc;
 
-        osrelease = "$(get_osrelease ${_destdir})";
-        osreldate = "$(get_osreldate ${_destdir})";
+        osrelease = "$(get-osrelease ${_destdir})";
+        osreldate = "$(get-osreldate ${_destdir})";
 
         path = "${_destdir%/}";
         host.hostname = "${BSDKIT_JAIL_NAME}";
         host.domainname = "local";
-        ip4.addr = "$(inet_address)";
+        ip4.addr = "$(inet-address)";
 }
 EOF
 }
 
-inet_interface() {
+inet-interface() {
     route get default | awk '/interface:/ { print $2 }'
 }
 
-inet_address() {
-    ifconfig $(inet_interface) | awk '$1 == "inet" { print $2; exit }'
+inet-address() {
+    ifconfig $(inet-interface) | awk '$1 == "inet" { print $2; exit }'
 }
 
-gateway_interface() {
+gateway-interface() {
     netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["interface-name"]'
 }
 
-gateway_address() {
+gateway-address() {
     netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["gateway"]'
 }
 
-start_jail() {
+start-jail() {
     if [ $# -ne 1 ]; then
-        usage "start_jail <destdir>"
+        usage "start-jail <destdir>"
     fi
 
     local _destdir=$1
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     local _jail_conf
     _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
-    __echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
+    __echo-runtime-jail-conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -c ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
 }
 
-stop_jail() {
+stop-jail() {
     if [ $# -ne 1 ]; then
-        usage "stop_jail <destdir>"
+        usage "stop-jail <destdir>"
     fi
 
     local _destdir=$1
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     local _jail_conf
     _jail_conf=$(mktemp /tmp/jail.conf.XXXXXX)
 
-    __echo_runtime_jail_conf ${_destdir} > ${_jail_conf}
+    __echo-runtime-jail-conf ${_destdir} > ${_jail_conf}
     jail -f ${_jail_conf} -r ${BSDKIT_JAIL_NAME}
     rm ${_jail_conf}
 }
 
-reset_state() {
+reset-state() {
     jail -R '*'
 
     mount -p |
@@ -1847,9 +1847,9 @@ reset_state() {
     #   zpool destroy ${BSDKIT_ZFS_POOL} || :
 }
 
-install_mbr_ufs() {
-    eval $(__local_options)
-    eval $(__parse_options $@)
+install-mbr-ufs() {
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _class=$1
     local _device=$2
@@ -1857,24 +1857,24 @@ install_mbr_ufs() {
     [ -n ${_class} ]
     [ -n ${_device} ]
 
-    __valid_class ${_class}
+    __valid-class ${_class}
 
     mkdir -p ${BSDKIT_DESTDIR}
 
     __mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
-    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    __swap_setup ${BSDKIT_DESTDIR}
-    __procfs_setup ${BSDKIT_DESTDIR}
-    __fdescfs_setup ${BSDKIT_DESTDIR}
-    __finalize_fstab ${BSDKIT_DESTDIR}
-    __customize_base ${BSDKIT_DESTDIR}
+    __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __swap-setup ${BSDKIT_DESTDIR}
+    __procfs-setup ${BSDKIT_DESTDIR}
+    __fdescfs-setup ${BSDKIT_DESTDIR}
+    __finalize-fstab ${BSDKIT_DESTDIR}
+    __customize-base ${BSDKIT_DESTDIR}
 
     return 0
 }
 
-install_mbr_ufs_gmirror() {
-    eval $(__local_options)
-    eval $(__parse_options $@)
+install-mbr-ufs-gmirror() {
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _class=$1
     local _mirror=$2
@@ -1889,27 +1889,27 @@ install_mbr_ufs_gmirror() {
     [ -n ${_mirror} ]
     [ ${#_devices} -gt 0 ]
 
-    __valid_class ${_class}
+    __valid-class ${_class}
 
     kldload -n geom_mirror
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    __gmirror_configure ${_mirror} ${_devices}
+    __gmirror-configure ${_mirror} ${_devices}
     __mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
-    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    __swap_setup ${BSDKIT_DESTDIR}
-    __procfs_setup ${BSDKIT_DESTDIR}
-    __fdescfs_setup ${BSDKIT_DESTDIR}
-    __finalize_fstab ${BSDKIT_DESTDIR}
-    __customize_base ${BSDKIT_DESTDIR}
+    __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __swap-setup ${BSDKIT_DESTDIR}
+    __procfs-setup ${BSDKIT_DESTDIR}
+    __fdescfs-setup ${BSDKIT_DESTDIR}
+    __finalize-fstab ${BSDKIT_DESTDIR}
+    __customize-base ${BSDKIT_DESTDIR}
 
     return 0
 }
 
-install_gpt_ufs() {
-    eval $(__local_options)
-    eval $(__parse_options $@)
+install-gpt-ufs() {
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _class=$1
     local _device=$2
@@ -1917,24 +1917,24 @@ install_gpt_ufs() {
     [ -n ${_class} ]
     [ -n ${_device} ]
 
-    __valid_class ${_class}
+    __valid-class ${_class}
 
     mkdir -p ${BSDKIT_DESTDIR}
 
     __gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
-    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    __swap_setup ${BSDKIT_DESTDIR}
-    __procfs_setup ${BSDKIT_DESTDIR}
-    __fdescfs_setup ${BSDKIT_DESTDIR}
-    __finalize_fstab ${BSDKIT_DESTDIR}
-    __customize_base ${BSDKIT_DESTDIR}
+    __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __swap-setup ${BSDKIT_DESTDIR}
+    __procfs-setup ${BSDKIT_DESTDIR}
+    __fdescfs-setup ${BSDKIT_DESTDIR}
+    __finalize-fstab ${BSDKIT_DESTDIR}
+    __customize-base ${BSDKIT_DESTDIR}
 
     return 0
 }
 
-install_zfs() {
-    eval $(__local_options)
-    eval $(__parse_options $@)
+install-zfs() {
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _devices
 
@@ -1946,22 +1946,22 @@ install_zfs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    __zfs_create_pool ${BSDKIT_DESTDIR} ${_devices}
-    __zfs_create_fs ${BSDKIT_DESTDIR}
-    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    __zfs_create_zpool_cache ${BSDKIT_DESTDIR}
-    __swap_setup ${BSDKIT_DESTDIR}
-    __procfs_setup ${BSDKIT_DESTDIR}
-    __fdescfs_setup ${BSDKIT_DESTDIR}
-    __finalize_fstab ${BSDKIT_DESTDIR}
-    __customize_base ${BSDKIT_DESTDIR}
+    __zfs-create-pool ${BSDKIT_DESTDIR} ${_devices}
+    __zfs-create-fs ${BSDKIT_DESTDIR}
+    __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __zfs-create-zpool-cache ${BSDKIT_DESTDIR}
+    __swap-setup ${BSDKIT_DESTDIR}
+    __procfs-setup ${BSDKIT_DESTDIR}
+    __fdescfs-setup ${BSDKIT_DESTDIR}
+    __finalize-fstab ${BSDKIT_DESTDIR}
+    __customize-base ${BSDKIT_DESTDIR}
 
     return 0
 }
 
-install_gpt_zfs() {
-    eval $(__local_options)
-    eval $(__parse_options $@)
+install-gpt-zfs() {
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _devices
 
@@ -1973,22 +1973,22 @@ install_gpt_zfs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    __zfs_create_gpt_pool ${BSDKIT_DESTDIR} ${_devices}
-    __zfs_create_fs ${BSDKIT_DESTDIR}
-    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    __zfs_create_zpool_cache ${BSDKIT_DESTDIR}
-    __swap_setup ${BSDKIT_DESTDIR}
-    __procfs_setup ${BSDKIT_DESTDIR}
-    __fdescfs_setup ${BSDKIT_DESTDIR}
-    __finalize_fstab ${BSDKIT_DESTDIR}
-    __customize_base ${BSDKIT_DESTDIR}
+    __zfs-create-gpt-pool ${BSDKIT_DESTDIR} ${_devices}
+    __zfs-create-fs ${BSDKIT_DESTDIR}
+    __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __zfs-create-zpool-cache ${BSDKIT_DESTDIR}
+    __swap-setup ${BSDKIT_DESTDIR}
+    __procfs-setup ${BSDKIT_DESTDIR}
+    __fdescfs-setup ${BSDKIT_DESTDIR}
+    __finalize-fstab ${BSDKIT_DESTDIR}
+    __customize-base ${BSDKIT_DESTDIR}
 
     return 0
 }
 
-install_mbr_zfs() {
-    eval $(__local_options)
-    eval $(__parse_options $@)
+install-mbr-zfs() {
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _devices
 
@@ -2000,24 +2000,24 @@ install_mbr_zfs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    __zfs_create_mbr_pool ${BSDKIT_DESTDIR} ${_devices}
-    __zfs_create_fs ${BSDKIT_DESTDIR}
-    __install_release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
-    __zfs_create_zpool_cache ${BSDKIT_DESTDIR}
-    __swap_setup ${BSDKIT_DESTDIR}
-    __procfs_setup ${BSDKIT_DESTDIR}
-    __fdescfs_setup ${BSDKIT_DESTDIR}
-    __finalize_fstab ${BSDKIT_DESTDIR}
-    __customize_base ${BSDKIT_DESTDIR}
+    __zfs-create-mbr-pool ${BSDKIT_DESTDIR} ${_devices}
+    __zfs-create-fs ${BSDKIT_DESTDIR}
+    __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
+    __zfs-create-zpool-cache ${BSDKIT_DESTDIR}
+    __swap-setup ${BSDKIT_DESTDIR}
+    __procfs-setup ${BSDKIT_DESTDIR}
+    __fdescfs-setup ${BSDKIT_DESTDIR}
+    __finalize-fstab ${BSDKIT_DESTDIR}
+    __customize-base ${BSDKIT_DESTDIR}
 
     return 0
 }
 
-create_iocage() {
-    __check_requirements
+create-iocage() {
+    __check-requirements
 
-    eval $(__local_options)
-    eval $(__parse_options $@)
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _jail_name=$1
 
@@ -2025,8 +2025,8 @@ create_iocage() {
 
     unset IOCAGE_COLOR
 
-    command -v iocage > /dev/null 2>&1 || error "iocage not found (create_iocage)."
-    iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
+    command -v iocage > /dev/null 2>&1 || error "iocage not found (create-iocage)."
+    iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create-iocage)."
 
     local _iocage_root
     _iocage_root=$(iocage get -p)
@@ -2037,19 +2037,19 @@ create_iocage() {
     iocage create -e --name ${_jail_name} "$@"
     local _destdir=${_iocage_jails}/${_jail_name}/root
 
-    [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
+    [ -d ${_destdir} ] || error "iocage root does not exist (create-iocage)."
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install-release ${FREEBSD_REL_URL} ${_destdir}
 
-    __setup_jail ${_destdir}
+    __setup-jail ${_destdir}
 }
 
-create_iocage_thin() {
-    __check_requirements
-    __check_iocage
+create-iocage-thin() {
+    __check-requirements
+    __check-iocage
 
-    eval $(__local_options)
-    eval $(__parse_options $@)
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _jail_name=$1
 
@@ -2057,7 +2057,7 @@ create_iocage_thin() {
 
     unset IOCAGE_COLOR
 
-    iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create_iocage)."
+    iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create-iocage)."
 
     local _iocage_root
     _iocage_root=$(iocage get -p)
@@ -2068,12 +2068,12 @@ create_iocage_thin() {
     iocage create --name ${_jail_name} $@
     local _destdir=${_iocage_jails}/${_jail_name}/root
 
-    [ -d ${_destdir} ] || error "iocage root does not exist (create_iocage)."
+    [ -d ${_destdir} ] || error "iocage root does not exist (create-iocage)."
 
-    __setup_jail ${_destdir}
+    __setup-jail ${_destdir}
 }
 
-is_iocage_jail_path() {
+is-iocage-jail-path() {
     local _path=$1
 
     if [ "${_path#/iocage/jails}" != "${_path}" ] && [ "${_path%/root}" != "${_path}" ]; then
@@ -2083,30 +2083,30 @@ is_iocage_jail_path() {
     return 1
 }
 
-create_iocage_jail() {
-    __check_requirements
-    __check_iocage
+create-iocage-jail() {
+    __check-requirements
+    __check-iocage
 
-    eval $(__local_options)
-    eval $(__parse_options $@)
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _opts _opts_args
 
     zparseopts -F -D -E -K -a _opts -A _opts_args -thin -plain
 
     local _thin
-    _thin=$(yes_if ${_opts[(Ie)--thin]})
+    _thin=$(yes-if ${_opts[(Ie)--thin]})
 
     local _plain
-    _plain=$(yes_if ${_opts[(Ie)--plain]})
+    _plain=$(yes-if ${_opts[(Ie)--plain]})
 
     local _options=()
 
-    if is_yes ${_thin}; then
+    if is-yes ${_thin}; then
         _options+="--thin"
     fi
 
-    if is_yes ${_plain}; then
+    if is-yes ${_plain}; then
         _options+="--plain"
     fi
 
@@ -2121,20 +2121,20 @@ create_iocage_jail() {
 
     iocage create -e --name ${_jail_name} ip4=inherit allow_raw_sockets=1
 
-    ${BSDKIT_SCRIPT} create_jail ${=_options[*]} ${_jail_root}
+    ${BSDKIT_SCRIPT} create-jail ${=_options[*]} ${_jail_root}
 
-    if is_yes ${_thin}; then
+    if is-yes ${_thin}; then
         echo "/ ${_jail_root}/.base nullfs ro" > ${_jail_path}/fstab
     fi
 
     cp ${BSDKIT_SRCDIR}/ansible/vendor.conf.jail ${_jail_root}/etc/defaults/vendor.conf
 }
 
-create_jail() {
-    __check_requirements
+create-jail() {
+    __check-requirements
 
-    eval $(__local_options)
-    eval $(__parse_options $@)
+    eval $(__local-options)
+    eval $(__parse-options $@)
 
     local _opts _opts_args
 
@@ -2151,22 +2151,22 @@ create_jail() {
     # expression will return its index, otherwise, it will return 0.
 
     local _thin
-    _thin=$(yes_if ${_opts[(Ie)--thin]})
+    _thin=$(yes-if ${_opts[(Ie)--thin]})
 
     local _plain
-    _plain=$(yes_if ${_opts[(Ie)--plain]})
+    _plain=$(yes-if ${_opts[(Ie)--plain]})
 
     local _options=()
 
-    if is_yes ${_thin}; then
+    if is-yes ${_thin}; then
         _options+="--thin"
     fi
 
     local _destdir=$1
 
-    __create_jail_destdir ${_destdir}
+    __create-jail-destdir ${_destdir}
 
-    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install_release ${FREEBSD_REL_URL} ${_destdir} ${=_options[*]}
+    BSDKIT_INSTALL_KERNEL=no BSDKIT_INSTALL_SRC=no __install-release ${FREEBSD_REL_URL} ${_destdir} ${=_options[*]}
 
     install -o root -g wheel -m 644 /etc/resolv.conf ${_destdir}/etc/resolv.conf
 
@@ -2175,10 +2175,10 @@ create_jail() {
         install -o root -g wheel -m 644 /usr/local/etc/pkg/repos/* ${_destdir}/usr/local/etc/pkg/repos/
     fi
 
-    if is_yes ${_plain}; then
+    if is-yes ${_plain}; then
         mount -t devfs devfs ${_destdir}/dev
 
-        if is_yes ${_thin}; then
+        if is-yes ${_thin}; then
             mount -t nullfs -o ro / ${_destdir}/.base
         fi
 
@@ -2187,36 +2187,36 @@ create_jail() {
         } always {
             umount ${_destdir}/dev
 
-            if is_yes ${_thin}; then
+            if is-yes ${_thin}; then
                 umount ${_destdir}/.base
             fi
         }
     else
-        # __setup_jail will mount devfs
+        # __setup-jail will mount devfs
 
-        if is_yes ${_thin}; then
+        if is-yes ${_thin}; then
             mount -t nullfs -o ro / ${_destdir}/.base
         fi
 
         local _options=()
 
-        if is_yes ${_plain}; then
+        if is-yes ${_plain}; then
             _options+="--plain"
         fi
 
         {
-            __setup_jail ${=_options[*]} ${_destdir}
+            __setup-jail ${=_options[*]} ${_destdir}
         } always {
-            if is_yes ${_thin}; then
+            if is-yes ${_thin}; then
                 umount ${_destdir}/.base
             fi
         }
     fi
 }
 
-make_thin_jail() {
+make-thin-jail() {
     if [ $# -lt 1 ]; then
-        usage "make_thin_jail <destdir>"
+        usage "make-thin-jail <destdir>"
     fi
 
     local _destdir=$1
@@ -2245,12 +2245,12 @@ make_thin_jail() {
         "usr/share"
     )
 
-    if ! is_yes ${BSDKIT_INSTALL_KERNEL}; then
+    if ! is-yes ${BSDKIT_INSTALL_KERNEL}; then
         _directory_list=(${_directory_list[@]/boot/})
         rm -r -f ${_destdir}/boot
     fi
 
-    if is_yes ${BSDKIT_INSTALL_SRC}; then
+    if is-yes ${BSDKIT_INSTALL_SRC}; then
         if [ -d ${_destdir}/usr/src ]; then
             _directory_list+="usr/src"
         fi
@@ -2258,7 +2258,7 @@ make_thin_jail() {
         rm -r -f ${_destdir}/usr/src
     fi
 
-    if is_yes ${BSDKIT_INSTALL_TESTS}; then
+    if is-yes ${BSDKIT_INSTALL_TESTS}; then
         if [ -d ${_destdir}/usr/tests ]; then
             _directory_list+="usr/tests"
         fi
@@ -2290,9 +2290,9 @@ make_thin_jail() {
     mkdir -p ${_destdir}/.base
 }
 
-make_full_jail() {
+make-full-jail() {
     if [ $# -lt 2 ]; then
-        usage "make_full_jail <srcdir> <destdir>"
+        usage "make-full-jail <srcdir> <destdir>"
     fi
 
     local _srcdir=$1
@@ -2333,17 +2333,17 @@ make_full_jail() {
         "usr/share"
     )
 
-    if ! is_yes ${BSDKIT_INSTALL_KERNEL}; then
+    if ! is-yes ${BSDKIT_INSTALL_KERNEL}; then
         _directory_list=(${_directory_list[@]/boot/})
         rm -r -f ${_destdir}/boot
     fi
 
-    if ! is_yes ${BSDKIT_INSTALL_KERNEL}; then
+    if ! is-yes ${BSDKIT_INSTALL_KERNEL}; then
         _directory_list=(${_directory_list[@]/boot/})
         rm -r -f ${_destdir}/boot
     fi
 
-    if is_yes ${BSDKIT_INSTALL_SRC}; then
+    if is-yes ${BSDKIT_INSTALL_SRC}; then
         if [ -d ${_destdir}/usr/src ]; then
             _directory_list+="usr/src"
         fi
@@ -2351,7 +2351,7 @@ make_full_jail() {
         rm -r -f ${_destdir}/usr/src
     fi
 
-    if is_yes ${BSDKIT_INSTALL_TESTS}; then
+    if is-yes ${BSDKIT_INSTALL_TESTS}; then
         if [ -d ${_destdir}/usr/tests ]; then
             _directory_list+="usr/tests"
         fi
@@ -2377,16 +2377,16 @@ make_full_jail() {
 
     popd -q
 
-    __run_mtree ${_destdir}
+    __run-mtree ${_destdir}
 
-    if is_mount_point ${_destdir}/.base; then
+    if is-mount-point ${_destdir}/.base; then
         umount -f ${_destdir}/.base
     fi
 
     [ -d ${_destdir}/.base ] && rmdir ${_destdir}/.base
 }
 
-build_md_root_device() {
+build-md-root-device() {
     local _option
     local _type
     local _size
@@ -2420,7 +2420,7 @@ build_md_root_device() {
     local _md_device
     _md_device=$(mdconfig -a -o reserve -o compress -L "md_root" -t ${_type} -s ${_size})
 
-    BSDKIT_INSTALL_SRC=no BSDKIT_INSTALL_KERNEL=no BSDKIT_PART_SIZE_SWAP=0 BSDKIT_LABEL_ROOT=md_root ${BSDKIT_SCRIPT} install_gpt_ufs $* single ${_md_device}
+    BSDKIT_INSTALL_SRC=no BSDKIT_INSTALL_KERNEL=no BSDKIT_PART_SIZE_SWAP=0 BSDKIT_LABEL_ROOT=md_root ${BSDKIT_SCRIPT} install-gpt-ufs $* single ${_md_device}
 
     rm -f ${BSDKIT_DESTDIR}/etc/rc.conf
     touch ${BSDKIT_DESTDIR}/etc/rc.conf
@@ -2458,7 +2458,7 @@ EOF
         umount -f ${BSDKIT_DESTDIR}/dev
     }
 
-    if is_yes ${_reboot}; then
+    if is-yes ${_reboot}; then
         kenv vfs.root.mountfrom="ufs:/dev/${_md_device}p3"
         reboot -r
     else
@@ -2468,11 +2468,11 @@ EOF
     fi
 }
 
-__create_jail_destdir() {
+__create-jail-destdir() {
     local _destdir=$1
 
     if [ -d ${_destdir} ]; then
-        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (__create_jail_destdir)."
+        [ "$(echo $(find ${_destdir} -type d -empty -maxdepth 0 | wc -l))" = "1" ] || error "${_destdir} already exists (__create-jail-destdir)."
     fi
 
     local _dirname _basename _parent_fs
@@ -2485,7 +2485,7 @@ __create_jail_destdir() {
 
     if [ -n ${_parent_fs} ]; then
         if ! zfs get -H -o value mountpoint ${_parent_fs}/${_basename} > /dev/null 2>&1; then
-            ${ZFS_CREATE_CMD} -o compression=$(__zfs_compression) ${_parent_fs}/${_basename}
+            ${ZFS_CREATE_CMD} -o compression=$(__zfs-compression) ${_parent_fs}/${_basename}
             _zfs="YES"
         fi
     else
@@ -2493,14 +2493,14 @@ __create_jail_destdir() {
     fi
 }
 
-remove_jail() {
+remove-jail() {
     if [ $# -ne 1 ]; then
-        usage "remove_jail <jail_name>"
+        usage "remove-jail <jail_name>"
     fi
 
     local _destdir=$1
 
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     local _dirname _basename _parent_fs
 
@@ -2524,7 +2524,7 @@ remove_jail() {
         fi
     fi
 
-    if is_yes ${_zfs}; then
+    if is-yes ${_zfs}; then
         zfs destroy ${_parent_fs}/${_basename}
     else
         rm -r -f ${_destdir} > /dev/null 2>&1 || :
@@ -2533,7 +2533,7 @@ remove_jail() {
     fi
 }
 
-build_setup_staging() {
+build-setup-staging() {
     local _staging=$1
     local _bsdkit=$2
     local _relpath=$3
@@ -2543,9 +2543,9 @@ build_setup_staging() {
     _relpath=$(realpath ${_relpath})
     _pkgpath=$(realpath ${_pkgpath})
 
-    __valid_bsdkit ${_bsdkit}
-    __valid_relpath ${_relpath}
-    __valid_pkgpath ${_pkgpath}
+    __valid-bsdkit ${_bsdkit}
+    __valid-relpath ${_relpath}
+    __valid-pkgpath ${_pkgpath}
 
     mkdir -p ${_staging}
 
@@ -2564,7 +2564,7 @@ build_setup_staging() {
 
     mkdir -p ${_destdir}
 
-    BSDKIT_INSTALL_SRC=no __install_release ${_relpath} ${_destdir}
+    BSDKIT_INSTALL_SRC=no __install-release ${_relpath} ${_destdir}
 
     rm -f ${_destdir}/boot/kernel/*.symbols(N)
 
@@ -2577,7 +2577,7 @@ build_setup_staging() {
 
     mkdir ${_destdir}/root/.ssh
 
-    echo_bsdkit_authorized_keys > ${_destdir}/root/.ssh/authorized_keys
+    echo-bsdkit-authorized-keys > ${_destdir}/root/.ssh/authorized_keys
 
     local _mfsroot=${_tmp}/mfsroot
 
@@ -2585,9 +2585,9 @@ build_setup_staging() {
 
     (cd ${_destdir} && pax -r -w -pe rescue ${_mfsroot})
 
-    __make_read_only ${_destdir}
+    __make-read-only ${_destdir}
 
-    __install_setup_runtime ${_destdir} ${_bsdkit} ${_pkgpath}
+    __install-setup-runtime ${_destdir} ${_bsdkit} ${_pkgpath}
 
     mkdir ${_mfsroot}/dev
     mkdir ${_mfsroot}/baseroot
@@ -2749,7 +2749,7 @@ EOF
     return 0
 }
 
-build_setup_iso() {
+build-setup-iso() {
     local _iso=$1
     local _staging=$2
     local _relpath=$3
@@ -2761,14 +2761,14 @@ build_setup_iso() {
         exit 69
     fi
 
-    __valid_staging ${_staging}
+    __valid-staging ${_staging}
 
     if [ ${_relpath} != "none" ]; then
-        __valid_relpath ${_relpath}
+        __valid-relpath ${_relpath}
     fi
 
     if [ ${_pkgpath} != "none" ]; then
-        __valid_pkgpath ${_pkgpath}
+        __valid-pkgpath ${_pkgpath}
     fi
 
     local _iso_path=${_iso}.fs
@@ -2851,7 +2851,7 @@ build_setup_iso() {
     return 0
 }
 
-build_setup_img() {
+build-setup-img() {
     local _iso_file=$1
     local _img_file=$2
 
@@ -2932,17 +2932,17 @@ with-verbose() {
 }
 
 deploy() {
-    __check_requirements
+    __check-requirements
 
     message "Running: $*"
 
     ${(@s/ /)@}
 
-    ansible_chroot_playbook
+    ansible-chroot-playbook
 }
 
-remote_exec() {
-    __check_requirements
+remote-exec() {
+    __check-requirements
 
     local _remote_address=""
     local _remote_port="22"
@@ -2976,7 +2976,7 @@ remote_exec() {
     local _ansible_yml=${_ansible_root}/ansible.yml
     local _ansible_key=${_ansible_root}/ansible.key
 
-    echo_bsdkit_private_key > ${_ansible_key}
+    echo-bsdkit-private-key > ${_ansible_key}
     chmod 600 ${_ansible_key}
 
     cat > ${_ansible_cfg} << EOF
@@ -3031,8 +3031,8 @@ EOF
     rm -r ${_ansible_root}
 }
 
-ansible_local_playbook() {
-    __check_requirements
+ansible-local-playbook() {
+    __check-requirements
 
     ansible-playbook \
         --inventory localhost, \
@@ -3041,8 +3041,8 @@ ansible_local_playbook() {
         ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
 }
 
-ansible_chroot_playbook() {
-    __check_requirements
+ansible-chroot-playbook() {
+    __check-requirements
 
     local _ansible_root
     _ansible_root=$(mktemp -d /tmp/ansible_root.XXXXX)
@@ -3070,7 +3070,7 @@ EOF
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
 
-    __install_facts ${BSDKIT_DESTDIR}
+    __install-facts ${BSDKIT_DESTDIR}
 
     mount -t devfs devfs ${BSDKIT_DESTDIR}/dev
 
@@ -3090,8 +3090,8 @@ EOF
     }
 }
 
-ansible_jail_playbook() {
-    __check_requirements
+ansible-jail-playbook() {
+    __check-requirements
 
     local _jail_name=$1
 
@@ -3130,7 +3130,7 @@ EOF
 
     _jail_root=$(jls -j ${_jail_name} path)
 
-    __install_facts ${_jail_root}
+    __install-facts ${_jail_root}
 
     eval env \
          ANSIBLE_CONFIG=${_ansible_cfg} \
@@ -3144,10 +3144,10 @@ EOF
     rm -r ${_ansible_root}
 }
 
-__build_facts() {
+__build-facts() {
     local _destdir=${1:-""}
 
-    __check_go_yq
+    __check-go-yq
 
     install -d -o root -g wheel -m 755 ${_destdir}/usr/local/etc/ansible/facts.d
 
@@ -3159,7 +3159,7 @@ __build_facts() {
        > ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact
 }
 
-__find_jail() {
+__find-jail() {
     local _jail_name=$1
 
     if ! jls -j ${_jail_name} name > /dev/null 2>&1; then
@@ -3173,7 +3173,7 @@ __find_jail() {
     echo ${_jail_name}
 }
 
-__ansible_pre_cleanup() {
+__ansible-pre-cleanup() {
     local _path="/usr/local/lib/python*/site-packages/"
 
     for _dir in ${_path}; do
@@ -3196,46 +3196,46 @@ __ansible_pre_cleanup() {
 }
 
 configure() {
-    __ansible_pre_cleanup
-    __build_facts
+    __ansible-pre-cleanup
+    __build-facts
 
-    ansible_local_playbook -t configure
+    ansible-local-playbook -t configure
 }
 
-configure_jail() {
+configure-jail() {
     if [ $# -lt 1 ]; then
-        usage "configure_jail <jail_name> [options]"
+        usage "configure-jail <jail_name> [options]"
     fi
 
-    __check_go_yq
+    __check-go-yq
 
-    local _jail_name=$(__find_jail $1)
+    local _jail_name=$(__find-jail $1)
     local _jail_root=$(jls -j ${_jail_name} path)
 
-    __build_facts ${_jail_root}
+    __build-facts ${_jail_root}
 
-    ansible_jail_playbook ${_jail_name} -t configure
+    ansible-jail-playbook ${_jail_name} -t configure
 }
 
-monit_setup() {
-    __build_facts
+monit-setup() {
+    __build-facts
 
-    ansible_local_playbook -t monit
+    ansible-local-playbook -t monit
 }
 
-monit_setup_jail() {
+monit-setup-jail() {
     if [ $# -lt 1 ]; then
-        usage "monit_setup_jail <jail_name>"
+        usage "monit-setup-jail <jail_name>"
     fi
 
-    __check_go_yq
+    __check-go-yq
 
-    local _jail_name=$(__find_jail $1)
+    local _jail_name=$(__find-jail $1)
     local _jail_root=$(jls -j ${_jail_name} path)
 
-    __build_facts ${_jail_root}
+    __build-facts ${_jail_root}
 
-    ansible_jail_playbook ${_jail_name} -t monit
+    ansible-jail-playbook ${_jail_name} -t monit
 }
 
 status() {
@@ -3246,19 +3246,19 @@ status() {
     monit -B summary
 }
 
-upgrade_os() {
+upgrade-os() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-os "$@"
 }
 
-upgrade_postgresql() {
+upgrade-postgresql() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-postgresql "$@"
 }
 
-rewrite_pool() {
+rewrite-pool() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-rewrite-pool "$@"
 }
 
-rewrite_filesystem() {
+rewrite-filesystem() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-rewrite-filesystem "$@"
 }
 
@@ -3267,17 +3267,17 @@ build() {
 }
 
 provision() {
-    if platform_is_digitalocean; then
-        ansible_local_playbook -t provision_digitalocean
-    elif platform_is_aws; then
-        ansible_local_playbook -t provision_aws
+    if platform-is-digitalocean; then
+        ansible-local-playbook -t provision_digitalocean
+    elif platform-is-aws; then
+        ansible-local-playbook -t provision_aws
     else
         error "Unsupported provisioning platform"
     fi
 }
 
 sysprep() {
-    __check_requirements
+    __check-requirements
 
     local OPTIONS=""
 
@@ -3308,13 +3308,13 @@ sysprep() {
         ${BSDKIT_SRCDIR}/playbook/sysprep.yml
 }
 
-enable_swap_device() {
-    if platform_is_aws; then
-        __enable_swap_device_aws
+enable-swap-device() {
+    if platform-is-aws; then
+        __enable-swap-device-aws
     fi
 }
 
-__enable_swap_device_aws() {
+__enable-swap-device-aws() {
     if [ -z "${BSDKIT_SWAP_DEVICE_SIZE}" ] || [ "${BSDKIT_SWAP_DEVICE_SIZE}" -eq 0 ]; then
         error "BSDKIT_SWAP_DEVICE_SIZE is not set"
     fi
@@ -3324,7 +3324,7 @@ __enable_swap_device_aws() {
     elif [ -e /dev/gpt/swap ]; then
         message "Configuring existing swap device"
         echo "/dev/gpt/swap none swap sw 0 0" >> /etc/fstab
-        reformat_fstab /etc/fstab
+        reformat-fstab /etc/fstab
     else
         for _disk in $(sysctl -n kern.disks); do
             if gpart list ${_disk} > /dev/null 2>&1; then
@@ -3347,7 +3347,7 @@ __enable_swap_device_aws() {
             swapon /dev/gpt/swap
             echo "/dev/gpt/swap none swap sw 0 0" >> /etc/fstab
 
-            reformat_fstab /etc/fstab
+            reformat-fstab /etc/fstab
 
             break
         done
@@ -3379,24 +3379,24 @@ update() {
     fi
 }
 
-is_mount_point() {
+is-mount-point() {
     local _directory=$1
 
     mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
 }
 
-get_os_version() {
+get-os-version() {
     local _version="$(uname -r | cut -d '-' -f 1)"
     echo "${_version}"
 }
 
-get_osrelease() {
+get-osrelease() {
     local _destdir=${1:-/}
 
     ${_destdir}/bin/freebsd-version -u
 }
 
-get_osreldate() {
+get-osreldate() {
     local _destdir=${1:-/}
 
     if [ -f ${_destdir}/usr/include/sys/param.h ]; then
@@ -3406,7 +3406,7 @@ get_osreldate() {
     fi
 }
 
-get_src_release_name() {
+get-src-release-name() {
     local _srcdir=${1:-/usr/src}
 
     local _newvers_file="${_srcdir}/sys/conf/newvers.sh"
@@ -3427,14 +3427,14 @@ get_src_release_name() {
     echo "${_release_name}"
 }
 
-echo_jail_conf() {
+echo-jail-conf() {
     if [ $# -ne 1 ]; then
-        usage "echo_jail_conf <destdir>"
+        usage "echo-jail-conf <destdir>"
     fi
 
     local _destdir=$1
 
-    __valid_destdir ${_destdir}
+    __valid-destdir ${_destdir}
 
     local _jail_name
 
@@ -3457,13 +3457,13 @@ ${_jail_name} {
         allow.raw_sockets;
         allow.sysvipc;
 
-        osrelease = "$(get_osrelease ${_destdir})";
-        osreldate = "$(get_osreldate ${_destdir})";
+        osrelease = "$(get-osrelease ${_destdir})";
+        osreldate = "$(get-osreldate ${_destdir})";
 
         path = "${_destdir%/}";
         host.hostname = "\${name}";
         host.domainname = "local";
-        interface = "$(inet_interface)";
+        interface = "$(inet-interface)";
         # ip4.addr = "";
         # mount.fstab = "${_jail_root%/}/\${name}.fstab";
 }
@@ -3479,37 +3479,37 @@ shell() {
     rm -f ${_private_key}
 }
 
-echo_bsdkit_private_key() {
+echo-bsdkit-private-key() {
     cat ${BSDKIT_SRCDIR}/keypairs/id_rsa
 }
 
-echo_bsdkit_authorized_keys() {
+echo-bsdkit-authorized-keys() {
     cat ${BSDKIT_SRCDIR}/keypairs/*.pub
 }
 
-get_boot_pool() {
+get-boot-pool() {
     zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
 }
 
-rebuild_zpool_cache() {
-    zpool set cachefile=/etc/zfs/zpool.cache $(get_boot_pool)
+rebuild-zpool-cache() {
+    zpool set cachefile=/etc/zfs/zpool.cache $(get-boot-pool)
 }
 
-ruby_version() {
+ruby-version() {
     if whence -p ruby > /dev/null 2>&1; then
         ruby --version | awk '{print $2}' | cut -d '.' -f 1-2
     fi
 }
 
-perl_version() {
+perl-version() {
     if whence -p perl > /dev/null 2>&1; then
         perl -e 'print(sprintf("%d.%d\n", $^V->{version}[0], $^V->{version}[1]))'
     fi
 }
 
-purge_libdir() {
+purge-libdir() {
     if [ $# -ne 1 ]; then
-        usage "purge_libdir <directory>"
+        usage "purge-libdir <directory>"
     fi
 
     local _directory=$1
@@ -3538,40 +3538,40 @@ purge_libdir() {
     done
 }
 
-purge_local_libdirs() {
-    local _ruby_version=$(ruby_version)
-    local _perl_version=$(perl_version)
+purge-local-libdirs() {
+    local _ruby-version=$(ruby-version)
+    local _perl-version=$(perl-version)
 
     for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
-        purge_libdir ${_ruby_libdir}
+        purge-libdir ${_ruby_libdir}
     done
 
     for _perl_libdir in ${PERL_LIBDIR_LIST[@]}; do
-        purge_libdir ${_perl_libdir}
+        purge-libdir ${_perl_libdir}
     done
 
-    if [ -n "${_ruby_version}" ]; then
+    if [ -n "${_ruby-version}" ]; then
         for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
-            if ! [ -d ${_ruby_libdir}/${_ruby_version} ]; then
-                message "Creating ${_ruby_libdir}/${_ruby_version}"
-                mkdir -p ${_ruby_libdir}/${_ruby_version}
+            if ! [ -d ${_ruby_libdir}/${_ruby-version} ]; then
+                message "Creating ${_ruby_libdir}/${_ruby-version}"
+                mkdir -p ${_ruby_libdir}/${_ruby-version}
             fi
         done
     fi
 
-    if [ -n "${_perl_version}" ]; then
+    if [ -n "${_perl-version}" ]; then
         for _perl_libdir in ${PERL_LIBDIR_LIST[@]}; do
-            if ! [ -d ${_perl_libdir}/${_perl_version} ]; then
-                message "Creating ${_perl_libdir}/${_perl_version}"
-                mkdir -p ${_perl_libdir}/${_perl_version}
+            if ! [ -d ${_perl_libdir}/${_perl-version} ]; then
+                message "Creating ${_perl_libdir}/${_perl-version}"
+                mkdir -p ${_perl_libdir}/${_perl-version}
             fi
         done
     fi
 }
 
-purge_pkg_tempfiles() {
+purge-pkg-tempfiles() {
     if [ $# -ne 1 ]; then
-        usage "purge_pkg_tempfiles <path>"
+        usage "purge-pkg-tempfiles <path>"
     fi
 
     local _path=$1
@@ -3581,9 +3581,9 @@ purge_pkg_tempfiles() {
         | xargs rm -r -v
 }
 
-purge_pkg_tempfiles_interactive() {
+purge-pkg-tempfiles-interactive() {
     if [ $# -ne 1 ]; then
-        usage "purge_pkg_tempfiles_interactive <path>"
+        usage "purge-pkg-tempfiles-interactive <path>"
     fi
 
     local _path=$1
@@ -3594,20 +3594,20 @@ purge_pkg_tempfiles_interactive() {
         | xargs -0 rm -r -v
 }
 
-check_pkg_tempfiles() {
+check-pkg-tempfiles() {
     if [ $# -ne 1 ]; then
-        usage "check_pkg_tempfiles <path>"
+        usage "check-pkg-tempfiles <path>"
     fi
 
     local _path=$1
 
     if ! find ${_path} -print0 \
             | awk 'BEGIN { RS="\\0"; exit_code = 0; } $0 ~ /\.pkgtemp\.[^\/]*$/ { exit_code = 1; } END { exit exit_code; }'; then
-        error "check_pkg_tempfiles: found temporary files."
+        error "check-pkg-tempfiles: found temporary files."
     fi
 }
 
-purge_be() {
+purge-be() {
     bectl list -H \
         | awk '$2 != "NR" && $2 != "R" && $2 != "N" { print $1 }' \
         | while read _bootenv; do
@@ -3621,13 +3621,13 @@ purge_be() {
     done
 }
 
-purge_distdir() {
-    if __valid_freebsd_distdir "${BSDKIT_FREEBSD_DISTDIR}"; then
+purge-distdir() {
+    if __valid-freebsd-distdir "${BSDKIT_FREEBSD_DISTDIR}"; then
         rm -rf ${BSDKIT_FREEBSD_DISTDIR}
     fi
 }
 
-start_local() {
+start-local() {
     local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
@@ -3651,7 +3651,7 @@ start_local() {
     done
 }
 
-stop_local() {
+stop-local() {
     local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
@@ -3675,7 +3675,7 @@ stop_local() {
     done
 }
 
-restart_local() {
+restart-local() {
     local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
@@ -3701,13 +3701,13 @@ restart_local() {
         service ${_service} restart || :
     done
 
-    if is_yes ${_monit}; then
+    if is-yes ${_monit}; then
         message "Starting service: monit"
         service monit start || :
     fi
 }
 
-zfs_migrate_postgresql() {
+zfs-migrate-postgresql() {
     if sysctl -n security.jail.jailed > /dev/null 2>&1; then
         if [ $(sysctl -n security.jail.jailed) -eq 1 ]; then
             message "PostgreSQL migration not supported in jail."
@@ -3716,7 +3716,7 @@ zfs_migrate_postgresql() {
     fi
 
     local _pool
-    _pool=$(get_boot_pool)
+    _pool=$(get-boot-pool)
 
     local _postgres_directory=/var/db/postgres
 
@@ -3737,7 +3737,7 @@ zfs_migrate_postgresql() {
         _running=YES
     fi
 
-    if is_yes ${_running}; then
+    if is-yes ${_running}; then
         message "Stopping PostgreSQL."
         service postgresql stop
     fi
@@ -3748,7 +3748,7 @@ zfs_migrate_postgresql() {
     # Properties will be set by Ansible.
     message "Creating new PostgreSQL dataset."
     zfs create \
-        -o compression=$(__zfs_compression) \
+        -o compression=$(__zfs-compression) \
         -o atime=off \
         -o redundant_metadata=most \
         ${_pool}${_postgres_directory}
@@ -3764,13 +3764,13 @@ zfs_migrate_postgresql() {
     message "Removing \"${_postgres_directory}.orig\"."
     rm -r -f ${_postgres_directory}.orig
 
-    if is_yes ${_running}; then
+    if is-yes ${_running}; then
         message "Starting PostgreSQL."
         service postgresql start
     fi
 }
 
-zfs_migrate_mysql() {
+zfs-migrate-mysql() {
     if sysctl -n security.jail.jailed > /dev/null 2>&1; then
         if [ $(sysctl -n security.jail.jailed) -eq 1 ]; then
             message "MySQL migration not supported in jail."
@@ -3779,7 +3779,7 @@ zfs_migrate_mysql() {
     fi
 
     local _pool
-    _pool=$(get_boot_pool)
+    _pool=$(get-boot-pool)
 
     local _mysql_directory=/var/db/mysql
 
@@ -3800,7 +3800,7 @@ zfs_migrate_mysql() {
         _running=YES
     fi
 
-    if is_yes ${_running}; then
+    if is-yes ${_running}; then
         message "Stopping MySQL."
         service mysql-server stop
     fi
@@ -3811,7 +3811,7 @@ zfs_migrate_mysql() {
     # Properties will be set by Ansible.
     message "Creating new MySQL dataset."
     zfs create \
-        -o compression=$(__zfs_compression) \
+        -o compression=$(__zfs-compression) \
         -o atime=off \
         -o redundant_metadata=most \
         ${_pool}${_mysql_directory}
@@ -3827,15 +3827,15 @@ zfs_migrate_mysql() {
     message "Removing \"${_mysql_directory}.orig\"."
     rm -r -f ${_mysql_directory}.orig
 
-    if is_yes ${_running}; then
+    if is-yes ${_running}; then
         message "Starting MySQL."
         service mysql-server start
     fi
 }
 
-rc_set() {
+rc-set() {
     if [ $# -ne 3 ]; then
-        usage "rc_set <file> <key> <value>"
+        usage "rc-set <file> <key> <value>"
     fi
 
     local _file=$1
@@ -3853,9 +3853,9 @@ ${_key}=\"${_value}\"
     fi
 }
 
-rc_delete() {
+rc-delete() {
     if [ $# -ne 2 ]; then
-        usage "rc_delete <file> <key>"
+        usage "rc-delete <file> <key>"
     fi
 
     local _file=$1
@@ -3866,9 +3866,9 @@ rc_delete() {
     sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=/d" ${_file}
 }
 
-rc_get() {
+rc-get() {
     if [ $# -ne 2 ]; then
-        usage "rc_get <file> <key>"
+        usage "rc-get <file> <key>"
     fi
 
     local _file=$1
@@ -3890,8 +3890,8 @@ rc_get() {
     fi
 }
 
-__config_merge() {
-    __check_go_yq
+__config-merge() {
+    __check-go-yq
 
     local _file=$1
 
@@ -3914,7 +3914,7 @@ __config-upgrade-key() {
     local _new_key=$2
 
     local _value
-    _value=$(config_get ${_old_key})
+    _value=$(config-get ${_old_key})
 
     if [ $? -ne 0 ]; then
         error "Failed to get the value of ${_old_key}"
@@ -3922,13 +3922,13 @@ __config-upgrade-key() {
 
     if [ "${_value}" != "null" ]; then
         message "Upgrading ${_old_key} to ${_new_key}"
-        config_set ${_new_key} ${_value}
+        config-set ${_new_key} ${_value}
 
         if [ $? -ne 0 ]; then
             error "Failed to set the value of ${_new_key}"
         fi
 
-        config_del ${_old_key}
+        config-del ${_old_key}
 
         if [ $? -ne 0 ]; then
             error "Failed to delete the key ${_old_key}"
@@ -3936,20 +3936,20 @@ __config-upgrade-key() {
     fi
 }
 
-config_set() {
+config-set() {
     if [ $# -lt 2 ]; then
-        usage "config_set <key> <value>"
+        usage "config-set <key> <value>"
     fi
 
     local _key=$1
     local _value=$2
 
-    yaml_set ${BSDKIT_CONFIG} ${_key} ${_value}
+    yaml-set ${BSDKIT_CONFIG} ${_key} ${_value}
 }
 
-config_get() {
+config-get() {
     if [ $# -lt 1 ]; then
-        usage "config_get <key>"
+        usage "config-get <key>"
     fi
 
     [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
@@ -3959,51 +3959,51 @@ config_get() {
     local _tmpfile
     _tmpfile=$(mktemp)
 
-    __config_merge ${_tmpfile}
+    __config-merge ${_tmpfile}
 
-    yaml_get ${_tmpfile} ${_key}
+    yaml-get ${_tmpfile} ${_key}
 
     rm -f ${_tmpfile}
 }
 
-config_del() {
+config-del() {
     if [ $# -lt 1 ]; then
-        usage "config_del <key>"
+        usage "config-del <key>"
     fi
 
     [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
     local _key=$1
 
-    yaml_del ${BSDKIT_CONFIG} ${_key}
+    yaml-del ${BSDKIT_CONFIG} ${_key}
 }
 
-config_keys() {
-    __check_py_pyaml
+config-keys() {
+    __check-py-pyaml
 
     [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
     local _tmpfile
     _tmpfile=$(mktemp)
 
-    __config_merge ${_tmpfile}
+    __config-merge ${_tmpfile}
 
-    yaml_list_keys ${_tmpfile}
+    yaml-list-keys ${_tmpfile}
 
     rm -f ${_tmpfile}
 }
 
-config_list() {
-    __check_py_pyaml
+config-list() {
+    __check-py-pyaml
 
     [ -f ${BSDKIT_CONFIG} ] || touch ${BSDKIT_CONFIG}
 
     local _tmpfile
     _tmpfile=$(mktemp)
 
-    __config_merge ${_tmpfile}
+    __config-merge ${_tmpfile}
 
-    yaml_list_items ${_tmpfile}
+    yaml-list-items ${_tmpfile}
 
     rm -f ${_tmpfile}
 }
@@ -4100,7 +4100,7 @@ zfs-raid-hint() {
         fi
     done
 
-    if is_yes ${_found}; then
+    if is-yes ${_found}; then
         message "If using hardware RAID, you might need to run these commands:"
         echo
         for _disk in ${(@s/ /)_disks}; do

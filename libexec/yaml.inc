@@ -1,9 +1,9 @@
 [[ -z "${BSDKIT_YAML_INCLUDED=""}" ]] && {
     BSDKIT_YAML_INCLUDED="yes"
 
-    yaml_set() {
+    yaml-set() {
         if [ $# -ne 3 ]; then
-            usage "yaml_set <file> <key> <value>"
+            usage "yaml-set <file> <key> <value>"
         fi
 
         local _file=$1
@@ -17,39 +17,39 @@
         yq -i eval "(.${_key}) = \"${_value}\"" ${_file}
     }
 
-    yaml_get() {
+    yaml-get() {
         if [ $# -ne 2 ]; then
-            usage "yaml_get <file> <key>"
+            usage "yaml-get <file> <key>"
         fi
 
         local _file=$1
         local _key=$2
 
         if [ ! -e ${_file} ]; then
-            error "yaml_get: ${_file} does not exists"
+            error "yaml-get: ${_file} does not exists"
         fi
 
         yq eval ".${_key}" ${_file}
     }
 
-    yaml_del() {
+    yaml-del() {
         if [ $# -ne 2 ]; then
-            usage "yaml_del <file> <key>"
+            usage "yaml-del <file> <key>"
         fi
 
         local _file=$1
         local _key=$2
 
         if [ ! -e ${_file} ]; then
-            error "yaml_del: ${_file} does not exists"
+            error "yaml-del: ${_file} does not exists"
         fi
 
         yq -i eval "del(.${_key})" ${_file}
     }
 
-    yaml_add() {
+    yaml-add() {
         if [ $# -ne 3 ]; then
-            usage "yaml_append <file> <key> <value>"
+            usage "yaml-add <file> <key> <value>"
         fi
 
         local _file=$1
@@ -67,9 +67,9 @@
         fi
     }
 
-    yaml_remove() {
+    yaml-remove() {
         if [ $# -ne 3 ]; then
-            usage "yaml_remove <file> <key> <value>"
+            usage "yaml-remove <file> <key> <value>"
         fi
 
         local _file=$1
@@ -83,37 +83,37 @@
         yq -i eval "del(.${_key}[] | select(. == \"${_value}\"))" ${_file}
     }
 
-    yaml_list_keys() {
+    yaml-list-keys() {
         if [ $# -ne 1 ]; then
-            usage "yaml_list_keys <file>"
+            usage "yaml-list-keys <file>"
         fi
 
         local _file=$1
 
         if [ ! -e ${_file} ]; then
-            error "yaml_list_keys: ${_file} does not exists"
+            error "yaml-list-keys: ${_file} does not exists"
         fi
 
         if [ ! -e ${BSDKIT_SRCDIR}/libexec/update-yaml.py ]; then
-            error "yaml_list_keys: ${BSDKIT_SRCDIR}/libexec/update-yaml.py does not exists"
+            error "yaml-list-keys: ${BSDKIT_SRCDIR}/libexec/update-yaml.py does not exists"
         fi
 
         python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list-keys ${_file}
     }
 
-    yaml_list_items() {
+    yaml-list-items() {
         if [ $# -ne 1 ]; then
-            usage "yaml_list_items <file>"
+            usage "yaml-list-items <file>"
         fi
 
         local _file=$1
 
         if [ ! -e ${_file} ]; then
-            error "yaml_list_items: ${_file} does not exists"
+            error "yaml-list-items: ${_file} does not exists"
         fi
 
         if [ ! -e ${BSDKIT_SRCDIR}/libexec/update-yaml.py ]; then
-            error "yaml_list_items: ${BSDKIT_SRCDIR}/libexec/update-yaml.py does not exists"
+            error "yaml-list-items: ${BSDKIT_SRCDIR}/libexec/update-yaml.py does not exists"
         fi
 
         python3 ${BSDKIT_SRCDIR}/libexec/update-yaml.py list-items ${_file}

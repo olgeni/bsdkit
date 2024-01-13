@@ -6,8 +6,8 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/colors.inc
-source ${SCRIPT_PATH}/hr_to_bytes.inc
-source ${SCRIPT_PATH}/is_yes.inc
+source ${SCRIPT_PATH}/hr-to-bytes.inc
+source ${SCRIPT_PATH}/is-yes.inc
 source ${SCRIPT_PATH}/yaml.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
@@ -19,7 +19,7 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 
 # ===========================================================================
 
-filter_properties() {
+filter-properties() {
     awk '
 BEGIN {
   read_only["available"] = 1;
@@ -62,7 +62,7 @@ BEGIN {
 '
 }
 
-rewrite_filesystem() {
+rewrite-filesystem() {
     local _option
 
     local _source_filesystem
@@ -102,7 +102,7 @@ rewrite_filesystem() {
     for _filesystem in $(zfs list -H -o name -t filesystem -r "${_source_filesystem}"); do
         # BD584E0F-28D6-4409-956D-F9B1468C2DD9
         zfs get -H all "${_filesystem}" |
-            filter_properties |
+            filter-properties |
             cut -s -f 2 |
             sort |
             uniq |
@@ -112,7 +112,7 @@ rewrite_filesystem() {
 
     # 8E95F488-BE4B-48F6-9FEE-C58CBBFD25BC
     zfs get -s received -H -r all "${_source_filesystem}" |
-        filter_properties |
+        filter-properties |
         awk '
 $2 != "mountpoint" {
   print "zfs set " $2 "=" $3 " " $1;
@@ -136,4 +136,4 @@ $2 == "mountpoint" {
     done
 }
 
-rewrite_filesystem "$@"
+rewrite-filesystem "$@"

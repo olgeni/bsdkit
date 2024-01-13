@@ -6,8 +6,8 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/colors.inc
-source ${SCRIPT_PATH}/hr_to_bytes.inc
-source ${SCRIPT_PATH}/is_yes.inc
+source ${SCRIPT_PATH}/hr-to-bytes.inc
+source ${SCRIPT_PATH}/is-yes.inc
 source ${SCRIPT_PATH}/yaml.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
@@ -24,7 +24,7 @@ usage() {
     exit 0
 }
 
-postgresql_is_running() {
+postgresql-is-running() {
     local _is_running=$(psql -U postgres -d template1 -c "SELECT 1;" -t -A)
 
     if [ "${_is_running}" = "1" ]; then
@@ -34,20 +34,20 @@ postgresql_is_running() {
     fi
 }
 
-postgresql_is_in_recovery() {
+postgresql-is-in-recovery() {
     local _in_recovery=$(psql -U postgres -d template1 -c "SELECT pg_is_in_recovery();" -t -A)
 
     [ "${_in_recovery}" = "t" ]
 }
 
-postgresql_has_standby_signal() {
+postgresql-has-standby-signal() {
     local _directory="$1"
 
     [ -f "${_directory}/standby.signal" ]
 }
 
-perform_pg_basebackup() {
-    if postgresql_is_running; then
+perform-pg-basebackup() {
+    if postgresql-is-running; then
         error "PostgreSQL is running. Please stop it first."
     fi
 

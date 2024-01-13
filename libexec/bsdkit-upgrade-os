@@ -6,8 +6,8 @@ SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
 source ${SCRIPT_PATH}/colors.inc
-source ${SCRIPT_PATH}/hr_to_bytes.inc
-source ${SCRIPT_PATH}/is_yes.inc
+source ${SCRIPT_PATH}/hr-to-bytes.inc
+source ${SCRIPT_PATH}/is-yes.inc
 source ${SCRIPT_PATH}/yaml.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
@@ -39,54 +39,54 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 
 _mountpoint_list=()
 
-get_file_fs() {
+get-file-fs() {
     local _directory="$1"
 
     df -T ${_directory} | tail -n +2 | awk '{ print $2; }'
 }
 
-file_on_fs() {
+file-on-fs() {
     local _directory="$1"
     local _type="$2"
 
-    [ "$(get_file_fs ${_directory})" = "${_type}" ]
+    [ "$(get-file-fs ${_directory})" = "${_type}" ]
 }
 
-file_on_ufs() {
+file-on-ufs() {
     local _directory="$1"
 
-    file_on_fs ${_directory} "ufs"
+    file-on-fs ${_directory} "ufs"
 }
 
-file_on_zfs() {
+file-on-zfs() {
     local _directory="$1"
 
-    file_on_fs ${_directory} "zfs"
+    file-on-fs ${_directory} "zfs"
 }
 
 cleanup() {
-    if is_yes ${BOOTENV_ENABLE}; then
+    if is-yes ${BOOTENV_ENABLE}; then
         for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
-            if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
+            if ${BSDKIT_PATH}/bsdkit is-mount-point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
                 umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
             fi
         done
 
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}/dev"; then
-            if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}/dev; then
+            if ${BSDKIT_PATH}/bsdkit is-mount-point ${BOOTENV_MOUNT}/dev; then
                 umount -f ${BOOTENV_MOUNT}/dev
             fi
         fi
 
         if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
-            if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}; then
+            if ${BSDKIT_PATH}/bsdkit is-mount-point ${BOOTENV_MOUNT}; then
                 bectl umount -f ${BOOTENV_NAME}
             fi
         fi
     else
         if [ -z "${DESTDIR}" ]; then
             if ! mount | cut -w -f 3 | fgrep -q "/proc"; then
-                if is_yes ${_proc_mounted}; then
+                if is-yes ${_proc_mounted}; then
                     mount /proc
                 fi
             fi
@@ -100,7 +100,7 @@ osmajor() {
     awk '/^\#define[[:blank:]]__FreeBSD_version/ { print substr($3, 1, 2); }' ${_destdir}/usr/include/sys/param.h
 }
 
-rebuild_port() {
+rebuild-port() {
     local _port="$1"
 
     if ! pkg info -q ${_port}; then
@@ -121,7 +121,7 @@ rebuild_port() {
     umount -f ${BOOTENV_MOUNT}/dev
 }
 
-remove_nouarch_files() {
+remove-nouarch-files() {
     local _directory="$1"
 
     if [ ! -d ${_directory} ]; then
@@ -150,7 +150,7 @@ remove_nouarch_files() {
     rm -f ${_directory_list}
 }
 
-update_boot_loader() {
+update-boot-loader() {
     _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
 
     for _disk in ${(s/ /)_disks}; do
@@ -292,7 +292,7 @@ if [ -d ${DESTDIR}/.base ]; then
 fi
 
 if [ -z "${BSDKIT_VERSION}" ]; then
-    BSDKIT_VERSION="$(${BSDKIT_PATH}/bsdkit get_os_version)"
+    BSDKIT_VERSION="$(${BSDKIT_PATH}/bsdkit get-os-version)"
     message "Using current version: ${BSDKIT_VERSION}"
 fi
 
@@ -317,12 +317,12 @@ else
     BOOTENV_ENABLE="no"
 fi
 
-if ! is_yes ${FETCH_ONLY}; then
-    if [ "${DESTDIR}" != "" ] && is_yes ${BOOTENV_ENABLE}; then
+if ! is-yes ${FETCH_ONLY}; then
+    if [ "${DESTDIR}" != "" ] && is-yes ${BOOTENV_ENABLE}; then
         error "incompatible BOOTENV_ENABLE and DESTDIR"
     fi
 
-    if is_yes ${BOOTENV_ENABLE}; then
+    if is-yes ${BOOTENV_ENABLE}; then
         which bectl > /dev/null 2>&1 || error "missing requirement: bectl"
     fi
 fi
@@ -368,15 +368,15 @@ fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.b
 # tests.txz       [sha256]  [size]  tests       "Test suite"                                  off
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
-    if ! is_yes ${_install_src} && [ ${_package} = "src" ]; then
+    if ! is-yes ${_install_src} && [ ${_package} = "src" ]; then
         continue
     fi
 
-    if ! is_yes ${_install_debug} && [ ${_package} != "${_package%_dbg}" ]; then
+    if ! is-yes ${_install_debug} && [ ${_package} != "${_package%_dbg}" ]; then
         continue
     fi
 
-    if ! is_yes ${_install_tests} && [ ${_package} = "tests" ]; then
+    if ! is-yes ${_install_tests} && [ ${_package} = "tests" ]; then
         continue
     fi
 
@@ -397,7 +397,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     done
 done
 
-if is_yes ${FETCH_ONLY}; then
+if is-yes ${FETCH_ONLY}; then
     message "Release downloaded successfully"
     exit 0
 fi
@@ -408,7 +408,7 @@ if [ -n "${_destdir_fs}" ]; then
     zfs snapshot "${_destdir_fs}@$(date +%F.%H%M)"
 fi
 
-if is_yes ${BOOTENV_ENABLE}; then
+if is-yes ${BOOTENV_ENABLE}; then
     if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
         error "mount point '${BOOTENV_MOUNT}' already in use"
     fi
@@ -437,7 +437,7 @@ if is_yes ${BOOTENV_ENABLE}; then
     DESTDIR=${BOOTENV_MOUNT}
 else
     if [ -z "${DESTDIR}" ]; then
-        if is_yes ${_proc_mounted}; then
+        if is-yes ${_proc_mounted}; then
             umount -f /proc
         fi
     fi
@@ -450,7 +450,7 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
 fi
 
 if [ -t 0 ]; then
-    if is_yes ${ETCUPDATE_AUTORESOLVE}; then
+    if is-yes ${ETCUPDATE_AUTORESOLVE}; then
         yes mf | etcupdate resolve -D ${DESTDIR}/
     else
         etcupdate resolve -D ${DESTDIR}/
@@ -475,13 +475,13 @@ find \
     -exec chflags noschg {} \;
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
-    if is_yes ${ETCUPDATE_AUTORESOLVE}; then
+    if is-yes ${ETCUPDATE_AUTORESOLVE}; then
         yes mf | etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
     else
         etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
     fi
 elif [ -f ${_srcdir}/Makefile ]; then
-    if is_yes ${ETCUPDATE_AUTORESOLVE}; then
+    if is-yes ${ETCUPDATE_AUTORESOLVE}; then
         yes mf | etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
     else
         etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
@@ -511,7 +511,7 @@ _readonly_directory_list=(
     "usr/tests"
 )
 
-if file_on_zfs ${DESTDIR:-/}; then
+if file-on-zfs ${DESTDIR:-/}; then
     for _directory in ${_readonly_directory_list}; do
         if [ -d ${DESTDIR}/${_directory} ]; then
             chflags -R uarch ${DESTDIR}/${_directory}
@@ -533,15 +533,15 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     _extract="no"
     _options=()
 
-    if ! is_yes ${_install_debug} && [ ${_package} != ${_package%_dbg} ]; then
+    if ! is-yes ${_install_debug} && [ ${_package} != ${_package%_dbg} ]; then
         continue
     fi
 
-    if ! is_yes ${_install_tests} && [ ${_package} = "tests" ]; then
+    if ! is-yes ${_install_tests} && [ ${_package} = "tests" ]; then
         continue
     fi
 
-    if ! is_yes ${_install_src} && [ ${_package} = "src" ]; then
+    if ! is-yes ${_install_src} && [ ${_package} = "src" ]; then
         continue
     fi
 
@@ -561,7 +561,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             _options+="--exclude ./tmp"
             _options+="--exclude ./var"
 
-            if ! is_yes ${_install_tests}; then
+            if ! is-yes ${_install_tests}; then
                 _options+="--exclude ./usr/tests"
             fi
 
@@ -571,7 +571,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         ports) ;;
 
         src)
-            if file_on_zfs ${DESTDIR:-/}; then
+            if file-on-zfs ${DESTDIR:-/}; then
                 for _arch in i386 amd64; do
                     if [ -f ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT ]; then
                         chflags uarch ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT
@@ -588,7 +588,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
             ;;
     esac
 
-    if is_yes ${_extract}; then
+    if is-yes ${_extract}; then
         message "Extracting ${_filename}"
 
         # In the Zsh shell, `${=VAR_NAME}` is a parameter expansion that
@@ -635,12 +635,12 @@ elif [ -f ${_srcdir}/Makefile ]; then
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
 fi
 
-if file_on_zfs ${DESTDIR:-/}; then
+if file-on-zfs ${DESTDIR:-/}; then
     message "Removing obsolete files"
 
     for _directory in ${_readonly_directory_list}; do
         if [ -d ${DESTDIR}/${_directory} ]; then
-            remove_nouarch_files ${DESTDIR}/${_directory}
+            remove-nouarch-files ${DESTDIR}/${_directory}
         fi
     done
 fi
@@ -714,8 +714,8 @@ for _file in ${DESTDIR}/var/db/mixer*-state(N); do
     fi
 done
 
-if is_yes ${BOOTENV_ENABLE}; then
-    if is_yes ${UPGRADE_PACKAGES}; then
+if is-yes ${BOOTENV_ENABLE}; then
+    if is-yes ${UPGRADE_PACKAGES}; then
         if pkg -c ${BOOTENV_MOUNT} update --repository bsdkit --force; then
             pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --yes pkg
             pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --fetch-only --yes
@@ -723,22 +723,22 @@ if is_yes ${BOOTENV_ENABLE}; then
         fi
     fi
 
-    if is_yes ${REBUILD_PORTS}; then
+    if is-yes ${REBUILD_PORTS}; then
         for _port in $(pkg which -qo /boot/modules/* | sort | uniq); do
-            rebuild_port ${_port}
+            rebuild-port ${_port}
         done
     fi
 fi
 
 if [ -z "${DESTDIR}" ]; then
-    update_boot_loader
-elif [ "${DESTDIR}" = "${BOOTENV_MOUNT}" ] && is_yes ${BOOTENV_ENABLE}; then
-    update_boot_loader
+    update-boot-loader
+elif [ "${DESTDIR}" = "${BOOTENV_MOUNT}" ] && is-yes ${BOOTENV_ENABLE}; then
+    update-boot-loader
 fi
 
-if is_yes ${BOOTENV_ENABLE}; then
+if is-yes ${BOOTENV_ENABLE}; then
     for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
-        if ${BSDKIT_PATH}/bsdkit is_mount_point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
+        if ${BSDKIT_PATH}/bsdkit is-mount-point ${BOOTENV_MOUNT}${_mountpoint_list[i]}; then
             umount -f ${BOOTENV_MOUNT}${_mountpoint_list[i]}
         fi
     done

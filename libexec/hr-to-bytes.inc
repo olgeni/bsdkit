@@ -3,7 +3,7 @@
 [[ -z "${BSDKIT_HR_TO_BYTES_INCLUDED=""}" ]] && {
     BSDKIT_HR_TO_BYTES_INCLUDED="yes"
 
-    hr_to_bytes() {
+    hr-to-bytes() {
         local size="${1}"
         local -A units=( [B]=1 [K]=1024 [M]=$((1024*1024)) [G]=$((1024*1024*1024)) [T]=$((1024*1024*1024*1024)) [P]=$((1024*1024*1024*1024*1024)) [E]=$((1024*1024*1024*1024*1024*1024)) )
         local unit="${size//[0-9.]/}"
