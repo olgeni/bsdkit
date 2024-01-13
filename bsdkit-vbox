@@ -17,6 +17,7 @@ which nc > /dev/null 2>&1 || error 'nc not found'
 : ${BSDKIT_VBOX_VNC_PORT:="5910"}
 : ${BSDKIT_VBOX_VNC_PASSWORD:="bsdkit"}
 : ${BSDKIT_VBOX_GUI_TYPE:="separate"} # gui | headless | sdl | separate
+: ${BSDKIT_VBOX_GRAPHICS_CONTROLLER:="vmsvga"} # none | vboxvga | vmsvga | vboxsvga
 : ${BSDKIT_VBOX_ISO:=""}
 : ${BSDKIT_VBOX_EFI:="no"}
 : ${BSDKIT_VBOX_DISK_SIZE:="16000"}
@@ -44,6 +45,7 @@ perform-create() {
     VBoxManage modifyvm ${BSDKIT_VBOX_NAME} \
                --memory ${BSDKIT_VBOX_MEMORY} \
                --vram ${BSDKIT_VBOX_VRAM} \
+               --graphicscontroller=${BSDKIT_VBOX_GRAPHICS_CONTROLLER} \
                --keyboard usb \
                --mouse usbtablet
 
