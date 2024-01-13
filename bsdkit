@@ -450,7 +450,7 @@ __valid_destdir() {
     [ -d ${_destdir} ] && [ ${_destdir} != "/" ] && [ -f ${_destdir}/bin/sh ]
 }
 
-__valid_freebsd_distdir () {
+__valid_freebsd_distdir() {
     local _freebsd_distdir=$1
 
     [ -n "${_freebsd_distdir}" ] && [ -d "${_freebsd_distdir}" ] && [ "${_freebsd_distdir}" != "/" ]
@@ -3621,7 +3621,7 @@ purge_be() {
     done
 }
 
-purge_distdir () {
+purge_distdir() {
     if __valid_freebsd_distdir "${BSDKIT_FREEBSD_DISTDIR}"; then
         rm -rf ${BSDKIT_FREEBSD_DISTDIR}
     fi
