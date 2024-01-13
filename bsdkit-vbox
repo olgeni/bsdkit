@@ -117,7 +117,7 @@ perform-stop() {
     message "Sending ACPI power button signal"
     VBoxManage controlvm ${BSDKIT_VBOX_NAME} acpipowerbutton || :
 
-    local _timeout=10
+    local _timeout=15
 
     SECONDS=0
 
