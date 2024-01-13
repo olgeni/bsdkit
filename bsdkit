@@ -4044,7 +4044,7 @@ update_zfs_compression() {
     done
 }
 
-update_mtree() {
+update-mtree() {
     _destdir=${1:-/}
 
     message "Applying BSD.root.dist"
