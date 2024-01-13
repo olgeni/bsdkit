@@ -4090,7 +4090,7 @@ update_mtree() {
     fi
 }
 
-zfs_raid_hint() {
+zfs-raid-hint() {
     _disks=$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)
     _found="no"
 
