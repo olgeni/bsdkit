@@ -101,10 +101,10 @@ SERVICE_RESTART_BLACKLIST=(
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
-source ${SCRIPT_PATH}/libexec/colors.inc
-source ${SCRIPT_PATH}/libexec/hr-to-bytes.inc
-source ${SCRIPT_PATH}/libexec/is-yes.inc
-source ${SCRIPT_PATH}/libexec/yaml.inc
+source ${SCRIPT_PATH}/lib/colors.inc
+source ${SCRIPT_PATH}/lib/hr-to-bytes.inc
+source ${SCRIPT_PATH}/lib/is-yes.inc
+source ${SCRIPT_PATH}/lib/yaml.inc
 
 if command -v pv > /dev/null 2>&1; then
     CAT_CMD=(pv -i ${BSDKIT_PV_UPDATE_DELAY})

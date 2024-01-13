@@ -5,10 +5,10 @@ setopt errreturn nounset pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
-source ${SCRIPT_PATH}/colors.inc
-source ${SCRIPT_PATH}/hr-to-bytes.inc
-source ${SCRIPT_PATH}/is-yes.inc
-source ${SCRIPT_PATH}/yaml.inc
+source ${SCRIPT_PATH}/../lib/colors.inc
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc
+source ${SCRIPT_PATH}/../lib/is-yes.inc
+source ${SCRIPT_PATH}/../lib/yaml.inc
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."
