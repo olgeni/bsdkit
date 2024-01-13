@@ -19,7 +19,7 @@ which nc > /dev/null 2>&1 || error 'nc not found'
 : ${BSDKIT_VBOX_GUI_TYPE:="separate"}
 : ${BSDKIT_VBOX_ISO:=""}
 : ${BSDKIT_VBOX_EFI:="no"}
-: ${BSDKIT_VBOX_DISK_SIZE:="30000"}
+: ${BSDKIT_VBOX_DISK_SIZE:="16000"}
 : ${BSDKIT_LAST_DISK="3"}
 : ${BSDKIT_LAST_DISK_LIMIT="8"}
 
