@@ -3905,7 +3905,7 @@ __config_merge() {
        > ${_tmpfile}
 }
 
-__config_upgrade_key() {
+__config-upgrade-key() {
     if [ $# -lt 2 ]; then
         error "config_update_key: missing arguments"
     fi
@@ -4008,9 +4008,9 @@ config_list() {
     rm -f ${_tmpfile}
 }
 
-config_upgrade() {
-    __config_upgrade_key "update_dns" "enable_update_dns"
-    __config_upgrade_key "console_syslog" "enable_console_syslog"
+config-upgrade() {
+    __config-upgrade-key "update_dns" "enable_update_dns"
+    __config-upgrade-key "console_syslog" "enable_console_syslog"
 }
 
 destroy-zfs-snapshots() {
