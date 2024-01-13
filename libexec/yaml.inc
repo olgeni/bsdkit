@@ -6,8 +6,6 @@
             usage "yaml_set <file> <key> <value>"
         fi
 
-        __check_go_yq
-
         local _file=$1
         local _key=$2
         local _value=$3
@@ -24,8 +22,6 @@
             usage "yaml_get <file> <key>"
         fi
 
-        __check_go_yq
-
         local _file=$1
         local _key=$2
 
@@ -41,8 +37,6 @@
             usage "yaml_del <file> <key>"
         fi
 
-        __check_go_yq
-
         local _file=$1
         local _key=$2
 
@@ -57,8 +51,6 @@
         if [ $# -ne 3 ]; then
             usage "yaml_append <file> <key> <value>"
         fi
-
-        __check_go_yq
 
         local _file=$1
         local _key=$2
@@ -80,8 +72,6 @@
             usage "yaml_remove <file> <key> <value>"
         fi
 
-        __check_go_yq
-
         local _file=$1
         local _key=$2
         local _value=$3
@@ -97,8 +87,6 @@
         if [ $# -ne 1 ]; then
             usage "yaml_list_keys <file>"
         fi
-
-        __check_py_pyaml
 
         local _file=$1
 
@@ -117,8 +105,6 @@
         if [ $# -ne 1 ]; then
             usage "yaml_list_items <file>"
         fi
-
-        __check_py_pyaml
 
         local _file=$1
 
