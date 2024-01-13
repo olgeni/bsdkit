@@ -29,7 +29,6 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 : ${FETCH_ONLY:="no"}
 : ${UPGRADE_PACKAGES:="no"}
 : ${REBUILD_PORTS:="no"}
-: ${ETCUPDATE_AUTORESOLVE:="no"}
 : ${PV_UPDATE_DELAY:="0.1"}
 
 : ${_install_src:="no"}
@@ -244,7 +243,7 @@ if mount | cut -w -f 3 | fgrep -q "/proc"; then
 fi
 
 OPTIND=1
-while getopts "a:b:d:eEFmn:p:r:v:" OPT; do
+while getopts "a:b:d:eEFn:p:r:v:" OPT; do
     case ${OPT} in
         a)
             BSDKIT_ARCH=${OPTARG}
@@ -263,9 +262,6 @@ while getopts "a:b:d:eEFmn:p:r:v:" OPT; do
             ;;
         F)
             FETCH_ONLY="yes"
-            ;;
-        m)
-            ETCUPDATE_AUTORESOLVE="yes"
             ;;
         n)
             BOOTENV_NAME=${OPTARG}
@@ -450,11 +446,7 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
 fi
 
 if [ -t 0 ]; then
-    if is-yes ${ETCUPDATE_AUTORESOLVE}; then
-        yes mf | etcupdate resolve -D ${DESTDIR}/
-    else
-        etcupdate resolve -D ${DESTDIR}/
-    fi
+    etcupdate resolve -D ${DESTDIR}/
 fi
 
 export PATH=/rescue:${PATH}
@@ -475,17 +467,9 @@ find \
     -exec chflags noschg {} \;
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
-    if is-yes ${ETCUPDATE_AUTORESOLVE}; then
-        yes mf | etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
-    else
-        etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
-    fi
+    etcupdate -F -p -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
 elif [ -f ${_srcdir}/Makefile ]; then
-    if is-yes ${ETCUPDATE_AUTORESOLVE}; then
-        yes mf | etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
-    else
-        etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
-    fi
+    etcupdate -F -p -D ${DESTDIR}/ -s ${_srcdir}
 fi
 
 if [ -t 0 ]; then
