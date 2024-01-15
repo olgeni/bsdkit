@@ -25,7 +25,7 @@ usage() {
 }
 
 postgresql-is-running() {
-    local _is_running=$(psql -U postgres -d template1 -c "SELECT 1;" -t -A)
+    local _is_running=$(psql -U ${POSTGRES_USER} -d ${TEMPLATE_DATABASE} -c "SELECT 1;" -t -A)
 
     if [ "${_is_running}" = "1" ]; then
         return 0
@@ -35,7 +35,7 @@ postgresql-is-running() {
 }
 
 postgresql-is-in-recovery() {
-    local _in_recovery=$(psql -U postgres -d template1 -c "SELECT pg_is_in_recovery();" -t -A)
+    local _in_recovery=$(psql -U ${POSTGRES_USER} -d ${TEMPLATE_DATABASE} -c "SELECT pg_is_in_recovery();" -t -A)
 
     [ "${_in_recovery}" = "t" ]
 }
@@ -51,44 +51,45 @@ perform-pg-basebackup() {
         error "PostgreSQL is running. Please stop it first."
     fi
 
-    local _source_directory="/var/db/postgres/data14"
-    local _target_directory="/var/db/postgres/data15"
+    local _postgresql_auto_conf="${SOURCE_PGDATA}/postgresql.auto.conf"
+    local _conn_info=$(grep "primary_conninfo" "$_postgresql_auto_conf" | cut -d '=' -f2-)
 
-    local conf_file="${_source_directory}/postgresql.auto.conf"
-    local conn_info=$(grep "primary_conninfo" "$conf_file" | cut -d '=' -f2-)
-
-    local _host=$(echo $conn_info | sed -e "s/.*host=\([^ ]*\).*/\1/")
-    local _port=$(echo $conn_info | sed -e "s/.*port=\([^ ]*\).*/\1/")
-    local _user=$(echo $conn_info | sed -e "s/.*user=\([^ ]*\).*/\1/")
+    local _host=$(echo $_conn_info | sed -e "s/.*host=\([^ ]*\).*/\1/")
+    local _port=$(echo $_conn_info | sed -e "s/.*port=\([^ ]*\).*/\1/")
+    local _user=$(echo $_conn_info | sed -e "s/.*user=\([^ ]*\).*/\1/")
 
     _host=${_host//\'/}
 
     if [ -z "$_{host}" ]; then
-        error "No host defined in ${conf_file}"
+        error "No host defined in ${_postgresql_auto_conf}"
     fi
 
     _port=${_port//\'/}
 
     if [ -z "$_{port}" ]; then
-        error "No port defined in ${conf_file}"
+        error "No port defined in ${_postgresql_auto_conf}"
     fi
 
     _user=${_user//\'/}
 
     if [ -z "$_{user}" ]; then
-        error "No user defined in ${conf_file}"
+        error "No user defined in ${_postgresql_auto_conf}"
     fi
 
     message "Performing pg_basebackup with host=${_host}, port=${_port}, user=${_user}"
 
-    pg_basebackup --pgdata="${_target_directory}" \
-        --wal-method=stream \
-        --progress \
-        --verbose \
-        --write-recovery-conf \
-        --host="${_host}" \
-        --username="${_user}" \
-        --port="${_port}"
+    _options=(
+        "--pgdata=${TARGET_PGDATA}"
+        "--wal-method=stream"
+        "--progress"
+        "--verbose"
+        "--write-recovery-conf"
+        "--host=${_host}"
+        "--username=${_user}"
+        "--port=${_port}"
+    )
+
+    su postgres -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_basebackup ${_options}"
 }
 
 zparseopts -F -D -E -K -a _opts -A _opts_args \
@@ -113,6 +114,7 @@ fi
 message "Upgrading PostgreSQL from ${SOURCE_VERSION} to ${TARGET_VERSION}"
 
 export POSTGRES_USER=postgres
+export TEMPLATE_DATABASE=template1
 
 export PGPREFIX_SOURCE=/tmp/postgresql${SOURCE_VERSION}-server
 export PGPREFIX_TARGET=/tmp/postgresql${TARGET_VERSION}-server
@@ -174,7 +176,7 @@ message "Fetching remaining packages"
 pkg upgrade --yes --fetch-only
 pkg upgrade --yes --fetch-only --glob postgresql\*
 
-if ! ${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" template1 > /dev/null 2>&1; then
+if ! ${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" ${TEMPLATE_DATABASE} > /dev/null 2>&1; then
     su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}"
 fi
 
@@ -187,9 +189,9 @@ env ${TARGET_BINDIR}/pg_dumpall -U ${POSTGRES_USER} > ~/dump.sql
 
 _initdb_flags=()
 
-_lc_collate=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" template1)
-_lc_ctype=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_ctype" template1)
-_encoding=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW server_encoding" template1)
+_lc_collate=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" ${TEMPLATE_DATABASE})
+_lc_ctype=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_ctype" ${TEMPLATE_DATABASE})
+_encoding=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW server_encoding" ${TEMPLATE_DATABASE})
 
 _lc_collate=${_lc_collate// /}
 _lc_ctype=${_lc_ctype// /}
