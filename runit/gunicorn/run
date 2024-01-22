@@ -40,7 +40,11 @@ cd ${GUNICORN_PATH}
 
 . ${GUNICORN_VENV}/bin/activate
 
-exec env -S "${ENVRC}" chpst -u ${GUNICORN_USER} ${CHPST_ARGS} ${GUNICORN_PYTHON} ${GUNICORN_PYTHON_FLAGS} -m gunicorn ${GUNICORN_ARGS} ${GUNICORN_APP}
+if [ "$(id -u)" = "0" ]; then
+    CHPST_COMMAND="chpst -u ${GUNICORN_USER} ${CHPST_ARGS}"
+fi
+
+exec env -S "${ENVRC}" ${CHPST_COMMAND:-} ${GUNICORN_PYTHON} ${GUNICORN_PYTHON_FLAGS} -m gunicorn ${GUNICORN_ARGS} ${GUNICORN_APP}
 
 # For logs: "--log-level debug"
 # For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"

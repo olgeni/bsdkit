@@ -40,4 +40,8 @@ cd ${DAPHNE_PATH}
 
 . ${DAPHNE_VENV}/bin/activate
 
-exec env -S "${ENVRC}" chpst -u ${DAPHNE_USER} ${CHPST_ARGS} ${DAPHNE_PYTHON} ${DAPHNE_PYTHON_FLAGS} -m daphne ${DAPHNE_ARGS} ${DAPHNE_APP}
+if [ "$(id -u)" = "0" ]; then
+    CHPST_COMMAND="chpst -u ${DAPHNE_USER} ${CHPST_ARGS}"
+fi
+
+exec env -S "${ENVRC}" ${CHPST_COMMAND} ${DAPHNE_PYTHON} ${DAPHNE_PYTHON_FLAGS} -m daphne ${DAPHNE_ARGS} ${DAPHNE_APP}
