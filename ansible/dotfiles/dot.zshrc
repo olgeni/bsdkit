@@ -158,6 +158,15 @@ case $(uname) in
     *) ;;
 esac
 
+case $(uname) in
+    FreeBSD)
+        if [ -r /var/db/rabbitmq/.erlang.cookie ]; then
+            export RABBITMQ_ERLANG_COOKIE=$(cat /var/db/rabbitmq/.erlang.cookie)
+        fi
+        ;;
+    *) ;;
+esac
+
 export LANG=en_US.UTF-8
 export CLICOLOR=yes
 export GPG_TTY=$(tty)
