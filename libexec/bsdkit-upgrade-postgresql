@@ -46,6 +46,12 @@ postgresql-has-standby-signal() {
     [ -f "${_directory}/standby.signal" ]
 }
 
+postgresql-is-main() {
+    local _directory="$1"
+
+    ! postgresql-has-standby-signal "${_directory}"
+}
+
 perform-pg-basebackup() {
     if postgresql-is-running; then
         error "PostgreSQL is running. Please stop it first."
@@ -89,7 +95,118 @@ perform-pg-basebackup() {
         "--port=${_port}"
     )
 
-    su postgres -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_basebackup ${_options}"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_basebackup ${_options}"
+}
+
+stop-old-cluster() {
+    message "Stopping old cluster"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl stop -D ${SOURCE_PGDATA}" || :
+}
+
+stop-new-cluster() {
+    message "Stopping new cluster"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_ctl stop -D ${TARGET_PGDATA}" || :
+}
+
+start-old-cluster() {
+    message "Starting old cluster"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}" || :
+}
+
+start-new-cluster() {
+    message "Starting new cluster"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_ctl start -D ${TARGET_PGDATA}" || :
+}
+
+perform-pg-upgrade() {
+    # to restart the old cluster:
+    # su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl stop -D ${SOURCE_PGDATA}" || :
+    # su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}" || :
+
+    _initdb_flags=()
+
+    _lc_collate=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" ${TEMPLATE_DATABASE})
+    _lc_ctype=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_ctype" ${TEMPLATE_DATABASE})
+    _encoding=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW server_encoding" ${TEMPLATE_DATABASE})
+
+    _lc_collate=${_lc_collate// /}
+    _lc_ctype=${_lc_ctype// /}
+    _encoding=${_encoding// /}
+
+    _initdb_flags+=("--lc-collate=${_lc_collate}")
+    _initdb_flags+=("--lc-ctype=${_lc_ctype}")
+    _initdb_flags+=("--encoding=${_encoding}")
+
+    message "Initializing new database"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/initdb ${_initdb_flags} --pgdata ${TARGET_PGDATA} --username ${POSTGRES_USER}"
+
+    if [ -f ${SOURCE_PGDATA}/pg_hba.conf ]; then
+        message "Copying pg_hba.conf"
+        cp -p -v ${SOURCE_PGDATA}/pg_hba.conf ${TARGET_PGDATA}/pg_hba.conf
+    fi
+
+    if [ -f ${SOURCE_PGDATA}/postgresql.auto.conf ]; then
+        message "Copying postgresql.auto.conf"
+        cp -p -v ${SOURCE_PGDATA}/postgresql.auto.conf ${TARGET_PGDATA}/postgresql.auto.conf
+    fi
+
+    _options=(
+        "--old-bindir=${SOURCE_BINDIR}"
+        "--new-bindir=${TARGET_BINDIR}"
+        "--old-datadir=${SOURCE_PGDATA}"
+        "--new-datadir=${TARGET_PGDATA}"
+        "--link"
+        "--username=${POSTGRES_USER}"
+    )
+
+    message "Checking cluster compatibility"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options} --check"
+
+    message "Upgrading cluster"
+    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options}"
+
+    rm -f -v /tmp/.s.PGSQL.*(N)
+
+    message "Starting new cluster"
+    start-new-cluster
+
+    if [ -f /var/db/postgres/update_extensions.sql ]; then
+        su ${POSTGRES_USER} -c "cd ~postgres && ${TARGET_BINDIR}/psql < ~postgres/update_extensions.sql"
+    fi
+
+    message "Running vacuumdb"
+    su ${POSTGRES_USER} -c "cd ~postgres && ${TARGET_BINDIR}/vacuumdb --all --analyze-in-stages"
+
+    message "Stopping new cluster"
+    stop-new-cluster
+
+    message "Removing helper files"
+    rm -f ~postgres/analyze_new_cluster.sh
+    rm -f ~postgres/delete_old_cluster.sh
+    rm -f ~postgres/update_extensions.sql
+
+    rm -f ~postgres/pg_upgrade_internal.log
+    rm -f ~postgres/pg_upgrade_server.log
+    rm -f ~postgres/pg_upgrade_utility.log
+}
+
+perform-package-upgrade() {
+    _is_source_contrib_installed=$(pkg query -g %n "postgresql${SOURCE_VERSION}-contrib" || :)
+
+    for _package in $(pkg query -g %n "postgresql${SOURCE_VERSION}-*"); do
+        message "Changing name of ${_package} to postgresql${TARGET_VERSION}${_package#postgresql${SOURCE_VERSION}}"
+        pkg set -y --change-name ${_package}:postgresql${TARGET_VERSION}${_package#postgresql${SOURCE_VERSION}}
+    done
+
+    message "Upgrading packages"
+    pkg upgrade --yes --glob postgresql\*
+
+    _is_target_contrib_installed=$(pkg query -g %n "postgresql${TARGET_VERSION}-contrib" || :)
+
+    if [ -n "${_is_source_contrib_installed}" ] && [ -z "${_is_target_contrib_installed}" ]; then
+        message "Installing contrib"
+        pkg install --yes postgresql${TARGET_VERSION}-contrib
+    fi
 }
 
 zparseopts -F -D -E -K -a _opts -A _opts_args \
@@ -176,99 +293,20 @@ message "Fetching remaining packages"
 pkg upgrade --yes --fetch-only
 pkg upgrade --yes --fetch-only --glob postgresql\*
 
-if ! ${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" ${TEMPLATE_DATABASE} > /dev/null 2>&1; then
-    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}"
+# ===
+
+if postgresql-is-main ${SOURCE_PGDATA}; then
+    message "Source cluster is in primary mode"
+    perform-pg-upgrade
+else
+    message "Source cluster is in standby mode"
+    perform-pg-basebackup
 fi
 
-message "Dumping database to ~/dump.sql"
-env ${TARGET_BINDIR}/pg_dumpall -U ${POSTGRES_USER} > ~/dump.sql
-
-# to restart the old cluster:
-# su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl stop -D ${SOURCE_PGDATA}" || :
-# su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}" || :
-
-_initdb_flags=()
-
-_lc_collate=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" ${TEMPLATE_DATABASE})
-_lc_ctype=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_ctype" ${TEMPLATE_DATABASE})
-_encoding=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW server_encoding" ${TEMPLATE_DATABASE})
-
-_lc_collate=${_lc_collate// /}
-_lc_ctype=${_lc_ctype// /}
-_encoding=${_encoding// /}
-
-_initdb_flags+=("--lc-collate=${_lc_collate}")
-_initdb_flags+=("--lc-ctype=${_lc_ctype}")
-_initdb_flags+=("--encoding=${_encoding}")
-
-message "Initializing new database"
-su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/initdb ${_initdb_flags} --pgdata ${TARGET_PGDATA} --username ${POSTGRES_USER}"
-
-if [ -f ${SOURCE_PGDATA}/pg_hba.conf ]; then
-    message "Copying pg_hba.conf"
-    cp -p -v ${SOURCE_PGDATA}/pg_hba.conf ${TARGET_PGDATA}/pg_hba.conf
-fi
-
-if [ -f ${SOURCE_PGDATA}/postgresql.auto.conf ]; then
-    message "Copying postgresql.auto.conf"
-    cp -p -v ${SOURCE_PGDATA}/postgresql.auto.conf ${TARGET_PGDATA}/postgresql.auto.conf
-fi
-
-_options=(
-    "--old-bindir=${SOURCE_BINDIR}"
-    "--new-bindir=${TARGET_BINDIR}"
-    "--old-datadir=${SOURCE_PGDATA}"
-    "--new-datadir=${TARGET_PGDATA}"
-    "--link"
-    "--username=${POSTGRES_USER}"
-)
-
-message "Checking cluster compatibility"
-su postgres -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options} --check"
-
-message "Stopping database"
-su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl stop -D ${SOURCE_PGDATA}" || :
-
-message "Upgrading cluster"
-su postgres -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options}"
-
-rm -f -v /tmp/.s.PGSQL.*(N)
-
-_is_source_contrib_installed=$(pkg query -g %n "postgresql${SOURCE_VERSION}-contrib" || :)
-
-for _package in $(pkg query -g %n "postgresql${SOURCE_VERSION}-*"); do
-    message "Changing name of ${_package} to postgresql${TARGET_VERSION}${_package#postgresql${SOURCE_VERSION}}"
-    pkg set -y --change-name ${_package}:postgresql${TARGET_VERSION}${_package#postgresql${SOURCE_VERSION}}
-done
-
-message "Upgrading packages"
-pkg upgrade --yes --glob postgresql\*
-
-_is_target_contrib_installed=$(pkg query -g %n "postgresql${TARGET_VERSION}-contrib" || :)
-
-if [ -n "${_is_source_contrib_installed}" ] && [ -z "${_is_target_contrib_installed}" ]; then
-    message "Installing contrib"
-    pkg install --yes postgresql${TARGET_VERSION}-contrib
-fi
+perform-package-upgrade
 
 message "Starting database"
 service postgresql onestart
-
-if [ -f /var/db/postgres/update_extensions.sql ]; then
-    su postgres -c "cd ~postgres && psql < /var/db/postgres/update_extensions.sql"
-fi
-
-message "Running vacuumdb"
-su postgres -c "cd ~postgres && vacuumdb --all --analyze-in-stages"
-
-message "Removing helper files"
-rm -f ~postgres/analyze_new_cluster.sh
-rm -f ~postgres/delete_old_cluster.sh
-rm -f ~postgres/update_extensions.sql
-
-rm -f ~postgres/pg_upgrade_internal.log
-rm -f ~postgres/pg_upgrade_server.log
-rm -f ~postgres/pg_upgrade_utility.log
 
 message "Removing temporary files"
 rm -r -f ${PGPREFIX_SOURCE}
