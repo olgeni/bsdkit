@@ -149,7 +149,7 @@ remove-nouarch-files() {
     rm -f ${_directory_list}
 }
 
-update-boot-loader() {
+check-partition-health() {
     _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
 
     for _disk in ${(s/ /)_disks}; do
@@ -163,6 +163,10 @@ update-boot-loader() {
             error "GPT on disk ${_disk} is marked as CORRUPT"
         fi
     done
+}
+
+update-boot-loader() {
+    _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
 
     _efi_mount_point="${DESTDIR}/boot/efi"
 
@@ -437,6 +441,12 @@ else
             umount -f /proc
         fi
     fi
+fi
+
+if [ -z "${DESTDIR}" ]; then
+    check-partition-health
+elif [ "${DESTDIR}" = "${BOOTENV_MOUNT}" ] && is-yes ${BOOTENV_ENABLE}; then
+    check-partition-health
 fi
 
 _srcdir=/usr/src
