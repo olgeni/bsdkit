@@ -351,6 +351,9 @@ cd ${_distdir}
 message "Fetching MANIFEST file"
 fetch -q ${_release}/MANIFEST || error "Failed to fetch MANIFEST file"
 
+message "Fetching OLDFILES file"
+fetch -q ${_release}/OLDFILES || error "Failed to fetch OLDFILES file"
+
 message "Fetching RELEASE file"
 fetch -q ${_release}/RELEASE || error "Failed to fetch RELEASE file"
 
