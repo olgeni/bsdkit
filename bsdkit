@@ -3250,6 +3250,10 @@ upgrade-os() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-os "$@"
 }
 
+upgrade-etc() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-etc "$@"
+}
+
 upgrade-postgresql() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-postgresql "$@"
 }

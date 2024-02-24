@@ -1,0 +1,81 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/colors.inc
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc
+source ${SCRIPT_PATH}/../lib/is-yes.inc
+source ${SCRIPT_PATH}/../lib/yaml.inc
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+    exit 1
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+# ===========================================================================
+
+: ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
+: ${BSDKIT_VERSION:=""}
+: ${BSDKIT_ARCH:="amd64"}
+: ${DESTDIR:=""}
+: ${BOOTENV_ENABLE:="default"}
+: ${BOOTENV_NAME:="$(date +%F.%H%M)"}
+: ${BOOTENV_MOUNT:="/mnt"}
+: ${FETCH_ONLY:="no"}
+: ${UPGRADE_PACKAGES:="no"}
+: ${REBUILD_PORTS:="no"}
+: ${PV_UPDATE_DELAY:="0.1"}
+
+if [ ! -t 0 ]; then
+    error "This script must be run from a terminal."
+fi
+
+OPTIND=1
+while getopts "a:r:v:" OPT; do
+    case ${OPT} in
+        a)
+            BSDKIT_ARCH=${OPTARG}
+            ;;
+        r)
+            BSDKIT_ROOT_URL=${OPTARG}
+            ;;
+        v)
+            BSDKIT_VERSION=${OPTARG}
+            ;;
+        *)
+            exit 64 # EX_USAGE
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ -z "${BSDKIT_VERSION}" ]; then
+    BSDKIT_VERSION="$(${BSDKIT_PATH}/bsdkit get-os-version)"
+    message "Using current version: ${BSDKIT_VERSION}"
+fi
+
+_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
+
+_distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
+
+mkdir -p ${_distdir}
+
+cd ${_distdir}
+
+message "Fetching etcupdate.tar.bz2 file"
+fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.bz2 file"
+
+etcupdate resolve
+
+if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
+    message "Running etcupdate (tar)"
+    etcupdate -F -I '*.cf' -t ${_distdir}/etcupdate.tar.bz2
+fi
+
+message "Upgrade complete."
