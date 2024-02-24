@@ -35,6 +35,7 @@
       - ftp/curl
       - ftp/lftp
       - misc/buffer
+      - misc/delay
       - misc/gnu-watch
       - misc/mbuffer
       - misc/mc
