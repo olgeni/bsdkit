@@ -22,14 +22,6 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:=""}
 : ${BSDKIT_ARCH:="amd64"}
-: ${DESTDIR:=""}
-: ${BOOTENV_ENABLE:="default"}
-: ${BOOTENV_NAME:="$(date +%F.%H%M)"}
-: ${BOOTENV_MOUNT:="/mnt"}
-: ${FETCH_ONLY:="no"}
-: ${UPGRADE_PACKAGES:="no"}
-: ${REBUILD_PORTS:="no"}
-: ${PV_UPDATE_DELAY:="0.1"}
 
 if [ ! -t 0 ]; then
     error "This script must be run from a terminal."
