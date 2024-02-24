@@ -1,0 +1,80 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/colors.inc
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc
+source ${SCRIPT_PATH}/../lib/is-yes.inc
+source ${SCRIPT_PATH}/../lib/yaml.inc
+
+# if [ "$(uname -s)" != "FreeBSD" ]; then
+#     error "Must be executed on FreeBSD."
+#     exit 1
+# fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+# ===========================================================================
+
+SERVER1=""
+SERVER2=""
+
+# Usage information
+function usage {
+    echo "Usage: $0 [-h] [-1 server1] [-2 server2]"
+    echo "  -h          Display this help message."
+    echo "  -1 server1  Specify the first server"
+    echo "  -2 server2  Specify the second server"
+}
+
+# Parse command line options
+while getopts ":h1:2:" opt; do
+    case ${opt} in
+        h )
+            usage
+            exit 0
+            ;;
+        1 )
+            SERVER1=$OPTARG
+            ;;
+        2 )
+            SERVER2=$OPTARG
+            ;;
+        \? )
+            echo "Invalid option: $OPTARG" 1>&2
+            usage
+            exit 1
+            ;;
+        : )
+            echo "Invalid option: $OPTARG requires an argument" 1>&2
+            usage
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND -1))
+
+# Check if both servers are specified
+if [ -z "$SERVER1" ] || [ -z "$SERVER2" ]; then
+    echo "Error: both servers must be specified." >&2
+    usage
+    exit 1
+fi
+
+# Temporary files for storing package lists
+TMPFILE1=$(mktemp /tmp/pkglist1.XXXXXX)
+TMPFILE2=$(mktemp /tmp/pkglist2.XXXXXX)
+
+# Ensure temporary files are deleted on exit
+trap 'rm -f "$TMPFILE1" "$TMPFILE2"' EXIT
+
+# Fetch and sort package lists from both servers
+ssh "$SERVER1" 'pkg info -qoa' | sort > "$TMPFILE1"
+ssh "$SERVER2" 'pkg info -qoa' | sort > "$TMPFILE2"
+
+# Compare the package lists
+echo "Comparing installed packages between $SERVER1 and $SERVER2:"
+diff "$TMPFILE1" "$TMPFILE2"
