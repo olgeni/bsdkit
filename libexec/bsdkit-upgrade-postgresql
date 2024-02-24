@@ -290,7 +290,6 @@ tar -x -f /tmp/All/postgresql${TARGET_VERSION}-contrib* -C ${PGPREFIX_TARGET} > 
 tar -x -f /tmp/All/postgresql${TARGET_VERSION}-client* -C ${PGPREFIX_TARGET} > /dev/null 2>&1
 
 message "Fetching remaining packages"
-pkg upgrade --yes --fetch-only
 pkg upgrade --yes --fetch-only --glob postgresql\*
 
 # ===
