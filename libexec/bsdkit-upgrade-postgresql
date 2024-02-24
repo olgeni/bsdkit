@@ -119,6 +119,12 @@ start-new-cluster() {
 }
 
 perform-pg-upgrade() {
+    if postgresql-is-running; then
+        error "PostgreSQL is running. Please stop it first."
+    fi
+
+    start-old-cluster
+
     # to restart the old cluster:
     # su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl stop -D ${SOURCE_PGDATA}" || :
     # su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl start -D ${SOURCE_PGDATA}" || :
@@ -128,6 +134,8 @@ perform-pg-upgrade() {
     _lc_collate=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" ${TEMPLATE_DATABASE})
     _lc_ctype=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_ctype" ${TEMPLATE_DATABASE})
     _encoding=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW server_encoding" ${TEMPLATE_DATABASE})
+
+    stop-old-cluster
 
     _lc_collate=${_lc_collate// /}
     _lc_ctype=${_lc_ctype// /}
