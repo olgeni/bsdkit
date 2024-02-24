@@ -137,6 +137,12 @@ build-release() {
 
     etcupdate build -s ${OS_SRCDIR} ${OS_RELDIR}/ftp/etcupdate.tar.bz2
 
+    echo -n > ${OS_RELDIR}/ftp/OLDFILES
+
+    env -i make -s -C ${OS_SRCDIR} list-old-files | sed 's/^/old-files: /' >> ${OS_RELDIR}/ftp/OLDFILES
+    env -i make -s -C ${OS_SRCDIR} list-old-dirs | sed 's/^/old-dirs: /' >> ${OS_RELDIR}/ftp/OLDFILES
+    env -i make -s -C ${OS_SRCDIR} list-old-libs | sed 's/^/old-libs: /' >> ${OS_RELDIR}/ftp/OLDFILES
+
     env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         clean
