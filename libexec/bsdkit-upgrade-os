@@ -22,6 +22,7 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:=""}
 : ${BSDKIT_ARCH:="amd64"}
+
 : ${DESTDIR:=""}
 : ${BOOTENV_ENABLE:="default"}
 : ${BOOTENV_NAME:="$(date +%F.%H%M)"}
