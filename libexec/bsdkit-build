@@ -19,7 +19,7 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 
 # ===========================================================================
 
-DEFAULT_VERSION=13
+DEFAULT_VERSION=14
 DEFAULT_ARCH=amd64
 
 unset POSIXLY_CORRECT
