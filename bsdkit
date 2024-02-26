@@ -3255,6 +3255,10 @@ upgrade-etc() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-etc "$@"
 }
 
+upgrade-loader() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-loader "$@"
+}
+
 upgrade-postgresql() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-postgresql "$@"
 }

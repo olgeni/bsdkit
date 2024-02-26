@@ -1,0 +1,130 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/colors.inc
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc
+source ${SCRIPT_PATH}/../lib/is-yes.inc
+source ${SCRIPT_PATH}/../lib/yaml.inc
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+    exit 1
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+# ===========================================================================
+
+: ${DESTDIR:=""}
+
+OPTIND=1
+while getopts "a:b:d:eEFn:p:r:v:" OPT; do
+    case ${OPT} in
+        d)
+            DESTDIR=${OPTARG%/}
+            ;;
+        *)
+            exit 64 # EX_USAGE
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ -d ${DESTDIR}/.base ]; then
+    error "Destination directory is thin jail"
+fi
+
+check-partition() {
+    _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
+
+    for _disk in ${(s/ /)_disks}; do
+        case "${_disk}" in
+            cd[0-9]*)
+                continue
+                ;;
+        esac
+
+        if echo "$(gpart show "${_disk}" 2>/dev/null)" | grep -qF '[CORRUPT]'; then
+            error "GPT on disk ${_disk} is marked as CORRUPT"
+        fi
+    done
+}
+
+update-loader() {
+    _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
+
+    _efi_mount_point="${DESTDIR}/boot/efi"
+
+    mkdir -p "${_efi_mount_point}"
+
+    for _disk in ${(s/ /)_disks}; do
+        case "${_disk}" in
+            cd[0-9]*)
+                continue
+                ;;
+        esac
+
+        _efi_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w efi | awk '{ print $3 }' || :)
+        _freebsd_boot_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-boot | awk '{ print $3 }' || :)
+        _freebsd_zfs_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-zfs | awk '{ print $3 }' || :)
+
+        if [ -n "${_freebsd_boot_partitions}" ]; then
+            for _partition in ${(s/ /)_freebsd_boot_partitions}; do
+                message "Checking freebsd-boot partition ${_partition}"
+
+                local _index=$(echo ${_partition} | sed -E 's/.*p([0-9]+)$/\1/')
+
+                if [ -z "${_index}" ]; then
+                    error "Failed to determine partition index (${_partition})"
+                fi
+
+                if [ -n "${_freebsd_zfs_partitions}" ]; then
+                    message "Upgrading boot loader on ${_partition} (gptzfsboot)"
+                    gpart bootcode -b "${DESTDIR}/boot/pmbr" -p "${DESTDIR}/boot/gptzfsboot" -i ${_index} "${_disk}"
+                else
+                    message "Upgrading boot loader on ${_partition} (gptboot)"
+                    gpart bootcode -b "${DESTDIR}/boot/pmbr" -p "${DESTDIR}/boot/gptboot" -i ${_index} "${_disk}"
+                fi
+            done
+        fi
+
+        if [ -n "${_efi_partitions}" ]; then
+            for _partition in ${(s/ /)_efi_partitions}; do
+                message "Checking EFI partition ${_partition}"
+
+                umount -f "/dev/${_partition}" >/dev/null 2>&1 || :
+
+                if ! mount -t msdosfs "/dev/${_partition}" "${_efi_mount_point}" >/dev/null 2>&1; then
+                    warning "Failed to mount EFI partition ${_partition}"
+                    continue
+                fi
+
+                if [ -d "${_efi_mount_point}/efi/boot" ]; then
+                    message "Upgrading EFI boot loader on ${_partition}"
+                    install -v "${DESTDIR}/boot/loader.efi" "${_efi_mount_point}/efi/boot/bootx64.efi.new"
+                    mv -v "${_efi_mount_point}/efi/boot/bootx64.efi.new" "${_efi_mount_point}/efi/boot/bootx64.efi"
+
+                    if [ ! -f "${_efi_mount_point}/efi/boot/startup.nsh" ]; then
+                        echo "BOOTx64.efi" > "${_efi_mount_point}/efi/boot/startup.nsh"
+                    fi
+                else
+                    warning "EFI directory not found for ${_partition}"
+                fi
+
+                if ! umount "${_efi_mount_point}" >/dev/null 2>&1; then
+                    error "Failed to unmount EFI partition ${_partition}"
+                fi
+            done
+        fi
+    done
+}
+
+check-partition
+update-loader
+
+message "Upgrade complete."
