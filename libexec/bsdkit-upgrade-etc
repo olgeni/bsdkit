@@ -23,15 +23,20 @@ BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 : ${BSDKIT_VERSION:=""}
 : ${BSDKIT_ARCH:="amd64"}
 
+: ${DESTDIR:=""}
+
 if [ ! -t 0 ]; then
     error "This script must be run from a terminal."
 fi
 
 OPTIND=1
-while getopts "a:r:v:" OPT; do
+while getopts "a:d:r:v:" OPT; do
     case ${OPT} in
         a)
             BSDKIT_ARCH=${OPTARG}
+            ;;
+        d)
+            DESTDIR=${OPTARG%/}
             ;;
         r)
             BSDKIT_ROOT_URL=${OPTARG}
@@ -63,11 +68,11 @@ cd ${_distdir}
 message "Fetching etcupdate.tar.bz2 file"
 fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.bz2 file"
 
-etcupdate resolve
+etcupdate resolve -D ${DESTDIR}/
 
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
     message "Running etcupdate (tar)"
-    etcupdate -F -I '*.cf' -t ${_distdir}/etcupdate.tar.bz2
+    etcupdate -F -I '*.cf' -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
 fi
 
 message "Upgrade complete."
