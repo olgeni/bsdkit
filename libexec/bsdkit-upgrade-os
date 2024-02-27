@@ -368,10 +368,6 @@ if [ -f ${DESTDIR}/usr/src/Makefile ]; then
     _srcdir=${DESTDIR}/usr/src
 fi
 
-if [ -t 0 ]; then
-    etcupdate resolve -D ${DESTDIR}/
-fi
-
 export PATH=/rescue:${PATH}
 
 if [ ! -d ${DESTDIR}/etc/rc.d ]; then
@@ -540,6 +536,10 @@ if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
 elif [ -f ${_srcdir}/Makefile ]; then
     message "Running etcupdate (src)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -s ${_srcdir}
+fi
+
+if [ -t 0 ]; then
+    etcupdate resolve -D ${DESTDIR}/
 fi
 
 if file-on-zfs ${DESTDIR:-/}; then
