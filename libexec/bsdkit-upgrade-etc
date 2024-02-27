@@ -68,11 +68,11 @@ cd ${_distdir}
 message "Fetching etcupdate.tar.bz2 file"
 fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.bz2 file"
 
-etcupdate resolve -D ${DESTDIR}/
-
 if [ -f ${_distdir}/etcupdate.tar.bz2 ]; then
     message "Running etcupdate (tar)"
     etcupdate -F -I '*.cf' -D ${DESTDIR}/ -t ${_distdir}/etcupdate.tar.bz2
 fi
+
+etcupdate resolve -D ${DESTDIR}/
 
 message "Upgrade complete."
