@@ -1,12 +1,10 @@
 ---
-- name: Copy /usr/share/examples/jails/jib to /usr/local/sbin/
-  copy:
-    src: /usr/share/examples/jails/jib
-    dest: /usr/local/sbin/jib
-    mode: 0755
+- name: Remove /usr/local/sbin/jib
+  file:
+    path: /usr/local/sbin/jib
+    state: absent
 
-- name: Copy /usr/share/examples/jails/jng to /usr/local/sbin/
-  copy:
-    src: /usr/share/examples/jails/jng
-    dest: /usr/local/sbin/jng
-    mode: 0755
+- name: Remove /usr/local/sbin/jng
+  file:
+    path: /usr/local/sbin/jng
+    state: absent
