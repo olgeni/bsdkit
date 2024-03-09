@@ -1,0 +1,207 @@
+---
+- name: Set bsdkit_facts_present
+  set_fact:
+    bsdkit_facts_present: true
+
+- name: Install bsdkit_facts packages
+  community.general.pkgng:
+    name:
+      - net/py-netaddr
+    state: present
+
+- name: Register kenv smbios.system.product
+  command:
+    cmd: kenv smbios.system.product
+  register: kenv_smbios_system_product
+  changed_when: false
+  failed_when: false
+
+- name: Display kenv smbios.system.product
+  debug:
+    msg: "smbios.system.product: {{ kenv_smbios_system_product.stdout }}"
+
+- name: Register kenv smbios.bios.vendor
+  command:
+    cmd: kenv smbios.bios.vendor
+  register: kenv_smbios_bios_vendor
+  changed_when: false
+  failed_when: false
+
+- name: Display kenv smbios.bios.vendor
+  debug:
+    msg: "kenv_smbios_bios_vendor.stdout: {{ kenv_smbios_bios_vendor.stdout }}"
+
+- name: Register freebsd_major
+  shell:
+    cmd: |
+      set -o pipefail
+      echo "{{ ansible_distribution_release }}" | sed -E 's/([0-9]+).*/\1/;'
+  register: freebsd_major
+  changed_when: false
+
+- name: Register security.jail.jailed
+  shell:
+    cmd: |
+      set -o pipefail
+      sysctl -n security.jail.jailed
+  changed_when: false
+  register: sysctl_security_jail_jailed
+
+- name: Set security_jail_jailed
+  set_fact:
+    security_jail_jailed: "{{ sysctl_security_jail_jailed.stdout == '1' }}"
+
+- name: Set bsdkit defaults
+  set_fact:
+    default_bsdkit_root_url: https://hub.olgeni.com/FreeBSD
+    default_bsdkit_version: "13.2"
+    default_bsdkit_arch: amd64
+    default_bsdkit_tree: default
+    default_bsdkit_pkgset: nox11
+    default_bsdkit_chroot: false
+
+- name: Set bsdkit variables
+  set_fact:
+    bsdkit_interface: "{{ lookup('env', 'BSDKIT_INTERFACE') }}"
+    bsdkit_ifconfig: "{{ lookup('env', 'BSDKIT_IFCONFIG') }}"
+    bsdkit_defaultrouter: "{{ lookup('env', 'BSDKIT_DEFAULTROUTER') }}"
+    bsdkit_ssh_public_key: "{{ lookup('env', 'BSDKIT_SSH_PUBLIC_KEY') }}"
+    bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
+    bsdkit_root_url: "{{ lookup('env', 'BSDKIT_ROOT_URL') | default(default_bsdkit_root_url, True) }}"
+    bsdkit_version: "{{ lookup('env', 'BSDKIT_VERSION') | default(default_bsdkit_version, True) }}"
+    bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
+    bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
+    bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
+    bsdkit_chroot: "{{ (lookup('env', 'BSDKIT_CHROOT') | default(default_bsdkit_chroot, False)) | bool }}"
+
+- name: Set is_host_install
+  set_fact:
+    is_host_install: "{{ not security_jail_jailed }}"
+
+- name: Set is_jail_install
+  set_fact:
+    is_jail_install: "{{ security_jail_jailed }}"
+
+- name: Set is_chroot_install
+  set_fact:
+    is_chroot_install: "{{ bsdkit_chroot }}"
+
+- name: Register uname -K
+  command:
+    cmd: |
+      uname -K
+  register: uname_k_output
+  changed_when: false
+
+- name: Set uname_k
+  set_fact:
+    uname_k: "{{ uname_k_output.stdout }}"
+
+- name: Set zfs_compression (default)
+  set_fact:
+    zfs_compression: lz4
+
+- name: Set zfs_compression (zstd)
+  when: uname_k | int > 1300000
+  set_fact:
+    zfs_compression: zstd
+
+- name: Set zfs_available (not is_chroot_install)
+  when: not is_chroot_install
+  block:
+    - name: Check ZFS boot pool
+      shell:
+        cmd: |
+          set -o pipefail
+          zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
+      register: zpool_get_bootfs
+      changed_when: false
+      failed_when: false
+
+    - name: Set zfs_available (computed)
+      set_fact:
+        zfs_available: "{{ ((zpool_get_bootfs.rc == 0) and (zpool_get_bootfs.stdout | length > 0)) | bool }}"
+
+- name: Set zfs_available (is_chroot_install)
+  when: is_chroot_install
+  block:
+    - name: Set zfs_available to false
+      set_fact:
+        zfs_available: false
+
+- name: Set boot_pool
+  when: zfs_available
+  set_fact:
+    boot_pool: "{{ zpool_get_bootfs.stdout }}"
+
+- name: Set platform_is_digitalocean
+  set_fact:
+    platform_is_digitalocean: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'Droplet') }}"
+
+- name: Set platform_is_cloudsigma
+  set_fact:
+    platform_is_cloudsigma: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'CloudSigma') }}"
+
+- name: Set platform_is_virtualbox
+  set_fact:
+    platform_is_virtualbox: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'VirtualBox') }}"
+
+- name: Set platform_is_vmware
+  set_fact:
+    platform_is_vmware: "{{ (is_host_install | bool) and (kenv_smbios_system_product.stdout == 'VMware Virtual Platform') }}"
+
+- name: Set platform_is_aws
+  set_fact:
+    platform_is_aws: "{{ (is_host_install | bool) and (kenv_smbios_bios_vendor.stdout == 'Amazon EC2') }}"
+
+- name: Set platform_is_cloud
+  set_fact:
+    platform_is_cloud: "{{ (platform_is_digitalocean | bool) or (platform_is_cloudsigma | bool) or (platform_is_virtualbox | bool) or (platform_is_vmware | bool) or (platform_is_aws | bool) }}"
+
+- name: Retrieve gateway address
+  set_fact:
+    gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"
+    public_interface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
+  when: "'gateway' in hostvars[inventory_hostname]['ansible_default_ipv4']"
+
+- name: Display gateway_address
+  debug:
+    var: gateway_address
+  when: gateway_address is defined
+
+- name: Display public_interface
+  debug:
+    var: public_interface
+  when: public_interface is defined
+
+- name: Retrieve private interface (#1)
+  shell:
+    cmd: |
+      set -o pipefail
+      ifconfig -u -l ether | rs 0 1 | grep -v {{ public_interface }} | head -n 1
+  register: ifconfig_ether_output
+  changed_when: false
+  failed_when: false
+  when: public_interface is defined
+
+- name: Retrieve private interface (#2)
+  set_fact:
+    private_interface: "{{ ifconfig_ether_output.stdout }}"
+  when: public_interface is defined and ifconfig_ether_output.stdout | length > 0
+
+- name: Display private_interface
+  debug:
+    var: private_interface
+  when: private_interface is defined
+
+- name: Include tasks from network_public.yml
+  include_tasks: network_public.yml
+  when: public_interface is defined
+
+- name: Include tasks from network_private.yml
+  include_tasks: network_private.yml
+  when: private_interface is defined
+
+- name: Include tasks from network_internet.yml
+  include_tasks: network_internet.yml
+  when: public_interface is defined
