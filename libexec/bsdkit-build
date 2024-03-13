@@ -17,6 +17,10 @@ fi
 
 BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 
+if [ -x /usr/local/bin/vim ]; then
+    export EDITOR=/usr/local/bin/vim
+fi
+
 # ===========================================================================
 
 DEFAULT_VERSION=14

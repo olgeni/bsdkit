@@ -17,6 +17,10 @@ source ${SCRIPT_PATH}/../lib/yaml.inc
 
 BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
 
+if [ -x /usr/local/bin/vim ]; then
+    export EDITOR=/usr/local/bin/vim
+fi
+
 # ===========================================================================
 
 SERVER1=""
