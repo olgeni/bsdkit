@@ -1,0 +1,94 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/colors.inc
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc
+source ${SCRIPT_PATH}/../lib/is-yes.inc
+source ${SCRIPT_PATH}/../lib/yaml.inc
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+    exit 1
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+if [ -x /usr/local/bin/vim ]; then
+    export EDITOR=/usr/local/bin/vim
+fi
+
+# ===========================================================================
+
+: ${DESTDIR:=""}
+
+OPTIND=1
+while getopts "a:b:d:eEFn:p:r:v:" OPT; do
+    case ${OPT} in
+        d)
+            DESTDIR=${OPTARG%/}
+            ;;
+        *)
+            exit 64 # EX_USAGE
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ -d ${DESTDIR}/.base ]; then
+    error "Destination directory is thin jail"
+fi
+
+apply-mtree() {
+    _destdir=${1:-/}
+
+    message "Applying BSD.root.dist"
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.root.dist -p ${_destdir}/
+
+    message "Applying BSD.usr.dist"
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.usr.dist -p ${_destdir}/usr
+
+    message "Applying BSD.var.dist"
+    mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.var.dist -p ${_destdir}/var
+
+    if [ -f ${_destdir}/etc/mtree/BSD.lib32.dist ]; then
+        if [ -d ${_destdir}/usr/lib32 ]; then
+            message "Applying BSD.lib32.dist"
+            mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.lib32.dist -p ${_destdir}/usr
+        fi
+    fi
+
+    if [ -f ${_destdir}/etc/mtree/BSD.include.dist ]; then
+        if [ -d ${_destdir}/usr/include ]; then
+            message "Applying BSD.include.dist"
+            mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.include.dist -p ${_destdir}/usr/include
+        fi
+    fi
+
+    if [ -f ${_destdir}/etc/mtree/BSD.sendmail.dist ]; then
+        message "Applying BSD.sendmail.dist"
+        mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.sendmail.dist -p ${_destdir}/
+    fi
+
+    if [ -f ${_destdir}/etc/mtree/BSD.tests.dist ]; then
+        if [ -d ${_destdir}/usr/tests ]; then
+            message "Applying BSD.tests.dist"
+            mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.tests.dist -p ${_destdir}/usr/tests
+        fi
+    fi
+
+    if [ -f ${_destdir}/etc/mtree/BSD.debug.dist ]; then
+        if [ -d ${_destdir}/usr/lib/debug ]; then
+            message "Applying BSD.debug.dist"
+            mtree -ideU -N ${_destdir}/etc -f ${_destdir}/etc/mtree/BSD.debug.dist -p ${_destdir}/usr/lib
+        fi
+    fi
+}
+
+apply-mtree ${DESTDIR}
+
+message "Operation complete."
