@@ -1653,6 +1653,7 @@ __install-setup-runtime() {
         sysutils/spiped
         sysutils/tmux
         sysutils/ts
+        textproc/jo
 
         # uncategorized
         comms/kermit

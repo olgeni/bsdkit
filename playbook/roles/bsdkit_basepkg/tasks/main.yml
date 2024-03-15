@@ -54,6 +54,7 @@
       - sysutils/spiped
       - sysutils/tmux
       - sysutils/ts
+      - textproc/jo
 
       # uncategorized
       - misc/inplace
