@@ -337,7 +337,7 @@ if is-yes ${BOOTENV_ENABLE}; then
     fi
 
     bectl create ${BOOTENV_NAME}
-    bectl mount ${BOOTENV_NAME} ${BOOTENV_MOUNT}
+    bectl mount ${BOOTENV_NAME} ${BOOTENV_MOUNT} > /dev/null 2>&1
 
     if mount | cut -w -f 3 | fgrep -q "/usr/src"; then
         _mountpoint_list+=("/usr/src")
