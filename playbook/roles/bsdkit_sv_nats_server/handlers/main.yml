@@ -1,0 +1,5 @@
+---
+- name: restart_sv_nats_server
+  shell:
+    cmd: |
+      sv restart {{ bsdkit_service_name }} || :
