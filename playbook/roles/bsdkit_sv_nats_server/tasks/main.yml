@@ -21,12 +21,13 @@
     path: /var/db/runit/{{ bsdkit_service_name }}/data
     state: directory
 
-- name: Copy nats.conf
+- name: Copy NATS configuration files
   template:
-    src: "{{ bsdkit_sv_nats_server_configuration }}"
-    dest: /var/db/runit/{{ bsdkit_service_name }}/nats.conf
+    src: "{{ item }}"
+    dest: "/var/db/runit/{{ bsdkit_service_name }}/{{ item | basename }}"
     group: wheel
     mode: "0644"
+  with_items: "{{ bsdkit_sv_nats_server_configuration }}"
   notify:
     - restart_sv_nats_server
 
