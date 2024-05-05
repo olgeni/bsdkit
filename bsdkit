@@ -3556,8 +3556,8 @@ purge-libdir() {
 }
 
 purge-local-libdirs() {
-    local _ruby-version=$(ruby-version)
-    local _perl-version=$(perl-version)
+    local _ruby_version=$(ruby-version)
+    local _perl_version=$(perl-version)
 
     for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
         purge-libdir ${_ruby_libdir}
@@ -3567,20 +3567,20 @@ purge-local-libdirs() {
         purge-libdir ${_perl_libdir}
     done
 
-    if [ -n "${_ruby-version}" ]; then
+    if [ -n "${_ruby_version}" ]; then
         for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
-            if ! [ -d ${_ruby_libdir}/${_ruby-version} ]; then
-                message "Creating ${_ruby_libdir}/${_ruby-version}"
-                mkdir -p ${_ruby_libdir}/${_ruby-version}
+            if ! [ -d ${_ruby_libdir}/${_ruby_version} ]; then
+                message "Creating ${_ruby_libdir}/${_ruby_version}"
+                mkdir -p ${_ruby_libdir}/${_ruby_version}
             fi
         done
     fi
 
-    if [ -n "${_perl-version}" ]; then
+    if [ -n "${_perl_version}" ]; then
         for _perl_libdir in ${PERL_LIBDIR_LIST[@]}; do
-            if ! [ -d ${_perl_libdir}/${_perl-version} ]; then
-                message "Creating ${_perl_libdir}/${_perl-version}"
-                mkdir -p ${_perl_libdir}/${_perl-version}
+            if ! [ -d ${_perl_libdir}/${_perl_version} ]; then
+                message "Creating ${_perl_libdir}/${_perl_version}"
+                mkdir -p ${_perl_libdir}/${_perl_version}
             fi
         done
     fi
