@@ -157,15 +157,17 @@ remove-nouarch-files() {
 
 trap cleanup EXIT
 
+CAT_CMD="/bin/cat"
+
 if is-yes "${PV_DISABLE}"; then
-    CAT_CMD="/bin/cat"
+    PROGRESS_CMD="/bin/cat"
 else
     if [ -t 0 ] && tty | grep -q "^/dev/ttyv"; then
-        CAT_CMD="/bin/cat"
+        PROGRESS_CMD="/bin/cat"
     elif which -s pv > /dev/null 2>&1; then
-        CAT_CMD="pv -i ${PV_UPDATE_DELAY} -c -w 75"
+        PROGRESS_CMD="pv -i ${PV_UPDATE_DELAY} -c -w 75"
     else
-        CAT_CMD="/bin/cat"
+        PROGRESS_CMD="/bin/cat"
     fi
 fi
 
@@ -316,7 +318,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
 
     if [ -f "${_filename}" ]; then
         message "Checking ${_filename}"
-        _sha256_local=$(${=CAT_CMD} "${_filename}" | sha256 -q)
+        _sha256_local=$(${=PROGRESS_CMD} "${_filename}" | sha256 -q)
     else
         _sha256_local="0"
     fi
