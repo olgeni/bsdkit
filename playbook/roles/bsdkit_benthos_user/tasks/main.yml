@@ -1,0 +1,26 @@
+---
+- name: Add Benthos group
+  group:
+    name: benthos
+    gid: 335
+    state: present
+
+- name: Add Benthos user
+  user:
+    name: benthos
+    uid: 335
+    group: benthos
+    home: /var/db/benthos
+    shell: /bin/sh
+    comment: "Benthos Daemon"
+    state: present
+
+- name: Create data directory for Benthos
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+    owner: benthos
+    group: benthos
+  with_items:
+    - /var/db/benthos
