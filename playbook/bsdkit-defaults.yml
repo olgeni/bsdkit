@@ -19,8 +19,8 @@ periodic_conf:
   monthly_status_security_enable: "NO"
   daily_clean_tmps_enable: "YES"
   daily_status_zfs_enable: "NO"
-  daily_scrub_zfs_enable: "NO"
-  daily_scrub_zfs_default_threshold: "0"
+  daily_scrub_zfs_enable: "YES"
+  daily_scrub_zfs_default_threshold: "35"
 
 periodic_conf_delete: {}
 
