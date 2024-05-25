@@ -2,13 +2,13 @@
 - name: Add MySQL group
   group:
     name: mysql
-    gid: 88
+    gid: "{{ mysql_user_gid }}"
     state: present
 
 - name: Add MySQL user
   user:
     name: mysql
-    uid: 88
+    uid: "{{ mysql_user_uid }}"
     group: mysql
     home: /var/db/mysql
     shell: /bin/sh

@@ -2,13 +2,13 @@
 - name: Add Nomad group
   group:
     name: nomad
-    gid: 472
+    gid: "{{ nomad_user_gid }}"
     state: present
 
 - name: Add Nomad user
   user:
     name: nomad
-    uid: 472
+    uid: "{{ nomad_user_uid }}"
     group: nomad
     home: /var/db/nomad
     shell: /bin/sh

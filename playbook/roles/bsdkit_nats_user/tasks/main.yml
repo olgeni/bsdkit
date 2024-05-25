@@ -2,13 +2,13 @@
 - name: Add NATS group
   group:
     name: nats
-    gid: 305
+    gid: "{{ nats_user_gid }}"
     state: present
 
 - name: Add NATS user
   user:
     name: nats
-    uid: 305
+    uid: "{{ nats_user_uid }}"
     group: nats
     home: /var/db/nats
     shell: /bin/sh

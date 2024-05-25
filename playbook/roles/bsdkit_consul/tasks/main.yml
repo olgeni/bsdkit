@@ -2,13 +2,13 @@
 - name: Add Consul group
   group:
     name: consul
-    gid: 469
+    gid: "{{ consul_user_gid }}"
     state: present
 
 - name: Add Consul user
   user:
     name: consul
-    uid: 469
+    uid: "{{ consul_user_uid }}"
     group: consul
     home: /var/db/consul
     shell: /bin/sh

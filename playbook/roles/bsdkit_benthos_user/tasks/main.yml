@@ -2,13 +2,13 @@
 - name: Add Benthos group
   group:
     name: benthos
-    gid: 335
+    gid: "{{ benthos_user_gid }}"
     state: present
 
 - name: Add Benthos user
   user:
     name: benthos
-    uid: 335
+    uid: "{{ benthos_user_uid }}"
     group: benthos
     home: /var/db/benthos
     shell: /bin/sh

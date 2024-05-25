@@ -2,13 +2,13 @@
 - name: Add PostgreSQL group
   group:
     name: postgres
-    gid: 770
+    gid: "{{ postgres_user_gid }}"
     state: present
 
 - name: Add PostgreSQL user
   user:
     name: postgres
-    uid: 770
+    uid: "{{ postgres_user_uid }}"
     group: postgres
     home: /var/db/postgres
     shell: /bin/sh

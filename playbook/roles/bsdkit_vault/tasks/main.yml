@@ -2,13 +2,13 @@
 - name: Add Vault group
   group:
     name: vault
-    gid: 471
+    gid: "{{ vault_user_gid }}"
     state: present
 
 - name: Add Vault user
   user:
     name: vault
-    uid: 471
+    uid: "{{ vault_user_uid }}"
     group: vault
     home: /var/db/vault
     shell: /bin/sh

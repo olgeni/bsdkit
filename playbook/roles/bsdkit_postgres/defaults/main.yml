@@ -1,1 +1,3 @@
 ---
+postgres_user_uid: 770
+postgres_user_gid: 770
