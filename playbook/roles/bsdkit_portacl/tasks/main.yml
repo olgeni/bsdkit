@@ -1,0 +1,12 @@
+---
+- name: Enable portacl service
+  when: is_host_install
+  service:
+    name: portacl
+    enabled: yes
+
+- name: Start portacl service
+  when: is_host_install
+  service:
+    name: portacl
+    state: started
