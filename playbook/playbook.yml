@@ -54,6 +54,8 @@
     - role: bsdkit_git
     - role: bsdkit_zfs
     - role: bsdkit_pkgdir
+    - role: bsdkit_portacl
+    - role: bsdkit_caddy
     - role: bsdkit_postgres_zfs
     - role: bsdkit_mysql_zfs
     - role: bsdkit_postgres
