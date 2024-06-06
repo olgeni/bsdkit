@@ -1,0 +1,50 @@
+- name: Stop caddy service monitoring
+  command: monit unmonitor caddy
+  when: monit_running and caddy_enabled and caddy_running
+  changed_when: false
+  failed_when: false
+
+- name: Stop caddy service
+  service:
+    name: caddy
+    state: stopped
+  when: caddy_enabled and caddy_running
+  register: service_caddy_stop
+  ignore_errors: true
+
+- name: Kill caddy service if stop failed
+  shell: kill -TERM $(cat /var/run/caddy/caddy.pid)
+  when: service_caddy_stop is failed
+  changed_when: false
+
+- name: Recursively change owner and group of directories
+  file:
+    path: "{{ item }}"
+    owner: www
+    group: www
+    state: directory
+    recurse: true
+  loop:
+    - /var/db/caddy
+    - /var/log/caddy
+    - /var/run/caddy
+
+- name: Recursively change owner and group using chown
+  command: chown -R www:www "{{ item }}"
+  changed_when: false
+  loop:
+    - /var/db/caddy
+    - /var/log/caddy
+    - /var/run/caddy
+
+- name: Start caddy service
+  service:
+    name: caddy
+    state: started
+  when: caddy_enabled and caddy_running
+
+- name: Start caddy service monitoring
+  command: monit monitor caddy
+  when: monit_running and caddy_enabled and caddy_running
+  changed_when: false
+  failed_when: false

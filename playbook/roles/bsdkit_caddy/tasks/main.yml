@@ -1,113 +1,14 @@
 ---
-- name: Get owner of /var/db/caddy
-  command: stat -f '%Su' /var/db/caddy
-  register: caddy_owner
-
-- name: Set caddy_user variable
-  set_fact:
-    caddy_user: "{{ caddy_owner.stdout }}"
-
-- name: Check if caddy service is enabled
-  command: sysrc -n caddy_enable
-  register: sysrc_caddy_enable
+- name: Check if /var/db/caddy exists
+  stat:
+    path: /var/db/caddy
+  register: caddy_path
   changed_when: false
 
-- name: Set caddy_enabled variable
+- name: Set caddy_exists variable
   set_fact:
-    caddy_enabled: "{{ sysrc_caddy_enable.stdout == 'YES' }}"
+    caddy_exists:
 
-- name: Check if caddy service is running
-  command: service caddy status
-  register: caddy_status
-  ignore_errors: true
-  changed_when: false
-
-- name: Check if monit service is running
-  command: service monit status
-  register: monit_status
-  ignore_errors: true
-  changed_when: false
-
-- name: Set caddy_running variable
-  set_fact:
-    caddy_running: "{{ caddy_status.rc == 0 }}"
-
-- name: Set monit_running variable
-  set_fact:
-    monit_running: "{{ monit_status.rc == 0 }}"
-
-- name: Display caddy_user
-  debug:
-    var: caddy_user
-
-- name: Display caddy_enabled
-  debug:
-    var: caddy_enabled
-
-- name: Display caddy_running
-  debug:
-    var: caddy_running
-
-- name: Create /etc/rc.conf.d/caddy
-  copy:
-    dest: /etc/rc.conf.d/caddy
-    content: |
-      caddy_user="www"
-      caddy_group="www"
-    owner: root
-    group: wheel
-    mode: "0644"
-
-- name: Check if caddy_user is root
-  when: caddy_user == 'root'
-  block:
-    - name: Stop caddy service monitoring
-      command: monit unmonitor caddy
-      when: monit_running and caddy_enabled and caddy_running
-      changed_when: false
-      failed_when: false
-
-    - name: Stop caddy service
-      service:
-        name: caddy
-        state: stopped
-      when: caddy_enabled and caddy_running
-      register: service_caddy_stop
-      ignore_errors: true
-
-    - name: Kill caddy service if stop failed
-      shell: kill -TERM $(cat /var/run/caddy/caddy.pid)
-      when: service_caddy_stop is failed
-      changed_when: false
-
-    - name: Recursively change owner and group of directories
-      file:
-        path: "{{ item }}"
-        owner: www
-        group: www
-        state: directory
-        recurse: true
-      loop:
-        - /var/db/caddy
-        - /var/log/caddy
-        - /var/run/caddy
-
-    - name: Recursively change owner and group using chown
-      command: chown -R www:www "{{ item }}"
-      changed_when: false
-      loop:
-        - /var/db/caddy
-        - /var/log/caddy
-        - /var/run/caddy
-
-    - name: Start caddy service
-      service:
-        name: caddy
-        state: started
-      when: caddy_enabled and caddy_running
-
-    - name: Start caddy service monitoring
-      command: monit monitor caddy
-      when: monit_running and caddy_enabled and caddy_running
-      changed_when: false
-      failed_when: false
+- name: Process caddy configuration
+  include_tasks: caddy.yml
+  when: caddy_path.stat.exists

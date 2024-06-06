@@ -1,0 +1,79 @@
+- name: Create /etc/rc.conf.d/caddy
+  copy:
+    dest: /etc/rc.conf.d/caddy
+    content: |
+      caddy_owner="www"
+      caddy_group="www"
+    owner: root
+    group: wheel
+    mode: "0644"
+
+#
+# caddy_enabled
+#
+
+- name: Check if caddy service is enabled
+  command: sysrc -n caddy_enable
+  register: sysrc_caddy_enable
+  changed_when: false
+
+- name: Set caddy_enabled variable
+  set_fact:
+    caddy_enabled: "{{ sysrc_caddy_enable.stdout == 'YES' }}"
+
+- name: Display caddy_enabled
+  debug:
+    var: caddy_enabled
+
+#
+# caddy_running
+#
+
+- name: Check if caddy service is running
+  command: service caddy status
+  register: caddy_status
+  ignore_errors: true
+  changed_when: false
+
+- name: Set caddy_running variable
+  set_fact:
+    caddy_running: "{{ caddy_status.rc == 0 }}"
+
+- name: Display caddy_running
+  debug:
+    var: caddy_running
+
+#
+# monit_running
+#
+
+- name: Check if monit service is running
+  command: service monit status
+  register: monit_status
+  ignore_errors: true
+  changed_when: false
+
+- name: Set monit_running variable
+  set_fact:
+    monit_running: "{{ monit_status.rc == 0 }}"
+
+#
+# caddy_owner
+#
+
+- name: Get owner of /var/db/caddy
+  command: stat -f '%Su' /var/db/caddy
+  register: caddy_owner
+  changed_when: false
+
+- name: Set caddy_owner variable
+  set_fact:
+    caddy_owner: "{{ caddy_owner.stdout }}"
+
+- name: Display caddy_owner
+  debug:
+    var: caddy_owner
+
+- name: Process caddy ownership
+  include_tasks: caddy_owner.yml
+  when: caddy_owner == 'root'
