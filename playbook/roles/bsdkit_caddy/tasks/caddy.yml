@@ -2,7 +2,7 @@
   copy:
     dest: /etc/rc.conf.d/caddy
     content: |
-      caddy_owner="www"
+      caddy_user="www"
       caddy_group="www"
     owner: root
     group: wheel
