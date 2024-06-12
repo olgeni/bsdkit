@@ -3586,6 +3586,33 @@ purge-local-libdirs() {
     fi
 }
 
+purge-python-libdir() {
+    for _directory in /usr/local/lib/python*(/); do
+        message "Checking ${_directory}"
+
+        for _file in $(find ${_directory} -type f -name '*.pkgsave'); do
+            message "Removing file: ${_file}"
+            rm -f "${_file}"
+        done
+    done
+
+    for _directory in /usr/local/lib/python*/site-packages; do
+        for _pycache in $(find ${_directory} -type d -name '__pycache__'); do
+            for _file in ${_pycache}/*.pyc(N); do
+                _dirname=$(realpath $(dirname ${_file})/..)
+                _module=$(basename ${_file} | cut -d '.' -f 1)
+
+                if ! [ -f ${_dirname}/${_module}.py ]; then
+                    warning "Removing: ${_file}"
+                    rm -f ${_file}
+                fi
+            done
+        done
+
+        find -d ${_directory} -type d -empty -delete -print
+    done
+}
+
 purge-pkg-tempfiles() {
     if [ $# -ne 1 ]; then
         usage "purge-pkg-tempfiles <path>"
