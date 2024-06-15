@@ -3587,29 +3587,31 @@ purge-local-libdirs() {
 }
 
 purge-python-libdir() {
-    for _directory in /usr/local/lib/python*(/); do
-        message "Checking ${_directory}"
+    for _lib_directory in /usr/local/lib/python*(N/); do
+        message "Checking directory: ${_lib_directory}"
 
-        for _file in $(find ${_directory} -type f -name '*.pkgsave'); do
+        for _file in $(find ${_lib_directory} -type f -name '*.pkgsave'); do
             message "Removing file: ${_file}"
-            rm -f "${_file}"
+            rm -f ${_file}
         done
-    done
 
-    for _directory in /usr/local/lib/python*/site-packages; do
-        for _pycache in $(find ${_directory} -type d -name '__pycache__'); do
-            for _file in ${_pycache}/*.pyc(N); do
-                _dirname=$(realpath $(dirname ${_file})/..)
-                _module=$(basename ${_file} | cut -d '.' -f 1)
+        for _site_directory in ${_lib_directory}/site-packages(N/); do
+            find ${_site_directory} -name '.pkgtemp.*' -print0 | xargs -0 rm -r -f
 
-                if ! [ -f ${_dirname}/${_module}.py ]; then
-                    warning "Removing: ${_file}"
-                    rm -f ${_file}
-                fi
+            for _pycache in $(find ${_site_directory} -type d -name '__pycache__'); do
+                for _file in ${_pycache}/*.pyc(N); do
+                    _dirname=$(realpath $(dirname ${_file})/..)
+                    _module=$(basename "${_file}" | cut -d '.' -f 1)
+
+                    if ! [ -f ${_dirname}/${_module}.py ]; then
+                        warning "Removing: ${_file}"
+                        rm -f ${_file}
+                    fi
+                done
             done
         done
 
-        find -d ${_directory} -type d -empty -delete -print
+        find -d ${_lib_directory} -type d -empty -delete
     done
 }
 
