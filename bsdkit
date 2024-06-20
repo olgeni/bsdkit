@@ -106,11 +106,13 @@ source ${SCRIPT_PATH}/lib/hr-to-bytes.inc
 source ${SCRIPT_PATH}/lib/is-yes.inc
 source ${SCRIPT_PATH}/lib/yaml.inc
 
-if command -v pv > /dev/null 2>&1; then
-    CAT_CMD=(pv -i ${BSDKIT_PV_UPDATE_DELAY})
-else
-    CAT_CMD=/bin/cat
-fi
+# if command -v pv > /dev/null 2>&1; then
+#     CAT_CMD=(pv -i ${BSDKIT_PV_UPDATE_DELAY})
+# else
+#     CAT_CMD=/bin/cat
+# fi
+
+CAT_CMD=/bin/cat
 
 if [ -z ${BSDKIT_PART_SIZE_SWAP} ]; then
     BSDKIT_PART_SIZE_SWAP=0
