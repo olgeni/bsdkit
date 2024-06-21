@@ -104,6 +104,7 @@ source ${SCRIPT_PATH}/lib/colors.inc
 source ${SCRIPT_PATH}/lib/hr-to-bytes.inc
 source ${SCRIPT_PATH}/lib/is-yes.inc
 source ${SCRIPT_PATH}/lib/yaml.inc
+source ${SCRIPT_PATH}/lib/rc.inc
 
 if command -v pv > /dev/null 2>&1; then
     CAT_CMD=(pv -c -w 75)
@@ -3936,63 +3937,6 @@ zfs-raid-hint() {
         done
         echo "  rm sector.bin"
         echo
-    fi
-}
-
-rc-set() {
-    if [ $# -ne 3 ]; then
-        usage "rc-set <file> <key> <value>"
-    fi
-
-    local _file=$1
-    local _key=$2
-    local _value=$3
-
-    if grep -E "^[[:space:]]*${_key}|#[[:space:]]*${_key}" ${_file} > /dev/null 2>&1; then
-        sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=[[:space:]]*/ c\\
-${_key}=\"${_value}\"
-/^[[:space:]]*#[[:space:]]*${_key}/ c\\
-${_key}=\"${_value}\"
-" ${_file}
-    else
-        echo "${_key}=\"${_value}\"" >> ${_file}
-    fi
-}
-
-rc-delete() {
-    if [ $# -ne 2 ]; then
-        usage "rc-delete <file> <key>"
-    fi
-
-    local _file=$1
-    local _key=$2
-
-    [ -e ${_file} ] || return 0
-
-    sed -E -i '' -e "/^[[:space:]]*${_key}[[:space:]]*=/d" ${_file}
-}
-
-rc-get() {
-    if [ $# -ne 2 ]; then
-        usage "rc-get <file> <key>"
-    fi
-
-    local _file=$1
-    local _key=$2
-
-    local _buffer
-    _buffer="$(grep -E "^[[:space:]]*${_key}[[:space:]]*=" ${_file})"
-
-    local _value1
-    _value1=$(echo ${_buffer} | sed -E -e "s/[^=]*[[:space:]]*=//")
-
-    local _value2
-    _value2=$(expr ${_value1} : "\"\(.*\)\"")
-
-    if [ -n ${_value2} ]; then
-        echo ${_value2}
-    else
-        echo ${_value1}
     fi
 }
 
