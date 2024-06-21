@@ -3390,7 +3390,7 @@ update() {
     git reset --hard ${_remote_hash} || error "git reset failed."
 
     if [ -t 1 ]; then
-        GIT_PAGER=cat git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
+        GIT_PAGER=/bin/cat git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
     fi
 }
 
