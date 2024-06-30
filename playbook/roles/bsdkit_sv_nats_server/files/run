@@ -43,18 +43,15 @@ if [ -n "${NATS_KEY_FILE}" ] && ! echo "${NATS_KEY_FILE}" | grep -q "/" > /dev/n
     NATS_KEY_FILE="/usr/local/etc/letsencrypt/live/${NATS_KEY_FILE}/privkey.pem"
 fi
 
-mkdir -p ${NATS_DATA_DIR}/certs
+if [ -n "${NATS_CERT_FILE}" ] && [ -n "${NATS_KEY_FILE}" ]; then
+    NATS_CERTS_DIR="${NATS_DATA_DIR}/certs"
 
-NATS_CERTS_DIR="${NATS_DATA_DIR}/certs"
+    mkdir -p ${NATS_CERTS_DIR}
+
+    install -m 644 -o ${NATS_USER} -g ${NATS_GROUP} "${NATS_CERT_FILE}" "${NATS_CERTS_DIR}/cert.pem"
+    install -m 600 -o ${NATS_USER} -g ${NATS_GROUP} "${NATS_KEY_FILE}" "${NATS_CERTS_DIR}/key.pem"
+fi
 
 chown -R ${NATS_USER}:${NATS_GROUP} ${NATS_DATA_DIR}
-
-if [ -n "${NATS_CERT_FILE}" ]; then
-    install -m 644 -o nats -g nats "${NATS_CERT_FILE}" "${NATS_CERTS_DIR}/cert.pem"
-fi
-
-if [ -n "${NATS_KEY_FILE}" ]; then
-    install -m 600 -o nats -g nats "${NATS_KEY_FILE}" "${NATS_CERTS_DIR}/key.pem"
-fi
 
 exec env -S "${ENVRC}" chpst -u ${NATS_USER}:${NATS_GROUP} ${CHPST_ARGS} /usr/local/bin/nats-server ${NATS_ARGS}
