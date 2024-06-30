@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# 6e3b9cfa-bc36-403d-9914-536fea3a9778
+
+set -e -u -o pipefail
+
+exec 2>&1
+
+[ -f config ] && . ./config
+
+: ${CHPST_ARGS=""}
+
+if [ -d env ]; then
+    CHPST_ARGS="${CHPST_ARGS} -e ${PWD}/env"
+fi
+
+ENVRC=""
+
+if [ -f envrc ]; then
+    ENVRC="$(cat envrc)"
+fi
+
+if [ -f envrc.local ]; then
+    ENVRC="${ENVRC} $(cat envrc.local)"
+fi
+
+if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
+    ENVRC="${ENVRC} $(cat envrc.d/*)"
+fi
+
+: ${REDPANDA_CONNECT_DATA_DIR:="/var/db/redpanda-connect"}
+: ${REDPANDA_CONNECT_USER:="benthos"}
+: ${REDPANDA_CONNECT_GROUP:="benthos"}
+: ${REDPANDA_CONNECT_ARGS="-c redpanda-connect.yml"}
+
+chown -R ${REDPANDA_CONNECT_USER}:${REDPANDA_CONNECT_GROUP} ${REDPANDA_CONNECT_DATA_DIR}
+
+exec env -S "${ENVRC}" chpst -u ${REDPANDA_CONNECT_USER}:${REDPANDA_CONNECT_GROUP} ${CHPST_ARGS} /usr/local/bin/redpanda-connect ${REDPANDA_CONNECT_ARGS}

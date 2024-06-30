@@ -1,5 +1,5 @@
 ---
-- name: restart_sv_benthos
+- name: restart_sv_redpanda_connect
   shell:
     cmd: |
       sv restart {{ bsdkit_service_name }} || :

@@ -4,7 +4,7 @@
     name: "{{ item }}"
     state: present
   loop:
-    - net/benthos
+    - net/redpanda-connect
 
 - name: Create /var/db/runit/{{ bsdkit_service_name }}
   file:
@@ -24,25 +24,25 @@
     path: /var/db/runit/{{ bsdkit_service_name }}/resources
     state: directory
 
-- name: Copy Benthos configuration files
+- name: Copy Redpanda Connect configuration files
   template:
     src: "{{ item }}"
     dest: "/var/db/runit/{{ bsdkit_service_name }}/{{ item | basename }}"
     group: wheel
     mode: "0644"
-  with_items: "{{ bsdkit_sv_benthos_configuration }}"
+  with_items: "{{ bsdkit_sv_redpanda_connect_configuration }}"
   notify:
-    - restart_sv_benthos
+    - restart_sv_redpanda_connect
 
-- name: Copy Benthos resource files
+- name: Copy Redpanda Connect resource files
   template:
     src: "{{ item }}"
     dest: "/var/db/runit/{{ bsdkit_service_name }}/resources/{{ item | basename }}"
     group: wheel
     mode: "0644"
-  with_items: "{{ bsdkit_sv_benthos_resources }}"
+  with_items: "{{ bsdkit_sv_redpanda_connect_resources }}"
   notify:
-    - restart_sv_benthos
+    - restart_sv_redpanda_connect
 
 - name: Copy /var/db/runit/{{ bsdkit_service_name }}/run
   copy:
@@ -51,16 +51,16 @@
     src: ../files/run
     mode: "0755"
   notify:
-    - restart_sv_benthos
+    - restart_sv_redpanda_connect
 
-- name: Copy /var/db/runit/{{ bsdkit_service_name }}/benthos.yml.sample
+- name: Copy /var/db/runit/{{ bsdkit_service_name }}/redpanda-connect.yml.sample
   copy:
-    dest: /var/db/runit/{{ bsdkit_service_name }}/benthos.yml.sample
+    dest: /var/db/runit/{{ bsdkit_service_name }}/redpanda-connect.yml.sample
     group: wheel
-    src: ../files/benthos.yml.sample
+    src: ../files/redpanda-connect.yml.sample
     mode: "0644"
   notify:
-    - restart_sv_benthos
+    - restart_sv_redpanda_connect
 
 - name: Link /var/service/{{ bsdkit_service_name }}
   file:
@@ -68,4 +68,4 @@
     path: /var/service/{{ bsdkit_service_name }}
     state: link
   notify:
-    - restart_sv_benthos
+    - restart_sv_redpanda_connect

@@ -1,0 +1,4 @@
+---
+bsdkit_service_name: redpanda-connect
+bsdkit_sv_redpanda_connect_configuration: []
+bsdkit_sv_redpanda_connect_resources: []
