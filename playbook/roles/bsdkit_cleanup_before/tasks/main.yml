@@ -39,15 +39,21 @@
   set_fact:
     is_freebsd_14_or_above: "{{ ansible_distribution_version is version('14.0', '>=') }}"
 
+- name: Check if /var/db/portsnap directory exists
+  stat:
+    path: /var/db/portsnap
+  register: stat_var_db_portsnap
+
 - name: Check if /var/db/portsnap contains any files
   find:
     paths: /var/db/portsnap
     file_type: any
   register: find_var_db_portsnap
+  when: stat_var_db_portsnap.stat.exists
 
-- name: Clean contents of /var/db/portsnap if FreeBSD version is 14 or above
+- name: Clean contents of /var/db/portsnap if FreeBSD version is 14 or above and directory exists
   file:
     path: "{{ item.path }}"
     state: absent
   loop: "{{ find_var_db_portsnap.files }}"
-  when: is_freebsd_14_or_above
+  when: is_freebsd_14_or_above and stat_var_db_portsnap.stat.exists and find_var_db_portsnap.matched > 0
