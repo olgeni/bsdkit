@@ -76,4 +76,3 @@
 
 - name: Process caddy ownership
   include_tasks: caddy_owner.yml
-  when: caddy_owner == 'root'
