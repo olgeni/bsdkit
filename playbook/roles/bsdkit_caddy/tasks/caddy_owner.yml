@@ -28,6 +28,7 @@
     - /var/db/caddy
     - /var/log/caddy
     - /var/run/caddy
+    - /usr/local/etc/caddy
 
 - name: Recursively change owner and group using chown
   command: chown -R www:www "{{ item }}"
@@ -36,6 +37,7 @@
     - /var/db/caddy
     - /var/log/caddy
     - /var/run/caddy
+    - /usr/local/etc/caddy
 
 - name: Start caddy service
   service:
