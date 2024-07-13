@@ -5,10 +5,6 @@
   register: caddy_path
   changed_when: false
 
-- name: Set caddy_exists variable
-  set_fact:
-    caddy_exists:
-
 - name: Process caddy configuration
   include_tasks: caddy.yml
   when: caddy_path.stat.exists
