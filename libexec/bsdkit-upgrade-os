@@ -155,10 +155,12 @@ remove-nouarch-files() {
 
 trap cleanup EXIT
 
-if command -v pv > /dev/null 2>&1; then
-    CAT_CMD=(pv -c -w 75)
-else
-    CAT_CMD=/bin/cat
+if [[ -z "${CAT_CMD+x}" ]]; then
+    if command -v pv > /dev/null 2>&1; then
+        CAT_CMD=(pv -c -w 75)
+    else
+        CAT_CMD=/bin/cat
+    fi
 fi
 
 if mount | cut -w -f 3 | fgrep -q "/proc"; then
