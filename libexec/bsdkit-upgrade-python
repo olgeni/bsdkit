@@ -31,7 +31,8 @@ usage() {
 zparseopts -F -D -E -K -a _opts -A _opts_args \
     t:=TARGET_VERSION_OPTION
 
-TARGET_VERSION=${TARGET_VERSION_OPTION[2]:-311}
+TARGET_VERSION_RAW=${TARGET_VERSION_OPTION[2]:-311}
+TARGET_VERSION=$(echo ${TARGET_VERSION_RAW} | sed 's/\.//g')
 
 message "Upgrading Python to ${TARGET_VERSION}"
 
