@@ -3262,6 +3262,10 @@ upgrade-postgresql() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-postgresql "$@"
 }
 
+upgrade-python() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-python "$@"
+}
+
 pkg-diff() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-pkg-diff "$@"
 }

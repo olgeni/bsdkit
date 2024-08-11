@@ -1,0 +1,66 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/colors.inc
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc
+source ${SCRIPT_PATH}/../lib/is-yes.inc
+source ${SCRIPT_PATH}/../lib/yaml.inc
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+    exit 1
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+if [ -x /usr/local/bin/vim ]; then
+    export EDITOR=/usr/local/bin/vim
+fi
+
+# ===========================================================================
+
+usage() {
+    echo "Usage: ${SCRIPT_NAME} -t <target version>"
+    exit 0
+}
+
+zparseopts -F -D -E -K -a _opts -A _opts_args \
+    t:=TARGET_VERSION_OPTION
+
+TARGET_VERSION=${TARGET_VERSION_OPTION[2]}
+
+if [ -z ${TARGET_VERSION+x} ]; then
+    usage
+fi
+
+message "Upgrading Python to ${TARGET_VERSION}"
+
+if [ "$(pkg info | grep py39 | wc -l)" -gt 0 ]; then
+    for i in $(pkg query -g %n 'py39-*'); do
+        echo Updating ${i}
+        pkg set -yn ${i}:$(echo ${i} | sed -e s@py39@py${TARGET_VERSION}@)
+    done
+
+    for i in $(pkg query -g %n '*-py39-*'); do
+        echo Updating ${i}
+        pkg set -yn ${i}:$(echo ${i} | sed -e s@py39@py${TARGET_VERSION}@)
+    done
+
+    pkg upg -y
+    pkg auto -y
+    pkg clean -y -a
+
+    for i in $(pkg query -g %n 'py39-*'); do
+        echo Removing ${i}
+        pkg delete -y ${i}
+    done
+
+    for i in $(pkg query -g %n '*-py39-*'); do
+        echo Removing ${i}
+        pkg delete -y ${i}
+    done
+fi
