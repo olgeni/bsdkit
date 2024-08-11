@@ -31,11 +31,7 @@ usage() {
 zparseopts -F -D -E -K -a _opts -A _opts_args \
     t:=TARGET_VERSION_OPTION
 
-TARGET_VERSION=${TARGET_VERSION_OPTION[2]}
-
-if [ -z ${TARGET_VERSION+x} ]; then
-    usage
-fi
+TARGET_VERSION=${TARGET_VERSION_OPTION[2]:-311}
 
 message "Upgrading Python to ${TARGET_VERSION}"
 
