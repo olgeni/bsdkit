@@ -52,7 +52,7 @@
     owner: root
     group: wheel
     mode: "0600"
-  when: manage_monitrc == true
+  when: manage_monitrc
   notify:
     - reload_monit
 
@@ -63,13 +63,13 @@
     owner: root
     group: wheel
     mode: "0600"
-  when: manage_monitrc == false
+  when: not manage_monitrc
 
 - name: Remove /usr/local/etc/bsdkit-monitrc (template)
   file:
     path: /usr/local/etc/bsdkit-monitrc
     state: absent
-  when: manage_monitrc == true
+  when: manage_monitrc
 
 - name: Configure monit service
   include_tasks: monit-service.yml
