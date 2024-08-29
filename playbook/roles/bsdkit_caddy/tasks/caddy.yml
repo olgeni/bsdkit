@@ -61,8 +61,8 @@
 # caddy_owner
 #
 
-- name: Get owner of /var/db/caddy
-  command: stat -f '%Su' /var/db/caddy
+- name: Get owner of /usr/local/etc/caddy/Caddyfile
+  command: stat -f '%Su' /usr/local/etc/caddy/Caddyfile
   register: caddy_owner
   changed_when: false
 
