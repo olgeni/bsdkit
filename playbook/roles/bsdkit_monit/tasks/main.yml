@@ -89,6 +89,11 @@
       pid_file: /var/run/httpd.pid
       host_only: false
 
+    - service: rspamd
+      process: rspamd
+      pid_file: /var/run/rspamd/rspamd.pid
+      host_only: false
+
     - service: caddy
       process: caddy
       pid_file: /var/run/caddy/caddy.pid
