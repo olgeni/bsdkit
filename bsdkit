@@ -3686,18 +3686,36 @@ start-local() {
         fi
     done
 
-    # make sure that monit is started last
+    # Remove monit from the service list to start it last
+    local _monit_service=""
+
     if [[ "${_service_list[@]}" =~ "monit" ]]; then
         _service_list=(${_service_list[@]/monit})
-        _service_list+="monit"
+        _monit_service="monit"
     fi
 
     local _service
 
+    # Start other services
     for _service in "${_service_list[@]}"; do
         message "Starting service: ${_service}"
         service ${_service} start || :
     done
+
+    # Start runit services
+    if [ -d /var/service ]; then
+        for _service in /var/service/*(N); do
+            _service_name=$(basename ${_service})
+            message "Starting runit service: ${_service_name}"
+            sv start ${_service_name} || :
+        done
+    fi
+
+    # Start monit last if it exists
+    if [ -n "${_monit_service}" ]; then
+        message "Starting service: ${_monit_service}"
+        service ${_monit_service} start || :
+    fi
 }
 
 stop-local() {
@@ -3710,14 +3728,32 @@ stop-local() {
         fi
     done
 
-    # make sure that monit is stopped first
+    # Remove monit from the service list to stop it first
+    local _monit_service=""
+
     if [[ "${_service_list[@]}" =~ "monit" ]]; then
         _service_list=(${_service_list[@]/monit})
-        _service_list=("monit" ${_service_list[@]})
+        _monit_service="monit"
     fi
 
     local _service
 
+    # Stop monit first if it exists
+    if [ -n "${_monit_service}" ]; then
+        message "Stopping service: ${_monit_service}"
+        service ${_monit_service} stop || :
+    fi
+
+    # Stop runit services
+    if [ -d /var/service ]; then
+        for _service in /var/service/*(N); do
+            _service_name=$(basename ${_service})
+            message "Stopping runit service: ${_service_name}"
+            sv stop ${_service_name} || :
+        done
+    fi
+
+    # Stop other services
     for _service in "${_service_list[@]}"; do
         message "Stopping service: ${_service}"
         service ${_service} stop || :
@@ -3734,25 +3770,41 @@ restart-local() {
         fi
     done
 
-    local _monit=NO
+    # Remove monit from the service list to restart it last
+    local _monit_service=""
 
     if [[ "${_service_list[@]}" =~ "monit" ]]; then
-        message "Stopping service: monit"
-        _monit=YES
         _service_list=(${_service_list[@]/monit})
-        service monit stop || :
+        _monit_service="monit"
     fi
 
     local _service
 
+    # Stop monit first if it exists
+    if [ -n "${_monit_service}" ]; then
+        message "Stopping service: ${_monit_service}"
+        service ${_monit_service} stop || :
+    fi
+
+    # Restart other services
     for _service in "${_service_list[@]}"; do
         message "Restarting service: ${_service}"
         service ${_service} restart || :
     done
 
-    if is-yes ${_monit}; then
-        message "Starting service: monit"
-        service monit start || :
+    # Restart runit services
+    if [ -d /var/service ]; then
+        for _service in /var/service/*(N); do
+            _service_name=$(basename ${_service})
+            message "Restarting runit service: ${_service_name}"
+            sv restart ${_service_name} || :
+        done
+    fi
+
+    # Start monit last if it exists
+    if [ -n "${_monit_service}" ]; then
+        message "Starting service: ${_monit_service}"
+        service ${_monit_service} start || :
     fi
 }
 
