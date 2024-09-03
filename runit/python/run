@@ -30,12 +30,12 @@ fi
 
 : ${PYTHON_USER:="nobody"}
 : ${PYTHON_GROUP:="nobody"}
-: ${PYTHON_PATH:=""}
-: ${PYTHON_ARGS=""}
-: ${PYTHON_VENV:="${PYTHON_PATH}/.venv"}
-: ${PYTHON_FILE:="main.py"}
-: ${PYTHON_EXECUTABLE:="python"}
 : ${PYTHON_HOME:="$(eval echo ~${PYTHON_USER})"}
+: ${PYTHON_PATH:=""}
+: ${PYTHON_VENV:="${PYTHON_PATH}/.venv"}
+: ${PYTHON_EXECUTABLE:="python"}
+: ${PYTHON_ARGS=""}
+: ${PYTHON_FILE:="main.py"}
 
 cd ${PYTHON_PATH}
 
