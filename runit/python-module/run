@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# 9667bf00-7c48-4770-a94b-76288cc5e407
+
+set -e -u -o pipefail
+
+exec 2>&1
+
+[ -f config ] && . ./config
+
+: ${CHPST_ARGS=""}
+
+if [ -d env ]; then
+    CHPST_ARGS="${CHPST_ARGS} -e ${PWD}/env"
+fi
+
+ENVRC=""
+
+if [ -f envrc ]; then
+    ENVRC="$(cat envrc)"
+fi
+
+if [ -f envrc.local ]; then
+    ENVRC="${ENVRC} $(cat envrc.local)"
+fi
+
+if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
+    ENVRC="${ENVRC} $(cat envrc.d/*)"
+fi
+
+: ${PYTHON_USER:="nobody"}
+: ${PYTHON_GROUP:="nobody"}
+: ${PYTHON_HOME:="$(eval echo ~${PYTHON_USER})"}
+: ${PYTHON_PATH:=""}
+: ${PYTHON_VENV:="${PYTHON_PATH}/.venv"}
+: ${PYTHON_EXECUTABLE:="python"}
+: ${PYTHON_ARGS=""}
+: ${PYTHON_MODULE:="main"}
+: ${PYTHON_MODULE_ARGS:=""}
+
+cd ${PYTHON_PATH}
+
+. ${PYTHON_VENV}/bin/activate
+
+if [ "$(id -u)" = "0" ]; then
+    CHPST_COMMAND="chpst -u ${PYTHON_USER}:${PYTHON_GROUP} ${CHPST_ARGS}"
+fi
+
+exec env -S "${ENVRC}" HOME="${PYTHON_HOME}" PYTHONUNBUFFERED=1 PYTHONPATH="${PYTHON_PATH}" ${CHPST_COMMAND} "${PYTHON_EXECUTABLE}" ${PYTHON_ARGS} -m "${PYTHON_MODULE}" "${PYTHON_MODULE_ARGS}"
