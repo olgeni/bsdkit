@@ -3625,9 +3625,7 @@ purge-pkg-tempfiles() {
 
     local _path=$1
 
-    find ${_path} -print0 \
-        | awk 'BEGIN { RS="\\0" } $0 ~ /\.pkgtemp\.[^\/]*$/ { print $0 }' \
-        | xargs rm -r -v
+    find ${_path} -name '.pkgtemp.*' -delete
 }
 
 purge-pkg-tempfiles-interactive() {
