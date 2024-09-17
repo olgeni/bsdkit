@@ -183,8 +183,7 @@ is-mount-point() {
 }
 
 get-os-version() {
-    local _version="$(uname -r | cut -d '-' -f 1)"
-    echo "${_version}"
+    uname -r | cut -d '-' -f 1
 }
 
 get-osrelease() {
