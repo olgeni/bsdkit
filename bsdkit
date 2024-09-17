@@ -177,7 +177,7 @@ gateway-address() {
 }
 
 is-mount-point() {
-    local _directory=$1
+    local _directory="${1%/}"
 
     mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
 }
