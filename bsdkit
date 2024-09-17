@@ -160,6 +160,86 @@ platform-is-cloud() {
     platform-is-digitalocean || platform-is-cloudsigma || platform-is-virtualbox || platform-is-vmware || platform-is-aws
 }
 
+inet-interface() {
+    route get default | awk '/interface:/ { print $2 }'
+}
+
+inet-address() {
+    ifconfig $(inet-interface) | awk '$1 == "inet" { print $2; exit }'
+}
+
+gateway-interface() {
+    netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["interface-name"]'
+}
+
+gateway-address() {
+    netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["gateway"]'
+}
+
+is-mount-point() {
+    local _directory=$1
+
+    mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
+}
+
+get-os-version() {
+    local _version="$(uname -r | cut -d '-' -f 1)"
+    echo "${_version}"
+}
+
+get-osrelease() {
+    local _destdir=${1:-/}
+
+    ${_destdir}/bin/freebsd-version -u
+}
+
+get-osreldate() {
+    local _destdir=${1:-/}
+
+    if [ -f ${_destdir}/usr/include/sys/param.h ]; then
+        awk '/^\#define[[:blank:]]__FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h
+    else
+        ${_destdir}/usr/bin/uname -K
+    fi
+}
+
+get-src-release-name() {
+    local _srcdir=${1:-/usr/src}
+
+    local _newvers_file="${_srcdir}/sys/conf/newvers.sh"
+    local _release_name=""
+
+    if [[ -f "${_newvers_file}" ]]; then
+        local _contents=$(<"${_newvers_file}")
+
+        local _revision=$(echo "${_contents}" | grep -oE 'REVISION="([^"]+)"' | cut -d'"' -f2)
+        local _branch=$(echo "${_contents}" | grep -oE 'BRANCH="([^"]+)"' | cut -d'"' -f2)
+
+        _release_name="${_revision}-${_branch}"
+    else
+        error "${_newvers_file} does not exist."
+        return 1
+    fi
+
+    echo "${_release_name}"
+}
+
+get-boot-pool() {
+    zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
+}
+
+ruby-version() {
+    if whence -p ruby > /dev/null 2>&1; then
+        ruby --version | awk '{print $2}' | cut -d '.' -f 1-2
+    fi
+}
+
+perl-version() {
+    if whence -p perl > /dev/null 2>&1; then
+        perl -e 'print(sprintf("%d.%d\n", $^V->{version}[0], $^V->{version}[1]))'
+    fi
+}
+
 reformat-fstab() {
     if [ $# -ne 1 ]; then
         usage "reformat-fstab <fstab>"
@@ -1784,22 +1864,6 @@ ${BSDKIT_JAIL_NAME} {
 EOF
 }
 
-inet-interface() {
-    route get default | awk '/interface:/ { print $2 }'
-}
-
-inet-address() {
-    ifconfig $(inet-interface) | awk '$1 == "inet" { print $2; exit }'
-}
-
-gateway-interface() {
-    netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["interface-name"]'
-}
-
-gateway-address() {
-    netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["gateway"]'
-}
-
 start-jail() {
     if [ $# -ne 1 ]; then
         usage "start-jail <destdir>"
@@ -3399,54 +3463,6 @@ update() {
     fi
 }
 
-is-mount-point() {
-    local _directory=$1
-
-    mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
-}
-
-get-os-version() {
-    local _version="$(uname -r | cut -d '-' -f 1)"
-    echo "${_version}"
-}
-
-get-osrelease() {
-    local _destdir=${1:-/}
-
-    ${_destdir}/bin/freebsd-version -u
-}
-
-get-osreldate() {
-    local _destdir=${1:-/}
-
-    if [ -f ${_destdir}/usr/include/sys/param.h ]; then
-        awk '/^\#define[[:blank:]]__FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h
-    else
-        ${_destdir}/usr/bin/uname -K
-    fi
-}
-
-get-src-release-name() {
-    local _srcdir=${1:-/usr/src}
-
-    local _newvers_file="${_srcdir}/sys/conf/newvers.sh"
-    local _release_name=""
-
-    if [[ -f "${_newvers_file}" ]]; then
-        local _contents=$(<"${_newvers_file}")
-
-        local _revision=$(echo "${_contents}" | grep -oE 'REVISION="([^"]+)"' | cut -d'"' -f2)
-        local _branch=$(echo "${_contents}" | grep -oE 'BRANCH="([^"]+)"' | cut -d'"' -f2)
-
-        _release_name="${_revision}-${_branch}"
-    else
-        error "${_newvers_file} does not exist."
-        return 1
-    fi
-
-    echo "${_release_name}"
-}
-
 echo-jail-conf() {
     if [ $# -ne 1 ]; then
         usage "echo-jail-conf <destdir>"
@@ -3507,24 +3523,8 @@ echo-bsdkit-authorized-keys() {
     cat ${BSDKIT_SRCDIR}/keypairs/*.pub
 }
 
-get-boot-pool() {
-    zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
-}
-
 rebuild-zpool-cache() {
     zpool set cachefile=/etc/zfs/zpool.cache $(get-boot-pool)
-}
-
-ruby-version() {
-    if whence -p ruby > /dev/null 2>&1; then
-        ruby --version | awk '{print $2}' | cut -d '.' -f 1-2
-    fi
-}
-
-perl-version() {
-    if whence -p perl > /dev/null 2>&1; then
-        perl -e 'print(sprintf("%d.%d\n", $^V->{version}[0], $^V->{version}[1]))'
-    fi
 }
 
 purge-libdir() {
