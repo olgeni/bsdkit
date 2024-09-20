@@ -125,30 +125,41 @@
       or not ssh_host_rsa_key_pub_stat.stat.exists
     )
 
-- name: Set 'UseDNS no' in /etc/ssh/sshd_config
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    line: UseDNS no
-    regexp: ^UseDNS
-    insertafter: EOF
-    validate: /usr/sbin/sshd -t -f %s
-  notify: restart_sshd
+- name: Remove 'UseDNS', 'PermitRootLogin', and 'PermitUserEnvironment' from /etc/ssh/sshd_config
+  when: "'# BEGIN ANSIBLE MANAGED BLOCK (Settings)' not in lookup('file', '/etc/ssh/sshd_config')"
+  block:
+    - name: Remove 'UseDNS' from /etc/ssh/sshd_config
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: absent
+        regexp: ^UseDNS
+        validate: /usr/sbin/sshd -t -f %s
+      notify: restart_sshd
 
-- name: Set 'PermitRootLogin without-password' in /etc/ssh/sshd_config
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    line: PermitRootLogin without-password
-    regexp: ^PermitRootLogin
-    insertafter: EOF
-    validate: /usr/sbin/sshd -t -f %s
-  notify: restart_sshd
+    - name: Remove 'PermitRootLogin' from /etc/ssh/sshd_config
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: absent
+        regexp: ^PermitRootLogin
+        validate: /usr/sbin/sshd -t -f %s
+      notify: restart_sshd
 
-- name: Set 'PermitUserEnvironment yes' in /etc/ssh/sshd_config
-  lineinfile:
+    - name: Remove 'PermitUserEnvironment' from /etc/ssh/sshd_config
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: absent
+        regexp: ^PermitUserEnvironment
+        validate: /usr/sbin/sshd -t -f %s
+      notify: restart_sshd
+
+- name: Set 'Settings' block in /etc/ssh/sshd_config
+  blockinfile:
     dest: /etc/ssh/sshd_config
-    line: PermitUserEnvironment yes
-    regexp: ^PermitUserEnvironment
-    insertafter: EOF
+    block: |
+      UseDNS no
+      PermitRootLogin without-password
+      PermitUserEnvironment yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK (Settings)"
     validate: /usr/sbin/sshd -t -f %s
   notify: restart_sshd
 
@@ -165,6 +176,15 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK (AcceptEnv)"
     validate: /usr/sbin/sshd -t -f %s
   notify: restart_sshd
+
+# /etc/pam.d/sshd:
+# - auth		required	pam_unix.so		no_warn try_first_pass
+# ---
+# + auth		required	pam_unix.so		no_warn try_first_pass
+# + auth		required	/usr/local/lib/pam_google_authenticator.so
+
+# TOOD: add support for Google authenticator
+# AuthenticationMethods publickey,keyboard-interactive:pam
 
 - name: Create SSH directory for root
   file:
