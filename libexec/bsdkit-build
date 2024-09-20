@@ -120,8 +120,6 @@ build-release() {
 
     echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
-    # optional: -DWITH_REPRODUCIBLE_BUILD
-
     env -i make -s -C ${OS_SRCDIR} \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         ${_jobs_option} buildworld buildkernel
