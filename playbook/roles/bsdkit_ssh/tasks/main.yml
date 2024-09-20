@@ -89,16 +89,15 @@
     mode: "0600"
   when: id_ecdsa_stat.stat.exists
 
-- name: Check if 'id_dsa' exists
-  stat:
-    path: /root/.ssh/id_dsa
-  register: id_dsa_stat
-
-- name: Set 'id_dsa' permissions
+- name: Remove 'id_dsa' if it exists
   file:
     path: /root/.ssh/id_dsa
-    mode: "0600"
-  when: id_dsa_stat.stat.exists
+    state: absent
+
+- name: Remove 'id_dsa.pub' if it exists
+  file:
+    path: /root/.ssh/id_dsa.pub
+    state: absent
 
 - name: Check if /etc/ssh/ssh_host_ecdsa_key.pub exists
   stat:
@@ -124,6 +123,14 @@
       or not ssh_host_ed25519_key_pub_stat.stat.exists
       or not ssh_host_rsa_key_pub_stat.stat.exists
     )
+
+- name: Remove DSA host keys if they exist
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/ssh/ssh_host_dsa_key
+    - /etc/ssh/ssh_host_dsa_key.pub
 
 - name: Remove 'UseDNS', 'PermitRootLogin', and 'PermitUserEnvironment' from /etc/ssh/sshd_config
   when: "'# BEGIN ANSIBLE MANAGED BLOCK (Settings)' not in lookup('file', '/etc/ssh/sshd_config')"
