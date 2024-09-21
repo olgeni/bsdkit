@@ -113,6 +113,7 @@ fi
 
 OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
 OS_MAJOR=$(echo ${_version} | sed -e 's/\..*//')
+OS_REPODIR=${BSDKIT_DATA}/pkgbase
 
 # ===
 
