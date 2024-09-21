@@ -124,7 +124,7 @@ build-release() {
 
     KERNCONF="BSDKIT"
 
-    echo ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
+    message ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
     env -i make -s -C ${OS_SRCDIR} \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
@@ -155,7 +155,7 @@ build-release() {
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         clean
 
-    echo ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
+    message ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
     rm -f ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 }
