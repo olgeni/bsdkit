@@ -112,8 +112,11 @@ if [ ! -d "${OS_SRCDIR}" ]; then
 fi
 
 OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
-OS_MAJOR=$(echo ${_version} | sed -e 's/\..*//')
 OS_REPODIR=${BSDKIT_DATA}/pkgbase
+
+OS_MAJOR=$(get-major-version-from-source ${OS_SRCDIR})
+OS_MINOR=$(get-minor-version-from-source ${OS_SRCDIR})
+OS_PATCH=$(get-patch-version-from-source ${OS_SRCDIR})
 
 # ===
 
