@@ -105,6 +105,12 @@ shift $((OPTIND - 1))
 # ===
 
 OS_SRCDIR=${BSDKIT_DATA}/src/${_version}/src
+
+if [ ! -d "${OS_SRCDIR}" ]; then
+    error "Source directory not found: ${OS_SRCDIR}"
+    exit 1
+fi
+
 OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
 OS_MAJOR=$(echo ${_version} | sed -e 's/\..*//')
 
