@@ -5,6 +5,7 @@ set -e -u -o pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+source ${SCRIPT_PATH}/lib/system.inc.sh
 source ${SCRIPT_PATH}/lib/colors.inc.sh
 source ${SCRIPT_PATH}/lib/is-yes.inc.sh
 

@@ -5,6 +5,7 @@ setopt errreturn nounset pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+source ${SCRIPT_PATH}/../lib/system.inc.sh
 source ${SCRIPT_PATH}/../lib/colors.inc.sh
 source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
@@ -114,9 +115,9 @@ fi
 OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
 OS_REPODIR=${BSDKIT_DATA}/pkgbase
 
-OS_MAJOR=$(get-major-version-from-source ${OS_SRCDIR})
-OS_MINOR=$(get-minor-version-from-source ${OS_SRCDIR})
-OS_PATCH=$(get-patch-version-from-source ${OS_SRCDIR})
+OS_MAJOR=$(get-src-major-version ${OS_SRCDIR})
+OS_MINOR=$(get-src-minor-version ${OS_SRCDIR})
+OS_PATCH=$(get-src-patch-version ${OS_SRCDIR})
 
 # ===
 
@@ -149,7 +150,7 @@ build-release() {
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         install DESTDIR=${OS_RELDIR}
 
-    ${BSDKIT_PATH}/bsdkit get-src-release-name ${OS_SRCDIR} > ${OS_RELDIR}/ftp/RELEASE
+    get-src-osrelease ${OS_SRCDIR} > ${OS_RELDIR}/ftp/RELEASE
 
     etcupdate build -s ${OS_SRCDIR} ${OS_RELDIR}/ftp/etcupdate.tar.bz2
 
@@ -166,106 +167,6 @@ build-release() {
     message ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
     rm -f ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
-}
-
-get-major-version-from-source() {
-    local _src_dir=$1
-
-    if [ ! -d "${_src_dir}" ]; then
-        error "Source directory not found: ${_src_dir}"
-        return 1
-    fi
-
-    local _newvers_sh=${_src_dir}/sys/conf/newvers.sh
-
-    if [ ! -f "${_newvers_sh}" ]; then
-        error "newvers.sh not found: ${_newvers_sh}"
-        return 1
-    fi
-
-    local _revision
-
-    while IFS= read -r line; do
-        case "$line" in
-            REVISION=*)
-                _revision="${line#REVISION=\"}"
-                _revision="${_revision%\"}"
-                ;;
-        esac
-    done < <(grep -E '^REVISION=' "$_newvers_sh")
-
-    local major_version="${_revision%%.*}"
-
-    echo "${major_version}"
-}
-
-get-minor-version-from-source() {
-    local _src_dir=$1
-
-    if [ ! -d "${_src_dir}" ]; then
-        error "Source directory not found: ${_src_dir}"
-        return 1
-    fi
-
-    local _newvers_sh=${_src_dir}/sys/conf/newvers.sh
-
-    if [ ! -f "${_newvers_sh}" ]; then
-        error "newvers.sh not found: ${_newvers_sh}"
-        return 1
-    fi
-
-    local _revision
-
-    while IFS= read -r line; do
-        case "$line" in
-            REVISION=*)
-                _revision="${line#REVISION=\"}"
-                _revision="${_revision%\"}"
-                ;;
-        esac
-    done < <(grep -E '^REVISION=' "$_newvers_sh")
-
-    echo "${_revision}"
-}
-
-get-patch-version-from-source() {
-    local _src_dir=$1
-
-    if [ ! -d "${_src_dir}" ]; then
-        error "Source directory not found: ${_src_dir}"
-        return 1
-    fi
-
-    local _newvers_sh=${_src_dir}/sys/conf/newvers.sh
-
-    if [ ! -f "${_newvers_sh}" ]; then
-        error "newvers.sh not found: ${_newvers_sh}"
-        return 1
-    fi
-
-    local _revision
-    local _branch
-
-    while IFS= read -r line; do
-        case "$line" in
-            REVISION=*)
-                _revision="${line#REVISION=\"}"
-                _revision="${_revision%\"}"
-                ;;
-            BRANCH=*)
-                _branch="${line#BRANCH=\"}"
-                _branch="${_branch%\"}"
-                ;;
-        esac
-    done < <(grep -E '^(REVISION|BRANCH)=' "$_newvers_sh")
-
-    if [[ "${_branch}" == RELEASE* ]]; then
-        local version_number="${_revision}${_branch#RELEASE-}"
-    else
-        local version_number="${_revision}"
-    fi
-
-    echo "${version_number}"
 }
 
 build-staging() {

@@ -5,6 +5,7 @@ setopt errreturn nounset pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+source ${SCRIPT_PATH}/../lib/system.inc.sh
 source ${SCRIPT_PATH}/../lib/colors.inc.sh
 source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
@@ -32,8 +33,6 @@ fi
 : ${BOOTENV_NAME:="$(date +%F.%H%M)"}
 : ${BOOTENV_MOUNT:="/mnt"}
 : ${FETCH_ONLY:="no"}
-: ${UPGRADE_PACKAGES:="no"}
-: ${REBUILD_PORTS:="no"}
 : ${CAT_CMD:="/bin/cat"}
 
 : ${_install_src:="no"}
@@ -42,31 +41,6 @@ fi
 : ${_proc_mounted:="no"}
 
 _mountpoint_list=()
-
-get-file-fs() {
-    local _directory="$1"
-
-    df -T ${_directory} | tail -n +2 | awk '{ print $2; }'
-}
-
-file-on-fs() {
-    local _directory="$1"
-    local _type="$2"
-
-    [ "$(get-file-fs ${_directory})" = "${_type}" ]
-}
-
-file-on-ufs() {
-    local _directory="$1"
-
-    file-on-fs ${_directory} "ufs"
-}
-
-file-on-zfs() {
-    local _directory="$1"
-
-    file-on-fs ${_directory} "zfs"
-}
 
 cleanup() {
     if is-yes ${BOOTENV_ENABLE}; then
@@ -96,33 +70,6 @@ cleanup() {
             fi
         fi
     fi
-}
-
-osmajor() {
-    local _destdir="$1"
-
-    awk '/^\#define[[:blank:]]__FreeBSD_version/ { print substr($3, 1, 2); }' ${_destdir}/usr/include/sys/param.h
-}
-
-rebuild-port() {
-    local _port="$1"
-
-    if ! pkg info -q ${_port}; then
-        return 0
-    fi
-
-    if ! [ $(osmajor /) = $(osmajor ${BOOTENV_MOUNT}) -a -d ${BOOTENV_MOUNT}/usr/ports/${_port} ]; then
-        return 0
-    fi
-
-    mount -t devfs devfs ${BOOTENV_MOUNT}/dev
-
-    pkg -c ${BOOTENV_MOUNT} unlock -y ${_port}
-    chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean all deinstall install
-    chroot ${BOOTENV_MOUNT} make -C /usr/ports/${_port} clean
-    pkg -c ${BOOTENV_MOUNT} lock -y ${_port}
-
-    umount -f ${BOOTENV_MOUNT}/dev
 }
 
 remove-nouarch-files() {
@@ -174,9 +121,6 @@ while getopts "a:b:d:eEFn:p:r:v:" OPT; do
         a)
             BSDKIT_ARCH=${OPTARG}
             ;;
-        b)
-            REBUILD_PORTS="yes"
-            ;;
         d)
             DESTDIR=${OPTARG%/}
             ;;
@@ -191,9 +135,6 @@ while getopts "a:b:d:eEFn:p:r:v:" OPT; do
             ;;
         n)
             BOOTENV_NAME=${OPTARG}
-            ;;
-        p)
-            UPGRADE_PACKAGES="yes"
             ;;
         r)
             BSDKIT_ROOT_URL=${OPTARG}
@@ -214,7 +155,7 @@ if [ -d ${DESTDIR}/.base ]; then
 fi
 
 if [ -z "${BSDKIT_VERSION}" ]; then
-    BSDKIT_VERSION="$(${BSDKIT_PATH}/bsdkit get-os-version)"
+    BSDKIT_VERSION="$(get-os-version)"
     message "Using current version: ${BSDKIT_VERSION}"
 fi
 
@@ -420,7 +361,7 @@ _readonly_directory_list=(
     "usr/tests"
 )
 
-if file-on-zfs ${DESTDIR:-/}; then
+if is-file-on-zfs ${DESTDIR:-/}; then
     for _directory in ${_readonly_directory_list}; do
         if [ -d ${DESTDIR}/${_directory} ]; then
             chflags -R uarch ${DESTDIR}/${_directory}
@@ -480,7 +421,7 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         ports) ;;
 
         src)
-            if file-on-zfs ${DESTDIR:-/}; then
+            if is-file-on-zfs ${DESTDIR:-/}; then
                 for _arch in i386 amd64; do
                     if [ -f ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT ]; then
                         chflags uarch ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT
@@ -548,7 +489,7 @@ if [ -t 0 ]; then
     etcupdate resolve -D ${DESTDIR}/
 fi
 
-if file-on-zfs ${DESTDIR:-/}; then
+if is-file-on-zfs ${DESTDIR:-/}; then
     message "Removing obsolete files"
 
     for _directory in ${_readonly_directory_list}; do
@@ -626,22 +567,6 @@ for _file in ${DESTDIR}/var/db/mixer*-state(N); do
         rm -f ${_file}
     fi
 done
-
-if is-yes ${BOOTENV_ENABLE}; then
-    if is-yes ${UPGRADE_PACKAGES}; then
-        if pkg -c ${BOOTENV_MOUNT} update --repository bsdkit --force; then
-            pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --yes pkg
-            pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --fetch-only --yes
-            env HANDLE_RC_SCRIPTS=NO pkg -c ${BOOTENV_MOUNT} upgrade --repository bsdkit --yes
-        fi
-    fi
-
-    if is-yes ${REBUILD_PORTS}; then
-        for _port in $(pkg which -qo /boot/modules/* | sort | uniq); do
-            rebuild-port ${_port}
-        done
-    fi
-fi
 
 if is-yes ${BOOTENV_ENABLE}; then
     for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do

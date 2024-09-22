@@ -100,6 +100,7 @@ SERVICE_RESTART_BLACKLIST=(
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+source ${SCRIPT_PATH}/lib/system.inc.sh
 source ${SCRIPT_PATH}/lib/colors.inc.sh
 source ${SCRIPT_PATH}/lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/lib/is-yes.inc.sh
@@ -124,119 +125,6 @@ usage() {
     # Print a usage message to stderr and exit with a non-zero status.
     echo "usage: $*" >&2
     exit 1
-}
-
-is-bios() {
-    # Return 0 if the system is booted in BIOS mode
-    [ "$(sysctl -n machdep.bootmethod)" = "BIOS" ]
-}
-
-is-efi() {
-    # Return 0 if the system is booted in UEFI mode
-    [ "$(sysctl -n machdep.bootmethod)" = "UEFI" ]
-}
-
-platform-is-digitalocean() {
-    [ "$(kenv -q smbios.system.product)" = "Droplet" ]
-}
-
-platform-is-cloudsigma() {
-    [ "$(kenv -q smbios.system.product)" = "CloudSigma" ]
-}
-
-platform-is-virtualbox() {
-    [ "$(kenv -q smbios.system.product)" = "VirtualBox" ]
-}
-
-platform-is-vmware() {
-    [ "$(kenv -q smbios.system.product)" = "VMware Virtual Platform" ]
-}
-
-platform-is-aws() {
-    [ "$(kenv -q smbios.bios.vendor)" = "Amazon EC2" ]
-}
-
-platform-is-cloud() {
-    platform-is-digitalocean || platform-is-cloudsigma || platform-is-virtualbox || platform-is-vmware || platform-is-aws
-}
-
-inet-interface() {
-    route get default | awk '/interface:/ { print $2 }'
-}
-
-inet-address() {
-    ifconfig $(inet-interface) | awk '$1 == "inet" { print $2; exit }'
-}
-
-gateway-interface() {
-    netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["interface-name"]'
-}
-
-gateway-address() {
-    netstat --libxo json -n -r | jq -r '.["statistics"]["route-information"]["route-table"]["rt-family"][] | select(.["address-family"] == "Internet") | .["rt-entry"][] | select(.["destination"] == "default") | .["gateway"]'
-}
-
-is-mount-point() {
-    local _directory="${1%/}"
-
-    mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
-}
-
-get-os-version() {
-    uname -r | cut -d '-' -f 1
-}
-
-get-osrelease() {
-    local _destdir=${1:-/}
-
-    ${_destdir}/bin/freebsd-version -u
-}
-
-get-osreldate() {
-    local _destdir=${1:-/}
-
-    if [ -f ${_destdir}/usr/include/sys/param.h ]; then
-        awk '/^\#define[[:blank:]]__FreeBSD_version/ { print $3 }' ${_destdir}/usr/include/sys/param.h
-    else
-        ${_destdir}/usr/bin/uname -K
-    fi
-}
-
-get-src-release-name() {
-    local _srcdir=${1:-/usr/src}
-
-    local _newvers_file="${_srcdir}/sys/conf/newvers.sh"
-    local _release_name=""
-
-    if [[ -f "${_newvers_file}" ]]; then
-        local _contents=$(<"${_newvers_file}")
-
-        local _revision=$(echo "${_contents}" | grep -oE 'REVISION="([^"]+)"' | cut -d'"' -f2)
-        local _branch=$(echo "${_contents}" | grep -oE 'BRANCH="([^"]+)"' | cut -d'"' -f2)
-
-        _release_name="${_revision}-${_branch}"
-    else
-        error "${_newvers_file} does not exist."
-        return 1
-    fi
-
-    echo "${_release_name}"
-}
-
-get-boot-pool() {
-    zpool get -H -o name,value bootfs | awk '$2 != "-" { print $1 }'
-}
-
-ruby-version() {
-    if whence -p ruby > /dev/null 2>&1; then
-        ruby --version | awk '{print $2}' | cut -d '.' -f 1-2
-    fi
-}
-
-perl-version() {
-    if whence -p perl > /dev/null 2>&1; then
-        perl -e 'print(sprintf("%d.%d\n", $^V->{version}[0], $^V->{version}[1]))'
-    fi
 }
 
 reformat-fstab() {
@@ -1858,7 +1746,7 @@ ${BSDKIT_JAIL_NAME} {
         path = "${_destdir%/}";
         host.hostname = "${BSDKIT_JAIL_NAME}";
         host.domainname = "local";
-        ip4.addr = "$(inet-address)";
+        ip4.addr = "$(get-inet-address)";
 }
 EOF
 }
@@ -3498,7 +3386,7 @@ ${_jail_name} {
         path = "${_destdir%/}";
         host.hostname = "\${name}";
         host.domainname = "local";
-        interface = "$(inet-interface)";
+        interface = "$(get-gateway-interface)";
         # ip4.addr = "";
         # mount.fstab = "${_jail_root%/}/\${name}.fstab";
 }
@@ -3558,8 +3446,8 @@ purge-libdir() {
 }
 
 purge-local-libdirs() {
-    local _ruby_version=$(ruby-version)
-    local _perl_version=$(perl-version)
+    local _ruby_version=$(get-ruby-version)
+    local _perl_version=$(get-perl-version)
 
     for _ruby_libdir in ${RUBY_LIBDIR_LIST[@]}; do
         purge-libdir ${_ruby_libdir}

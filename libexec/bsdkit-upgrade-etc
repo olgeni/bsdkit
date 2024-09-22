@@ -5,6 +5,7 @@ setopt errreturn nounset pipefail
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
+source ${SCRIPT_PATH}/../lib/system.inc.sh
 source ${SCRIPT_PATH}/../lib/colors.inc.sh
 source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
@@ -57,7 +58,7 @@ done
 shift $((OPTIND - 1))
 
 if [ -z "${BSDKIT_VERSION}" ]; then
-    BSDKIT_VERSION="$(${BSDKIT_PATH}/bsdkit get-os-version)"
+    BSDKIT_VERSION="$(get-os-version)"
     message "Using current version: ${BSDKIT_VERSION}"
 fi
 
