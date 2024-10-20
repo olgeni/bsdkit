@@ -53,6 +53,11 @@
     name: caddy
     state: restarted
 
+- name: reload_caddy
+  service:
+    name: caddy
+    state: reloaded
+
 - name: restart_fail2ban
   service:
     name: fail2ban
