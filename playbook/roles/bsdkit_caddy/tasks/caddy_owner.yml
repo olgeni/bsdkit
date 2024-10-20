@@ -30,12 +30,18 @@
     - /var/run/caddy
     - /usr/local/etc/caddy
 
-- name: Ensure Caddyfile.sample has correct owner and permissions
+- name: Ensure Caddyfile.sample has correct owner and permissions if it exists
+  stat:
+    path: /usr/local/etc/caddy/Caddyfile.sample
+  register: caddyfile_sample_stat
+
+- name: Set correct owner and permissions for Caddyfile.sample
   file:
     path: /usr/local/etc/caddy/Caddyfile.sample
     owner: root
     group: wheel
     mode: '0644'
+  when: caddyfile_sample_stat.stat.exists
 
 - name: Start caddy service
   service:
