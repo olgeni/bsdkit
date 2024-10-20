@@ -1,3 +1,3 @@
 ---
-bsdkit_service_name: nats-server
+bsdkit_sv_nats_server_service_name: nats-server
 bsdkit_sv_nats_server_configuration: []

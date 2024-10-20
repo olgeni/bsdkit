@@ -2,4 +2,4 @@
 - name: restart_sv_redpanda_connect
   shell:
     cmd: |
-      sv restart {{ bsdkit_service_name }} || :
+      sv restart {{ bsdkit_sv_redpanda_connect_service_name }} || :

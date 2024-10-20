@@ -1,33 +1,33 @@
 ---
-- name: Install packages (benthos)
+- name: Install packages (redpanda-connect)
   community.general.pkgng:
     name: "{{ item }}"
     state: present
   loop:
     - net/redpanda-connect
 
-- name: Create /var/db/runit/{{ bsdkit_service_name }}
+- name: Create /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}
   file:
     mode: "0755"
-    path: /var/db/runit/{{ bsdkit_service_name }}
+    path: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}
     state: directory
 
-- name: Create /var/db/runit/{{ bsdkit_service_name }}/data
+- name: Create /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/data
   file:
     mode: "0755"
-    path: /var/db/runit/{{ bsdkit_service_name }}/data
+    path: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/data
     state: directory
 
-- name: Create /var/db/runit/{{ bsdkit_service_name }}/resources
+- name: Create /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/resources
   file:
     mode: "0755"
-    path: /var/db/runit/{{ bsdkit_service_name }}/resources
+    path: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/resources
     state: directory
 
 - name: Copy Redpanda Connect configuration files
   template:
     src: "{{ item }}"
-    dest: "/var/db/runit/{{ bsdkit_service_name }}/{{ item | basename }}"
+    dest: "/var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/{{ item | basename }}"
     group: wheel
     mode: "0644"
   with_items: "{{ bsdkit_sv_redpanda_connect_configuration }}"
@@ -37,35 +37,35 @@
 - name: Copy Redpanda Connect resource files
   template:
     src: "{{ item }}"
-    dest: "/var/db/runit/{{ bsdkit_service_name }}/resources/{{ item | basename }}"
+    dest: "/var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/resources/{{ item | basename }}"
     group: wheel
     mode: "0644"
   with_items: "{{ bsdkit_sv_redpanda_connect_resources }}"
   notify:
     - restart_sv_redpanda_connect
 
-- name: Copy /var/db/runit/{{ bsdkit_service_name }}/run
+- name: Copy /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/run
   copy:
-    dest: /var/db/runit/{{ bsdkit_service_name }}/run
+    dest: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/run
     group: wheel
     src: ../files/run
     mode: "0755"
   notify:
     - restart_sv_redpanda_connect
 
-- name: Copy /var/db/runit/{{ bsdkit_service_name }}/redpanda-connect.yml.sample
+- name: Copy /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/redpanda-connect.yml.sample
   copy:
-    dest: /var/db/runit/{{ bsdkit_service_name }}/redpanda-connect.yml.sample
+    dest: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/redpanda-connect.yml.sample
     group: wheel
     src: ../files/redpanda-connect.yml.sample
     mode: "0644"
   notify:
     - restart_sv_redpanda_connect
 
-- name: Link /var/service/{{ bsdkit_service_name }}
+- name: Link /var/service/{{ bsdkit_sv_redpanda_connect_service_name }}
   file:
-    src: /var/db/runit/{{ bsdkit_service_name }}
-    path: /var/service/{{ bsdkit_service_name }}
+    src: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}
+    path: /var/service/{{ bsdkit_sv_redpanda_connect_service_name }}
     state: link
   notify:
     - restart_sv_redpanda_connect

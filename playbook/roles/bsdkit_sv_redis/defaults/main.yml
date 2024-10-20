@@ -1,2 +1,2 @@
 ---
-bsdkit_service_name: redis
+bsdkit_sv_redis_service_name: redis
