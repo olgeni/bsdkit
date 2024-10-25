@@ -74,24 +74,14 @@
 - name: Configure monit service
   include_tasks: monit-service.yml
   loop:
-    - service: devd
-      process: devd
-      pid_file: /var/run/devd.pid
-      host_only: true
-
-    - service: smartd
-      process: smartd
-      pid_file: /var/run/smartd.pid
-      host_only: true
+    - service: amazon-ssm-agent
+      process: amazon-ssm-agent
+      pid_file: /var/run/amazon_ssm_agent.pid
+      host_only: false
 
     - service: apache24
       process: httpd
       pid_file: /var/run/httpd.pid
-      host_only: false
-
-    - service: rspamd
-      process: rspamd
-      pid_file: /var/run/rspamd/rspamd.pid
       host_only: false
 
     - service: caddy
@@ -114,6 +104,11 @@
       pid_file: /var/run/cron.pid
       host_only: false
 
+    - service: devd
+      process: devd
+      pid_file: /var/run/devd.pid
+      host_only: true
+
     - service: fail2ban
       process: fail2ban
       pid_file: /var/run/fail2ban/fail2ban.pid
@@ -127,6 +122,11 @@
     - service: inetd
       process: inetd
       pid_file: /var/run/inetd.pid
+      host_only: false
+
+    - service: milter-opendkim
+      process: opendkim
+      pid_file: /var/run/milteropendkim/pid
       host_only: false
 
     - service: mysql-server
@@ -147,11 +147,6 @@
     - service: ntpd
       process: ntpd
       pid_file: /var/db/ntp/ntpd.pid
-      host_only: false
-
-    - service: milter-opendkim
-      process: opendkim
-      pid_file: /var/run/milteropendkim/pid
       host_only: false
 
     - service: openvpn
@@ -179,10 +174,20 @@
       matching: /usr/local/sbin/runsvdir
       host_only: false
 
+    - service: rspamd
+      process: rspamd
+      pid_file: /var/run/rspamd/rspamd.pid
+      host_only: false
+
     - service: sa-spamd
       process: spamd
       pid_file: /var/run/spamd/spamd.pid
       host_only: false
+
+    - service: smartd
+      process: smartd
+      pid_file: /var/run/smartd.pid
+      host_only: true
 
     - service: sshd
       process: sshd
@@ -197,11 +202,6 @@
     - service: znapzend
       process: znapzend
       pid_file: /var/run/znapzend.pid
-      host_only: false
-
-    - service: amazon-ssm-agent
-      process: amazon-ssm-agent
-      pid_file: /var/run/amazon_ssm_agent.pid
       host_only: false
 
 - name: Enable monit service
