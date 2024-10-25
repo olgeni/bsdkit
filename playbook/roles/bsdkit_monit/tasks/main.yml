@@ -199,6 +199,11 @@
       pid_file: /var/run/znapzend.pid
       host_only: false
 
+    - service: amazon-ssm-agent
+      process: amazon-ssm-agent
+      pid_file: /var/run/amazon_ssm_agent.pid
+      host_only: false
+
 - name: Enable monit service
   service:
     name: monit
