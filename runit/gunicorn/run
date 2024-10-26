@@ -48,4 +48,4 @@ exec env -S "${ENVRC}" ${CHPST_COMMAND:-} ${GUNICORN_PYTHON} ${GUNICORN_PYTHON_F
 
 # For logs: "--log-level debug"
 # For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"
-# For proxy address resolution: "--forwarded-allow-ips='*'"
+# For proxy address resolution: "--forwarded-allow-ips=*"
