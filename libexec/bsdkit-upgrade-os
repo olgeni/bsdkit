@@ -22,6 +22,8 @@ if [ -x /usr/local/bin/vim ]; then
     export EDITOR=/usr/local/bin/vim
 fi
 
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
+
 # ===========================================================================
 
 : ${BSDKIT_ROOT_URL:="http://hub.olgeni.com/FreeBSD"}
