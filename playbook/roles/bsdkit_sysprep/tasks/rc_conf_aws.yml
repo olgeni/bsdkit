@@ -9,6 +9,7 @@
     - amazon_ssm_agent_enable
     - dev_aws_disk_enable
     - ec2_configinit_enable
+    - ec2_ephemeral_swap
     - ec2_fetchkey_enable
     - ec2_loghostkey_enable
     - growfs_enable
