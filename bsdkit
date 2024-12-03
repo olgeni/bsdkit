@@ -1631,9 +1631,9 @@ __install-setup-runtime() {
         sysutils/ansible
         sysutils/ddrescue
         sysutils/flashrom
-        sysutils/fusefs-exfat
-        sysutils/fusefs-ext2
-        sysutils/fusefs-ntfs
+	filesystems/exfat
+	filesystems/ext2
+	filesystems/ntfs
         sysutils/hextools
         sysutils/hfsutils
         sysutils/ipmitool
