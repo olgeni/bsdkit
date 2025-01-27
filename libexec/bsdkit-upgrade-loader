@@ -60,12 +60,37 @@ check-partition() {
     done
 }
 
+has-software-raid() {
+    # Supported devices:
+    # class=0x010400 vendor=0x8086 device=0x1c04: 6 Series/C200 Series Desktop SATA RAID Controller
+
+    local _pci_devices
+    _pci_devices=$(pciconf -l)
+
+    if echo "${_pci_devices}" | grep -q "class=0x010400" && echo "${_pci_devices}" | grep -q "vendor=0x8086" && echo "${_pci_devices}" | grep -q "device=0x1c04"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 update-loader() {
     _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
+    _has_software_raid=0
+
+    if has-software-raid; then
+        _has_software_raid=1
+    fi
 
     _efi_mount_point="${DESTDIR}/boot/efi"
 
     mkdir -p "${_efi_mount_point}"
+
+    # If we have software RAID, we need to handle the last sector (GPT) carefully
+    if [ ${_has_software_raid} -eq 1 ]; then
+        message "Software RAID detected - will preserve last sectors (GPT)"
+        sysctl -q kern.geom.debugflags=0x10
+    fi
 
     for _disk in ${(s/ /)_disks}; do
         case "${_disk}" in
@@ -89,8 +114,24 @@ update-loader() {
                 fi
 
                 if [ -n "${_freebsd_zfs_partitions}" ]; then
+                    if [ ${_has_software_raid} -eq 1 ]; then
+                        # Save the last sector which contains RAID config
+                        _last_sector_offset=$(expr $(sudo diskinfo /dev/${_disk} | awk '{ print $4 }') - 1)
+                        message "Saving boot sector for ${_disk}"
+                        dd if=/dev/${_disk} of=sector-${_disk}.bin iseek=${_last_sector_offset}
+
+                        message "Recovering partition table for ${_disk}"
+                        gpart recover ${_disk}
+                    fi
+
                     message "Upgrading boot loader on ${_partition} (gptzfsboot)"
                     gpart bootcode -b "${DESTDIR}/boot/pmbr" -p "${DESTDIR}/boot/gptzfsboot" -i ${_index} "${_disk}"
+
+                    if [ ${_has_software_raid} -eq 1 ]; then
+                        message "Restoring boot sector for ${_disk}"
+                        dd if=sector-${_disk}.bin of=/dev/${_disk} oseek=${_last_sector_offset}
+                        rm -f sector-${_disk}.bin
+                    fi
                 else
                     message "Upgrading boot loader on ${_partition} (gptboot)"
                     gpart bootcode -b "${DESTDIR}/boot/pmbr" -p "${DESTDIR}/boot/gptboot" -i ${_index} "${_disk}"
@@ -127,6 +168,10 @@ update-loader() {
             done
         fi
     done
+
+    if [ ${_has_software_raid} -eq 1 ]; then
+        sysctl -q kern.geom.debugflags=0x00
+    fi
 }
 
 check-partition
