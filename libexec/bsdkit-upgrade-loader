@@ -45,6 +45,7 @@ if [ -d ${DESTDIR}/.base ]; then
 fi
 
 check-partition() {
+    local _disks
     _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
 
     for _disk in ${(s/ /)_disks}; do
@@ -75,6 +76,7 @@ has-software-raid() {
 }
 
 update-loader() {
+    local _disks _has_software_raid _efi_mount_point
     _disks="$(sysctl -n kern.disks | rs 0 1 | sort | rs 1 0)"
     _has_software_raid=0
 
@@ -99,6 +101,7 @@ update-loader() {
                 ;;
         esac
 
+        local _efi_partitions _freebsd_boot_partitions _freebsd_zfs_partitions
         _efi_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w efi | awk '{ print $3 }' || :)
         _freebsd_boot_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-boot | awk '{ print $3 }' || :)
         _freebsd_zfs_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-zfs | awk '{ print $3 }' || :)
@@ -107,7 +110,8 @@ update-loader() {
             for _partition in ${(s/ /)_freebsd_boot_partitions}; do
                 message "Checking freebsd-boot partition ${_partition}"
 
-                local _index=$(echo ${_partition} | sed -E 's/.*p([0-9]+)$/\1/')
+                local _index _last_sector_offset
+                _index=$(echo ${_partition} | sed -E 's/.*p([0-9]+)$/\1/')
 
                 if [ -z "${_index}" ]; then
                     error "Failed to determine partition index (${_partition})"
