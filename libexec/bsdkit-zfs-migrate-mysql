@@ -1,0 +1,85 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/system.inc.sh
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+    exit 1
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+main() {
+    if sysctl -n security.jail.jailed > /dev/null 2>&1; then
+        if [ $(sysctl -n security.jail.jailed) -eq 1 ]; then
+            message "MySQL migration not supported in jail."
+            return 1
+        fi
+    fi
+
+    local _pool
+    _pool=$(get-boot-pool)
+
+    local _mysql_directory=/var/db/mysql
+
+    if zfs get -H -o value name ${_pool}${_mysql_directory} > /dev/null 2>&1; then
+        message "MySQL dataset already exists."
+        return 0
+    fi
+
+    if [ -e ${_mysql_directory}.orig ]; then
+        message "Found leftover MySQL directory: \"${_mysql_directory}.orig\"."
+        return 1
+    fi
+
+    local _running=NO
+
+    if service mysql-server status > /dev/null 2>&1; then
+        message "MySQL is running."
+        _running=YES
+    fi
+
+    if is-yes ${_running}; then
+        message "Stopping MySQL."
+        service mysql-server stop
+    fi
+
+    message "Moving MySQL directory to \"${_mysql_directory}.orig\"."
+    mv ${_mysql_directory} ${_mysql_directory}.orig
+
+    # Properties will be set by Ansible.
+    message "Creating new MySQL dataset."
+    zfs create \
+        -o compression=$(__zfs-compression) \
+        -o atime=off \
+        -o redundant_metadata=most \
+        ${_pool}${_mysql_directory}
+
+    message "Setting permissions on \"${_mysql_directory}\"."
+    install -o mysql -g mysql -m 755 -d ${_mysql_directory}
+
+    message "Copying MySQL data."
+    pushd ${_mysql_directory}.orig
+    find . | cpio -p -d -u -v ${_mysql_directory}
+    popd
+
+    message "Removing \"${_mysql_directory}.orig\"."
+    rm -r -f ${_mysql_directory}.orig
+
+    if is-yes ${_running}; then
+        message "Starting MySQL."
+        service mysql-server start
+    fi
+
+    message "MySQL migration completed."
+    return 0
+}
+
+main "$@"
