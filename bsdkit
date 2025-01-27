@@ -3694,66 +3694,7 @@ restart-local() {
 }
 
 zfs-migrate-postgresql() {
-    if sysctl -n security.jail.jailed > /dev/null 2>&1; then
-        if [ $(sysctl -n security.jail.jailed) -eq 1 ]; then
-            message "PostgreSQL migration not supported in jail."
-            return 1
-        fi
-    fi
-
-    local _pool
-    _pool=$(get-boot-pool)
-
-    local _postgres_directory=/var/db/postgres
-
-    if zfs get -H -o value name ${_pool}${_postgres_directory} > /dev/null 2>&1; then
-        message "PostgreSQL dataset already exists."
-        return 0
-    fi
-
-    if [ -e ${_postgres_directory}.orig ]; then
-        message "Found leftover PostgreSQL directory: \"${_postgres_directory}.orig\"."
-        return 1
-    fi
-
-    local _running=NO
-
-    if service postgresql status > /dev/null 2>&1; then
-        message "PostgreSQL is running."
-        _running=YES
-    fi
-
-    if is-yes ${_running}; then
-        message "Stopping PostgreSQL."
-        service postgresql stop
-    fi
-
-    message "Moving PostgreSQL directory to \"${_postgres_directory}.orig\"."
-    mv ${_postgres_directory} ${_postgres_directory}.orig
-
-    # Properties will be set by Ansible.
-    message "Creating new PostgreSQL dataset."
-    zfs create \
-        -o compression=$(__zfs-compression) \
-        -o atime=off \
-        -o redundant_metadata=most \
-        ${_pool}${_postgres_directory}
-
-    message "Setting permissions on \"${_postgres_directory}\"."
-    install -o postgres -g postgres -m 755 -d ${_postgres_directory}
-
-    message "Copying PostgreSQL data."
-    pushd ${_postgres_directory}.orig
-    find . | cpio -p -d -u -v ${_postgres_directory}
-    popd
-
-    message "Removing \"${_postgres_directory}.orig\"."
-    rm -r -f ${_postgres_directory}.orig
-
-    if is-yes ${_running}; then
-        message "Starting PostgreSQL."
-        service postgresql start
-    fi
+    ${BSDKIT_PATH}/libexec/bsdkit-zfs-migrate-postgresql "$@"
 }
 
 zfs-migrate-mysql() {

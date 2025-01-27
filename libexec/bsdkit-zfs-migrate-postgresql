@@ -1,0 +1,74 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/system.inc.sh
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+    exit 1
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+main() {
+    if sysctl -n security.jail.jailed > /dev/null 2>&1; then
+        if [ $(sysctl -n security.jail.jailed) -eq 1 ]; then
+            message "PostgreSQL migration not supported in jail."
+            return 1
+        fi
+    fi
+
+    local _pool
+    _pool=$(get-boot-pool)
+
+    local _postgres_directory=/var/db/postgres
+
+    if zfs get -H -o value name ${_pool}${_postgres_directory} > /dev/null 2>&1; then
+        message "PostgreSQL dataset already exists."
+        return 0
+    fi
+
+    if [ -e ${_postgres_directory}.orig ]; then
+        message "Found leftover PostgreSQL directory: \"${_postgres_directory}.orig\"."
+        return 1
+    fi
+
+    if [ ! -e ${_postgres_directory} ]; then
+        message "PostgreSQL directory not found: \"${_postgres_directory}\"."
+        return 1
+    fi
+
+    if ! service postgresql status > /dev/null 2>&1; then
+        message "PostgreSQL service not running."
+        return 1
+    fi
+
+    service postgresql stop
+
+    message "Creating PostgreSQL dataset..."
+    zfs create ${_pool}${_postgres_directory}
+
+    message "Moving PostgreSQL data..."
+    mv ${_postgres_directory} ${_postgres_directory}.orig
+    zfs set mountpoint=${_postgres_directory} ${_pool}${_postgres_directory}
+
+    message "Copying PostgreSQL data..."
+    cp -a ${_postgres_directory}.orig/. ${_postgres_directory}/
+
+    message "Starting PostgreSQL service..."
+    service postgresql start
+
+    message "Removing old PostgreSQL directory..."
+    rm -rf ${_postgres_directory}.orig
+
+    message "PostgreSQL migration completed."
+    return 0
+}
+
+main "$@"
