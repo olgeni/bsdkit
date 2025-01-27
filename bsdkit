@@ -3229,6 +3229,14 @@ rewrite-filesystem() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-rewrite-filesystem "$@"
 }
 
+zfs-migrate-postgresql() {
+    ${BSDKIT_PATH}/libexec/bsdkit-zfs-migrate-postgresql "$@"
+}
+
+zfs-migrate-mysql() {
+    ${BSDKIT_PATH}/libexec/bsdkit-zfs-migrate-mysql "$@"
+}
+
 apply-mtree() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-apply-mtree "$@"
 }
@@ -3691,14 +3699,6 @@ restart-local() {
         message "Starting service: ${_monit_service}"
         service ${_monit_service} start || :
     fi
-}
-
-zfs-migrate-postgresql() {
-    ${BSDKIT_PATH}/libexec/bsdkit-zfs-migrate-postgresql "$@"
-}
-
-zfs-migrate-mysql() {
-    ${BSDKIT_PATH}/libexec/bsdkit-zfs-migrate-mysql "$@"
 }
 
 destroy-zfs-snapshots() {
