@@ -178,7 +178,10 @@ update-loader() {
     fi
 }
 
-check-partition
+if ! has-software-raid; then
+    check-partition
+fi
+
 update-loader
 
 message "Upgrade complete."
