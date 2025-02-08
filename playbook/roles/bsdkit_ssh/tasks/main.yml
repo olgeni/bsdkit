@@ -179,6 +179,7 @@
       AcceptEnv NPM_*
       AcceptEnv ANTHROPIC_API_KEY
       AcceptEnv DEEPSEEK_API_KEY
+      AcceptEnv GEMINI_API_KEY
       AcceptEnv OPENAI_API_KEY
     marker: "# {mark} ANSIBLE MANAGED BLOCK (AcceptEnv)"
     validate: /usr/sbin/sshd -t -f %s
