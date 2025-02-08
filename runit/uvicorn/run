@@ -28,6 +28,10 @@ if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
     ENVRC="${ENVRC} $(cat envrc.d/*)"
 fi
 
+# UVICORN_ARGS:
+#   --root-path=/api
+#   --uds /var/run/service.sock
+
 : ${UVICORN_USER:="nobody"}
 : ${UVICORN_PATH:="/tmp"}
 : ${UVICORN_ARGS=""}
