@@ -32,6 +32,7 @@
       sudo --user=gitlab-runner zsh <<- "EOF"
       gitlab-runner verify --delete
       EOF
+    chdir: /tmp
   changed_when: false
 
 - name: List Gitlab Runner configuration
@@ -40,6 +41,7 @@
       sudo --user=gitlab-runner zsh <<- "EOF"
       gitlab-runner list --config ~gitlab-runner/.gitlab-runner/config.toml 2>&1
       EOF
+    chdir: /tmp
   changed_when: false
   register: gitlab_runner_list
 
@@ -65,6 +67,8 @@
           --locked="{{ gitlab_runner_locked }}" \
           --access-level="{{ gitlab_runner_access_level }}"
       EOF
+    args:
+      chdir: /tmp
   changed_when: false
   notify:
     - restart_gitlab_runner
