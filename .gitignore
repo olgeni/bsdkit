@@ -1,4 +1,5 @@
 .aider*
+.ansible
 .envrc
 .idea
 .vagrant
