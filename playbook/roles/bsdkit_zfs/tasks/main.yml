@@ -15,6 +15,17 @@
         extra_zfs_properties:
           canmount: false
 
+    - name: Create ZFS dataset for /var/db/containers
+      community.general.zfs:
+        name: "{{ boot_pool }}/var/db/containers"
+        state: present
+      register: containers_dataset_result
+
+    - name: Create ZFS snapshot for /var/db/containers@empty
+      community.general.zfs:
+        name: "{{ boot_pool }}/var/db/containers@empty"
+      when: containers_dataset_result.changed
+
     - name: Create ZFS dataset for /jails
       community.general.zfs:
         name: "{{ boot_pool }}/jails"

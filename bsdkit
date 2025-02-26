@@ -66,6 +66,7 @@ DEFAULT_ASHIFT=12
 
 ZPOOL_CREATE_CMD=(zpool create -o ashift=${DEFAULT_ASHIFT})
 ZFS_CREATE_CMD=(zfs create)
+ZFS_SNAPSHOT_CMD=(zfs snapshot)
 ZFS_CMD=(zfs)
 ZFS_COMPRESSION_ALGORITHM=zstd
 
@@ -1006,6 +1007,8 @@ __zfs-create-fs() {
     # These cannot be created from within the chroot (wrong mountpoint). Properties will be set by Ansible.
     ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/var/db/postgres
     ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/var/db/mysql
+    ${ZFS_CREATE_CMD} ${BSDKIT_ZFS_POOL}/var/db/containers
+    ${ZFS_SNAPSHOT_CMD} ${BSDKIT_ZFS_POOL}/var/db/containers@empty
 
     mkdir -p ${_destdir}/altroot
     mkdir -p ${_destdir}/boot
