@@ -19,6 +19,7 @@
       - devel/git
       - security/ca_root_nss
       - shells/zsh
+      - sysutils/podman-suite
       - sysutils/pv
       - textproc/fzf
       - textproc/go-yq
