@@ -35,6 +35,7 @@ fi
 : ${GUNICORN_VENV:="${GUNICORN_PATH}/.venv"}
 : ${GUNICORN_PYTHON:="python3"}
 : ${GUNICORN_PYTHON_FLAGS=""}
+: ${GUNICORN_UV:=""}
 
 cd ${GUNICORN_PATH}
 
@@ -44,7 +45,12 @@ if [ "$(id -u)" = "0" ]; then
     CHPST_COMMAND="chpst -u ${GUNICORN_USER} ${CHPST_ARGS}"
 fi
 
-exec env -S "${ENVRC}" ${CHPST_COMMAND:-} ${GUNICORN_PYTHON} ${GUNICORN_PYTHON_FLAGS} -m gunicorn ${GUNICORN_ARGS} ${GUNICORN_APP}
+PYTHON_PREFIX=""
+if [ -n "${GUNICORN_UV}" ]; then
+    PYTHON_PREFIX="uv run "
+fi
+
+exec env -S "${ENVRC}" ${CHPST_COMMAND:-} ${PYTHON_PREFIX}${GUNICORN_PYTHON} ${GUNICORN_PYTHON_FLAGS} -m gunicorn ${GUNICORN_ARGS} ${GUNICORN_APP}
 
 # For logs: "--log-level debug"
 # For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"

@@ -34,6 +34,7 @@ fi
 : ${UWSGI_VENV:="${UWSGI_PATH}/.venv"}
 : ${UWSGI_PYTHON:="python3"}
 : ${UWSGI_PYTHON_FLAGS=""}
+: ${UWSGI_UV:=""}
 
 eval export HOME=~${UWSGI_USER}
 
@@ -46,6 +47,11 @@ cd ${UWSGI_PATH}
 
 . ${UWSGI_VENV}/bin/activate
 
-exec env -S "${ENVRC}" chpst -u ${UWSGI_USER} ${CHPST_ARGS} ${UWSGI_PYTHON} ${UWSGI_PYTHON_FLAGS} -m uwsgi ${UWSGI_ARGS}
+PYTHON_PREFIX=""
+if [ -n "${UWSGI_UV}" ]; then
+    PYTHON_PREFIX="uv run "
+fi
+
+exec env -S "${ENVRC}" chpst -u ${UWSGI_USER} ${CHPST_ARGS} ${PYTHON_PREFIX}${UWSGI_PYTHON} ${UWSGI_PYTHON_FLAGS} -m uwsgi ${UWSGI_ARGS}
 
 # For logs: "--log-master"

@@ -39,6 +39,7 @@ fi
 : ${UVICORN_VENV:="${UVICORN_PATH}/.venv"}
 : ${UVICORN_PYTHON:="python3"}
 : ${UVICORN_PYTHON_FLAGS=""}
+: ${UVICORN_UV:=""}
 
 cd ${UVICORN_PATH}
 
@@ -48,4 +49,9 @@ if [ "$(id -u)" = "0" ]; then
     CHPST_COMMAND="chpst -u ${UVICORN_USER} ${CHPST_ARGS}"
 fi
 
-exec env -S "${ENVRC}" ${CHPST_COMMAND} ${UVICORN_PYTHON} ${UVICORN_PYTHON_FLAGS} -m uvicorn ${UVICORN_ARGS} ${UVICORN_APP}
+PYTHON_PREFIX=""
+if [ -n "${UVICORN_UV}" ]; then
+    PYTHON_PREFIX="uv run "
+fi
+
+exec env -S "${ENVRC}" ${CHPST_COMMAND} ${PYTHON_PREFIX}${UVICORN_PYTHON} ${UVICORN_PYTHON_FLAGS} -m uvicorn ${UVICORN_ARGS} ${UVICORN_APP}
