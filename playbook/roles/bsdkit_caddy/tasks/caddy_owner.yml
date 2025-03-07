@@ -28,7 +28,12 @@
     - /var/db/caddy
     - /var/log/caddy
     - /var/run/caddy
-    - /usr/local/etc/caddy
+
+- name: Change owner and group of /usr/local/etc/caddy directory while preserving Caddyfile.sample
+  shell: |
+    find /usr/local/etc/caddy -type d -exec chown www:www {} \;
+    find /usr/local/etc/caddy -type f -not -name "Caddyfile.sample" -exec chown www:www {} \;
+  changed_when: false
 
 - name: Ensure Caddyfile.sample has correct owner and permissions if it exists
   stat:
