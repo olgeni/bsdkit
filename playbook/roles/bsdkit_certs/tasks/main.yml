@@ -17,3 +17,31 @@
     - "../ansible/certs/*.pem"
   notify:
     - certctl_rehash
+
+- name: Check if ca-root-nss.crt exists and differs from cert.pem
+  shell: |
+    if [ -f /usr/local/share/certs/ca-root-nss.crt ] && [ -e /usr/local/etc/ssl/cert.pem ]; then
+      if ! cmp -s /usr/local/share/certs/ca-root-nss.crt /usr/local/etc/ssl/cert.pem; then
+        echo "different"
+      else
+        echo "same"
+      fi
+    elif [ -f /usr/local/share/certs/ca-root-nss.crt ]; then
+      echo "source_only"
+    else
+      echo "no_source"
+    fi
+  register: cert_pem_check
+  changed_when: false
+
+- name: Update cert.pem from ca-root-nss.crt
+  copy:
+    src: /usr/local/share/certs/ca-root-nss.crt
+    dest: /usr/local/etc/ssl/cert.pem
+    remote_src: true
+    owner: root
+    group: wheel
+    mode: "0644"
+  when: cert_pem_check.stdout == "different" or cert_pem_check.stdout == "source_only"
+  notify:
+    - certctl_rehash
