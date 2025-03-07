@@ -1,12 +1,19 @@
 ---
+- name: Remove /usr/local/etc/ssl/certs/uma.crt
+  file:
+    path: /usr/local/etc/ssl/certs/uma.crt
+    state: absent
+  notify:
+    - certctl_rehash
+
 - name: Install CA certificates in /usr/local/etc/ssl/certs
   copy:
-    src: ../ansible/certs/{{ item }}.crt
-    dest: /usr/local/etc/ssl/certs/{{ item }}.crt
+    src: "{{ item }}"
+    dest: "/usr/local/etc/ssl/certs/{{ item | basename }}"
     owner: root
     group: wheel
     mode: "0644"
-  with_items:
-    - uma
+  with_fileglob:
+    - "../ansible/certs/*.pem"
   notify:
     - certctl_rehash
