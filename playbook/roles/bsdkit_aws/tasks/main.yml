@@ -2,23 +2,23 @@
 - name: Check if ec2-user exists
   ansible.builtin.command: id ec2-user
   register: user_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Check if ssm-user exists
   ansible.builtin.command: id ssm-user
   register: ssm_user_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Ensure ec2-user is in the wheel group
   ansible.builtin.user:
     name: ec2-user
     groups: wheel
-    append: yes
+    append: true
   when: user_check.rc == 0
 
 - name: Ensure ssm-user is in the wheel group
   ansible.builtin.user:
     name: ssm-user
     groups: wheel
-    append: yes
+    append: true
   when: ssm_user_check.rc == 0

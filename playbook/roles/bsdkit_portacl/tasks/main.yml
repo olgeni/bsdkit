@@ -3,7 +3,7 @@
   when: is_host_install
   service:
     name: portacl
-    enabled: yes
+    enabled: true
 
 - name: Start portacl service
   when: is_host_install
