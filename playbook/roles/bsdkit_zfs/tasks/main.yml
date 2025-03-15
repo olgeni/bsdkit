@@ -24,6 +24,7 @@
     - name: Create ZFS snapshot for /var/db/containers@empty
       community.general.zfs:
         name: "{{ boot_pool }}/var/db/containers@empty"
+        state: present
       when: containers_dataset_result.changed
 
     - name: Create ZFS dataset for /jails
