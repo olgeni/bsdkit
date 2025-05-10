@@ -6,7 +6,7 @@ set -e -u -o pipefail
 
 exec 2>&1
 
-[ -f config ] && . $(realpath config)
+[ -f config ] && . ./config
 
 : ${CHPST_ARGS=""}
 
