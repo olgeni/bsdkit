@@ -39,6 +39,8 @@ fi
 
 cd ${GUNICORN_PATH}
 
+export OSTYPE=freebsd
+
 . ${GUNICORN_VENV}/bin/activate
 
 if [ "$(id -u)" = "0" ]; then

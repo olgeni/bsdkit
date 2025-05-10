@@ -43,6 +43,8 @@ fi
 
 cd ${UVICORN_PATH}
 
+export OSTYPE=freebsd
+
 . ${UVICORN_VENV}/bin/activate
 
 if [ "$(id -u)" = "0" ]; then

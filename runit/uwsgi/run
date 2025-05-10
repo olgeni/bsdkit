@@ -45,6 +45,8 @@ fi
 
 cd ${UWSGI_PATH}
 
+export OSTYPE=freebsd
+
 . ${UWSGI_VENV}/bin/activate
 
 PYTHON_PREFIX=""

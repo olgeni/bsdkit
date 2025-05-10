@@ -41,6 +41,8 @@ fi
 
 cd ${PYTHON_PATH}
 
+export OSTYPE=freebsd
+
 . ${PYTHON_VENV}/bin/activate
 
 if [ "$(id -u)" = "0" ]; then
