@@ -180,6 +180,16 @@
   set_fact:
     platform_is_cloud: "{{ (platform_is_digitalocean | bool) or (platform_is_cloudsigma | bool) or (platform_is_virtualbox | bool) or (platform_is_vmware | bool) or (platform_is_aws | bool) }}"
 
+- name: Display platform detection results
+  debug:
+    msg:
+      - "platform_is_digitalocean: {{ platform_is_digitalocean }}"
+      - "platform_is_cloudsigma: {{ platform_is_cloudsigma }}"
+      - "platform_is_virtualbox: {{ platform_is_virtualbox }}"
+      - "platform_is_vmware: {{ platform_is_vmware }}"
+      - "platform_is_aws: {{ platform_is_aws }}"
+      - "platform_is_cloud: {{ platform_is_cloud }}"
+
 - name: Retrieve gateway address
   set_fact:
     gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"
