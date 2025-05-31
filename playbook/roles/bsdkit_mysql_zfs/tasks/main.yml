@@ -2,12 +2,18 @@
 - name: bsdkit_mysql_zfs
   when: is_host_install and zfs_available
   block:
+    - name: Check if MySQL home directory exists
+      stat:
+        path: /var/db/mysql
+      register: mysql_dir_stat
+
     - name: Check contents of MySQL home directory
       find:
         paths: /var/db/mysql
         recurse: true
         hidden: true
       register: find_var_db_mysql
+      when: mysql_dir_stat.stat.exists and mysql_dir_stat.stat.isdir
 
     - name: Gather facts about MySQL ZFS dataset
       community.general.zfs_facts:
@@ -16,7 +22,7 @@
       failed_when: false
 
     - name: Create ZFS dataset for MySQL
-      when: find_var_db_mysql.matched == 0 or mysql_zfs_facts.name is defined
+      when: (not mysql_dir_stat.stat.exists) or (find_var_db_mysql.matched | default(0) == 0) or mysql_zfs_facts.name is defined
       community.general.zfs:
         name: "{{ boot_pool }}/var/db/mysql"
         state: present

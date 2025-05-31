@@ -2,6 +2,11 @@
 - name: bsdkit_postgres_zfs
   when: is_host_install and zfs_available
   block:
+    - name: Check if PostgreSQL home directory exists
+      stat:
+        path: /var/db/postgres
+      register: postgres_dir_stat
+
     - name: Check contents of PostgreSQL home directory
       find:
         paths: /var/db/postgres
@@ -9,6 +14,7 @@
         hidden: true
       register: find_var_db_postgres
       failed_when: false
+      when: postgres_dir_stat.stat.exists and postgres_dir_stat.stat.isdir
 
     - name: Gather facts about PostgreSQL ZFS dataset
       community.general.zfs_facts:
@@ -17,7 +23,7 @@
       failed_when: false
 
     - name: Create ZFS dataset for PostgreSQL
-      when: find_var_db_postgres.matched == 0 or var_db_postgres_zfs_facts.name is defined
+      when: (not postgres_dir_stat.stat.exists) or (find_var_db_postgres.matched | default(0) == 0) or var_db_postgres_zfs_facts.name is defined
       community.general.zfs:
         name: "{{ boot_pool }}/var/db/postgres"
         state: present
