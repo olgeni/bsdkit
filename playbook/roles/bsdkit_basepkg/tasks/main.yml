@@ -30,6 +30,7 @@
       - archivers/zip
       - devel/bsddialog
       - devel/gum
+      - devel/uclcmd
       - editors/bvi
       - editors/nano
       - editors/vim
