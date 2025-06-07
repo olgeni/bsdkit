@@ -15,6 +15,7 @@ zparseopts -D -E -F -- \
     v:=version_arg -version:=version_arg \
     a:=arch_arg -arch:=arch_arg \
     k:=token_arg -token:=token_arg \
+    s=snapshot_arg -snapshot=snapshot_arg \
     h=help_arg -help=help_arg || exit 1
 
 # Show help if requested
@@ -24,10 +25,11 @@ Usage: ${0:t} [options]
 
 Options:
     -r, --region REGION     DigitalOcean region (default: ${DEFAULT_REGION})
-    -t, --tag TAG           FreeBSD tag (default: ${DEFAULT_TAG})
+    -t, --tag TAG           FreeBSD tag (default: auto-derived from version)
     -v, --version VERSION   FreeBSD version (default: ${DEFAULT_VERSION})
     -a, --arch ARCH         Architecture (default: ${DEFAULT_ARCH})
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
+    -s, --snapshot          Use snapshot builds instead of releases
     -h, --help              Show this help message
 
 Environment variables required:
@@ -35,11 +37,24 @@ Environment variables required:
     STORAGE_BUCKET              Google Cloud Storage bucket (e.g., gs:bucket/path)
     STORAGE_URL                 Public URL for storage (e.g., https://storage.googleapis.com/bucket/path)
 
-Example:
+Examples:
+    # Release build (tag auto-derived as "14.2")
     DIGITALOCEAN_ACCESS_TOKEN=token \\
     STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --tag 14.1 --version 14.1-RELEASE
+    ${0:t} --region nyc3 --version 14.2-RELEASE
+
+    # Snapshot build (tag auto-derived as "15.0")
+    DIGITALOCEAN_ACCESS_TOKEN=token \\
+    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
+    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
+    ${0:t} --region nyc3 --version 15.0-CURRENT --snapshot
+
+    # Custom tag override
+    DIGITALOCEAN_ACCESS_TOKEN=token \\
+    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
+    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
+    ${0:t} --region nyc3 --version 14.2-RELEASE --tag custom-14.2
 EOF
     exit 0
 fi
@@ -47,10 +62,18 @@ fi
 # Define common variables with defaults
 REGION="${region_arg[2]:-${DEFAULT_REGION}}"
 DISTRIBUTION="Unknown"
-TAG="${tag_arg[2]:-${DEFAULT_TAG}}"
 VERSION="${version_arg[2]:-${DEFAULT_VERSION}}"
 ARCH="${arch_arg[2]:-${DEFAULT_ARCH}}"
+SNAPSHOT="${snapshot_arg[1]:+true}"
 WORK_DIR="/tmp/freebsd-images"
+
+# Derive TAG from VERSION if not explicitly provided
+if [[ -n "${tag_arg[2]:-}" ]]; then
+    TAG="${tag_arg[2]}"
+else
+    # Extract version number from VERSION (e.g., "14.2-RELEASE" -> "14.2", "15.0-CURRENT" -> "15.0")
+    TAG="${VERSION%%-*}"
+fi
 
 # Set DigitalOcean token from command line or environment
 if [[ -n "${token_arg[2]:-}" ]]; then
@@ -79,9 +102,15 @@ image_types=("ufs" "zfs")
 # Function to process and upload image
 process_image() {
     local image_type="$1"
-    local base_url="https://download.freebsd.org/releases/VM-IMAGES/${VERSION}/${ARCH}/Latest"
-    local remote_filename="FreeBSD-${VERSION}-${ARCH}-BASIC-CLOUDINIT.${image_type}.qcow2"
-    local compressed_remote_filename="${remote_filename}.xz"
+    
+    # Determine base URL based on snapshot flag
+    local base_url
+    if [[ "${SNAPSHOT}" == "true" ]]; then
+        base_url="https://download.freebsd.org/ftp/snapshots/VM-IMAGES/${VERSION}/${ARCH}/Latest"
+    else
+        base_url="https://download.freebsd.org/ftp/releases/VM-IMAGES/${VERSION}/${ARCH}/Latest"
+    fi
+    
     local filename="FreeBSD-${TAG}-${ARCH}-${image_type}.qcow2"
     local compressed_filename="${filename}.xz"
     local bz2_filename="${filename}.bz2"
@@ -92,10 +121,23 @@ process_image() {
     mkdir -p "${WORK_DIR}"
     cd "${WORK_DIR}"
 
-    # Download image if not exists
+    # Download image if not exists - try both filename patterns
     if [[ ! -f "${compressed_filename}" ]]; then
-        echo "Downloading ${compressed_remote_filename}..." >&2
-        curl -L -o "${compressed_filename}" "${base_url}/${compressed_remote_filename}"
+        # Try dot pattern first: FreeBSD-VERSION-ARCH-BASIC-CLOUDINIT.TYPE.qcow2.xz
+        local remote_filename_dot="FreeBSD-${VERSION}-${ARCH}-BASIC-CLOUDINIT.${image_type}.qcow2"
+        local compressed_remote_filename_dot="${remote_filename_dot}.xz"
+        
+        echo "Downloading ${compressed_remote_filename_dot}..." >&2
+        if curl -L -f -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_dot}" 2>/dev/null; then
+            echo "Downloaded using dot pattern." >&2
+        else
+            # Fallback to hyphen pattern: FreeBSD-VERSION-ARCH-BASIC-CLOUDINIT-TYPE.qcow2.xz
+            local remote_filename_hyphen="FreeBSD-${VERSION}-${ARCH}-BASIC-CLOUDINIT-${image_type}.qcow2"
+            local compressed_remote_filename_hyphen="${remote_filename_hyphen}.xz"
+            
+            echo "Dot pattern failed, trying hyphen pattern: ${compressed_remote_filename_hyphen}..." >&2
+            curl -L -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_hyphen}"
+        fi
     fi
 
     # Decompress if needed
