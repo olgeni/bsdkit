@@ -117,6 +117,13 @@ process_image() {
 
     echo "Processing ${image_type} image..." >&2
 
+    # Check if file already exists in storage
+    if rclone lsf "${STORAGE_BUCKET}/${bz2_filename}" >/dev/null 2>&1; then
+        echo "File ${bz2_filename} already exists in storage, skipping download and upload..." >&2
+        echo "${STORAGE_URL}/${bz2_filename}"
+        return 0
+    fi
+
     # Create work directory
     mkdir -p "${WORK_DIR}"
     cd "${WORK_DIR}"
@@ -136,14 +143,32 @@ process_image() {
             local compressed_remote_filename_hyphen="${remote_filename_hyphen}.xz"
             
             echo "Dot pattern failed, trying hyphen pattern: ${compressed_remote_filename_hyphen}..." >&2
-            curl -L -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_hyphen}"
+            if ! curl -L -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_hyphen}"; then
+                rm -f "${compressed_filename}"
+                echo "Download failed, partial file removed" >&2
+                exit 1
+            fi
         fi
     fi
 
     # Decompress if needed
-    if [[ ! -f "${filename}" ]]; then
+    if [[ ! -f "${decompressed_filename}" ]]; then
         echo "Decompressing ${compressed_filename}..." >&2
-        xz -d -k "${compressed_filename}"
+        if ! xz -d -k "${compressed_filename}"; then
+            echo "Decompression failed. Examining file..." >&2
+            echo "File type: $(file "${compressed_filename}")" >&2
+            echo "File size: $(ls -lh "${compressed_filename}" | awk '{print $5}')" >&2
+            echo "First 100 bytes:" >&2
+            head -c 100 "${compressed_filename}" | xxd >&2
+            rm -f "${compressed_filename}" "${decompressed_filename}"
+            echo "Decompression failed, corrupted file removed. Please run again to re-download." >&2
+            exit 1
+        fi
+    fi
+
+    # Rename to desired filename if different
+    if [[ "${decompressed_filename}" != "${filename}" && ! -f "${filename}" ]]; then
+        mv "${decompressed_filename}" "${filename}"
     fi
 
     # Recompress with bzip2 if needed
