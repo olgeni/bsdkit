@@ -3,7 +3,7 @@ BSDKIT_ROOT_URL=https://hub.olgeni.com/FreeBSD
 .endif
 
 .if !defined(BSDKIT_VERSION)
-BSDKIT_VERSION=14.2
+BSDKIT_VERSION=14.3
 .endif
 
 .if !defined(BSDKIT_PKGSET)

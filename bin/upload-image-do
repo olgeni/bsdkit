@@ -4,8 +4,8 @@ set -e -u -o pipefail  # Exit on error, undefined vars, pipe failures
 
 # Default values
 DEFAULT_REGION="fra1"
-DEFAULT_TAG="14.2"
-DEFAULT_VERSION="14.2-RELEASE"
+DEFAULT_TAG="14.3"
+DEFAULT_VERSION="14.3-RELEASE"
 DEFAULT_ARCH="amd64"
 
 # Parse command line arguments using zparseopts
@@ -38,11 +38,11 @@ Environment variables required:
     STORAGE_URL                 Public URL for storage (e.g., https://storage.googleapis.com/bucket/path)
 
 Examples:
-    # Release build (tag auto-derived as "14.2")
+    # Release build (tag auto-derived as "14.3")
     DIGITALOCEAN_ACCESS_TOKEN=token \\
     STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 14.2-RELEASE
+    ${0:t} --region nyc3 --version 14.3-RELEASE
 
     # Snapshot build (tag auto-derived as "15.0")
     DIGITALOCEAN_ACCESS_TOKEN=token \\
@@ -54,7 +54,7 @@ Examples:
     DIGITALOCEAN_ACCESS_TOKEN=token \\
     STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 14.2-RELEASE --tag custom-14.2
+    ${0:t} --region nyc3 --version 14.3-RELEASE --tag custom-14.3
 EOF
     exit 0
 fi
