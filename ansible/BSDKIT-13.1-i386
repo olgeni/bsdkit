@@ -1,9 +1,0 @@
-# BSDKIT-13.1-i386
-
-include		GENERIC
-
-ident		BSDKIT
-
-options		DDB		# Enable the ddb debugger backend.
-
-options		KVA_PAGES=512

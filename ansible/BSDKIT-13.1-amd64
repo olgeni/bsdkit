@@ -1,7 +1,0 @@
-# BSDKIT-13.1-amd64
-
-include		GENERIC
-
-ident		BSDKIT
-
-options		DDB		# Enable the ddb debugger backend.
