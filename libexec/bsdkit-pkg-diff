@@ -78,12 +78,12 @@ trap 'rm -f "$TMPFILE1" "$TMPFILE2"' EXIT
 # Fetch and sort package lists from both servers
 if [[ $QUERY_ALL -eq 1 ]]; then
     # Query all packages
-    ssh "$SERVER1" "pkg query '%o'" | sort > "$TMPFILE1"
-    ssh "$SERVER2" "pkg query '%o'" | sort > "$TMPFILE2"
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER1" "pkg query '%o'" | sort > "$TMPFILE1"
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER2" "pkg query '%o'" | sort > "$TMPFILE2"
 else
     # Query only non-automatic packages
-    ssh "$SERVER1" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE1"
-    ssh "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2"
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER1" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE1"
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2"
 fi
 
 # Compare the package lists
