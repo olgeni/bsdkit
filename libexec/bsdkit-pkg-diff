@@ -77,8 +77,8 @@ TMPFILE2=$(mktemp /tmp/pkglist2.XXXXXX)
 trap 'rm -f "$TMPFILE1" "$TMPFILE2"' EXIT
 
 # Fetch and sort package lists from both servers
-ssh "$SERVER1" 'pkg info -qoa' | sort > "$TMPFILE1"
-ssh "$SERVER2" 'pkg info -qoa' | sort > "$TMPFILE2"
+ssh "$SERVER1" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE1"
+ssh "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2"
 
 # Compare the package lists
 echo "Comparing installed packages between $SERVER1 and $SERVER2:"
