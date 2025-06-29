@@ -29,38 +29,37 @@ SERVER2=""
 
 # Usage information
 function usage {
-    echo "Usage: $0 [-h] [-1 server1] [-2 server2]"
-    echo "  -h          Display this help message."
-    echo "  -1 server1  Specify the first server"
-    echo "  -2 server2  Specify the second server"
+    echo "Usage: $0 [--help] --server1 server1 --server2 server2 [--all]"
+    echo "  --help      Display this help message"
+    echo "  --server1   Specify the first server"
+    echo "  --server2   Specify the second server"
+    echo "  --all       Query all packages (including automatic packages)"
 }
 
 # Parse command line options
-while getopts ":h1:2:" opt; do
-    case ${opt} in
-        h )
-            usage
-            exit 0
-            ;;
-        1 )
-            SERVER1=$OPTARG
-            ;;
-        2 )
-            SERVER2=$OPTARG
-            ;;
-        \? )
-            echo "Invalid option: $OPTARG" 1>&2
-            usage
-            exit 1
-            ;;
-        : )
-            echo "Invalid option: $OPTARG requires an argument" 1>&2
-            usage
-            exit 1
-            ;;
-    esac
-done
-shift $((OPTIND -1))
+zparseopts -D -E \
+    h=help -help=help \
+    -server1:=server1_opt \
+    -server2:=server2_opt \
+    -all=all_opt
+
+if [[ -n "$help" ]]; then
+    usage
+    exit 0
+fi
+
+if [[ -n "$server1_opt" ]]; then
+    SERVER1="${server1_opt[2]}"
+fi
+
+if [[ -n "$server2_opt" ]]; then
+    SERVER2="${server2_opt[2]}"
+fi
+
+QUERY_ALL=0
+if [[ -n "$all_opt" ]]; then
+    QUERY_ALL=1
+fi
 
 # Check if both servers are specified
 if [ -z "$SERVER1" ] || [ -z "$SERVER2" ]; then
@@ -77,8 +76,15 @@ TMPFILE2=$(mktemp /tmp/pkglist2.XXXXXX)
 trap 'rm -f "$TMPFILE1" "$TMPFILE2"' EXIT
 
 # Fetch and sort package lists from both servers
-ssh "$SERVER1" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE1"
-ssh "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2"
+if [[ $QUERY_ALL -eq 1 ]]; then
+    # Query all packages
+    ssh "$SERVER1" "pkg query '%o'" | sort > "$TMPFILE1"
+    ssh "$SERVER2" "pkg query '%o'" | sort > "$TMPFILE2"
+else
+    # Query only non-automatic packages
+    ssh "$SERVER1" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE1"
+    ssh "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2"
+fi
 
 # Compare the package lists
 echo "Comparing installed packages between $SERVER1 and $SERVER2:"
