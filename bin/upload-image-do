@@ -102,7 +102,7 @@ image_types=("ufs" "zfs")
 # Function to process and upload image
 process_image() {
     local image_type="$1"
-    
+
     # Determine base URL based on snapshot flag
     local base_url
     if [[ "${SNAPSHOT}" == "true" ]]; then
@@ -110,7 +110,7 @@ process_image() {
     else
         base_url="https://download.freebsd.org/ftp/releases/VM-IMAGES/${VERSION}/${ARCH}/Latest"
     fi
-    
+
     local filename="FreeBSD-${TAG}-${ARCH}-${image_type}.qcow2"
     local compressed_filename="${filename}.xz"
     local bz2_filename="${filename}.bz2"
@@ -133,7 +133,7 @@ process_image() {
         # Try dot pattern first: FreeBSD-VERSION-ARCH-BASIC-CLOUDINIT.TYPE.qcow2.xz
         local remote_filename_dot="FreeBSD-${VERSION}-${ARCH}-BASIC-CLOUDINIT.${image_type}.qcow2"
         local compressed_remote_filename_dot="${remote_filename_dot}.xz"
-        
+
         echo "Downloading ${compressed_remote_filename_dot}..." >&2
         if curl -L -f -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_dot}" 2>/dev/null; then
             echo "Downloaded using dot pattern." >&2
@@ -141,7 +141,7 @@ process_image() {
             # Fallback to hyphen pattern: FreeBSD-VERSION-ARCH-BASIC-CLOUDINIT-TYPE.qcow2.xz
             local remote_filename_hyphen="FreeBSD-${VERSION}-${ARCH}-BASIC-CLOUDINIT-${image_type}.qcow2"
             local compressed_remote_filename_hyphen="${remote_filename_hyphen}.xz"
-            
+
             echo "Dot pattern failed, trying hyphen pattern: ${compressed_remote_filename_hyphen}..." >&2
             if ! curl -L -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_hyphen}"; then
                 rm -f "${compressed_filename}"

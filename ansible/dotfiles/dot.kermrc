@@ -19,7 +19,7 @@ COMMENT - Standard C-Kermit initialization file
 ; set modem flow-control rts/cts
 ; set modem speaker off
 ; set modem hangup-method rs232-signal
-; set modem speaker off 
+; set modem speaker off
 ; set modem type generic-high-speed
 ; set modem volume low
 ; set protocol kermit
