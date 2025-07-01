@@ -189,6 +189,10 @@ if [ -z "${INSIDE_EMACS}" ]; then
     test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 fi
 
+if [ -e ${HOME}/.aftman/env ]; then
+    source ${HOME}/.aftman/env
+fi
+
 if [ -e ${HOME}/.zshrc.local ]; then
     source ${HOME}/.zshrc.local
 fi
