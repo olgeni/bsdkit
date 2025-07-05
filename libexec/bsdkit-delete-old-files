@@ -1,0 +1,175 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/system.inc.sh
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
+source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
+source ${SCRIPT_PATH}/../lib/yaml.inc.sh
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+    exit 1
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+if [ -x /usr/local/bin/vim ]; then
+    export EDITOR=/usr/local/bin/vim
+fi
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
+
+# ===========================================================================
+
+: ${BSDKIT_VERSION:=""}
+: ${BSDKIT_ARCH:="amd64"}
+: ${DESTDIR:=""}
+: ${DRY_RUN:="no"}
+: ${PROCESS_LIBS:="no"}
+: ${FORCE_REMOVE:="no"}
+
+cleanup() {
+    # Cleanup function - currently empty
+    :
+}
+
+
+trap cleanup EXIT
+
+OPTIND=1
+while getopts "a:d:lnv:y" OPT; do
+    case ${OPT} in
+        a)
+            BSDKIT_ARCH=${OPTARG}
+            ;;
+        d)
+            DESTDIR=${OPTARG%/}
+            ;;
+        l)
+            PROCESS_LIBS="yes"
+            ;;
+        n)
+            DRY_RUN="yes"
+            ;;
+        v)
+            BSDKIT_VERSION=${OPTARG}
+            ;;
+        y)
+            FORCE_REMOVE="yes"
+            ;;
+        *)
+            exit 64 # EX_USAGE
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ -d ${DESTDIR}/.base ]; then
+    error "Destination directory is thin jail"
+fi
+
+if [ -z "${BSDKIT_VERSION}" ]; then
+    BSDKIT_VERSION="$(get-os-version)"
+    message "Using current version: ${BSDKIT_VERSION}"
+fi
+
+_distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
+
+if [ ! -f ${_distdir}/OLDFILES ]; then
+    error "OLDFILES file not found in ${_distdir}"
+fi
+
+message "Processing OLDFILES from ${_distdir}"
+
+if is-yes ${DRY_RUN}; then
+    message "Running in dry-run mode (no changes will be made)"
+fi
+
+# Process OLDFILES
+# Save stdin for interactive prompts
+exec 3<&0
+cat ${_distdir}/OLDFILES | while IFS=': ' read _type _path; do
+    case ${_type} in
+        old-files)
+            if [ -f "${DESTDIR}/${_path}" ] || [ -L "${DESTDIR}/${_path}" ]; then
+                if is-yes ${DRY_RUN}; then
+                    message "Would remove file: ${DESTDIR}/${_path}"
+                else
+                    message "Removing file: ${DESTDIR}/${_path}"
+                    rm -f "${DESTDIR}/${_path}"
+                fi
+            fi
+            ;;
+
+        old-dirs)
+            if [ -d "${DESTDIR}/${_path}" ]; then
+                if [ -z "$(ls -A "${DESTDIR}/${_path}")" ]; then
+                    # Directory is empty
+                    if is-yes ${DRY_RUN}; then
+                        message "Would remove empty directory: ${DESTDIR}/${_path}"
+                    else
+                        message "Removing empty directory: ${DESTDIR}/${_path}"
+                        rmdir "${DESTDIR}/${_path}"
+                    fi
+                else
+                    # Directory is not empty
+                    if is-yes ${DRY_RUN}; then
+                        warning "Would remove non-empty directory: ${DESTDIR}/${_path}"
+                    else
+                        if is-yes ${FORCE_REMOVE}; then
+                            warning "Removing non-empty directory: ${DESTDIR}/${_path}"
+                            rm -rf "${DESTDIR}/${_path}"
+                        else
+                            warning "Directory not empty: ${DESTDIR}/${_path}"
+                            if [ -t 3 ]; then
+                                echo -n "Remove directory and all contents? [y/N] "
+                                read _response <&3
+                                if [ "${_response}" = "y" ] || [ "${_response}" = "Y" ]; then
+                                    message "Removing directory: ${DESTDIR}/${_path}"
+                                    rm -rf "${DESTDIR}/${_path}"
+                                else
+                                    message "Skipping directory: ${DESTDIR}/${_path}"
+                                fi
+                            else
+                                message "Skipping non-empty directory (no TTY): ${DESTDIR}/${_path}"
+                            fi
+                        fi
+                    fi
+                fi
+            fi
+            ;;
+
+        old-libs)
+            if is-yes ${PROCESS_LIBS}; then
+                if [ -f "${DESTDIR}/${_path}" ] || [ -L "${DESTDIR}/${_path}" ]; then
+                    if is-yes ${DRY_RUN}; then
+                        message "Would remove library: ${DESTDIR}/${_path}"
+                    else
+                        message "Removing library: ${DESTDIR}/${_path}"
+                        if ! rm -f "${DESTDIR}/${_path}" 2>/dev/null; then
+                            # Try again with noschg
+                            chflags noschg "${DESTDIR}/${_path}" 2>/dev/null
+                            rm -f "${DESTDIR}/${_path}"
+                        fi
+                    fi
+                fi
+            fi
+            ;;
+
+        *)
+            # Skip unknown types
+            ;;
+    esac
+done
+
+if ! is-yes ${PROCESS_LIBS}; then
+    message "Note: old-libs entries were not processed (use -l option to process them)"
+fi
+
+message "Processing complete."

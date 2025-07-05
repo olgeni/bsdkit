@@ -3205,6 +3205,10 @@ upgrade-os() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-os "$@"
 }
 
+delete-old-files() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-delete-old-files "$@"
+}
+
 upgrade-etc() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-etc "$@"
 }
