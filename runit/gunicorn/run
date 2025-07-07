@@ -28,6 +28,11 @@ if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
     ENVRC="${ENVRC} $(cat envrc.d/* | grep -v '^\s*#')"
 fi
 
+ENV_ARGS=""
+if [ -n "${ENVRC}" ]; then
+    ENV_ARGS="-S \"${ENVRC}\""
+fi
+
 : ${GUNICORN_USER:="nobody"}
 : ${GUNICORN_PATH:="/tmp"}
 : ${GUNICORN_ARGS=""}
@@ -52,7 +57,7 @@ if [ -n "${GUNICORN_UV}" ]; then
     PYTHON_PREFIX="uv run "
 fi
 
-exec env -S "${ENVRC}" ${CHPST_COMMAND:-} ${PYTHON_PREFIX}${GUNICORN_PYTHON} ${GUNICORN_PYTHON_FLAGS} -m gunicorn ${GUNICORN_ARGS} ${GUNICORN_APP}
+exec env ${ENV_ARGS} ${CHPST_COMMAND:-} ${PYTHON_PREFIX}${GUNICORN_PYTHON} ${GUNICORN_PYTHON_FLAGS} -m gunicorn ${GUNICORN_ARGS} ${GUNICORN_APP}
 
 # For logs: "--log-level debug"
 # For uvicorn support: "--worker-class uvicorn.workers.UvicornWorker"

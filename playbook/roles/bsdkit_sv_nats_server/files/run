@@ -28,6 +28,11 @@ if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
     ENVRC="${ENVRC} $(cat envrc.d/*)"
 fi
 
+ENV_ARGS=""
+if [ -n "${ENVRC}" ]; then
+    ENV_ARGS="-S \"${ENVRC}\""
+fi
+
 : ${NATS_DATA_DIR:="/var/db/nats"}
 : ${NATS_USER:="nats"}
 : ${NATS_GROUP:="nats"}
@@ -54,4 +59,4 @@ fi
 
 chown -R ${NATS_USER}:${NATS_GROUP} ${NATS_DATA_DIR}
 
-exec env -S "${ENVRC}" chpst -u ${NATS_USER}:${NATS_GROUP} ${CHPST_ARGS} /usr/local/bin/nats-server ${NATS_ARGS}
+exec env ${ENV_ARGS} chpst -u ${NATS_USER}:${NATS_GROUP} ${CHPST_ARGS} /usr/local/bin/nats-server ${NATS_ARGS}
