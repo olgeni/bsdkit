@@ -85,7 +85,7 @@ if [ ! -f ${_distdir}/OLDFILES ]; then
     error "OLDFILES file not found in ${_distdir}"
 fi
 
-message "Processing OLDFILES from ${_distdir}"
+message "Processing old files from ${_distdir}"
 
 if is-yes ${DRY_RUN}; then
     message "Running in dry-run mode (no changes will be made)"
