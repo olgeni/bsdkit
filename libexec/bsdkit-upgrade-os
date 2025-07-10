@@ -74,33 +74,54 @@ cleanup() {
     fi
 }
 
-remove-nouarch-files() {
-    local _directory="$1"
+# Function to clean up old source files after extraction
+cleanup-old-src-files() {
+    local _srcdir="$1"
+    local _archive="$2"
 
-    if [ ! -d ${_directory} ]; then
+    if [ ! -d "${_srcdir}" ]; then
         return 0
     fi
 
-    local _file_list=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
-    local _directory_list=$(mktemp -t ${SCRIPT_NAME}.XXXXXX)
+    message "Cleaning up obsolete source files"
 
-    find -s ${_directory} -flags nouarch -type f >> ${_file_list}
-    find -s ${_directory} -flags nouarch -type d | sed -n '1!G;h;$p' >> ${_directory_list}
+    # Get list of files in the archive
+    local _archive_files=$(mktemp -t ${SCRIPT_NAME}.archive.XXXXXX)
+    local _existing_files=$(mktemp -t ${SCRIPT_NAME}.existing.XXXXXX)
+    local _files_to_remove=$(mktemp -t ${SCRIPT_NAME}.remove.XXXXXX)
 
-    cat ${_file_list} | while read _filename; do
-        message "Removing ${_filename}"
-        rm -f ${_filename}
-    done
+    # List files in the archive (relative paths from usr/src)
+    # The archive contains paths like usr/src/sys/... so we need to strip the prefix
+    tar -tf "${_archive}" | grep '^usr/src/' | sed 's|^usr/src/||' | grep -v '/$' | grep -v '^$' | sort > ${_archive_files}
 
-    cat ${_directory_list} | while read _directory; do
-        if [ -z "$(ls -A ${_directory})" ]; then
-            message "Removing ${_directory}"
-            rmdir ${_directory}
-        fi
-    done
+    # List existing files in src directory (relative to /usr/src)
+    (cd "${_srcdir}" && find . -type f | sed 's|^\./||' | grep -v '^$' | sort) > ${_existing_files}
 
-    rm -f ${_file_list}
-    rm -f ${_directory_list}
+    # Find files to remove (in existing but not in archive)
+    comm -23 ${_existing_files} ${_archive_files} > ${_files_to_remove}
+
+    # Filter out files to preserve (BSDKIT kernel configs)
+    local _filtered_files=$(mktemp -t ${SCRIPT_NAME}.filtered.XXXXXX)
+    grep -v '^sys/.*/conf/BSDKIT$' ${_files_to_remove} > ${_filtered_files} || true
+
+    # Remove obsolete files using xargs for speed
+    local _count=0
+    if [ -s ${_filtered_files} ]; then
+        _count=$(wc -l < ${_filtered_files} | awk '{print $1}')
+        (cd "${_srcdir}" && xargs -n 100 rm -f < ${_filtered_files})
+    fi
+
+    rm -f ${_filtered_files}
+
+    if [ ${_count} -gt 0 ]; then
+        message "Removed ${_count} obsolete source files"
+    fi
+
+    # Clean up empty directories
+    find "${_srcdir}" -type d -empty -delete 2>/dev/null || true
+
+    # Clean up temp files
+    rm -f ${_archive_files} ${_existing_files} ${_files_to_remove} ${_filtered_files}
 }
 
 trap cleanup EXIT
@@ -363,23 +384,7 @@ _readonly_directory_list=(
     "usr/tests"
 )
 
-if is-file-on-zfs ${DESTDIR:-/}; then
-    for _directory in ${_readonly_directory_list}; do
-        if [ -d ${DESTDIR}/${_directory} ]; then
-            chflags -R uarch ${DESTDIR}/${_directory}
-        fi
-    done
-
-    for _directory in /boot/loader.conf /boot/loader.conf.local /boot/loader.conf.d; do
-        if [ -e ${DESTDIR}${_directory} ]; then
-            chflags -R uarch ${DESTDIR}${_directory}
-        fi
-    done
-
-    if [ -n "$(ls -A ${DESTDIR}/boot/modules)" ]; then
-        chflags -R uarch ${DESTDIR}/boot/modules/*
-    fi
-fi
+# No longer using uarch flags for file tracking
 
 cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     _extract="no"
@@ -423,14 +428,6 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         ports) ;;
 
         src)
-            if is-file-on-zfs ${DESTDIR:-/}; then
-                for _arch in i386 amd64; do
-                    if [ -f ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT ]; then
-                        chflags uarch ${DESTDIR}/usr/src/sys/${_arch}/conf/BSDKIT
-                    fi
-                done
-            fi
-
             _options+="--no-same-owner"
             _extract="yes"
             ;;
@@ -476,6 +473,11 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
         fi
 
         rm -f ${_stderr_log}
+
+        # Clean up obsolete source files after extraction
+        if [ ${_package} = "src" ] && [ -d ${DESTDIR}/usr/src ]; then
+            cleanup-old-src-files ${DESTDIR}/usr/src ${_distdir}/${_filename}
+        fi
     fi
 done
 
@@ -491,15 +493,7 @@ if [ -t 0 ]; then
     etcupdate resolve -D ${DESTDIR}/
 fi
 
-if is-file-on-zfs ${DESTDIR:-/}; then
-    message "Removing obsolete files"
-
-    for _directory in ${_readonly_directory_list}; do
-        if [ -d ${DESTDIR}/${_directory} ]; then
-            remove-nouarch-files ${DESTDIR}/${_directory}
-        fi
-    done
-fi
+# Obsolete file removal now handled differently
 
 message "Running mtree"
 
