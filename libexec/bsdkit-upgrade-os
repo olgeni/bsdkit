@@ -546,21 +546,6 @@ fi
 message "Running newaliases"
 chroot ${DESTDIR}/ newaliases
 
-if [ -f ${_srcdir}/Makefile ]; then
-    cd ${_srcdir}
-
-    message "Running delete-old"
-
-    {
-        set +o pipefail
-        yes y | make delete-old DESTDIR=${DESTDIR}/ > /dev/null 2>&1
-        set -o pipefail
-    }
-
-    # message "Running delete-old-libs"
-    # yes y | make delete-old-libs DESTDIR=${DESTDIR}/ > /dev/null 2>&1
-fi
-
 # Remove obsolete mixer state files when upgrading to FreeBSD 14.
 for _file in ${DESTDIR}/var/db/mixer*-state(N); do
     # Content is like "vol 75:75 pcm 75:75..."
