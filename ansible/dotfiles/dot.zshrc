@@ -167,10 +167,6 @@ case $(uname) in
     *) ;;
 esac
 
-if [ -e ${HOME}/.claude/local/claude ]; then
-    export PATH="$HOME/.claude/local:$PATH"
-fi
-
 export LANG=en_US.UTF-8
 export CLICOLOR=yes
 export GPG_TTY=$(tty)
