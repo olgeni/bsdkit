@@ -15,7 +15,6 @@ zparseopts -D -E -F -- \
     v:=version_arg -version:=version_arg \
     a:=arch_arg -arch:=arch_arg \
     k:=token_arg -token:=token_arg \
-    s=snapshot_arg -snapshot=snapshot_arg \
     n=dry_run_arg -dry-run=dry_run_arg \
     h=help_arg -help=help_arg || exit 1
 
@@ -30,7 +29,6 @@ Options:
     -v, --version VERSION   FreeBSD version (default: ${DEFAULT_VERSION})
     -a, --arch ARCH         Architecture (default: ${DEFAULT_ARCH})
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
-    -s, --snapshot          Use snapshot builds instead of releases
     -n, --dry-run           Show operations without executing them
     -h, --help              Show this help message
 
@@ -46,11 +44,16 @@ Examples:
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
     ${0:t} --region nyc3 --version 14.3-RELEASE
 
-    # Snapshot build (tag auto-derived as "15.0")
+    # Snapshot builds (automatically detected from version suffix)
     DIGITALOCEAN_ACCESS_TOKEN=token \\
     STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 15.0-CURRENT --snapshot
+    ${0:t} --region nyc3 --version 15.0-CURRENT    # Current development
+
+    DIGITALOCEAN_ACCESS_TOKEN=token \\
+    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
+    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
+    ${0:t} --region nyc3 --version 14.3-STABLE     # Stable branch
 
     # Custom tag override
     DIGITALOCEAN_ACCESS_TOKEN=token \\
@@ -66,9 +69,15 @@ REGION="${region_arg[2]:-${DEFAULT_REGION}}"
 DISTRIBUTION="Unknown"
 VERSION="${version_arg[2]:-${DEFAULT_VERSION}}"
 ARCH="${arch_arg[2]:-${DEFAULT_ARCH}}"
-SNAPSHOT="${snapshot_arg[1]:+true}"
 DRY_RUN="${dry_run_arg[1]:+true}"
 WORK_DIR="/tmp/freebsd-images"
+
+# Automatically detect snapshot based on version suffix
+if [[ "${VERSION}" == *"-CURRENT" || "${VERSION}" == *"-STABLE" ]]; then
+    SNAPSHOT="true"
+else
+    SNAPSHOT=""
+fi
 
 # Derive TAG from VERSION if not explicitly provided
 if [[ -n "${tag_arg[2]:-}" ]]; then
