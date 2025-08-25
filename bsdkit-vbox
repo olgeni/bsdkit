@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-set -e -u -o pipefail
+set -o errexit -o nounset -o pipefail
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e -u -o pipefail
+set -o errexit -o nounset -o pipefail
 
 filter-properties() {
     awk '

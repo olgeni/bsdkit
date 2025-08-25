@@ -40,7 +40,7 @@
 - name: Reset unused disk space
   shell:
     cmd: |
-      set -e -u -o pipefail
+      set -o errexit -o nounset -o pipefail
       sysctl vfs.zfs.initialize_value=0
       zpool initialize --uninit {{ boot_pool }}
       zpool initialize --wait {{ boot_pool }}

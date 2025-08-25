@@ -74,7 +74,7 @@
     - name: Migrate settings from /boot/loader.conf to /boot/loader.conf.local
       shell:
         cmd: |
-          set -e -u -o pipefail
+          set -o errexit -o nounset -o pipefail
 
           _strings=$(mktemp /tmp/XXXXXX)
           cat /boot/loader.conf | grep -v '^$' > ${_strings}

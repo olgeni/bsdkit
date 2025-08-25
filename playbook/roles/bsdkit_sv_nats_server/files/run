@@ -2,7 +2,7 @@
 
 # b41fc276-d139-405e-a31e-16940c01a972
 
-set -e -u -o pipefail
+set -o errexit -o nounset -o pipefail
 
 exec 2>&1
 

@@ -39,7 +39,7 @@
   when: (stat_usr_local_etc_sv.stat.isdir is defined) and (stat_usr_local_etc_sv.stat.isdir)
   shell:
     cmd: |
-      set -e -u -o pipefail
+      set -o errexit -o nounset -o pipefail
 
       for _file in /usr/local/etc/sv/*(N); do
           sv stop ${_file} || :

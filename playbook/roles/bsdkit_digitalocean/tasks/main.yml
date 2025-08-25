@@ -14,7 +14,7 @@
       when: uri_metadata_payload is failed
       shell:
         cmd: |
-          set -e -u -o pipefail
+          set -o errexit -o nounset -o pipefail
 
           metadata_mountpoint=/var/lib/cloud/seed/config_drive
 
@@ -141,7 +141,7 @@
     - name: Update rc.conf
       shell:
         cmd: |
-          set -e -u -o pipefail
+          set -o errexit -o nounset -o pipefail
 
           sysrc ifconfig_DEFAULT && sysrc -x ifconfig_DEFAULT
 

@@ -75,7 +75,7 @@
 - name: reformat_rc_conf
   shell:
     cmd: |
-      set -e -u -o pipefail
+      set -o errexit -o nounset -o pipefail
       _rc_conf=$(mktemp /tmp/XXXXXX)
       sysrc -a -e > ${_rc_conf}
       cat ${_rc_conf} > /etc/rc.conf
@@ -84,7 +84,7 @@
 - name: reformat_loader_conf_local
   shell:
     cmd: |
-      set -e -u -o pipefail
+      set -o errexit -o nounset -o pipefail
       _loader_conf_local=$(mktemp /tmp/XXXXXX)
       sed -e '/^$/d' -e '/^[[:space:]]*#/d' /boot/loader.conf.local | sort > ${_loader_conf_local}
       cat ${_loader_conf_local} > /boot/loader.conf.local
@@ -93,7 +93,7 @@
 - name: reformat_sysctl_conf_local
   shell:
     cmd: |
-      set -e -u -o pipefail
+      set -o errexit -o nounset -o pipefail
       _sysctl_conf_local=$(mktemp /tmp/XXXXXX)
       sed -e '/^$/d' -e '/^[[:space:]]*#/d' /etc/sysctl.conf.local | sort > ${_sysctl_conf_local}
       cat ${_sysctl_conf_local} > /etc/sysctl.conf.local

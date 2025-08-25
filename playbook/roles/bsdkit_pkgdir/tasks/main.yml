@@ -11,7 +11,7 @@
       when: (stat_var_db_pkg.stat.isdir is defined) and (stat_var_db_pkg.stat.isdir) and (not stat_var_db_pkg.stat.islnk)
       shell:
         cmd: |
-          set -e -u -o pipefail
+          set -o errexit -o nounset -o pipefail
           mkdir /usr/local/pkg/
           mv /var/db/pkg/* /usr/local/pkg/
           rmdir /var/db/pkg

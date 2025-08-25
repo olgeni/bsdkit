@@ -56,7 +56,7 @@
       block:
         - name: Save /var/db/pkg
           shell: |
-            set -e -u -o pipefail
+            set -o errexit -o nounset -o pipefail
             mkdir /tmp/pkg/
             mv /var/db/pkg/* /tmp/pkg/
           changed_when: true
@@ -68,7 +68,7 @@
 
         - name: Restore /var/db/pkg
           shell: |
-            set -e -u -o pipefail
+            set -o errexit -o nounset -o pipefail
             mkdir -p /usr/local/pkg
             rm -r -f /var/db/pkg
             ln -s -f /usr/local/pkg /var/db/pkg
