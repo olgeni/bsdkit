@@ -6,3 +6,13 @@
     regexp: ^MAILTO
     insertbefore: ^SHELL=
   notify: restart_cron
+
+- name: Add daily pkg clean job to /etc/crontab
+  cron:
+    name: "Clean package cache"
+    minute: "30"
+    hour: "3"
+    user: root
+    job: "/usr/sbin/pkg clean -a -y"
+    cron_file: pkg-clean
+  notify: restart_cron
