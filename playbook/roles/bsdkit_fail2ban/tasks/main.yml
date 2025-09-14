@@ -7,7 +7,13 @@
         name: security/py-fail2ban
         state: present
 
+    - name: Check if fail2ban config directory exists
+      stat:
+        path: /usr/local/etc/fail2ban
+      register: fail2ban_config_dir
+
     - name: Create /usr/local/etc/fail2ban/jail.local
+      when: fail2ban_config_dir.stat.exists
       template:
         src: jail.local.j2
         dest: /usr/local/etc/fail2ban/jail.local
@@ -17,6 +23,7 @@
       notify: restart_fail2ban
 
     - name: Enable fail2ban
+      when: fail2ban_config_dir.stat.exists
       service:
         name: fail2ban
         enabled: true
@@ -67,7 +74,13 @@
         group: wheel
         mode: "0600"
 
+    - name: Check if fail2ban.d directory exists
+      stat:
+        path: /usr/local/etc/fail2ban/fail2ban.d
+      register: fail2ban_d_dir
+
     - name: bsdkit-allowipv6.conf
+      when: fail2ban_d_dir.stat.exists
       template:
         src: bsdkit-allowipv6.conf.j2
         dest: /usr/local/etc/fail2ban/fail2ban.d/bsdkit-allowipv6.conf
