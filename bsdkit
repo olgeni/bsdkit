@@ -87,6 +87,7 @@ PERL_LIBDIR_LIST=(
 )
 
 SERVICE_RESTART_BLACKLIST=(
+    "bastille"
     "dev_aws_disk"
     "ec2_configinit"
     "ec2_fetchkey"
