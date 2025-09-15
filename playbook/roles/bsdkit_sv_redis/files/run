@@ -24,10 +24,6 @@ if [ -f envrc.local ]; then
     ENVRC="${ENVRC} $(cat envrc.local)"
 fi
 
-ENV_ARGS=""
-if [ -n "${ENVRC}" ]; then
-    ENV_ARGS="-S \"${ENVRC}\""
-fi
 
 : ${REDIS_USER:="redis"}
 : ${REDIS_GROUP:="redis"}
@@ -42,4 +38,8 @@ if [ -n "${REDIS_PORT}" ]; then
     REDIS_ARGS="--port ${REDIS_PORT} ${REDIS_ARGS}"
 fi
 
-exec env ${ENV_ARGS} chpst -u ${REDIS_USER}:${REDIS_GROUP} ${CHPST_ARGS} /usr/local/bin/redis-server ${REDIS_ARGS}
+if [ -n "${ENVRC}" ]; then
+    exec env -S "${ENVRC}" chpst -u ${REDIS_USER}:${REDIS_GROUP} ${CHPST_ARGS} /usr/local/bin/redis-server ${REDIS_ARGS}
+else
+    exec chpst -u ${REDIS_USER}:${REDIS_GROUP} ${CHPST_ARGS} /usr/local/bin/redis-server ${REDIS_ARGS}
+fi

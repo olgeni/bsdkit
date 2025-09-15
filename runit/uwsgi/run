@@ -28,10 +28,6 @@ if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
     ENVRC="${ENVRC} $(cat envrc.d/* | grep -v '^\s*#')"
 fi
 
-ENV_ARGS=""
-if [ -n "${ENVRC}" ]; then
-    ENV_ARGS="-S \"${ENVRC}\""
-fi
 
 : ${UWSGI_USER:="nobody"}
 : ${UWSGI_PATH:="/tmp"}
@@ -59,6 +55,10 @@ if [ -n "${UWSGI_UV}" ]; then
     PYTHON_PREFIX="uv run "
 fi
 
-exec env ${ENV_ARGS} chpst -u ${UWSGI_USER} ${CHPST_ARGS} ${PYTHON_PREFIX}${UWSGI_PYTHON} ${UWSGI_PYTHON_FLAGS} -m uwsgi ${UWSGI_ARGS}
+if [ -n "${ENVRC}" ]; then
+    exec env -S "${ENVRC}" chpst -u ${UWSGI_USER} ${CHPST_ARGS} ${PYTHON_PREFIX}${UWSGI_PYTHON} ${UWSGI_PYTHON_FLAGS} -m uwsgi ${UWSGI_ARGS}
+else
+    exec chpst -u ${UWSGI_USER} ${CHPST_ARGS} ${PYTHON_PREFIX}${UWSGI_PYTHON} ${UWSGI_PYTHON_FLAGS} -m uwsgi ${UWSGI_ARGS}
+fi
 
 # For logs: "--log-master"

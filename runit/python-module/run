@@ -28,10 +28,6 @@ if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
     ENVRC="${ENVRC} $(cat envrc.d/* | grep -v '^\s*#')"
 fi
 
-ENV_ARGS=""
-if [ -n "${ENVRC}" ]; then
-    ENV_ARGS="-S \"${ENVRC}\""
-fi
 
 : ${PYTHON_USER:="nobody"}
 : ${PYTHON_GROUP:="nobody"}
@@ -59,4 +55,8 @@ if [ -n "${PYTHON_UV}" ]; then
     PYTHON_PREFIX="uv run "
 fi
 
-exec env ${ENV_ARGS} HOME="${PYTHON_HOME}" PYTHONUNBUFFERED=1 PYTHONPATH="${PYTHON_PATH}" ${CHPST_COMMAND} ${PYTHON_PREFIX}"${PYTHON_EXECUTABLE}" ${PYTHON_ARGS} -m "${PYTHON_MODULE}" ${PYTHON_MODULE_ARGS}
+if [ -n "${ENVRC}" ]; then
+    exec env -S "${ENVRC}" HOME="${PYTHON_HOME}" PYTHONUNBUFFERED=1 PYTHONPATH="${PYTHON_PATH}" ${CHPST_COMMAND} ${PYTHON_PREFIX}"${PYTHON_EXECUTABLE}" ${PYTHON_ARGS} -m "${PYTHON_MODULE}" ${PYTHON_MODULE_ARGS}
+else
+    exec env HOME="${PYTHON_HOME}" PYTHONUNBUFFERED=1 PYTHONPATH="${PYTHON_PATH}" ${CHPST_COMMAND} ${PYTHON_PREFIX}"${PYTHON_EXECUTABLE}" ${PYTHON_ARGS} -m "${PYTHON_MODULE}" ${PYTHON_MODULE_ARGS}
+fi
