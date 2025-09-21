@@ -286,6 +286,22 @@ cat MANIFEST | while read _filename _sha256 _size _package _desc _enable; do
     done
 done
 
+# Check if upgrade is needed by comparing installed version with RELEASE file
+if [ -x ${DESTDIR}/bin/freebsd-version ]; then
+    _installed_version=$(chroot ${DESTDIR:-/} /bin/freebsd-version -r) || error "Failed to determine installed version"
+    _target_version=$(cat ${_distdir}/RELEASE)
+
+    if [ "${_installed_version}" = "${_target_version}" ]; then
+        message "System is already at version ${_target_version}, no upgrade needed"
+        message "Release files are cached in ${_distdir}"
+        exit 0
+    else
+        message "Upgrading from ${_installed_version} to ${_target_version}"
+    fi
+else
+    message "Cannot determine installed version, proceeding with upgrade"
+fi
+
 if is-yes ${FETCH_ONLY}; then
     message "Release downloaded successfully"
     exit 0
