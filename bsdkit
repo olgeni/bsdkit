@@ -312,12 +312,12 @@ __parse-options() {
     # -D: Removes all matched options from the input parameters, including
     #     initial '-' or '--'.
     #
-    # -E: Modifies parsing to include unrecognized specs, stopping only at
-    #     undefined '-' or '--'.
-    #
-    # -K: Retains arrays unaffected if no corresponding spec matches;
-    #     otherwise, overwrites the array upon spec match.
-
+    # zparseopts flags:
+    # -D: Remove recognized options from positional parameters
+    # -E: Stop at first unrecognized option (don't error on unknown options)
+    # -K: Keep existing array values if option not present (vs clearing array)
+    # -a: Store options in array _opts
+    # -A: Store options with arguments in associative array _opts_args
     zparseopts -D -E -K -a _opts -A _opts_args r: v: a: p: z:
 
     local _option
@@ -1179,6 +1179,13 @@ __fetch-release() {
 __install-release() {
     local _opts _opts_args
 
+    # zparseopts flags:
+    # -F: Fail if unrecognized options are found
+    # -D: Remove recognized options from positional parameters
+    # -E: Stop at first unrecognized option (don't error on unknown options)
+    # -K: Keep existing array values if option not present (vs clearing array)
+    # -a: Store options in array _opts
+    # -A: Store options with arguments in associative array _opts_args
     zparseopts -F -D -E -K -a _opts -A _opts_args -thin
 
     # In Zsh, `[(I)...]` option search in the `_opts` associative array for
@@ -1459,6 +1466,13 @@ EOF
 __setup-jail() {
     local _opts _opts_args
 
+    # zparseopts flags:
+    # -F: Fail if unrecognized options are found
+    # -D: Remove recognized options from positional parameters
+    # -E: Stop at first unrecognized option (don't error on unknown options)
+    # -K: Keep existing array values if option not present (vs clearing array)
+    # -a: Store options in array _opts
+    # -A: Store options with arguments in associative array _opts_args
     zparseopts -F -D -E -K -a _opts -A _opts_args -plain
 
     local _plain
@@ -2048,6 +2062,13 @@ create-iocage-jail() {
 
     local _opts _opts_args
 
+    # zparseopts flags:
+    # -F: Fail if unrecognized options are found
+    # -D: Remove recognized options from positional parameters
+    # -E: Stop at first unrecognized option (don't error on unknown options)
+    # -K: Keep existing array values if option not present (vs clearing array)
+    # -a: Store options in array _opts
+    # -A: Store options with arguments in associative array _opts_args
     zparseopts -F -D -E -K -a _opts -A _opts_args -thin -plain
 
     local _thin
@@ -2094,6 +2115,13 @@ create-jail() {
 
     local _opts _opts_args
 
+    # zparseopts flags:
+    # -F: Fail if unrecognized options are found
+    # -D: Remove recognized options from positional parameters
+    # -E: Stop at first unrecognized option (don't error on unknown options)
+    # -K: Keep existing array values if option not present (vs clearing array)
+    # -a: Store options in array _opts
+    # -A: Store options with arguments in associative array _opts_args
     zparseopts -F -D -E -K -a _opts -A _opts_args -thin -plain
 
     # In this code snippet, `(Ie)` is a parameter expansion flag in the Zsh

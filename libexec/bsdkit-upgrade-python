@@ -29,6 +29,13 @@ usage() {
     exit 0
 }
 
+# zparseopts flags:
+# -F: Fail if unrecognized options are found
+# -D: Remove recognized options from positional parameters
+# -E: Stop at first unrecognized option (don't error on unknown options)
+# -K: Keep existing array values if option not present (vs clearing array)
+# -a: Store options in array _opts
+# -A: Store options with arguments in associative array _opts_args
 zparseopts -F -D -E -K -a _opts -A _opts_args \
     t:=TARGET_VERSION_OPTION
 

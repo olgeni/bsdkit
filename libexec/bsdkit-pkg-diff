@@ -37,6 +37,9 @@ function usage {
 }
 
 # Parse command line options
+# zparseopts flags:
+# -D: Remove recognized options from positional parameters
+# -E: Stop at first unrecognized option (don't error on unknown options)
 zparseopts -D -E \
     h=help -help=help \
     -server1:=server1_opt \

@@ -9,6 +9,10 @@ DEFAULT_VERSION="14.3-RELEASE"
 DEFAULT_ARCH="amd64"
 
 # Parse command line arguments using zparseopts
+# zparseopts flags:
+# -D: Remove recognized options from positional parameters
+# -E: Stop at first unrecognized option (don't error on unknown options)
+# -F: Fail if unrecognized options are found
 zparseopts -D -E -F -- \
     r:=region_arg -region:=region_arg \
     t:=tag_arg -tag:=tag_arg \
