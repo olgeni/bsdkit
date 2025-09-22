@@ -13,6 +13,6 @@
     minute: "30"
     hour: "3"
     user: root
-    job: "/usr/sbin/pkg clean -a -y"
+    job: "/usr/sbin/pkg clean -a -y >/dev/null 2>&1"
     cron_file: pkg-clean
   notify: restart_cron
