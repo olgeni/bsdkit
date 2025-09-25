@@ -3222,6 +3222,27 @@ monit-setup-jail() {
     ansible-jail-playbook ${_jail_name} -t monit
 }
 
+configure-crontab() {
+    __build-facts
+
+    ansible-local-playbook -t crontab
+}
+
+configure-crontab-jail() {
+    if [ $# -lt 1 ]; then
+        usage "configure-crontab-jail <jail_name>"
+    fi
+
+    __check-go-yq
+
+    local _jail_name=$(__find-jail $1)
+    local _jail_root=$(jls -j ${_jail_name} path)
+
+    __build-facts ${_jail_root}
+
+    ansible-jail-playbook ${_jail_name} -t crontab
+}
+
 status() {
     if ! command -v monit > /dev/null 2>&1; then
         error "monit is not installed"

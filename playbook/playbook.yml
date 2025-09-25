@@ -38,6 +38,8 @@
     - role: bsdkit_periodic
     - role: bsdkit_ftp
     - role: bsdkit_crontab
+      tags:
+        - crontab
     - role: bsdkit_syslog
     - role: bsdkit_newsyslog
     - role: bsdkit_ssh
