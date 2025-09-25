@@ -288,7 +288,7 @@ done
 
 # Check if upgrade is needed by comparing installed version with RELEASE file
 if [ -x ${DESTDIR}/bin/freebsd-version ]; then
-    _installed_version=$(chroot ${DESTDIR:-/} /bin/freebsd-version -r) || error "Failed to determine installed version"
+    _installed_version=$(chroot ${DESTDIR:-/} /bin/freebsd-version -u) || error "Failed to determine installed version"
     _target_version=$(cat ${_distdir}/RELEASE)
 
     if [ "${_installed_version}" = "${_target_version}" ]; then
