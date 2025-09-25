@@ -16,3 +16,13 @@
     job: "/usr/sbin/pkg clean -a -y >/dev/null 2>&1"
     cron_file: pkg-clean
   notify: restart_cron
+
+- name: Add daily bsdkit update job to /etc/crontab
+  cron:
+    name: "Update bsdkit"
+    minute: "0"
+    hour: "3"
+    user: root
+    job: "/usr/local/bsdkit/bsdkit update >/dev/null 2>&1"
+    cron_file: bsdkit-update
+  notify: restart_cron
