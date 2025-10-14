@@ -94,23 +94,23 @@ update-loader() {
         sysctl -q kern.geom.debugflags=0x10
     fi
 
+    local _efi_partitions _freebsd_boot_partitions _freebsd_zfs_partitions
+
     for _disk in ${(s/ /)_disks}; do
         case "${_disk}" in
             cd[0-9]*)
                 continue
                 ;;
         esac
-
-        local _efi_partitions _freebsd_boot_partitions _freebsd_zfs_partitions
         _efi_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w efi | awk '{ print $3 }' || :)
         _freebsd_boot_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-boot | awk '{ print $3 }' || :)
         _freebsd_zfs_partitions=$(gpart show -p "${_disk}" 2>/dev/null | grep -w freebsd-zfs | awk '{ print $3 }' || :)
 
         if [ -n "${_freebsd_boot_partitions}" ]; then
+            local _index _last_sector_offset
+
             for _partition in ${(s/ /)_freebsd_boot_partitions}; do
                 message "Checking freebsd-boot partition ${_partition}"
-
-                local _index _last_sector_offset
                 _index=$(echo ${_partition} | sed -E 's/.*p([0-9]+)$/\1/')
 
                 if [ -z "${_index}" ]; then
