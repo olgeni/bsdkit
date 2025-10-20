@@ -61,6 +61,21 @@ Examples:
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
     ${0:t} --region nyc3 --version 14.3-STABLE     # Stable branch
 
+    DIGITALOCEAN_ACCESS_TOKEN=token \\
+    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
+    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
+    ${0:t} --region nyc3 --version 15.0-ALPHA5     # Alpha release
+
+    DIGITALOCEAN_ACCESS_TOKEN=token \\
+    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
+    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
+    ${0:t} --region nyc3 --version 15.0-BETA1      # Beta release
+
+    DIGITALOCEAN_ACCESS_TOKEN=token \\
+    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
+    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
+    ${0:t} --region nyc3 --version 15.0-RC1        # Release candidate
+
     # Custom tag override
     DIGITALOCEAN_ACCESS_TOKEN=token \\
     STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
@@ -80,7 +95,7 @@ FORCE="${force_arg[1]:+true}"
 WORK_DIR="/tmp/freebsd-images"
 
 # Automatically detect snapshot based on version suffix
-if [[ "${VERSION}" == *"-CURRENT" || "${VERSION}" == *"-STABLE" ]]; then
+if [[ "${VERSION}" == *"-CURRENT" || "${VERSION}" == *"-STABLE" || "${VERSION}" == *"-ALPHA"* || "${VERSION}" == *"-BETA"* || "${VERSION}" == *"-RC"* ]]; then
     SNAPSHOT="true"
 else
     SNAPSHOT=""
