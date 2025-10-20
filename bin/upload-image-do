@@ -95,7 +95,8 @@ FORCE="${force_arg[1]:+true}"
 WORK_DIR="/tmp/freebsd-images"
 
 # Automatically detect snapshot based on version suffix
-if [[ "${VERSION}" == *"-CURRENT" || "${VERSION}" == *"-STABLE" || "${VERSION}" == *"-ALPHA"* || "${VERSION}" == *"-BETA"* || "${VERSION}" == *"-RC"* ]]; then
+# Only CURRENT and STABLE are in snapshots; ALPHA, BETA, RC are in releases
+if [[ "${VERSION}" == *"-CURRENT" || "${VERSION}" == *"-STABLE" ]]; then
     SNAPSHOT="true"
 else
     SNAPSHOT=""
