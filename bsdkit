@@ -3018,6 +3018,8 @@ EOF
 ansible-local-playbook() {
     __check-requirements
 
+    __install-facts /
+
     ansible-playbook \
         --inventory localhost, \
         --connection local \
