@@ -18,7 +18,6 @@ zparseopts -D -E -F -- \
     a:=arch_arg -arch:=arch_arg \
     k:=token_arg -token:=token_arg \
     n=dry_run_arg -dry-run=dry_run_arg \
-    f=force_arg -force=force_arg \
     h=help_arg -help=help_arg || exit 1
 
 # Show help if requested
@@ -32,7 +31,6 @@ Options:
     -a, --arch ARCH         Architecture (default: ${DEFAULT_ARCH})
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
     -n, --dry-run           Show operations without executing them
-    -f, --force             Force re-download and re-upload even if files exist
     -h, --help              Show this help message
 
 Environment variables required:
@@ -82,7 +80,6 @@ DISTRIBUTION="Unknown"
 VERSION="${version_arg[2]:-${DEFAULT_VERSION}}"
 ARCH="${arch_arg[2]:-${DEFAULT_ARCH}}"
 DRY_RUN="${dry_run_arg[1]:+true}"
-FORCE="${force_arg[1]:+true}"
 WORK_DIR="/tmp/freebsd-images"
 
 # Automatically detect snapshot based on version suffix
@@ -134,17 +131,6 @@ process_image() {
     local bz2_filename="${filename}.bz2"
 
     echo "Processing ${image_type} image..." >&2
-
-    # Check if file already exists in storage (unless force flag is set)
-    if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would check if ${bz2_filename} exists in ${STORAGE_BUCKET}" >&2
-    elif [[ "${FORCE}" != "true" ]] && rclone lsf "${STORAGE_BUCKET}/${bz2_filename}" >/dev/null 2>&1; then
-        echo "File ${bz2_filename} already exists in storage, skipping download and upload..." >&2
-        echo "${STORAGE_URL}/${bz2_filename}"
-        return 0
-    elif [[ "${FORCE}" == "true" ]]; then
-        echo "Force flag set, proceeding with download and upload..." >&2
-    fi
 
     # Create work directory
     if [[ "${DRY_RUN}" == "true" ]]; then
