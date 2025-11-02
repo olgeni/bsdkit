@@ -4,7 +4,6 @@ set -o errexit -o nounset -o pipefail  # Exit on error, undefined vars, pipe fai
 
 # Default values
 DEFAULT_REGION="fra1"
-DEFAULT_TAG="14.3-RELEASE"
 DEFAULT_VERSION="14.3-RELEASE"
 DEFAULT_ARCH="amd64"
 
@@ -15,7 +14,6 @@ DEFAULT_ARCH="amd64"
 # -F: Fail if unrecognized options are found
 zparseopts -D -E -F -- \
     r:=region_arg -region:=region_arg \
-    t:=tag_arg -tag:=tag_arg \
     v:=version_arg -version:=version_arg \
     a:=arch_arg -arch:=arch_arg \
     k:=token_arg -token:=token_arg \
@@ -30,7 +28,6 @@ Usage: ${0:t} [options]
 
 Options:
     -r, --region REGION     DigitalOcean region (default: ${DEFAULT_REGION})
-    -t, --tag TAG           FreeBSD tag (default: auto-derived from version)
     -v, --version VERSION   FreeBSD version (default: ${DEFAULT_VERSION})
     -a, --arch ARCH         Architecture (default: ${DEFAULT_ARCH})
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
@@ -44,7 +41,7 @@ Environment variables required:
     STORAGE_URL                 Public URL for storage (e.g., https://storage.googleapis.com/bucket/path)
 
 Examples:
-    # Release build (tag auto-derived as "14.3")
+    # Release build
     DIGITALOCEAN_ACCESS_TOKEN=token \\
     STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
@@ -75,12 +72,6 @@ Examples:
     STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
     STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
     ${0:t} --region nyc3 --version 15.0-RC1        # Release candidate
-
-    # Custom tag override
-    DIGITALOCEAN_ACCESS_TOKEN=token \\
-    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
-    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 14.3-RELEASE --tag custom-14.3
 EOF
     exit 0
 fi
@@ -100,14 +91,6 @@ if [[ "${VERSION}" == *"-CURRENT" || "${VERSION}" == *"-STABLE" ]]; then
     SNAPSHOT="true"
 else
     SNAPSHOT=""
-fi
-
-# Derive TAG from VERSION if not explicitly provided
-if [[ -n "${tag_arg[2]:-}" ]]; then
-    TAG="${tag_arg[2]}"
-else
-    # Use full VERSION string (e.g., "14.2-RELEASE", "15.0-CURRENT")
-    TAG="${VERSION}"
 fi
 
 # Set DigitalOcean token from command line or environment
@@ -146,7 +129,7 @@ process_image() {
         base_url="https://download.freebsd.org/ftp/releases/VM-IMAGES/${VERSION}/${ARCH}/Latest"
     fi
 
-    local filename="FreeBSD-${TAG}-${ARCH}-${image_type}.qcow2"
+    local filename="FreeBSD-${VERSION}-${ARCH}-${image_type}.qcow2"
     local compressed_filename="${filename}.xz"
     local bz2_filename="${filename}.bz2"
 
@@ -255,7 +238,7 @@ create_do_image() {
     local image_type="$1"
     local gcs_url="$2"
 
-    local image_name="FreeBSD-${TAG}-${ARCH}-${image_type}"
+    local image_name="FreeBSD-${VERSION}-${ARCH}-${image_type}"
     local description="FreeBSD ${VERSION} ${image_type:u}"
 
     echo "Creating image (${image_type})..."
