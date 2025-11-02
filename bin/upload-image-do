@@ -4,7 +4,7 @@ set -o errexit -o nounset -o pipefail  # Exit on error, undefined vars, pipe fai
 
 # Default values
 DEFAULT_REGION="fra1"
-DEFAULT_TAG="14.3"
+DEFAULT_TAG="14.3-RELEASE"
 DEFAULT_VERSION="14.3-RELEASE"
 DEFAULT_ARCH="amd64"
 
@@ -106,8 +106,8 @@ fi
 if [[ -n "${tag_arg[2]:-}" ]]; then
     TAG="${tag_arg[2]}"
 else
-    # Extract version number from VERSION (e.g., "14.2-RELEASE" -> "14.2", "15.0-CURRENT" -> "15.0")
-    TAG="${VERSION%%-*}"
+    # Use full VERSION string (e.g., "14.2-RELEASE", "15.0-CURRENT")
+    TAG="${VERSION}"
 fi
 
 # Set DigitalOcean token from command line or environment
