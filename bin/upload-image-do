@@ -1,34 +1,30 @@
 #!/usr/bin/env zsh
 
-set -o errexit -o nounset -o pipefail  # Exit on error, undefined vars, pipe failures
+set -o errexit -o nounset -o pipefail
 
-# Default values
-DEFAULT_REGION="fra1"
-DEFAULT_VERSION="14.3-RELEASE"
-DEFAULT_ARCH="amd64"
-
-# Parse command line arguments using zparseopts
-# zparseopts flags:
-# -D: Remove recognized options from positional parameters
-# -E: Stop at first unrecognized option (don't error on unknown options)
-# -F: Fail if unrecognized options are found
+# Parse command line arguments
 zparseopts -D -E -F -- \
     r:=region_arg -region:=region_arg \
-    v:=version_arg -version:=version_arg \
-    a:=arch_arg -arch:=arch_arg \
     k:=token_arg -token:=token_arg \
+    i:=image_name_arg -image-name:=image_name_arg \
+    d:=description_arg -description:=description_arg \
     n=dry_run_arg -dry-run=dry_run_arg \
     h=help_arg -help=help_arg || exit 1
 
 # Show help if requested
 if [[ -n "${help_arg}" ]]; then
     cat >&2 <<EOF
-Usage: ${0:t} [options]
+Usage: ${0:t} [options] URL
+
+Download a FreeBSD image from a direct URL and upload to DigitalOcean.
+
+Arguments:
+    URL                 FreeBSD image URL (https://...) or local file path (/path/to/file)
 
 Options:
-    -r, --region REGION     DigitalOcean region (default: ${DEFAULT_REGION})
-    -v, --version VERSION   FreeBSD version (default: ${DEFAULT_VERSION})
-    -a, --arch ARCH         Architecture (default: ${DEFAULT_ARCH})
+    -r, --region REGION     DigitalOcean region (default: fra1)
+    -i, --image-name NAME   DigitalOcean image name (if provided, creates image; if not provided, skips image creation)
+    -d, --description DESC  DigitalOcean image description (defaults to image name if not provided)
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
     -n, --dry-run           Show operations without executing them
     -h, --help              Show this help message
@@ -39,56 +35,46 @@ Environment variables required:
     STORAGE_URL                 Public URL for storage (e.g., https://storage.googleapis.com/bucket/path)
 
 Examples:
-    # Release build
-    DIGITALOCEAN_ACCESS_TOKEN=token \\
-    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
-    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 14.3-RELEASE
+    export DIGITALOCEAN_ACCESS_TOKEN=token
+    export STORAGE_BUCKET=gs:mybucket/FreeBSD/images
+    export STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/images
 
-    # Snapshot builds (automatically detected from version suffix)
-    DIGITALOCEAN_ACCESS_TOKEN=token \\
-    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
-    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 15.0-CURRENT    # Current development
+    # Just download/compress/upload (skip DigitalOcean image creation)
+    ${0:t} -r nyc3 \\
+        'https://download.freebsd.org/ftp/snapshots/VM-IMAGES/15.0-STABLE/amd64/20251106/FreeBSD-15.0-STABLE-amd64-BASIC-CLOUDINIT-20251106-71bd17b879a7-281079-zfs.qcow2.xz'
 
-    DIGITALOCEAN_ACCESS_TOKEN=token \\
-    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
-    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 14.3-STABLE     # Stable branch
+    # With image name and custom description
+    ${0:t} -r nyc3 \\
+        -i 'FreeBSD-15.0-BETA4-amd64-zfs' \\
+        -d 'FreeBSD 15.0 Beta 4 ZFS' \\
+        'https://download.freebsd.org/ftp/releases/VM-IMAGES/15.0-BETA4/amd64/Latest/FreeBSD-15.0-BETA4-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
 
-    DIGITALOCEAN_ACCESS_TOKEN=token \\
-    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
-    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 15.0-ALPHA5     # Alpha release
+    # With image name only (description defaults to name)
+    ${0:t} -r fra1 \\
+        -i 'FreeBSD-14.3-RELEASE-amd64-zfs' \\
+        'https://download.freebsd.org/ftp/releases/VM-IMAGES/14.3-RELEASE/amd64/Latest/FreeBSD-14.3-RELEASE-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
 
-    DIGITALOCEAN_ACCESS_TOKEN=token \\
-    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
-    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 15.0-BETA1      # Beta release
-
-    DIGITALOCEAN_ACCESS_TOKEN=token \\
-    STORAGE_BUCKET=gs:mybucket/FreeBSD/image \\
-    STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/image \\
-    ${0:t} --region nyc3 --version 15.0-RC1        # Release candidate
+    # Using local file
+    ${0:t} -r fra1 \\
+        -i 'FreeBSD-15.0-STABLE-amd64-zfs' \\
+        '/path/to/FreeBSD-15.0-STABLE-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
 EOF
     exit 0
 fi
 
-# Define common variables with defaults
-REGION="${region_arg[2]:-${DEFAULT_REGION}}"
-DISTRIBUTION="Unknown"
-VERSION="${version_arg[2]:-${DEFAULT_VERSION}}"
-ARCH="${arch_arg[2]:-${DEFAULT_ARCH}}"
-DRY_RUN="${dry_run_arg[1]:+true}"
-WORK_DIR="/tmp/freebsd-images"
-
-# Automatically detect snapshot based on version suffix
-# Only CURRENT and STABLE are in snapshots; ALPHA, BETA, RC are in releases
-if [[ "${VERSION}" == *"-CURRENT" || "${VERSION}" == *"-STABLE" ]]; then
-    SNAPSHOT="true"
-else
-    SNAPSHOT=""
+# Get URL from positional argument
+if [[ $# -lt 1 ]]; then
+    echo "Error: URL is required" >&2
+    exit 1
 fi
+URL="$1"
+
+# Define variables
+REGION="${region_arg[2]:-fra1}"
+DRY_RUN="${dry_run_arg[1]:+true}"
+WORK_DIR="/tmp/freebsd-image-upload"
+DO_IMAGE_NAME="${image_name_arg[2]:-}"
+DO_DESCRIPTION="${description_arg[2]:-}"
 
 # Set DigitalOcean token from command line or environment
 if [[ -n "${token_arg[2]:-}" ]]; then
@@ -111,170 +97,143 @@ if [[ -z "${STORAGE_URL:-}" ]]; then
     exit 1
 fi
 
-# Define image types
-image_types=("ufs" "zfs")
+# Extract filename from URL
+REMOTE_FILENAME=$(basename "${URL}")
+WORK_COMPRESSED="${WORK_DIR}/${REMOTE_FILENAME}"
 
-# Function to process and upload image
-process_image() {
-    local image_type="$1"
+# Determine decompressed and final filenames
+if [[ "${REMOTE_FILENAME}" == *.xz ]]; then
+    DECOMPRESSED="${WORK_COMPRESSED%.xz}"
+elif [[ "${REMOTE_FILENAME}" == *.bz2 ]]; then
+    DECOMPRESSED="${WORK_COMPRESSED%.bz2}"
+else
+    DECOMPRESSED="${WORK_COMPRESSED}"
+fi
 
-    # Determine base URL based on snapshot flag
-    local base_url
-    if [[ "${SNAPSHOT}" == "true" ]]; then
-        base_url="https://download.freebsd.org/ftp/snapshots/VM-IMAGES/${VERSION}/${ARCH}/Latest"
-    else
-        base_url="https://download.freebsd.org/ftp/releases/VM-IMAGES/${VERSION}/${ARCH}/Latest"
-    fi
+# Extract base filename (without compression)
+BASENAME=$(basename "${DECOMPRESSED}")
+FINAL_FILENAME="${BASENAME}.bz2"
 
-    local filename="FreeBSD-${VERSION}-${ARCH}-${image_type}.qcow2"
-    local compressed_filename="${filename}.xz"
-    local bz2_filename="${filename}.bz2"
+echo "URL: ${URL}" >&2
+echo "Remote filename: ${REMOTE_FILENAME}" >&2
+echo "Work directory: ${WORK_DIR}" >&2
+echo "Final upload name: ${FINAL_FILENAME}" >&2
 
-    echo "Processing ${image_type} image..." >&2
+# Create work directory
+if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "[DRY-RUN] Would create work directory: ${WORK_DIR}" >&2
+else
+    mkdir -p "${WORK_DIR}"
+    cd "${WORK_DIR}"
+fi
 
-    # Create work directory
+# Download or copy image
+# Detect if URL is a local file path or remote URL
+if [[ "${URL}" =~ ^https?:// ]]; then
+    # Remote URL - download with curl
     if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would create work directory: ${WORK_DIR}" >&2
+        echo "[DRY-RUN] Would download: ${URL}" >&2
     else
-        mkdir -p "${WORK_DIR}"
-        cd "${WORK_DIR}"
-    fi
-
-    # Download image if not exists - try both filename patterns
-    if [[ ! -f "${compressed_filename}" ]]; then
-        # Try dot pattern first: FreeBSD-VERSION-ARCH-BASIC-CLOUDINIT.TYPE.qcow2.xz
-        local remote_filename_dot="FreeBSD-${VERSION}-${ARCH}-BASIC-CLOUDINIT.${image_type}.qcow2"
-        local compressed_remote_filename_dot="${remote_filename_dot}.xz"
-        local decompressed_filename="${filename}"
-
-        if [[ "${DRY_RUN}" == "true" ]]; then
-            echo "[DRY-RUN] Would download: ${base_url}/${compressed_remote_filename_dot}" >&2
-            echo "[DRY-RUN] Would save to: ${compressed_filename}" >&2
-        elif curl -L -f -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_dot}" 2>/dev/null; then
-            echo "Downloaded using dot pattern." >&2
-        else
-            # Fallback to hyphen pattern: FreeBSD-VERSION-ARCH-BASIC-CLOUDINIT-TYPE.qcow2.xz
-            local remote_filename_hyphen="FreeBSD-${VERSION}-${ARCH}-BASIC-CLOUDINIT-${image_type}.qcow2"
-            local compressed_remote_filename_hyphen="${remote_filename_hyphen}.xz"
-
-            echo "Dot pattern failed, trying hyphen pattern: ${compressed_remote_filename_hyphen}..." >&2
-            if [[ "${DRY_RUN}" == "true" ]]; then
-                echo "[DRY-RUN] Would download: ${base_url}/${compressed_remote_filename_hyphen}" >&2
-                echo "[DRY-RUN] Would save to: ${compressed_filename}" >&2
-            elif ! curl -L -o "${compressed_filename}" "${base_url}/${compressed_remote_filename_hyphen}"; then
-                rm -f "${compressed_filename}"
-                echo "Download failed, partial file removed" >&2
-                exit 1
-            fi
+        echo "Downloading image..." >&2
+        if ! curl -L -f -o "${WORK_COMPRESSED}" "${URL}"; then
+            rm -f "${WORK_COMPRESSED}"
+            echo "Download failed, file removed" >&2
+            exit 1
         fi
+        echo "Download complete." >&2
     fi
-
-    # Decompress if needed
-    if [[ ! -f "${decompressed_filename}" ]]; then
-        if [[ "${DRY_RUN}" == "true" ]]; then
-            echo "[DRY-RUN] Would decompress: ${compressed_filename}" >&2
-        else
-            echo "Decompressing ${compressed_filename}..." >&2
-            if ! xz -d -k "${compressed_filename}"; then
-            echo "Decompression failed. Examining file..." >&2
-            echo "File type: $(file "${compressed_filename}")" >&2
-            echo "File size: $(ls -lh "${compressed_filename}" | awk '{print $5}')" >&2
-            echo "First 100 bytes:" >&2
-            head -c 100 "${compressed_filename}" | xxd >&2
-                rm -f "${compressed_filename}" "${decompressed_filename}"
-                echo "Decompression failed, corrupted file removed. Please run again to re-download." >&2
-                exit 1
-            fi
-        fi
-    fi
-
-    # Rename to desired filename if different
-    if [[ "${decompressed_filename}" != "${filename}" && ! -f "${filename}" ]]; then
-        if [[ "${DRY_RUN}" == "true" ]]; then
-            echo "[DRY-RUN] Would rename: ${decompressed_filename} to ${filename}" >&2
-        else
-            mv "${decompressed_filename}" "${filename}"
-        fi
-    fi
-
-    # Recompress with bzip2 if needed
-    if [[ ! -f "${bz2_filename}" ]]; then
-        if [[ "${DRY_RUN}" == "true" ]]; then
-            echo "[DRY-RUN] Would compress with bzip2: ${filename} -> ${bz2_filename}" >&2
-        else
-            echo "Compressing with bzip2..." >&2
-            bzip2 -1 -k -v "${filename}" >&2
-        fi
-    fi
-
-    # Upload to Google Cloud Storage
+else
+    # Local file path - copy it
     if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would upload to GCS: ${bz2_filename} -> ${STORAGE_BUCKET}/${bz2_filename}" >&2
+        echo "[DRY-RUN] Would copy local file: ${URL}" >&2
     else
-        echo "Uploading to GCS as ${bz2_filename}..." >&2
-        rclone --progress copyto "${bz2_filename}" "${STORAGE_BUCKET}/${bz2_filename}" >&2 2>&1
+        if [[ ! -f "${URL}" ]]; then
+            echo "Error: Local file not found: ${URL}" >&2
+            exit 1
+        fi
+        echo "Copying local file..." >&2
+        if ! cp "${URL}" "${WORK_COMPRESSED}"; then
+            rm -f "${WORK_COMPRESSED}"
+            echo "Copy failed, file removed" >&2
+            exit 1
+        fi
+        echo "Copy complete." >&2
     fi
+fi
 
-    # Return the GCS URL
-    echo "${STORAGE_URL}/${bz2_filename}"
-}
+# Decompress if needed
+if [[ "${REMOTE_FILENAME}" == *.xz || "${REMOTE_FILENAME}" == *.bz2 ]]; then
+    if [[ "${DRY_RUN}" == "true" ]]; then
+        echo "[DRY-RUN] Would decompress: ${WORK_COMPRESSED}" >&2
+    else
+        echo "Decompressing ${REMOTE_FILENAME}..." >&2
+        if [[ "${REMOTE_FILENAME}" == *.xz ]]; then
+            xz -d "${WORK_COMPRESSED}"
+        else
+            bzip2 -d "${WORK_COMPRESSED}"
+        fi
+        echo "Decompression complete." >&2
+    fi
+fi
 
-# Function to create Digital Ocean image
-create_do_image() {
-    local image_type="$1"
-    local gcs_url="$2"
+# Recompress with bzip2 if needed (if original wasn't bzip2)
+if [[ "${REMOTE_FILENAME}" != *.bz2 ]]; then
+    if [[ "${DRY_RUN}" == "true" ]]; then
+        echo "[DRY-RUN] Would compress with bzip2: ${BASENAME} -> ${FINAL_FILENAME}" >&2
+    else
+        echo "Compressing with bzip2..." >&2
+        bzip2 -1 -v "${DECOMPRESSED}" >&2
+        echo "Compression complete." >&2
+    fi
+fi
 
-    local image_name="FreeBSD-${VERSION}-${ARCH}-${image_type}"
-    local description="FreeBSD ${VERSION} ${image_type:u}"
+# Upload to Google Cloud Storage
+UPLOAD_SOURCE="${WORK_DIR}/${FINAL_FILENAME}"
+if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "[DRY-RUN] Would upload to GCS: ${FINAL_FILENAME} -> ${STORAGE_BUCKET}/${FINAL_FILENAME}" >&2
+else
+    echo "Uploading to GCS as ${FINAL_FILENAME}..." >&2
+    rclone --progress copyto "${UPLOAD_SOURCE}" "${STORAGE_BUCKET}/${FINAL_FILENAME}" >&2 2>&1
+    echo "Upload complete." >&2
+fi
 
-    echo "Creating image (${image_type})..."
+# Generate GCS URL
+GCS_URL="${STORAGE_URL}/${FINAL_FILENAME}"
+echo "GCS URL: ${GCS_URL}" >&2
+
+# Create DigitalOcean image (optional, only if name is provided)
+if [[ -n "${DO_IMAGE_NAME}" ]]; then
+    IMAGE_NAME="${DO_IMAGE_NAME}"
+    DESCRIPTION="${DO_DESCRIPTION:-${DO_IMAGE_NAME}}"
+
+    echo "Image properties:" >&2
+    echo "  Name: ${IMAGE_NAME}" >&2
+    echo "  Description: ${DESCRIPTION}" >&2
 
     if [[ "${DRY_RUN}" == "true" ]]; then
         echo "[DRY-RUN] Would create DigitalOcean image:"
-        echo "  Name: ${image_name}"
+        echo "  Name: ${IMAGE_NAME}"
         echo "  Region: ${REGION}"
-        echo "  Distribution: ${DISTRIBUTION}"
-        echo "  Tags: FreeBSD"
-        echo "  Description: ${description}"
-        echo "  URL: ${gcs_url}"
+        echo "  Description: ${DESCRIPTION}"
+        echo "  URL: ${GCS_URL}"
     else
-        doctl compute image create "${image_name}" \
+        echo "Creating DigitalOcean image..." >&2
+        doctl compute image create "${IMAGE_NAME}" \
             --region "${REGION}" \
-            --image-distribution "${DISTRIBUTION}" \
             --tag-names "FreeBSD" \
-            --image-description "${description}" \
-            --image-url "${gcs_url}"
+            --image-description "${DESCRIPTION}" \
+            --image-url "${GCS_URL}" >&2
+        echo "Image creation initiated." >&2
     fi
-}
+else
+    echo "Skipping DigitalOcean image creation (use -i/--image-name to create)" >&2
+fi
 
-# Function to cleanup work directory
-cleanup() {
-    if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would clean up temporary files in: ${WORK_DIR}"
-    else
-        echo "Cleaning up temporary files..."
-        if [[ -d "${WORK_DIR}" ]]; then
-            rm -rf "${WORK_DIR}"
-            echo "Cleanup complete."
-        fi
-    fi
-}
-
-# Main execution
-main() {
-    # Set trap to cleanup on exit
-    trap cleanup EXIT
-
-    # Process each image type
-    for image_type in "${image_types[@]}"; do
-        gcs_url=$(process_image "${image_type}")
-
-        # Create image in Digital Ocean
-        create_do_image "${image_type}" "${gcs_url}"
-    done
-
-    echo "All images processed and uploaded!"
-}
-
-# Run main function
-main
+# Cleanup
+if [[ "${DRY_RUN}" == "true" ]]; then
+    echo "[DRY-RUN] Would clean up temporary files in: ${WORK_DIR}"
+else
+    echo "Cleaning up temporary files..." >&2
+    rm -rf "${WORK_DIR}"
+    echo "Done!" >&2
+fi
