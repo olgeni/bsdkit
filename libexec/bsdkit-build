@@ -147,6 +147,14 @@ build-release() {
         ${_jobs_option} packages REPODIR=${OS_REPODIR}
 
     env -i make -s -C ${OS_SRCDIR}/release \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} \
+        ${_jobs_option} clean
+
+    env -i make -s -C ${OS_SRCDIR}/release \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+        WITH_OCIIMAGES=yes oci-release
+
+    env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         install DESTDIR=${OS_RELDIR}
 
