@@ -173,9 +173,11 @@ build-release() {
     rm -r -f ${OS_RELDIR}
     mkdir -p ${OS_RELDIR}
 
-    env -i make -s -C ${OS_SRCDIR} \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        ${_jobs_option} packages REPODIR=${OS_REPODIR}
+    if [ -z "${BSDKIT_SKIP_PACKAGES}" ]; then
+        env -i make -s -C ${OS_SRCDIR} \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            ${_jobs_option} packages REPODIR=${OS_REPODIR}
+    fi
 
     if [ -z "${_use_existing}" ]; then
         env -i make -s -C ${OS_SRCDIR}/release \
