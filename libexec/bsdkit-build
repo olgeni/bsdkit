@@ -34,48 +34,89 @@ if [ $(whoami) != "root" ]; then
     exit 1
 fi
 
-if [ $# -eq 0 ]; then
+show_help() {
     cat << EOF
 
-${SCRIPT_NAME} - Build FreeBSD releases, packages, and OCI images
+${SCRIPT_NAME} - Build FreeBSD releases, ISOs, USB images, and VM images
 
-USAGE
-    ${SCRIPT_NAME} -v <version> -a <arch> [options]
+USAGE:
+    ${SCRIPT_NAME} [OPTIONS]
 
-OPTIONS
-    -v <version>     FreeBSD version to build (default: ${DEFAULT_VERSION})
-    -a <arch>        Target architecture (default: ${DEFAULT_ARCH})
-    -j <jobs>        Number of parallel jobs for make
+OPTIONS:
+    -h                  Show this help message
 
-    -E               Use existing build (skip buildworld/buildkernel)
-    -P               Build images with packages included
+  Build Targets:
+    -R                  Build release (world, kernel, packages, OCI, VM images)
+    -S                  Build staging area
+    -I                  Build ISO image
+    -U                  Build USB image
+    -V                  Build VM images (qcow2, raw, vmdk, vhd)
+    -C                  Build cloud-init enabled VM images
+    -A                  Build all: release/staging/ISO/USB
 
-BUILD TARGETS
-    -R               Build release (buildworld, buildkernel, packages, OCI)
-    -S               Build staging environment
-    -I               Build ISO image
-    -U               Build USB image
-    -A               Build all targets (release/staging/ISO/USB)
+  Build Configuration:
+    -v VERSION          FreeBSD version (default: ${DEFAULT_VERSION})
+    -a ARCH             Target architecture (default: ${DEFAULT_ARCH})
+    -j JOBS             Number of parallel jobs for make
+    -E                  Use existing build (skip buildworld/buildkernel)
+    -P                  Include packages in ISO/USB images
 
-EXAMPLES
-    # Full build with all targets
-    ${SCRIPT_NAME} -v 14 -a amd64 -j 32 -A
+  VM Image Options:
+    -F FILESYSTEMS      VM filesystems, space-separated (default: ufs zfs)
+                        Available: ufs, zfs
+    -M FORMATS          VM image formats, space-separated (default: qcow2)
+                        Available: qcow2, raw, vmdk, vhd
+    -Q SIZE             VM disk size (default: 10g)
+    -W SIZE             VM swap size (default: 2g)
 
-    # Build only release (includes OCI images)
-    ${SCRIPT_NAME} -v 14 -a amd64 -R
+EXAMPLES:
+    # Build complete release with all components
+    ${SCRIPT_NAME} -v 14 -a amd64 -j 16 -A
 
-    # Rebuild OCI images using existing build
-    ${SCRIPT_NAME} -v 14 -a amd64 -E -R
+    # Build just a cloud-init VM image
+    ${SCRIPT_NAME} -v 14 -a amd64 -C
 
-    # Build ISO with packages
+    # Build VM images in multiple formats with custom size
+    ${SCRIPT_NAME} -v 14 -a amd64 -V -M "qcow2 raw vmdk" -Q 20g -W 4g
+
+    # Build VM images for ZFS only
+    ${SCRIPT_NAME} -v 14 -a amd64 -V -F zfs
+
+    # Build release and cloud-init images
+    ${SCRIPT_NAME} -v 14 -a amd64 -j 16 -R -S -C
+
+    # Build ISO with packages included
     ${SCRIPT_NAME} -v 14 -a amd64 -P -I
 
-NOTES
-    • Release builds include: buildworld, buildkernel, packages, and OCI images
-    • Use -E to skip buildworld/buildkernel when reusing existing builds
-    • OCI images are built automatically as part of the release process
+VM IMAGE TYPES:
+    Regular (-V):       Basic VM images without cloud-init
+                        Output: bsdkit-\${version}-\${arch}.\${fs}.\${format}
+                        (where \${fs} is ufs or zfs, \${format} is from -M)
+
+    Cloud-init (-C):    VM images with cloud-init support
+                        Includes: config-drive, growfs, DHCP, serial console
+                        Output: bsdkit-\${version}-\${arch}-cloudinit.\${fs}.\${format}
+
+DIRECTORIES:
+    Source:             \$BSDKIT_DATA/src/\${version}/src
+    Release:            \$BSDKIT_DATA/src/\${version}/release-\${arch}
+    Staging:            \$BSDKIT_DATA/staging-\${version}-\${arch}
+    ISO/USB:            \$BSDKIT_DATA/iso/
+    VM images:          \$BSDKIT_DATA/vmimages-\${version}-\${arch}
 
 EOF
+}
+
+# Allow -h to work without root
+for arg in "$@"; do
+    if [ "$arg" = "-h" ]; then
+        show_help
+        exit 0
+    fi
+done
+
+if [ $# -eq 0 ]; then
+    show_help
     exit 0
 fi
 
@@ -89,10 +130,21 @@ _build_release=""
 _build_staging=""
 _build_iso=""
 _build_usb=""
+_build_vmimage=""
+
+_with_cloudinit=""
+_vm_filesystems="ufs zfs"
+_vm_formats="qcow2"
+_vm_size="10g"
+_vm_swapsize="2g"
 
 OPTIND=1
-while getopts "v:a:j:EPRSIUA" OPT; do
+while getopts "hv:a:j:F:M:Q:W:EPRSIUCVA" OPT; do
     case ${OPT} in
+        h)
+            show_help
+            exit 0
+            ;;
         v)
             _version="${OPTARG}"
             ;;
@@ -101,6 +153,18 @@ while getopts "v:a:j:EPRSIUA" OPT; do
             ;;
         j)
             _jobs_option="-j${OPTARG}"
+            ;;
+        F)
+            _vm_filesystems="${OPTARG}"
+            ;;
+        M)
+            _vm_formats="${OPTARG}"
+            ;;
+        Q)
+            _vm_size="${OPTARG}"
+            ;;
+        W)
+            _vm_swapsize="${OPTARG}"
             ;;
         E)
             _use_existing="YES"
@@ -120,13 +184,23 @@ while getopts "v:a:j:EPRSIUA" OPT; do
         U)
             _build_usb="YES"
             ;;
+        V)
+            _build_vmimage="YES"
+            ;;
+        C)
+            _with_cloudinit="YES"
+            _build_vmimage="YES"
+            ;;
         A)
             _build_release="YES"
             _build_staging="YES"
             _build_iso="YES"
             _build_usb="YES"
             ;;
-        *) ;;
+        *)
+            show_help
+            exit 1
+            ;;
     esac
 done
 
@@ -185,9 +259,11 @@ build-release() {
             ${_jobs_option} clean
     fi
 
-    env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        WITH_OCIIMAGES=yes oci-release
+    if [ -z "${BSDKIT_SKIP_OCI}" ]; then
+        env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            WITH_OCIIMAGES=yes oci-release
+    fi
 
     env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
@@ -261,6 +337,94 @@ build-usb() {
     ${BSDKIT_PATH}/bsdkit build-setup-img ${_iso} ${_usb}
 }
 
+build-vmimage() {
+    local _make_conf=${BSDKIT_PATH}/etc/make.conf
+    local _src_conf=${BSDKIT_PATH}/etc/src.conf
+    local _vmimage_dir=${BSDKIT_DATA}/vmimages-${_version}-${_arch}
+    local _objdir=/usr/obj${OS_SRCDIR}/${_arch}.${_arch}/release
+
+    mkdir -p ${_vmimage_dir}
+
+    if [ -n "${_with_cloudinit}" ]; then
+        # Build cloud-init enabled images using cloudware system
+        message ">>> Building CLOUDINIT VM images: ${_vm_filesystems} / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
+
+        # Clean only cloudware VM artifacts to force rebuild
+        message ">>> Cleaning existing cloudware artifacts"
+        chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) ${_objdir}/basic-cloudinit.*(N) 2>/dev/null || true
+        rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
+        rm -f ${_objdir}/basic-cloudinit.*.(img|qcow2|raw|vmdk|vhd)(N)
+
+        env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
+            TARGET=${_arch} TARGET_ARCH=${_arch} \
+            KERNCONF="BSDKIT" \
+            WITH_CLOUDWARE=YES \
+            CLOUDWARE="BASIC-CLOUDINIT" \
+            VMFSLIST="${_vm_filesystems}" \
+            VMSIZE="${_vm_size}" \
+            SWAPSIZE="${_vm_swapsize}" \
+            WORLDDIR=${OS_SRCDIR} \
+            cloudware-release
+
+        # Copy cloud-init images
+        message ">>> Installing CLOUDINIT VM images to ${_vmimage_dir}"
+        for img in ${_objdir}/basic-cloudinit.*.(qcow2|raw|vmdk|vhd)(N); do
+            if [ -f "${img}" ]; then
+                local basename=$(basename ${img})
+                local newname=$(echo ${basename} | sed "s/^basic-cloudinit\./bsdkit-${_version}-${_arch}-cloudinit./")
+                cp -v ${img} ${_vmimage_dir}/${newname}
+            fi
+        done
+
+        # Clean up cloudware build artifacts
+        message ">>> Cleaning up CLOUDINIT build artifacts"
+        chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) 2>/dev/null || true
+        rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
+        rm -f ${_objdir}/basic-cloudinit.*.img(N)
+    else
+        # Build regular VM images
+        message ">>> Building VM images: ${_vm_filesystems} / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
+
+        # Clean only VM artifacts to force rebuild
+        message ">>> Cleaning existing VM artifacts"
+        chflags -R noschg ${_objdir}/vm-image-*(N) ${_objdir}/vm.*(N) 2>/dev/null || true
+        rm -rf ${_objdir}/vm-image-*(N)
+        rm -f ${_objdir}/vm.*.(img|qcow2|raw|vmdk|vhd)(N) ${_objdir}/*.(ufs|zfs).img(N) ${_objdir}/vm-image(N)
+
+        env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
+            TARGET=${_arch} TARGET_ARCH=${_arch} \
+            KERNCONF="BSDKIT" \
+            WITH_VMIMAGES=YES \
+            VMFSLIST="${_vm_filesystems}" \
+            VMFORMATS="${_vm_formats}" \
+            VMSIZE="${_vm_size}" \
+            SWAPSIZE="${_vm_swapsize}" \
+            WORLDDIR=${OS_SRCDIR} \
+            vm-release
+
+        # Copy VM images
+        message ">>> Installing VM images to ${_vmimage_dir}"
+        for img in ${_objdir}/vm.*.(qcow2|raw|vmdk|vhd)(N); do
+            if [ -f "${img}" ]; then
+                local basename=$(basename ${img})
+                local newname=$(echo ${basename} | sed "s/^vm\./bsdkit-${_version}-${_arch}./")
+                cp -v ${img} ${_vmimage_dir}/${newname}
+            fi
+        done
+
+        # Clean up regular VM build artifacts
+        message ">>> Cleaning up VM build artifacts"
+        chflags -R noschg ${_objdir}/vm-image-*(N) 2>/dev/null || true
+        rm -rf ${_objdir}/vm-image-*(N)
+        rm -f ${_objdir}/vm.*.img(N) ${_objdir}/*.img(N) ${_objdir}/vm-image(N)
+    fi
+
+    message ">>> VM images created in: ${_vmimage_dir}"
+    ls -lh ${_vmimage_dir}
+}
+
 if [ -n "${_build_release}" ]; then
     build-release
 fi
@@ -275,4 +439,10 @@ fi
 
 if [ -n "${_build_usb}" ]; then
     build-usb
+fi
+
+if [ -n "${_build_vmimage}" ]; then
+    if [ -z "${BSDKIT_SKIP_VM}" ]; then
+        build-vmimage
+    fi
 fi
