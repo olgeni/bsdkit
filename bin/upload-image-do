@@ -220,6 +220,7 @@ if [[ "${DRY_RUN}" == "true" ]]; then
 else
     echo "Creating DigitalOcean image..." >&2
     doctl compute image create "${IMAGE_NAME}" \
+        --access-token "${DIGITALOCEAN_ACCESS_TOKEN}" \
         --region "${REGION}" \
         --tag-names "FreeBSD" \
         --image-description "${DESCRIPTION}" \
