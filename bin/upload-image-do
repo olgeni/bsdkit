@@ -121,10 +121,11 @@ echo "Remote filename: ${REMOTE_FILENAME}" >&2
 echo "Work directory: ${WORK_DIR}" >&2
 echo "Final upload name: ${FINAL_FILENAME}" >&2
 
-# Create work directory
+# Create work directory (clean if exists)
 if [[ "${DRY_RUN}" == "true" ]]; then
     echo "[DRY-RUN] Would create work directory: ${WORK_DIR}" >&2
 else
+    rm -rf "${WORK_DIR}"
     mkdir -p "${WORK_DIR}"
     cd "${WORK_DIR}"
 fi
