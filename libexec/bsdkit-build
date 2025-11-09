@@ -183,7 +183,7 @@ build-release() {
             ${_jobs_option} clean
     fi
 
-    env -i make -s -C ${OS_SRCDIR}/release \
+    env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         WITH_OCIIMAGES=yes oci-release
 
