@@ -37,22 +37,46 @@ fi
 if [ $# -eq 0 ]; then
     cat << EOF
 
-usage: ${SCRIPT_NAME} [option] ...
+${SCRIPT_NAME} - Build FreeBSD releases, packages, and OCI images
 
-Options and arguments:
+USAGE
+    ${SCRIPT_NAME} -v <version> -a <arch> [options]
 
-    -v version
-    -a arch
-    -j jobs
-    -E: use existing build (skip buildworld/buildkernel)
-    -P: build images with packages
-    -R: build release
-    -S: build staging
-    -I: build ISO image
-    -U: build USB image
-    -A: build release/staging/ISO/USB
+OPTIONS
+    -v <version>     FreeBSD version to build (default: ${DEFAULT_VERSION})
+    -a <arch>        Target architecture (default: ${DEFAULT_ARCH})
+    -j <jobs>        Number of parallel jobs for make
+
+    -E               Use existing build (skip buildworld/buildkernel)
+    -P               Build images with packages included
+
+BUILD TARGETS
+    -R               Build release (buildworld, buildkernel, packages, OCI)
+    -S               Build staging environment
+    -I               Build ISO image
+    -U               Build USB image
+    -A               Build all targets (release/staging/ISO/USB)
+
+EXAMPLES
+    # Full build with all targets
+    ${SCRIPT_NAME} -v 14 -a amd64 -j 32 -A
+
+    # Build only release (includes OCI images)
+    ${SCRIPT_NAME} -v 14 -a amd64 -R
+
+    # Rebuild OCI images using existing build
+    ${SCRIPT_NAME} -v 14 -a amd64 -E -R
+
+    # Build ISO with packages
+    ${SCRIPT_NAME} -v 14 -a amd64 -P -I
+
+NOTES
+    • Release builds include: buildworld, buildkernel, packages, and OCI images
+    • Use -E to skip buildworld/buildkernel when reusing existing builds
+    • OCI images are built automatically as part of the release process
 
 EOF
+    exit 0
 fi
 
 _version=${DEFAULT_VERSION}
