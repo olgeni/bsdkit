@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+set -x
+
 setopt errreturn nounset pipefail
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
@@ -247,13 +249,13 @@ build-release() {
     rm -r -f ${OS_RELDIR}
     mkdir -p ${OS_RELDIR}
 
-    if [ -z "${BSDKIT_SKIP_PACKAGES}" ]; then
+    if [ -z "${BSDKIT_SKIP_PACKAGES:-}" ]; then
         env -i make -s -C ${OS_SRCDIR} \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
             ${_jobs_option} packages REPODIR=${OS_REPODIR}
     fi
 
-    if [ -z "${BSDKIT_SKIP_OCI}" ]; then
+    if [ -z "${BSDKIT_SKIP_OCI:-}" ]; then
         env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
             WITH_OCIIMAGES=yes oci-release
@@ -442,7 +444,7 @@ if [ -n "${_build_usb}" ]; then
 fi
 
 if [ -n "${_build_vmimage}" ]; then
-    if [ -z "${BSDKIT_SKIP_VM}" ]; then
+    if [ -z "${BSDKIT_SKIP_VM:-}" ]; then
         build-vmimage
     fi
 fi
