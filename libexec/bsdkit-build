@@ -360,7 +360,7 @@ build-vmimage() {
         env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
             TARGET=${_arch} TARGET_ARCH=${_arch} \
-            KERNCONF="BSDKIT" \
+            KERNEL="BSDKIT" \
             WITH_CLOUDWARE=YES \
             CLOUDWARE="BASIC-CLOUDINIT" \
             VMFSLIST="${_vm_filesystems}" \
@@ -397,7 +397,7 @@ build-vmimage() {
         env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
             TARGET=${_arch} TARGET_ARCH=${_arch} \
-            KERNCONF="BSDKIT" \
+            KERNEL="BSDKIT" \
             WITH_VMIMAGES=YES \
             VMFSLIST="${_vm_filesystems}" \
             VMFORMATS="${_vm_formats}" \
