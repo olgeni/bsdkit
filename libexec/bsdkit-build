@@ -230,9 +230,7 @@ build-release() {
     local _make_conf=${BSDKIT_PATH}/etc/make.conf
     local _src_conf=${BSDKIT_PATH}/etc/src.conf
 
-    install -o root -g wheel -m 644 ansible/BSDKIT-${_version}-${_arch} ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
-
-    KERNCONF="BSDKIT"
+    KERNCONF="GENERIC"
 
     message ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
@@ -286,8 +284,6 @@ build-release() {
         clean
 
     message ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
-
-    rm -f ${OS_SRCDIR}/sys/${_arch}/conf/BSDKIT
 }
 
 build-staging() {
@@ -360,7 +356,7 @@ build-vmimage() {
         env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
             TARGET=${_arch} TARGET_ARCH=${_arch} \
-            KERNEL="BSDKIT" \
+            KERNEL="GENERIC" \
             WITH_CLOUDWARE=YES \
             CLOUDWARE="BASIC-CLOUDINIT" \
             VMFSLIST="${_vm_filesystems}" \
@@ -397,7 +393,7 @@ build-vmimage() {
         env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
             TARGET=${_arch} TARGET_ARCH=${_arch} \
-            KERNEL="BSDKIT" \
+            KERNEL="GENERIC" \
             WITH_VMIMAGES=YES \
             VMFSLIST="${_vm_filesystems}" \
             VMFORMATS="${_vm_formats}" \
