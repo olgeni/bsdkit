@@ -44,6 +44,7 @@ Options and arguments:
     -v version
     -a arch
     -j jobs
+    -E: use existing build (skip buildworld/buildkernel)
     -P: build images with packages
     -R: build release
     -S: build staging
@@ -57,6 +58,7 @@ fi
 _version=${DEFAULT_VERSION}
 _arch=${DEFAULT_ARCH}
 _jobs_option=""
+_use_existing=""
 _with_packages=""
 
 _build_release=""
@@ -65,7 +67,7 @@ _build_iso=""
 _build_usb=""
 
 OPTIND=1
-while getopts "v:a:j:PRSIUA" OPT; do
+while getopts "v:a:j:EPRSIUA" OPT; do
     case ${OPT} in
         v)
             _version="${OPTARG}"
@@ -75,6 +77,9 @@ while getopts "v:a:j:PRSIUA" OPT; do
             ;;
         j)
             _jobs_option="-j${OPTARG}"
+            ;;
+        E)
+            _use_existing="YES"
             ;;
         P)
             _with_packages="YES"
@@ -131,13 +136,15 @@ build-release() {
 
     message ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
-    env -i make -s -C ${OS_SRCDIR} \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        ${_jobs_option} buildworld buildkernel
+    if [ -z "${_use_existing}" ]; then
+        env -i make -s -C ${OS_SRCDIR} \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            ${_jobs_option} buildworld buildkernel
 
-    env -i make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        release NOPORTS="YES"
+        env -i make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            release NOPORTS="YES"
+    fi
 
     rm -r -f ${OS_RELDIR}
     mkdir -p ${OS_RELDIR}
@@ -146,9 +153,11 @@ build-release() {
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         ${_jobs_option} packages REPODIR=${OS_REPODIR}
 
-    env -i make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} \
-        ${_jobs_option} clean
+    if [ -z "${_use_existing}" ]; then
+        env -i make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} \
+            ${_jobs_option} clean
+    fi
 
     env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
