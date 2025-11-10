@@ -17,15 +17,15 @@ fi
 ENVRC=""
 
 if [ -f envrc ]; then
-    ENVRC="$(grep -v '^\s*#' envrc)"
+    ENVRC="$(grep -Ev '^\s*(#|$)' envrc)"
 fi
 
 if [ -f envrc.local ]; then
-    ENVRC="${ENVRC} $(grep -v '^\s*#' envrc.local)"
+    ENVRC="${ENVRC} $(grep -Ev '^\s*(#|$)' envrc.local)"
 fi
 
 if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
-    ENVRC="${ENVRC} $(cat envrc.d/* | grep -v '^\s*#')"
+    ENVRC="${ENVRC} $(cat envrc.d/* | grep -Ev '^\s*(#|$)')"
 fi
 
 : ${NATS_DATA_DIR:="/var/db/nats"}
