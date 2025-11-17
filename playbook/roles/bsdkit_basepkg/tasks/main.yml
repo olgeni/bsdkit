@@ -113,3 +113,21 @@
   command: "pkg set -A 0 {{ item }}"
   loop: "{{ bsdkit_bare_metal_packages }}"
   changed_when: false
+
+- name: Configure podman to use ZFS storage driver (when ZFS is available)
+  when: zfs_available
+  community.general.ini_file:
+    path: /usr/local/etc/containers/storage.conf
+    section: storage
+    option: driver
+    value: '"zfs"'
+    backup: true
+
+- name: Configure podman to use VFS storage driver (when ZFS is not available)
+  when: not zfs_available
+  community.general.ini_file:
+    path: /usr/local/etc/containers/storage.conf
+    section: storage
+    option: driver
+    value: '"vfs"'
+    backup: true
