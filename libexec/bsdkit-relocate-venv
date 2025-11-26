@@ -1,0 +1,90 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+
+# ===========================================================================
+
+usage() {
+    echo "Usage: ${SCRIPT_NAME} <venv_path>"
+    echo ""
+    echo "Relocate a Python virtualenv to its current directory after moving it."
+    echo "Updates shebangs and VIRTUAL_ENV paths in bin/* scripts."
+    echo ""
+    echo "Arguments:"
+    echo "  venv_path    Path to the virtualenv directory (must contain bin/activate)"
+    exit 0
+}
+
+# ===========================================================================
+
+if [[ $# -lt 1 ]]; then
+    usage
+fi
+
+VENV_DIR="$1"
+
+# Resolve to absolute path
+if [[ ! -d "$VENV_DIR" ]]; then
+    error "Directory not found: $VENV_DIR"
+fi
+
+VENV_DIR="$(realpath "$VENV_DIR")"
+BIN_DIR="$VENV_DIR/bin"
+
+if [[ ! -d "$BIN_DIR" ]]; then
+    error "$BIN_DIR not found. Is this a virtualenv?"
+fi
+
+if [[ ! -f "$BIN_DIR/activate" ]]; then
+    error "$BIN_DIR/activate not found. Is this a virtualenv?"
+fi
+
+# Detect old venv path from activate script
+OLD_VENV=$(grep "^VIRTUAL_ENV=" "$BIN_DIR/activate" | cut -d"'" -f2)
+
+if [[ -z "$OLD_VENV" ]]; then
+    error "Could not detect old VIRTUAL_ENV path from $BIN_DIR/activate"
+fi
+
+if [[ "$OLD_VENV" == "$VENV_DIR" ]]; then
+    message "Virtualenv already at correct location: $VENV_DIR"
+    exit 0
+fi
+
+message "Relocating virtualenv:"
+message "  From: $OLD_VENV"
+message "  To:   $VENV_DIR"
+
+# Count files to fix
+COUNT=0
+
+for file in "$BIN_DIR"/*; do
+    [[ -f "$file" ]] || continue
+    if grep -q "$OLD_VENV" "$file" 2>/dev/null; then
+        ((COUNT++))
+    fi
+done
+
+if [[ $COUNT -eq 0 ]]; then
+    warning "No files found containing old path"
+    exit 0
+fi
+
+message "Found $COUNT files to update"
+
+# Fix all files in bin/
+for file in "$BIN_DIR"/*; do
+    [[ -f "$file" ]] || continue
+
+    if grep -q "$OLD_VENV" "$file" 2>/dev/null; then
+        sed -i '' "s|${OLD_VENV}|${VENV_DIR}|g" "$file"
+        message "  Fixed: $(basename "$file")"
+    fi
+done
+
+message "Done! Virtualenv relocated successfully."

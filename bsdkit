@@ -3305,6 +3305,10 @@ build() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-build "$@"
 }
 
+relocate-venv() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-relocate-venv "$@"
+}
+
 provision() {
     if platform-is-digitalocean; then
         ansible-local-playbook -t provision_digitalocean
