@@ -19,11 +19,6 @@
     path: /var/log/console
     state: absent
 
-- name: Remove misc/buffer package
-  community.general.pkgng:
-    name: misc/buffer
-    state: absent
-
 - name: Check if FreeBSD version is 14 or above
   set_fact:
     is_freebsd_14_or_above: "{{ ansible_distribution_version is version('14.0', '>=') }}"
