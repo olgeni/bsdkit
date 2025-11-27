@@ -35,6 +35,7 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 : ${BOOTENV_NAME:="$(date +%F.%H%M)"}
 : ${BOOTENV_MOUNT:="/mnt"}
 : ${FETCH_ONLY:="no"}
+: ${FORCE_UPGRADE:="no"}
 : ${CAT_CMD:="/bin/cat"}
 
 : ${_install_src:="no"}
@@ -139,7 +140,7 @@ if mount | cut -w -f 3 | fgrep -q "/proc"; then
 fi
 
 OPTIND=1
-while getopts "a:b:d:eEFn:p:r:v:" OPT; do
+while getopts "a:b:d:eEfFn:p:r:v:" OPT; do
     case ${OPT} in
         a)
             BSDKIT_ARCH=${OPTARG}
@@ -152,6 +153,9 @@ while getopts "a:b:d:eEFn:p:r:v:" OPT; do
             ;;
         E)
             BOOTENV_ENABLE="no"
+            ;;
+        f)
+            FORCE_UPGRADE="yes"
             ;;
         F)
             FETCH_ONLY="yes"
@@ -292,9 +296,13 @@ if [ -x ${DESTDIR}/bin/freebsd-version ]; then
     _target_version=$(cat ${_distdir}/RELEASE)
 
     if [ "${_installed_version}" = "${_target_version}" ]; then
-        message "System is already at version ${_target_version}, no upgrade needed"
-        message "Release files are cached in ${_distdir}"
-        exit 0
+        if is-yes ${FORCE_UPGRADE}; then
+            message "System is already at version ${_target_version}, forcing upgrade"
+        else
+            message "System is already at version ${_target_version}, no upgrade needed"
+            message "Release files are cached in ${_distdir}"
+            exit 0
+        fi
     else
         message "Upgrading from ${_installed_version} to ${_target_version}"
     fi
