@@ -19,7 +19,6 @@
         - always
     - role: bsdkit_ifconfig
     - role: bsdkit_bsdenv
-    - role: bsdkit_pkg
 
 - name: Configuration
   hosts: all
@@ -28,6 +27,7 @@
     - configure
   roles:
     - role: bsdkit_cleanup_before
+    - role: bsdkit_pkg
     - role: bsdkit_basepkg
     - role: bsdkit_loader
     - role: bsdkit_sysctl
