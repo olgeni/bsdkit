@@ -23,7 +23,7 @@ Arguments:
 
 Options:
     -r, --region REGION     DigitalOcean region (default: fra1)
-    -i, --image-name NAME   DigitalOcean image name (required)
+    -i, --image-name NAME   DigitalOcean image name (optional, auto-detected from filename if not provided)
     -d, --description DESC  DigitalOcean image description (defaults to image name if not provided)
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
     -n, --dry-run           Show operations without executing them
@@ -39,7 +39,10 @@ Examples:
     export STORAGE_BUCKET=gs:mybucket/FreeBSD/images
     export STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/images
 
-    # With image name and custom description
+    # Auto-detect image name from filename
+    ${0:t} 'https://download.freebsd.org/ftp/snapshots/VM-IMAGES/14.3-STABLE/amd64/20251120/FreeBSD-14.3-STABLE-amd64-20251120-fa1337393b84-272914.qcow2.xz'
+
+    # With custom image name and description
     ${0:t} -r nyc3 \\
         -i 'FreeBSD-15.0-BETA4-amd64-zfs' \\
         -d 'FreeBSD 15.0 Beta 4 ZFS' \\
@@ -93,15 +96,23 @@ if [[ -z "${STORAGE_URL:-}" ]]; then
     exit 1
 fi
 
-# Check if image name is provided (required)
-if [[ -z "${DO_IMAGE_NAME}" ]]; then
-    echo "Error: -i/--image-name is required" >&2
-    exit 1
-fi
-
 # Extract filename from URL
 REMOTE_FILENAME=$(basename "${URL}")
 WORK_COMPRESSED="${WORK_DIR}/${REMOTE_FILENAME}"
+
+# Auto-detect image name from filename if not provided
+if [[ -z "${DO_IMAGE_NAME}" ]]; then
+    # Remove common extensions to get the base image name
+    AUTO_IMAGE_NAME="${REMOTE_FILENAME}"
+    # Strip extensions: .qcow2.xz, .qcow2.bz2, .qcow2, .xz, .bz2
+    AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.qcow2.xz}"
+    AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.qcow2.bz2}"
+    AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.qcow2}"
+    AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.xz}"
+    AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.bz2}"
+    DO_IMAGE_NAME="${AUTO_IMAGE_NAME}"
+    echo "Auto-detected image name: ${DO_IMAGE_NAME}" >&2
+fi
 
 # Determine decompressed and final filenames
 if [[ "${REMOTE_FILENAME}" == *.xz ]]; then
