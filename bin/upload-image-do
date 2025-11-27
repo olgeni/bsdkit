@@ -71,7 +71,6 @@ URL="$1"
 # Define variables
 REGION="${region_arg[2]:-fra1}"
 DRY_RUN="${dry_run_arg[1]:+true}"
-WORK_DIR="/tmp/freebsd-image-upload"
 DO_IMAGE_NAME="${image_name_arg[2]:-}"
 DO_DESCRIPTION="${description_arg[2]:-}"
 
@@ -94,6 +93,14 @@ fi
 if [[ -z "${STORAGE_URL:-}" ]]; then
     echo "Error: STORAGE_URL environment variable is not set" >&2
     exit 1
+fi
+
+# Create unique work directory
+if [[ "${DRY_RUN}" == "true" ]]; then
+    WORK_DIR="/tmp/freebsd-image-upload-dryrun"
+    echo "[DRY-RUN] Would create unique work directory" >&2
+else
+    WORK_DIR=$(mktemp -d /tmp/freebsd-image-upload.XXXXXX)
 fi
 
 # Extract filename from URL
@@ -132,12 +139,8 @@ echo "Remote filename: ${REMOTE_FILENAME}" >&2
 echo "Work directory: ${WORK_DIR}" >&2
 echo "Final upload name: ${FINAL_FILENAME}" >&2
 
-# Create work directory (clean if exists)
-if [[ "${DRY_RUN}" == "true" ]]; then
-    echo "[DRY-RUN] Would create work directory: ${WORK_DIR}" >&2
-else
-    rm -rf "${WORK_DIR}"
-    mkdir -p "${WORK_DIR}"
+# Change to work directory
+if [[ "${DRY_RUN}" != "true" ]]; then
     cd "${WORK_DIR}"
 fi
 
