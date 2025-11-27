@@ -49,6 +49,19 @@
     mode: "0644"
   with_items: "{{ dotfile_list }}"
 
+- name: Check if freebsd user exists
+  command: pw usershow freebsd
+  register: freebsd_user_exists
+  changed_when: false
+  failed_when: false
+
+- name: Remove freebsd user if it exists
+  user:
+    name: freebsd
+    state: absent
+    remove: true
+  when: freebsd_user_exists is defined and freebsd_user_exists.rc == 0
+
 - name: Check if ec2-user exists
   command: pw usershow ec2-user
   register: ec2_user_exists
