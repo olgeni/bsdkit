@@ -219,6 +219,16 @@ __check-go-yq() {
     fi
 }
 
+__check-git() {
+    if ! command -v pkg > /dev/null 2>&1; then
+        return 0
+    fi
+
+    if ! command -v git > /dev/null 2>&1; then
+        pkg install -y devel/git
+    fi
+}
+
 __check-iocage() {
     if ! command -v iocage > /dev/null 2>&1; then
         pkg install -y sysutils/iocage
@@ -3399,6 +3409,8 @@ __enable-swap-device-aws() {
 
 update() {
     [ -d ${BSDKIT_SRCDIR}/.git ] || error "local git repository not found"
+
+    __check-git
 
     cd ${BSDKIT_SRCDIR}
 
