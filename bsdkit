@@ -3020,7 +3020,7 @@ EOF
     eval env \
          ANSIBLE_CONFIG=${_ansible_cfg} \
          $(__environment) \
-         ansible-playbook ${_ansible_yml}
+         /usr/local/bin/ansible-playbook ${_ansible_yml}
 
     rm -r ${_ansible_root}
 }
@@ -3030,7 +3030,7 @@ ansible-local-playbook() {
 
     __install-facts /
 
-    ansible-playbook \
+    /usr/local/bin/ansible-playbook \
         --inventory localhost, \
         --connection local \
         -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
@@ -3079,7 +3079,7 @@ EOF
              BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
              BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
              BSDKIT_CHROOT=1 \
-             ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
+             /usr/local/bin/ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
     } always {
         umount -f ${BSDKIT_DESTDIR}/dev
         rm -r ${_ansible_root}
@@ -3135,7 +3135,7 @@ EOF
          BSDKIT_INTERFACE=${_bsdkit_interface} \
          BSDKIT_IFCONFIG=${_bsdkit_ifconfig} \
          BSDKIT_DEFAULTROUTER=${_bsdkit_defaultrouter} \
-         ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
+         /usr/local/bin/ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
 
     rm -r ${_ansible_root}
 }
@@ -3353,7 +3353,7 @@ sysprep() {
         esac
     done
 
-    ansible-playbook \
+    /usr/local/bin/ansible-playbook \
         --inventory localhost, \
         --connection local \
         -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
