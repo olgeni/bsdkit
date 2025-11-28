@@ -194,7 +194,7 @@ reformat-sysctl-conf() {
 }
 
 __check-python3() {
-    if ! command -v python3 > /dev/null 2>&1; then
+    if [ ! -x /usr/local/bin/python3 ]; then
         pkg install -y lang/python3
     fi
 }
