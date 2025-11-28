@@ -109,7 +109,7 @@ source ${SCRIPT_PATH}/lib/is-yes.inc.sh
 source ${SCRIPT_PATH}/lib/yaml.inc.sh
 source ${SCRIPT_PATH}/lib/rc.inc.sh
 
-if command -v pv > /dev/null 2>&1; then
+if [ -x /usr/local/bin/pv ]; then
     CAT_CMD=(pv -c -w 75)
 else
     CAT_CMD=/bin/cat
@@ -232,6 +232,18 @@ __check-git() {
 __check-iocage() {
     if [ ! -x /usr/local/sbin/iocage ]; then
         pkg install -y sysutils/iocage
+    fi
+}
+
+__check-monit() {
+    if [ ! -x /usr/local/bin/monit ]; then
+        pkg install -y sysutils/monit
+    fi
+}
+
+__check-fzf() {
+    if [ ! -x /usr/local/bin/fzf ]; then
+        pkg install -y textproc/fzf
     fi
 }
 
@@ -1996,6 +2008,7 @@ install-mbr-zfs() {
 
 create-iocage() {
     __check-requirements
+    __check-iocage
 
     eval $(__local-options)
     eval $(__parse-options $@)
@@ -2006,7 +2019,6 @@ create-iocage() {
 
     unset IOCAGE_COLOR
 
-    command -v iocage > /dev/null 2>&1 || error "iocage not found (create-iocage)."
     iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create-iocage)."
 
     local _iocage_root
@@ -2750,7 +2762,7 @@ build-setup-iso() {
     local _relpath=$3
     local _pkgpath=$4
 
-    if ! command -v mkisofs > /dev/null 2>&1; then
+    if [ ! -x /usr/local/bin/mkisofs ]; then
         error "required command missing (mkisofs)."
         # EX_UNAVAILABLE
         exit 69
@@ -3258,9 +3270,7 @@ configure-crontab-jail() {
 }
 
 status() {
-    if ! command -v monit > /dev/null 2>&1; then
-        error "monit is not installed"
-    fi
+    __check-monit
 
     monit -B summary
 }
@@ -3781,10 +3791,7 @@ restart-local() {
 }
 
 destroy-zfs-snapshots() {
-    if ! command -v fzf > /dev/null 2>&1; then
-        error "required command missing (fzf)"
-        return 69
-    fi
+    __check-fzf
 
     local _snapshot
 
