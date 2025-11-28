@@ -287,7 +287,8 @@ __environment() {
         BSDKIT_PKGSET=\"${BSDKIT_PKGSET}\" \
         BSDKIT_SSH_PUBLIC_KEY=\"${BSDKIT_SSH_PUBLIC_KEY}\" \
         ANSIBLE_DISPLAY_OK_HOSTS=\"${ANSIBLE_DISPLAY_OK_HOSTS}\" \
-        ANSIBLE_DISPLAY_SKIPPED_HOSTS=\"${ANSIBLE_DISPLAY_SKIPPED_HOSTS}\"
+        ANSIBLE_DISPLAY_SKIPPED_HOSTS=\"${ANSIBLE_DISPLAY_SKIPPED_HOSTS}\" \
+        PATH=\"/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin\"
 }
 
 __parse-url() {
@@ -3030,7 +3031,8 @@ ansible-local-playbook() {
 
     __install-facts /
 
-    /usr/local/bin/ansible-playbook \
+    env PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin" \
+        /usr/local/bin/ansible-playbook \
         --inventory localhost, \
         --connection local \
         -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
@@ -3353,7 +3355,8 @@ sysprep() {
         esac
     done
 
-    /usr/local/bin/ansible-playbook \
+    env PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin" \
+        /usr/local/bin/ansible-playbook \
         --inventory localhost, \
         --connection local \
         -e ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} \
