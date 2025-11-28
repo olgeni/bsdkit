@@ -224,7 +224,7 @@ __check-git() {
         return 0
     fi
 
-    if ! command -v git > /dev/null 2>&1; then
+    if [ ! -x /usr/local/bin/git ]; then
         pkg install -y devel/git
     fi
 }
