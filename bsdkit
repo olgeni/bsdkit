@@ -1736,7 +1736,7 @@ __install-facts() {
 
     if [ ! -f ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact ]; then
         install -d -o root -g wheel -m 755 ${_destdir}/usr/local/etc/ansible/facts.d
-        yq -o=json ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml > ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact
+        /usr/local/bin/yq -o=json ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml > ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact
     fi
 }
 
@@ -3139,7 +3139,7 @@ __build-facts() {
 
     [ -f ${_destdir}${BSDKIT_CONFIG} ] || touch ${_destdir}${BSDKIT_CONFIG}
 
-    yq -o=json ea '. as $item ireduce ({}; . * $item)' \
+    /usr/local/bin/yq -o=json ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
        ${_destdir}${BSDKIT_CONFIG} \
        > ${_destdir}/usr/local/etc/ansible/facts.d/bsdkit.fact
@@ -3805,7 +3805,7 @@ __config-merge() {
         error "config_merge: ${_file} does not exists"
     fi
 
-    yq ea '. as $item ireduce ({}; . * $item)' \
+    /usr/local/bin/yq ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
        ${BSDKIT_CONFIG} \
        > ${_tmpfile}

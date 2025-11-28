@@ -15,7 +15,7 @@ yaml-set() {
         touch ${_file}
     fi
 
-    yq -i eval "(.${_key}) = \"${_value}\"" ${_file}
+    /usr/local/bin/yq -i eval "(.${_key}) = \"${_value}\"" ${_file}
 }
 
 yaml-get() {
@@ -30,7 +30,7 @@ yaml-get() {
         error "yaml-get: ${_file} does not exists"
     fi
 
-    yq eval ".${_key}" ${_file}
+    /usr/local/bin/yq eval ".${_key}" ${_file}
 }
 
 yaml-del() {
@@ -45,7 +45,7 @@ yaml-del() {
         error "yaml-del: ${_file} does not exists"
     fi
 
-    yq -i eval "del(.${_key})" ${_file}
+    /usr/local/bin/yq -i eval "del(.${_key})" ${_file}
 }
 
 yaml-add() {
@@ -61,10 +61,10 @@ yaml-add() {
         touch ${_file}
     fi
 
-    yq eval ".${_key}[] | select(. == \"${_value}\")" ${_file}
+    /usr/local/bin/yq eval ".${_key}[] | select(. == \"${_value}\")" ${_file}
 
-    if ! yq eval ".${_key}[] | select(. == \"${_value}\")" ${_file} | grep -q -e .; then
-        yq -i eval ".${_key} += [\"${_value}\"]" ${_file}
+    if ! /usr/local/bin/yq eval ".${_key}[] | select(. == \"${_value}\")" ${_file} | grep -q -e .; then
+        /usr/local/bin/yq -i eval ".${_key} += [\"${_value}\"]" ${_file}
     fi
 }
 
@@ -81,7 +81,7 @@ yaml-remove() {
         touch ${_file}
     fi
 
-    yq -i eval "del(.${_key}[] | select(. == \"${_value}\"))" ${_file}
+    /usr/local/bin/yq -i eval "del(.${_key}[] | select(. == \"${_value}\"))" ${_file}
 }
 
 yaml-list-keys() {
