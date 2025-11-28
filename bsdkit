@@ -200,7 +200,7 @@ __check-python3() {
 }
 
 __check-ansible() {
-    if ! command -v ansible-playbook > /dev/null 2>&1; then
+    if [ ! -x /usr/local/bin/ansible-playbook ]; then
         pkg install -y sysutils/ansible
     fi
 }
@@ -210,7 +210,7 @@ __check-go-yq() {
         return 0
     fi
 
-    if ! command -v yq > /dev/null 2>&1; then
+    if [ ! -x /usr/local/bin/yq ]; then
         pkg install -y textproc/go-yq
     else
         if pkg info textproc/yq > /dev/null 2>&1; then
@@ -230,7 +230,7 @@ __check-git() {
 }
 
 __check-iocage() {
-    if ! command -v iocage > /dev/null 2>&1; then
+    if [ ! -x /usr/local/sbin/iocage ]; then
         pkg install -y sysutils/iocage
     fi
 }
