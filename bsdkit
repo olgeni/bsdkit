@@ -3402,23 +3402,23 @@ update() {
 
     cd ${BSDKIT_SRCDIR}
 
-    local _current_hash=$(git rev-parse --short HEAD)
+    local _current_hash=$(/usr/local/bin/git rev-parse --short HEAD)
 
-    git fetch --no-tags || error "git fetch failed."
+    /usr/local/bin/git fetch --no-tags || error "git fetch failed."
 
-    git tag --list | xargs git tag -d > /dev/null 2>&1
+    /usr/local/bin/git tag --list | xargs /usr/local/bin/git tag -d > /dev/null 2>&1
 
-    local _remote_hash=$(git rev-parse --short origin/master)
+    local _remote_hash=$(/usr/local/bin/git rev-parse --short origin/master)
 
     if [ ${_current_hash} = ${_remote_hash} ]; then
         message "Already up-to-date."
         return 0
     fi
 
-    git reset --hard ${_remote_hash} || error "git reset failed."
+    /usr/local/bin/git reset --hard ${_remote_hash} || error "git reset failed."
 
     if [ -t 1 ]; then
-        GIT_PAGER=/bin/cat git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
+        GIT_PAGER=/bin/cat /usr/local/bin/git log --pretty=oneline --abbrev-commit --graph --decorate ${_current_hash}..${_remote_hash}
     fi
 }
 
