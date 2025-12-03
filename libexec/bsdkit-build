@@ -52,8 +52,7 @@ OPTIONS:
     -S                  Build staging area
     -I                  Build ISO image
     -U                  Build USB image
-    -V                  Build VM images (qcow2, raw, vmdk, vhd)
-    -C                  Build cloud-init enabled VM images
+    -V                  Build VM images (regular and cloud-init)
     -A                  Build all: release/staging/ISO/USB
 
   Build Configuration:
@@ -64,8 +63,6 @@ OPTIONS:
     -P                  Include packages in ISO/USB images
 
   VM Image Options:
-    -F FILESYSTEMS      VM filesystems, space-separated (default: ufs zfs)
-                        Available: ufs, zfs
     -M FORMATS          VM image formats, space-separated (default: qcow2)
                         Available: qcow2, raw, vmdk, vhd
     -Q SIZE             VM disk size (default: 10g)
@@ -75,29 +72,21 @@ EXAMPLES:
     # Build complete release with all components
     ${SCRIPT_NAME} -v 14 -a amd64 -j 16 -A
 
-    # Build just a cloud-init VM image
-    ${SCRIPT_NAME} -v 14 -a amd64 -C
+    # Build VM images (regular and cloud-init)
+    ${SCRIPT_NAME} -v 14 -a amd64 -V
 
     # Build VM images in multiple formats with custom size
     ${SCRIPT_NAME} -v 14 -a amd64 -V -M "qcow2 raw vmdk" -Q 20g -W 4g
-
-    # Build VM images for ZFS only
-    ${SCRIPT_NAME} -v 14 -a amd64 -V -F zfs
-
-    # Build release and cloud-init images
-    ${SCRIPT_NAME} -v 14 -a amd64 -j 16 -R -S -C
 
     # Build ISO with packages included
     ${SCRIPT_NAME} -v 14 -a amd64 -P -I
 
 VM IMAGE TYPES:
-    Regular (-V):       Basic VM images without cloud-init
-                        Output: bsdkit-\${version}-\${arch}.\${fs}.\${format}
-                        (where \${fs} is ufs or zfs, \${format} is from -M)
+    -V builds both regular and cloud-init VM images for UFS and ZFS:
 
-    Cloud-init (-C):    VM images with cloud-init support
-                        Includes: config-drive, growfs, DHCP, serial console
-                        Output: bsdkit-\${version}-\${arch}-cloudinit.\${fs}.\${format}
+    Regular:            bsdkit-\${version}-\${arch}.(ufs|zfs).\${format}
+    Cloud-init:         bsdkit-\${version}-\${arch}-cloudinit.(ufs|zfs).\${format}
+                        (includes config-drive, growfs, DHCP, serial console)
 
 DIRECTORIES:
     Source:             \$BSDKIT_DATA/src/\${version}/src
@@ -134,14 +123,12 @@ _build_iso=""
 _build_usb=""
 _build_vmimage=""
 
-_with_cloudinit=""
-_vm_filesystems="ufs zfs"
 _vm_formats="qcow2"
 _vm_size="10g"
 _vm_swapsize="2g"
 
 OPTIND=1
-while getopts "hv:a:j:F:M:Q:W:EPRSIUCVA" OPT; do
+while getopts "hv:a:j:M:Q:W:EPRSIVUA" OPT; do
     case ${OPT} in
         h)
             show_help
@@ -155,9 +142,6 @@ while getopts "hv:a:j:F:M:Q:W:EPRSIUCVA" OPT; do
             ;;
         j)
             _jobs_option="-j${OPTARG}"
-            ;;
-        F)
-            _vm_filesystems="${OPTARG}"
             ;;
         M)
             _vm_formats="${OPTARG}"
@@ -187,10 +171,6 @@ while getopts "hv:a:j:F:M:Q:W:EPRSIUCVA" OPT; do
             _build_usb="YES"
             ;;
         V)
-            _build_vmimage="YES"
-            ;;
-        C)
-            _with_cloudinit="YES"
             _build_vmimage="YES"
             ;;
         A)
@@ -343,81 +323,79 @@ build-vmimage() {
 
     mkdir -p ${_vmimage_dir}
 
-    if [ -n "${_with_cloudinit}" ]; then
-        # Build cloud-init enabled images using cloudware system
-        message ">>> Building CLOUDINIT VM images: ${_vm_filesystems} / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
+    # Build regular VM images
+    message ">>> Building VM images: ufs zfs / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
 
-        # Clean only cloudware VM artifacts to force rebuild
-        message ">>> Cleaning existing cloudware artifacts"
-        chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) ${_objdir}/basic-cloudinit.*(N) 2>/dev/null || true
-        rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
-        rm -f ${_objdir}/basic-cloudinit.*.(img|qcow2|raw|vmdk|vhd)(N)
+    # Clean only VM artifacts to force rebuild
+    message ">>> Cleaning existing VM artifacts"
+    chflags -R noschg ${_objdir}/vm-image-*(N) ${_objdir}/vm.*(N) 2>/dev/null || true
+    rm -rf ${_objdir}/vm-image-*(N)
+    rm -f ${_objdir}/vm.*.(img|qcow2|raw|vmdk|vhd)(N) ${_objdir}/*.(ufs|zfs).img(N) ${_objdir}/vm-image(N)
 
-        env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
-            TARGET=${_arch} TARGET_ARCH=${_arch} \
-            KERNEL="GENERIC" \
-            WITH_CLOUDWARE=YES \
-            CLOUDWARE="BASIC-CLOUDINIT" \
-            VMFSLIST="${_vm_filesystems}" \
-            VMSIZE="${_vm_size}" \
-            SWAPSIZE="${_vm_swapsize}" \
-            WORLDDIR=${OS_SRCDIR} \
-            cloudware-release
+    env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
+        TARGET=${_arch} TARGET_ARCH=${_arch} \
+        KERNEL="GENERIC" \
+        WITH_VMIMAGES=YES \
+        VMFSLIST="ufs zfs" \
+        VMFORMATS="${_vm_formats}" \
+        VMSIZE="${_vm_size}" \
+        SWAPSIZE="${_vm_swapsize}" \
+        WORLDDIR=${OS_SRCDIR} \
+        vm-release
 
-        # Copy cloud-init images
-        message ">>> Installing CLOUDINIT VM images to ${_vmimage_dir}"
-        for img in ${_objdir}/basic-cloudinit.*.(qcow2|raw|vmdk|vhd)(N); do
-            if [ -f "${img}" ]; then
-                local basename=$(basename ${img})
-                local newname=$(echo ${basename} | sed "s/^basic-cloudinit\./bsdkit-${_version}-${_arch}-cloudinit./")
-                cp -v ${img} ${_vmimage_dir}/${newname}
-            fi
-        done
+    # Copy VM images
+    message ">>> Installing VM images to ${_vmimage_dir}"
+    for img in ${_objdir}/vm.*.(qcow2|raw|vmdk|vhd)(N); do
+        if [ -f "${img}" ]; then
+            local basename=$(basename ${img})
+            local newname=$(echo ${basename} | sed "s/^vm\./bsdkit-${_version}-${_arch}./")
+            cp -v ${img} ${_vmimage_dir}/${newname}
+        fi
+    done
 
-        # Clean up cloudware build artifacts
-        message ">>> Cleaning up CLOUDINIT build artifacts"
-        chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) 2>/dev/null || true
-        rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
-        rm -f ${_objdir}/basic-cloudinit.*.img(N)
-    else
-        # Build regular VM images
-        message ">>> Building VM images: ${_vm_filesystems} / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
+    # Clean up regular VM build artifacts
+    message ">>> Cleaning up VM build artifacts"
+    chflags -R noschg ${_objdir}/vm-image-*(N) 2>/dev/null || true
+    rm -rf ${_objdir}/vm-image-*(N)
+    rm -f ${_objdir}/vm.*.img(N) ${_objdir}/*.img(N) ${_objdir}/vm-image(N)
 
-        # Clean only VM artifacts to force rebuild
-        message ">>> Cleaning existing VM artifacts"
-        chflags -R noschg ${_objdir}/vm-image-*(N) ${_objdir}/vm.*(N) 2>/dev/null || true
-        rm -rf ${_objdir}/vm-image-*(N)
-        rm -f ${_objdir}/vm.*.(img|qcow2|raw|vmdk|vhd)(N) ${_objdir}/*.(ufs|zfs).img(N) ${_objdir}/vm-image(N)
+    # Build cloud-init enabled images using cloudware system
+    message ">>> Building CLOUDINIT VM images: ufs zfs / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
 
-        env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
-            TARGET=${_arch} TARGET_ARCH=${_arch} \
-            KERNEL="GENERIC" \
-            WITH_VMIMAGES=YES \
-            VMFSLIST="${_vm_filesystems}" \
-            VMFORMATS="${_vm_formats}" \
-            VMSIZE="${_vm_size}" \
-            SWAPSIZE="${_vm_swapsize}" \
-            WORLDDIR=${OS_SRCDIR} \
-            vm-release
+    # Clean only cloudware VM artifacts to force rebuild
+    message ">>> Cleaning existing cloudware artifacts"
+    chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) ${_objdir}/basic-cloudinit.*(N) 2>/dev/null || true
+    rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
+    rm -f ${_objdir}/basic-cloudinit.*.(img|qcow2|raw|vmdk|vhd)(N)
 
-        # Copy VM images
-        message ">>> Installing VM images to ${_vmimage_dir}"
-        for img in ${_objdir}/vm.*.(qcow2|raw|vmdk|vhd)(N); do
-            if [ -f "${img}" ]; then
-                local basename=$(basename ${img})
-                local newname=$(echo ${basename} | sed "s/^vm\./bsdkit-${_version}-${_arch}./")
-                cp -v ${img} ${_vmimage_dir}/${newname}
-            fi
-        done
+    env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
+        TARGET=${_arch} TARGET_ARCH=${_arch} \
+        KERNEL="GENERIC" \
+        WITH_CLOUDWARE=YES \
+        CLOUDWARE="BASIC-CLOUDINIT" \
+        VMFSLIST="ufs zfs" \
+        VMSIZE="${_vm_size}" \
+        SWAPSIZE="${_vm_swapsize}" \
+        WORLDDIR=${OS_SRCDIR} \
+        cloudware-release
 
-        # Clean up regular VM build artifacts
-        message ">>> Cleaning up VM build artifacts"
-        chflags -R noschg ${_objdir}/vm-image-*(N) 2>/dev/null || true
-        rm -rf ${_objdir}/vm-image-*(N)
-        rm -f ${_objdir}/vm.*.img(N) ${_objdir}/*.img(N) ${_objdir}/vm-image(N)
-    fi
+    # Copy cloud-init images
+    message ">>> Installing CLOUDINIT VM images to ${_vmimage_dir}"
+    for img in ${_objdir}/basic-cloudinit.*.(qcow2|raw|vmdk|vhd)(N); do
+        if [ -f "${img}" ]; then
+            local basename=$(basename ${img})
+            local newname=$(echo ${basename} | sed "s/^basic-cloudinit\./bsdkit-${_version}-${_arch}-cloudinit./")
+            cp -v ${img} ${_vmimage_dir}/${newname}
+        fi
+    done
+
+    # Clean up cloudware build artifacts
+    message ">>> Cleaning up CLOUDINIT build artifacts"
+    chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) 2>/dev/null || true
+    rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
+    rm -f ${_objdir}/basic-cloudinit.*.img(N)
 
     message ">>> VM images created in: ${_vmimage_dir}"
     ls -lh ${_vmimage_dir}
