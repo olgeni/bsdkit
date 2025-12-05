@@ -29,6 +29,8 @@ fi
 DEFAULT_VERSION=14
 DEFAULT_ARCH=amd64
 
+: ${BSDKIT_SKIP_OCI:=1}
+
 unset POSIXLY_CORRECT
 
 if [ $(whoami) != "root" ]; then
