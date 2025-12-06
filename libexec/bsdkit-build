@@ -61,7 +61,6 @@ OPTIONS:
     -v VERSION          FreeBSD version (default: ${DEFAULT_VERSION})
     -a ARCH             Target architecture (default: ${DEFAULT_ARCH})
     -j JOBS             Number of parallel jobs for make
-    -E                  Use existing build (skip buildworld/buildkernel)
     -P                  Include packages in ISO/USB images
 
   VM Image Options:
@@ -116,7 +115,6 @@ fi
 _version=${DEFAULT_VERSION}
 _arch=${DEFAULT_ARCH}
 _jobs_option=""
-_use_existing=""
 _with_packages=""
 
 _build_release=""
@@ -130,7 +128,7 @@ _vm_size="10g"
 _vm_swapsize="2g"
 
 OPTIND=1
-while getopts "hv:a:j:M:Q:W:EPRSIVUA" OPT; do
+while getopts "hv:a:j:M:Q:W:PRSIVUA" OPT; do
     case ${OPT} in
         h)
             show_help
@@ -153,9 +151,6 @@ while getopts "hv:a:j:M:Q:W:EPRSIVUA" OPT; do
             ;;
         W)
             _vm_swapsize="${OPTARG}"
-            ;;
-        E)
-            _use_existing="YES"
             ;;
         P)
             _with_packages="YES"
@@ -216,11 +211,9 @@ build-release() {
 
     message ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
-    if [ -z "${_use_existing}" ]; then
-        env -i make -s -C ${OS_SRCDIR} \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            ${_jobs_option} buildworld buildkernel
-    fi
+    env -i make -s -C ${OS_SRCDIR} \
+        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+        ${_jobs_option} buildworld buildkernel
 
     env -i make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
@@ -239,12 +232,6 @@ build-release() {
         env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
             WITH_OCIIMAGES=yes oci-release
-    fi
-
-    if [ -z "${_use_existing}" ]; then
-        env -i make -s -C ${OS_SRCDIR}/release \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} \
-            ${_jobs_option} clean
     fi
 
     env -i make -s -C ${OS_SRCDIR}/release \
