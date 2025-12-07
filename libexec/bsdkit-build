@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-set -x
-
 setopt errreturn nounset pipefail
 
 SCRIPT_PATH="$(dirname $(realpath $0))"
