@@ -27,6 +27,8 @@ fi
 DEFAULT_VERSION=14
 DEFAULT_ARCH=amd64
 
+BUILD_PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+
 : ${BSDKIT_SKIP_OCI:=1}
 
 unset POSIXLY_CORRECT
@@ -209,11 +211,11 @@ build-release() {
 
     message ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
 
-    env -i make -s -C ${OS_SRCDIR} \
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         ${_jobs_option} buildworld buildkernel
 
-    env -i make -s -C ${OS_SRCDIR}/release \
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         release NOPORTS="YES"
 
@@ -221,18 +223,18 @@ build-release() {
     mkdir -p ${OS_RELDIR}
 
     if [ -z "${BSDKIT_SKIP_PACKAGES:-}" ]; then
-        env -i make -s -C ${OS_SRCDIR} \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
             ${_jobs_option} packages REPODIR=${OS_REPODIR}
     fi
 
     if [ -z "${BSDKIT_SKIP_OCI:-}" ]; then
-        env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
             WITH_OCIIMAGES=yes oci-release
     fi
 
-    env -i make -s -C ${OS_SRCDIR}/release \
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         install DESTDIR=${OS_RELDIR}
 
@@ -242,11 +244,11 @@ build-release() {
 
     echo -n > ${OS_RELDIR}/ftp/OLDFILES
 
-    env -i make -s -C ${OS_SRCDIR} list-old-files | sed 's/^/old-files: /' >> ${OS_RELDIR}/ftp/OLDFILES
-    env -i make -s -C ${OS_SRCDIR} list-old-dirs | sed 's/^/old-dirs: /' >> ${OS_RELDIR}/ftp/OLDFILES
-    env -i make -s -C ${OS_SRCDIR} list-old-libs | sed 's/^/old-libs: /' >> ${OS_RELDIR}/ftp/OLDFILES
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-files | sed 's/^/old-files: /' >> ${OS_RELDIR}/ftp/OLDFILES
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-dirs | sed 's/^/old-dirs: /' >> ${OS_RELDIR}/ftp/OLDFILES
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-libs | sed 's/^/old-libs: /' >> ${OS_RELDIR}/ftp/OLDFILES
 
-    env -i make -s -C ${OS_SRCDIR}/release \
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
         clean
 
@@ -319,7 +321,7 @@ build-vmimage() {
     rm -rf ${_objdir}/vm-image-*(N)
     rm -f ${_objdir}/vm.*.(img|qcow2|raw|vmdk|vhd)(N) ${_objdir}/*.(ufs|zfs).img(N) ${_objdir}/vm-image(N)
 
-    env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
         TARGET=${_arch} TARGET_ARCH=${_arch} \
         KERNEL="GENERIC" \
@@ -356,7 +358,7 @@ build-vmimage() {
     rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
     rm -f ${_objdir}/basic-cloudinit.*.(img|qcow2|raw|vmdk|vhd)(N)
 
-    env -i PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin make -s -C ${OS_SRCDIR}/release \
+    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
         __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
         TARGET=${_arch} TARGET_ARCH=${_arch} \
         KERNEL="GENERIC" \
