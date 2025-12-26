@@ -203,75 +203,116 @@ OS_PATCH=$(get-src-patch-version ${OS_SRCDIR})
 
 # ===
 
+_current_step=""
+
+run-step() {
+    local step_name="$1"
+    shift
+    _current_step="${step_name}"
+    message "[${step_name}] Starting: $(date "+%Y-%m-%d %H:%M:%S")"
+    if "$@"; then
+        message "[${step_name}] Completed: $(date "+%Y-%m-%d %H:%M:%S")"
+        return 0
+    else
+        local rc=$?
+        error "[${step_name}] FAILED (exit code ${rc}): $(date "+%Y-%m-%d %H:%M:%S")"
+        return ${rc}
+    fi
+}
+
 build-release() {
     local _make_conf=${BSDKIT_PATH}/etc/make.conf
     local _src_conf=${BSDKIT_PATH}/etc/src.conf
 
     KERNCONF="GENERIC"
 
-    message ">>> Start of build: $(date "+%Y-%m-%d %H:%M:%S")"
+    message "Build release started: $(date "+%Y-%m-%d %H:%M:%S")"
+    message "Source: ${OS_SRCDIR}"
+    message "Target: ${_arch} / KERNCONF=${KERNCONF}"
 
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        ${_jobs_option} buildworld buildkernel
+    run-step "buildworld+buildkernel" \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            ${_jobs_option} buildworld buildkernel
 
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        release NOPORTS="YES"
+    run-step "release" \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            release NOPORTS="YES"
 
+    message "[prepare-reldir] Preparing ${OS_RELDIR}"
     rm -r -f ${OS_RELDIR}
     mkdir -p ${OS_RELDIR}
 
     if [ -z "${BSDKIT_SKIP_PACKAGES:-}" ]; then
-        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            ${_jobs_option} packages REPODIR=${OS_REPODIR}
+        run-step "packages" \
+            env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
+                __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+                ${_jobs_option} packages REPODIR=${OS_REPODIR}
+    else
+        message "[packages] Skipped (BSDKIT_SKIP_PACKAGES is set)"
     fi
 
     if [ -z "${BSDKIT_SKIP_OCI:-}" ]; then
-        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            WITH_OCIIMAGES=yes oci-release
+        run-step "oci-release" \
+            env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
+                __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+                WITH_OCIIMAGES=yes oci-release
+    else
+        message "[oci-release] Skipped (BSDKIT_SKIP_OCI is set)"
     fi
 
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        install DESTDIR=${OS_RELDIR}
+    run-step "install" \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            install DESTDIR=${OS_RELDIR}
 
+    message "[post-install] Generating RELEASE file"
     get-src-osrelease ${OS_SRCDIR} > ${OS_RELDIR}/ftp/RELEASE
 
+    message "[post-install] Building etcupdate tarball"
     etcupdate build -s ${OS_SRCDIR} ${OS_RELDIR}/ftp/etcupdate.tar.bz2
 
+    message "[post-install] Generating OLDFILES list"
     echo -n > ${OS_RELDIR}/ftp/OLDFILES
-
     env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-files | sed 's/^/old-files: /' >> ${OS_RELDIR}/ftp/OLDFILES
     env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-dirs | sed 's/^/old-dirs: /' >> ${OS_RELDIR}/ftp/OLDFILES
     env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-libs | sed 's/^/old-libs: /' >> ${OS_RELDIR}/ftp/OLDFILES
 
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-        clean
+    run-step "clean" \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            clean
 
-    message ">>> End of build: $(date "+%Y-%m-%d %H:%M:%S")"
+    message "Build release completed: $(date "+%Y-%m-%d %H:%M:%S")"
 }
 
 build-staging() {
     local _target=${BSDKIT_DATA}/release-${_version}-${_arch}
 
+    message "Build staging started: $(date "+%Y-%m-%d %H:%M:%S")"
+
     if [ -d "${OS_RELDIR}/ftp" ]; then
+        message "[staging] Copying release files to ${_target}"
         if [ -d "${_target}" ]; then
             rm -r -f ${_target}
         fi
 
         mkdir -p ${_target}
         cp ${OS_RELDIR}/ftp/* ${_target}
+    else
+        message "[staging] No release files found at ${OS_RELDIR}/ftp"
     fi
 
-    ${BSDKIT_PATH}/bsdkit build-setup-staging \
-        ${BSDKIT_DATA}/staging-${_version}-${_arch} \
-        . \
-        ${BSDKIT_DATA}/release-${_version}-${_arch} \
-        ${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+    message "[staging] Running build-setup-staging"
+    run-step "build-setup-staging" \
+        ${BSDKIT_PATH}/bsdkit build-setup-staging \
+            ${BSDKIT_DATA}/staging-${_version}-${_arch} \
+            . \
+            ${BSDKIT_DATA}/release-${_version}-${_arch} \
+            ${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+
+    message "Build staging completed: $(date "+%Y-%m-%d %H:%M:%S")"
 }
 
 build-iso() {
@@ -279,29 +320,48 @@ build-iso() {
     local _release="none"
     local _packages="none"
 
+    message "Build ISO started: $(date "+%Y-%m-%d %H:%M:%S")"
+
     if [ -n "${_with_packages}" ]; then
         _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.iso
         _release=${BSDKIT_DATA}/release-${_version}-${_arch}
         _packages=${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
+        message "[iso] Building full ISO with packages"
+    else
+        message "[iso] Building minimal ISO without packages"
     fi
 
-    ${BSDKIT_PATH}/bsdkit build-setup-iso \
-        ${_iso} \
-        ${BSDKIT_DATA}/staging-${_version}-${_arch} \
-        ${_release} \
-        ${_packages}
+    message "[iso] Output: ${_iso}"
+    run-step "build-setup-iso" \
+        ${BSDKIT_PATH}/bsdkit build-setup-iso \
+            ${_iso} \
+            ${BSDKIT_DATA}/staging-${_version}-${_arch} \
+            ${_release} \
+            ${_packages}
+
+    message "Build ISO completed: $(date "+%Y-%m-%d %H:%M:%S")"
 }
 
 build-usb() {
     local _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.iso
     local _usb=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.img
 
+    message "Build USB started: $(date "+%Y-%m-%d %H:%M:%S")"
+
     if [ -n "${_with_packages}" ]; then
         _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.iso
         _usb=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.img
+        message "[usb] Building full USB image with packages"
+    else
+        message "[usb] Building minimal USB image"
     fi
 
-    ${BSDKIT_PATH}/bsdkit build-setup-img ${_iso} ${_usb}
+    message "[usb] Input: ${_iso}"
+    message "[usb] Output: ${_usb}"
+    run-step "build-setup-img" \
+        ${BSDKIT_PATH}/bsdkit build-setup-img ${_iso} ${_usb}
+
+    message "Build USB completed: $(date "+%Y-%m-%d %H:%M:%S")"
 }
 
 build-vmimage() {
@@ -310,31 +370,33 @@ build-vmimage() {
     local _vmimage_dir=${BSDKIT_DATA}/vmimages-${_version}-${_arch}
     local _objdir=/usr/obj${OS_SRCDIR}/${_arch}.${_arch}/release
 
+    message "Build VM images started: $(date "+%Y-%m-%d %H:%M:%S")"
+    message "[vmimage] Output directory: ${_vmimage_dir}"
+    message "[vmimage] Formats: ${_vm_formats} / Size: ${_vm_size} / Swap: ${_vm_swapsize}"
+
     mkdir -p ${_vmimage_dir}
 
     # Build regular VM images
-    message ">>> Building VM images: ufs zfs / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
-
-    # Clean only VM artifacts to force rebuild
-    message ">>> Cleaning existing VM artifacts"
+    message "[vmimage] Cleaning existing VM artifacts"
     chflags -R noschg ${_objdir}/vm-image-*(N) ${_objdir}/vm.*(N) 2>/dev/null || true
     rm -rf ${_objdir}/vm-image-*(N)
     rm -f ${_objdir}/vm.*.(img|qcow2|raw|vmdk|vhd)(N) ${_objdir}/*.(ufs|zfs).img(N) ${_objdir}/vm-image(N)
 
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
-        TARGET=${_arch} TARGET_ARCH=${_arch} \
-        KERNEL="GENERIC" \
-        WITH_VMIMAGES=YES \
-        VMFSLIST="ufs zfs" \
-        VMFORMATS="${_vm_formats}" \
-        VMSIZE="${_vm_size}" \
-        SWAPSIZE="${_vm_swapsize}" \
-        WORLDDIR=${OS_SRCDIR} \
-        vm-release
+    run-step "vm-release" \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
+            TARGET=${_arch} TARGET_ARCH=${_arch} \
+            KERNEL="GENERIC" \
+            WITH_VMIMAGES=YES \
+            VMFSLIST="ufs zfs" \
+            VMFORMATS="${_vm_formats}" \
+            VMSIZE="${_vm_size}" \
+            SWAPSIZE="${_vm_swapsize}" \
+            WORLDDIR=${OS_SRCDIR} \
+            vm-release
 
     # Copy VM images
-    message ">>> Installing VM images to ${_vmimage_dir}"
+    message "[vmimage] Installing VM images to ${_vmimage_dir}"
     for img in ${_objdir}/vm.*.(qcow2|raw|vmdk|vhd)(N); do
         if [ -f "${img}" ]; then
             local basename=$(basename ${img})
@@ -344,34 +406,32 @@ build-vmimage() {
     done
 
     # Clean up regular VM build artifacts
-    message ">>> Cleaning up VM build artifacts"
+    message "[vmimage] Cleaning up VM build artifacts"
     chflags -R noschg ${_objdir}/vm-image-*(N) 2>/dev/null || true
     rm -rf ${_objdir}/vm-image-*(N)
     rm -f ${_objdir}/vm.*.img(N) ${_objdir}/*.img(N) ${_objdir}/vm-image(N)
 
     # Build cloud-init enabled images using cloudware system
-    message ">>> Building CLOUDINIT VM images: ufs zfs / ${_vm_formats} (size: ${_vm_size}, swap: ${_vm_swapsize})"
-
-    # Clean only cloudware VM artifacts to force rebuild
-    message ">>> Cleaning existing cloudware artifacts"
+    message "[vmimage] Cleaning existing cloudware artifacts"
     chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) ${_objdir}/basic-cloudinit.*(N) 2>/dev/null || true
     rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
     rm -f ${_objdir}/basic-cloudinit.*.(img|qcow2|raw|vmdk|vhd)(N)
 
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-        __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
-        TARGET=${_arch} TARGET_ARCH=${_arch} \
-        KERNEL="GENERIC" \
-        WITH_CLOUDWARE=YES \
-        CLOUDWARE="BASIC-CLOUDINIT" \
-        VMFSLIST="ufs zfs" \
-        VMSIZE="${_vm_size}" \
-        SWAPSIZE="${_vm_swapsize}" \
-        WORLDDIR=${OS_SRCDIR} \
-        cloudware-release
+    run-step "cloudware-release" \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} \
+            TARGET=${_arch} TARGET_ARCH=${_arch} \
+            KERNEL="GENERIC" \
+            WITH_CLOUDWARE=YES \
+            CLOUDWARE="BASIC-CLOUDINIT" \
+            VMFSLIST="ufs zfs" \
+            VMSIZE="${_vm_size}" \
+            SWAPSIZE="${_vm_swapsize}" \
+            WORLDDIR=${OS_SRCDIR} \
+            cloudware-release
 
     # Copy cloud-init images
-    message ">>> Installing CLOUDINIT VM images to ${_vmimage_dir}"
+    message "[vmimage] Installing CLOUDINIT VM images to ${_vmimage_dir}"
     for img in ${_objdir}/basic-cloudinit.*.(qcow2|raw|vmdk|vhd)(N); do
         if [ -f "${img}" ]; then
             local basename=$(basename ${img})
@@ -381,12 +441,12 @@ build-vmimage() {
     done
 
     # Clean up cloudware build artifacts
-    message ">>> Cleaning up CLOUDINIT build artifacts"
+    message "[vmimage] Cleaning up CLOUDINIT build artifacts"
     chflags -R noschg ${_objdir}/cw-basic-cloudinit-*(N) 2>/dev/null || true
     rm -rf ${_objdir}/cw-basic-cloudinit-*(N)
     rm -f ${_objdir}/basic-cloudinit.*.img(N)
 
-    message ">>> VM images created in: ${_vmimage_dir}"
+    message "VM images created in: ${_vmimage_dir}"
     ls -lh ${_vmimage_dir}
 }
 
