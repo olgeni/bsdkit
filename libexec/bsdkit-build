@@ -234,14 +234,10 @@ build-release() {
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
             ${_jobs_option} buildworld buildkernel
 
-    if [ -z "${BSDKIT_SKIP_PACKAGES:-}" ]; then
-        run-step "packages" \
-            env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
-                __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-                ${_jobs_option} packages
-    else
-        message "[packages] Skipped (BSDKIT_SKIP_PACKAGES is set)"
-    fi
+    run-step "packages" \
+        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
+            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+            ${_jobs_option} packages
 
     run-step "release" \
         env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
