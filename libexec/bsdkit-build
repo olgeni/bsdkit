@@ -195,7 +195,6 @@ if [ ! -d "${OS_SRCDIR}" ]; then
 fi
 
 OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
-OS_REPODIR=${BSDKIT_DATA}/pkgbase
 
 OS_MAJOR=$(get-src-major-version ${OS_SRCDIR})
 OS_MINOR=$(get-src-minor-version ${OS_SRCDIR})
@@ -235,6 +234,15 @@ build-release() {
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
             ${_jobs_option} buildworld buildkernel
 
+    if [ -z "${BSDKIT_SKIP_PACKAGES:-}" ]; then
+        run-step "packages" \
+            env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
+                __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
+                ${_jobs_option} packages
+    else
+        message "[packages] Skipped (BSDKIT_SKIP_PACKAGES is set)"
+    fi
+
     run-step "release" \
         env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
             __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
@@ -243,15 +251,6 @@ build-release() {
     message "[prepare-reldir] Preparing ${OS_RELDIR}"
     rm -r -f ${OS_RELDIR}
     mkdir -p ${OS_RELDIR}
-
-    if [ -z "${BSDKIT_SKIP_PACKAGES:-}" ]; then
-        run-step "packages" \
-            env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
-                __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-                ${_jobs_option} packages REPODIR=${OS_REPODIR}
-    else
-        message "[packages] Skipped (BSDKIT_SKIP_PACKAGES is set)"
-    fi
 
     if [ -z "${BSDKIT_SKIP_OCI:-}" ]; then
         run-step "oci-release" \
