@@ -1,4 +1,13 @@
 #!/bin/sh
+#
+# zfs-get-properties - Generate ZFS property restoration commands
+#
+# Outputs shell commands to restore locally set or received ZFS
+# properties for a dataset and its children. Read-only properties
+# are filtered out. Useful for backing up ZFS configuration.
+#
+# Usage: zfs-get-properties <dataset>
+#
 
 set -o errexit -o nounset -o pipefail
 

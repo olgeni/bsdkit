@@ -1,4 +1,11 @@
 #!/bin/sh
+#
+# pkg-leaves - Interactively delete leaf packages
+#
+# Shows installed packages that have no reverse dependencies (nothing
+# depends on them). Uses fzf for interactive multi-selection of
+# packages to delete.
+#
 
 set -e -u
 

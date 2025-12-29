@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# zsh-rec - Record a zsh session with asciinema
+#
+# Starts a new login zsh session and records it using asciinema.
+# Recordings are saved to ~/.asciinema/ with ISO 8601 timestamps.
+#
 
 set -o errexit -o nounset -o pipefail
 

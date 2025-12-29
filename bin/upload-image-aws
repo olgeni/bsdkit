@@ -1,4 +1,22 @@
 #!/bin/sh
+#
+# upload-image-aws - Upload a VirtualBox VM image to AWS EC2
+#
+# Converts a VDI disk image to raw format and uploads it to AWS using
+# bsdec2-image-upload. The image name includes git version information.
+#
+# Required environment variables:
+#   IMAGE_BUCKET      - S3 bucket for image upload
+#   IMAGE_NAME        - Base name for the AMI
+#   IMAGE_DESCRIPTION - Description for the AMI
+#   VM_PATH           - Path to VirtualBox VM directory
+#   VM_DISK_NAME      - Name of the VDI disk file (without extension)
+#   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY - AWS credentials
+#
+# Options:
+#   -f FLAVOR  Add a flavor suffix to image name/description
+#   -n         Dry run (show what would be done)
+#
 
 set -o errexit -o nounset -o pipefail
 

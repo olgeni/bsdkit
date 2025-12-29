@@ -1,4 +1,11 @@
 #!/bin/sh
+#
+# pkg-install - Interactively install packages from the repository
+#
+# Shows packages available in the repository that are not currently
+# installed. Uses fzf for interactive multi-selection of packages
+# to install.
+#
 
 set -e -u
 

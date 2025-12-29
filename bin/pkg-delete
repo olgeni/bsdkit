@@ -1,4 +1,11 @@
 #!/bin/sh
+#
+# pkg-delete - Interactively delete orphaned packages
+#
+# Finds packages that are installed but no longer available in the
+# repository and have no reverse dependencies (nothing depends on them).
+# Uses fzf for interactive multi-selection of packages to delete.
+#
 
 set -e -u
 
