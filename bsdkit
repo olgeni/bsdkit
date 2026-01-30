@@ -424,7 +424,7 @@ __valid-pkgpath() {
     __valid-url ${_pkgpath} && return 0
 
     [ -d ${_pkgpath} ]
-    [ -f ${_pkgpath}/packagesite.txz ]
+    [[ -f ${_pkgpath}/packagesite.txz || -f ${_pkgpath}/packagesite.pkg ]]
 }
 
 __valid-staging() {
