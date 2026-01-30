@@ -2546,13 +2546,22 @@ build-setup-staging() {
     local _relpath=$3
     local _pkgpath=$4
 
+    message "[build-setup-staging] staging=${_staging}"
+    message "[build-setup-staging] bsdkit=${_bsdkit}"
+    message "[build-setup-staging] relpath=${_relpath}"
+    message "[build-setup-staging] pkgpath=${_pkgpath}"
+
     _bsdkit=$(realpath ${_bsdkit})
     _relpath=$(realpath ${_relpath})
     _pkgpath=$(realpath ${_pkgpath})
 
-    __valid-bsdkit ${_bsdkit}
-    __valid-relpath ${_relpath}
-    __valid-pkgpath ${_pkgpath}
+    message "[build-setup-staging] resolved bsdkit=${_bsdkit}"
+    message "[build-setup-staging] resolved relpath=${_relpath}"
+    message "[build-setup-staging] resolved pkgpath=${_pkgpath}"
+
+    __valid-bsdkit ${_bsdkit} || { warning "[build-setup-staging] __valid-bsdkit FAILED for ${_bsdkit}"; return 1; }
+    __valid-relpath ${_relpath} || { warning "[build-setup-staging] __valid-relpath FAILED for ${_relpath}"; return 1; }
+    __valid-pkgpath ${_pkgpath} || { warning "[build-setup-staging] __valid-pkgpath FAILED for ${_pkgpath}"; return 1; }
 
     mkdir -p ${_staging}
 
