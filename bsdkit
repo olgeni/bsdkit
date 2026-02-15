@@ -3340,6 +3340,10 @@ relocate-venv() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-relocate-venv "$@"
 }
 
+update-runit() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-update-runit "$@"
+}
+
 provision() {
     if platform-is-digitalocean; then
         ansible-local-playbook -t provision_digitalocean

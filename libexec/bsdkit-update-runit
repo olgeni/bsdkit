@@ -1,0 +1,48 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+
+# ===========================================================================
+
+RUNIT_DIR="/var/db/runit"
+TEMPLATE_DIR="${SCRIPT_PATH}/../runit"
+
+if [[ ! -d "${RUNIT_DIR}" ]]; then
+    error "Runit directory not found: ${RUNIT_DIR}"
+fi
+
+if [[ ! -d "${TEMPLATE_DIR}" ]]; then
+    error "Template directory not found: ${TEMPLATE_DIR}"
+fi
+
+COUNT=0
+
+for template in "${TEMPLATE_DIR}"/*/run; do
+    [[ -f "${template}" ]] || continue
+
+    UUID=$(sed -n '3s/^# ID: //p' "${template}")
+
+    if [[ -z "${UUID}" ]]; then
+        warning "No UUID found in ${template}, skipping"
+        continue
+    fi
+
+    matches=$(find "${RUNIT_DIR}" -name run -exec grep -l "${UUID}" {} + 2>/dev/null || true)
+
+    if [[ -z "${matches}" ]]; then
+        continue
+    fi
+
+    for target in ${(f)matches}; do
+        install -m 0755 "${template}" "${target}"
+        message "Updated ${target}"
+        (( ++COUNT ))
+    done
+done
+
+message "Updated ${COUNT} file(s)."
