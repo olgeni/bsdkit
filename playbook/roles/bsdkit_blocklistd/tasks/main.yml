@@ -11,3 +11,47 @@
         name: "{{ blocklistd_service }}"
         enabled: true
         state: started
+
+    - name: Check if /etc/pf.conf exists
+      stat:
+        path: /etc/pf.conf
+      register: stat_pf_conf
+
+    - name: Create backup of /etc/pf.conf
+      when: stat_pf_conf.stat.exists
+      copy:
+        src: /etc/pf.conf
+        dest: /etc/pf.conf.orig
+        owner: root
+        group: wheel
+        mode: "0600"
+
+    - name: Add the blocklistd anchor line to /etc/pf.conf
+      lineinfile:
+        path: /etc/pf.conf
+        line: 'anchor "blocklistd/*"'
+        state: present
+        create: true
+        owner: root
+        group: wheel
+        mode: "0600"
+
+    - name: Reload pf.conf
+      command: pfctl -f /etc/pf.conf
+      register: pfctl_result
+      changed_when: pfctl_result.rc == 0
+
+    - name: Remove backup of pf.conf
+      when: pfctl_result.rc == 0
+      file:
+        path: /etc/pf.conf.orig
+        state: absent
+
+    - name: Restore pf.conf if pfctl failed
+      when: pfctl_result.rc != 0
+      copy:
+        src: /etc/pf.conf.orig
+        dest: /etc/pf.conf
+        owner: root
+        group: wheel
+        mode: "0600"
