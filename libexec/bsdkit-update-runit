@@ -39,9 +39,11 @@ for template in "${TEMPLATE_DIR}"/*/run; do
     fi
 
     for target in ${(f)matches}; do
-        install -m 0755 "${template}" "${target}"
-        message "Updated ${target}"
-        (( ++COUNT ))
+        if ! cmp -s "${template}" "${target}"; then
+            install -m 0755 "${template}" "${target}"
+            message "Updated ${target}"
+            (( ++COUNT ))
+        fi
     done
 done
 
