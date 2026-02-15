@@ -42,8 +42,6 @@ cd ${GUNICORN_PATH}
 
 export OSTYPE=freebsd
 
-. ${GUNICORN_VENV}/bin/activate
-
 if [ "$(id -u)" = "0" ]; then
     CHPST_COMMAND="chpst -u ${GUNICORN_USER} ${CHPST_ARGS}"
 fi
@@ -51,6 +49,8 @@ fi
 PYTHON_PREFIX=""
 if [ -n "${GUNICORN_UV}" ]; then
     PYTHON_PREFIX="uv run "
+else
+    . ${GUNICORN_VENV}/bin/activate
 fi
 
 if [ -n "${ENVRC}" ]; then

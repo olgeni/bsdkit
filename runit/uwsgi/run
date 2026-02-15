@@ -48,11 +48,11 @@ cd ${UWSGI_PATH}
 
 export OSTYPE=freebsd
 
-. ${UWSGI_VENV}/bin/activate
-
 PYTHON_PREFIX=""
 if [ -n "${UWSGI_UV}" ]; then
     PYTHON_PREFIX="uv run "
+else
+    . ${UWSGI_VENV}/bin/activate
 fi
 
 if [ -n "${ENVRC}" ]; then
