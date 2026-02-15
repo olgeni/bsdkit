@@ -1,0 +1,13 @@
+---
+- name: Setup blocklistd/blacklistd
+  when: bsdkit.enable_blocklistd is defined and bsdkit.enable_blocklistd
+  block:
+    - name: Set blocklistd service name
+      set_fact:
+        blocklistd_service: "{{ 'blocklistd' if ansible_distribution_version is version('15.0', '>=') else 'blacklistd' }}"
+
+    - name: Enable blocklistd service
+      service:
+        name: "{{ blocklistd_service }}"
+        enabled: true
+        state: started

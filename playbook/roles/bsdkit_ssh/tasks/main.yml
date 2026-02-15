@@ -166,6 +166,9 @@
       UseDNS no
       PermitRootLogin without-password
       PermitUserEnvironment yes
+      {% if bsdkit.enable_blocklistd is defined and bsdkit.enable_blocklistd %}
+      {{ 'UseBlocklist yes' if ansible_distribution_version is version('15.0', '>=') else 'UseBlacklist yes' }}
+      {% endif %}
     marker: "# {mark} ANSIBLE MANAGED BLOCK (Settings)"
     validate: /usr/sbin/sshd -t -f %s
   notify: restart_sshd

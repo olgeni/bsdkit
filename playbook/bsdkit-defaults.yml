@@ -31,6 +31,7 @@ pw_conf_delete: {}
 
 enable_update_dns: true
 enable_console_syslog: true
+enable_blocklistd: true
 enable_fail2ban: false
 enable_iocage: false
 

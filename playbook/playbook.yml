@@ -65,6 +65,7 @@
     - role: bsdkit_nomad
     - role: bsdkit_vault
     - role: bsdkit_ntpd
+    - role: bsdkit_blocklistd
     - role: bsdkit_fail2ban
     - role: bsdkit_iocage
     - role: bsdkit_jail

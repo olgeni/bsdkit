@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: bsdkit
+  description: bsdkit_blocklistd
+  company: bsdkit
+  license: BSD-2-Clause
+  min_ansible_version: "2.1"
+  platforms:
+    - name: FreeBSD
+      versions:
+        - all
+  galaxy_tags: []
+
+dependencies:
+  - name: bsdkit_facts
+  - name: bsdkit_handlers

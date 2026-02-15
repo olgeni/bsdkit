@@ -84,6 +84,16 @@
       pid_file: /var/run/httpd.pid
       host_only: false
 
+    - service: blacklistd
+      process: blacklistd
+      pid_file: /var/run/blacklistd.pid
+      host_only: false
+
+    - service: blocklistd
+      process: blocklistd
+      pid_file: /var/run/blocklistd.pid
+      host_only: false
+
     - service: caddy
       process: caddy
       pid_file: /var/run/caddy/caddy.pid
