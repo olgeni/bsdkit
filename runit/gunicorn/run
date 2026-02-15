@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# e41c5c63-185f-43e8-a8e9-bf89a0bf0256
+# ID: e41c5c63-185f-43e8-a8e9-bf89a0bf0256
 
 set -o errexit -o nounset -o pipefail
 
