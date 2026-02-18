@@ -7,10 +7,19 @@
     group: wheel
     mode: "0755"
 
-- name: Disable default FreeBSD repository
+- name: Disable default FreeBSD repositories
   copy:
     content: |
       FreeBSD: {
+          enabled: no
+      }
+      FreeBSD-ports: {
+          enabled: no
+      }
+      FreeBSD-ports-kmods: {
+          enabled: no
+      }
+      FreeBSD-base: {
           enabled: no
       }
     dest: /usr/local/etc/pkg/repos/FreeBSD.conf
