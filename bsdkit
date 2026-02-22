@@ -3695,7 +3695,7 @@ start-local() {
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
             message "Skipping service: ${_blacklisted_service}"
-            _service_list=(${_service_list[@]/$_blacklisted_service})
+            _service_list=(${_service_list[@]:#${_blacklisted_service}})
         fi
     done
 
@@ -3703,7 +3703,7 @@ start-local() {
     local _monit_service=""
 
     if [[ "${_service_list[@]}" =~ "monit" ]]; then
-        _service_list=(${_service_list[@]/monit})
+        _service_list=(${_service_list[@]:#monit})
         _monit_service="monit"
     fi
 
@@ -3737,7 +3737,7 @@ stop-local() {
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
             message "Skipping service: ${_blacklisted_service}"
-            _service_list=(${_service_list[@]/$_blacklisted_service})
+            _service_list=(${_service_list[@]:#${_blacklisted_service}})
         fi
     done
 
@@ -3745,7 +3745,7 @@ stop-local() {
     local _monit_service=""
 
     if [[ "${_service_list[@]}" =~ "monit" ]]; then
-        _service_list=(${_service_list[@]/monit})
+        _service_list=(${_service_list[@]:#monit})
         _monit_service="monit"
     fi
 
@@ -3779,7 +3779,7 @@ restart-local() {
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
             message "Skipping service: ${_blacklisted_service}"
-            _service_list=(${_service_list[@]/$_blacklisted_service})
+            _service_list=(${_service_list[@]:#${_blacklisted_service}})
         fi
     done
 
@@ -3787,7 +3787,7 @@ restart-local() {
     local _monit_service=""
 
     if [[ "${_service_list[@]}" =~ "monit" ]]; then
-        _service_list=(${_service_list[@]/monit})
+        _service_list=(${_service_list[@]:#monit})
         _monit_service="monit"
     fi
 
