@@ -17,15 +17,15 @@ fi
 ENVRC=""
 
 if [ -f envrc ]; then
-    ENVRC="$(grep -Ev '^\s*(#|$)' envrc)"
+    ENVRC="$(grep -Ev '^[[:space:]]*(#|$)' envrc | sed 's/^[[:space:]]*export //')"
 fi
 
 if [ -f envrc.local ]; then
-    ENVRC="${ENVRC} $(grep -Ev '^\s*(#|$)' envrc.local)"
+    ENVRC="${ENVRC} $(grep -Ev '^[[:space:]]*(#|$)' envrc.local | sed 's/^[[:space:]]*export //')"
 fi
 
 if [ -d envrc.d ] && [ $(ls envrc.d | wc -l) -gt 0 ]; then
-    ENVRC="${ENVRC} $(cat envrc.d/* | grep -Ev '^\s*(#|$)')"
+    ENVRC="${ENVRC} $(cat envrc.d/* | grep -Ev '^[[:space:]]*(#|$)' | sed 's/^[[:space:]]*export //')"
 fi
 
 
