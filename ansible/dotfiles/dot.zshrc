@@ -158,6 +158,10 @@ case $(uname) in
     *) ;;
 esac
 
+if [ -d ~/go/bin ]; then
+    export PATH=$PATH:~/go/bin
+fi
+
 case $(uname) in
     FreeBSD)
         if [ -r /var/db/rabbitmq/.erlang.cookie ]; then
