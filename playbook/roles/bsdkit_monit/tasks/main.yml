@@ -124,6 +124,11 @@
       pid_file: /var/run/fail2ban/fail2ban.pid
       host_only: false
 
+    - service: gitea
+      process: gitea
+      pid_file: /var/run/gitea.pid
+      host_only: false
+
     - service: gitlab_runner
       process: gitlab-runner
       pid_file: /var/run/gitlab_runner.pid
