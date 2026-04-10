@@ -81,14 +81,18 @@ trap 'rm -f "$TMPFILE1" "$TMPFILE2"' EXIT
 # Fetch and sort package lists from both servers
 if [[ $QUERY_ALL -eq 1 ]]; then
     # Query all packages
-    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER1" "pkg query '%o'" | sort > "$TMPFILE1"
-    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER2" "pkg query '%o'" | sort > "$TMPFILE2"
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER1" "pkg query '%o'" | sort > "$TMPFILE1" \
+        || { echo "Error: failed to fetch package list from $SERVER1." >&2; exit 1; }
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER2" "pkg query '%o'" | sort > "$TMPFILE2" \
+        || { echo "Error: failed to fetch package list from $SERVER2." >&2; exit 1; }
 else
     # Query only non-automatic packages
-    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER1" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE1"
-    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2"
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER1" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE1" \
+        || { echo "Error: failed to fetch package list from $SERVER1." >&2; exit 1; }
+    ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2" \
+        || { echo "Error: failed to fetch package list from $SERVER2." >&2; exit 1; }
 fi
 
 # Compare the package lists
 echo "Comparing installed packages between $SERVER1 and $SERVER2:"
-diff "$TMPFILE1" "$TMPFILE2"
+diff "$TMPFILE1" "$TMPFILE2" || true
