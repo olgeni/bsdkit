@@ -3669,6 +3669,29 @@ check-pkg-tempfiles() {
     fi
 }
 
+purge-ko() {
+    local _dry_run=false
+
+    if [ "${1-}" = "-n" ]; then
+        _dry_run=true
+    fi
+
+    local _kernel_mtime=$(stat -f '%m' /boot/kernel/kernel)
+
+    for _file in /boot/kernel/*; do
+        if [ "$(stat -f '%m' "${_file}")" -lt "${_kernel_mtime}" ]; then
+            if ! pkg which "${_file}" > /dev/null 2>&1; then
+                if ${_dry_run}; then
+                    message "Would remove: ${_file}"
+                else
+                    message "Removing: ${_file}"
+                    rm -f "${_file}"
+                fi
+            fi
+        fi
+    done
+}
+
 purge-be() {
     bectl list -H \
         | awk '$2 != "NR" && $2 != "R" && $2 != "N" { print $1 }' \
