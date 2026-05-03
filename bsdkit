@@ -3339,11 +3339,11 @@ rewrite-filesystem() {
 }
 
 zfs-migrate-postgresql() {
-    ${BSDKIT_PATH}/libexec/bsdkit-zfs-migrate-postgresql "$@"
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-zfs-migrate-postgresql "$@"
 }
 
 zfs-migrate-mysql() {
-    ${BSDKIT_PATH}/libexec/bsdkit-zfs-migrate-mysql "$@"
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-zfs-migrate-mysql "$@"
 }
 
 apply-mtree() {
