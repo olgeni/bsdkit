@@ -228,7 +228,7 @@ if [ -f ${DESTDIR}/usr/tests/Kyuafile ]; then
     _install_tests="yes"
 fi
 
-_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}
+_release=${BSDKIT_ROOT_URL}/release-${BSDKIT_VERSION}-${BSDKIT_ARCH}/ftp
 
 _distdir=/usr/freebsd-dist/${BSDKIT_VERSION}-${BSDKIT_ARCH}
 
