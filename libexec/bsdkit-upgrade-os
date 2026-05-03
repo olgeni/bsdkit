@@ -10,6 +10,7 @@ source ${SCRIPT_PATH}/../lib/colors.inc.sh
 source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
 source ${SCRIPT_PATH}/../lib/yaml.inc.sh
+source ${SCRIPT_PATH}/../lib/mtree.inc.sh
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."
@@ -519,46 +520,7 @@ fi
 # Obsolete file removal now handled differently
 
 message "Running mtree"
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.root.dist ]; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.root.dist -p ${DESTDIR}/
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.usr.dist ]; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.usr.dist -p ${DESTDIR}/usr
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.var.dist ]; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.var.dist -p ${DESTDIR}/var
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist ]; then
-    mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.sendmail.dist -p ${DESTDIR}/
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.lib32.dist ]; then
-    if [ -d ${DESTDIR}/usr/lib32 ]; then
-        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.lib32.dist -p ${DESTDIR}/usr
-    fi
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.include.dist ]; then
-    if [ -d ${DESTDIR}/usr/include ]; then
-        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.include.dist -p ${DESTDIR}/usr/include
-    fi
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.tests.dist ]; then
-    if [ -d ${DESTDIR}/usr/tests ]; then
-        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.tests.dist -p ${DESTDIR}/usr/tests
-    fi
-fi
-
-if [ -f ${DESTDIR}/etc/mtree/BSD.debug.dist ]; then
-    if [ -d ${DESTDIR}/usr/lib/debug ]; then
-        mtree -ideU -N ${DESTDIR}/etc -f ${DESTDIR}/etc/mtree/BSD.debug.dist -p ${DESTDIR}/usr/lib
-    fi
-fi
+apply-mtree ${DESTDIR}
 
 message "Running newaliases"
 chroot ${DESTDIR}/ newaliases
