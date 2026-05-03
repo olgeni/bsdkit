@@ -10,6 +10,7 @@ source ${SCRIPT_PATH}/../lib/colors.inc.sh
 source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
 source ${SCRIPT_PATH}/../lib/yaml.inc.sh
+source ${SCRIPT_PATH}/../lib/zfs.inc.sh
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."
@@ -22,49 +23,6 @@ if [ -x /usr/local/bin/vim ]; then
 fi
 
 # ===========================================================================
-
-filter-properties() {
-    awk '
-BEGIN {
-  read_only["available"] = 1;
-  read_only["casesensitivity"] = 1;
-  read_only["compressratio"] = 1;
-  read_only["createtxg"] = 1;
-  read_only["creation"] = 1;
-  read_only["encryption"] = 1;
-  read_only["filesystem_count"] = 1;
-  read_only["guid"] = 1;
-  read_only["keyformat"] = 1;
-  read_only["keylocation"] = 1;
-  read_only["logicalreferenced"] = 1;
-  read_only["logicalused"] = 1;
-  read_only["mlslabel"] = 1;
-  read_only["mounted"] = 1;
-  read_only["normalization"] = 1;
-  read_only["objsetid"] = 1;
-  read_only["origin"] = 1;
-  read_only["pbkdf2iters"] = 1;
-  read_only["refcompressratio"] = 1;
-  read_only["referenced"] = 1;
-  read_only["snapshot_count"] = 1;
-  read_only["type"] = 1;
-  read_only["used"] = 1;
-  read_only["usedbychildren"] = 1;
-  read_only["usedbydataset"] = 1;
-  read_only["usedbyrefreservation"] = 1;
-  read_only["usedbysnapshots"] = 1;
-  read_only["utf8only"] = 1;
-  read_only["version"] = 1;
-  read_only["written"] = 1;
-}
-
-{
-  if (!read_only[$2]) {
-    print;
-  }
-}
-'
-}
 
 rewrite-filesystem() {
     local _option
