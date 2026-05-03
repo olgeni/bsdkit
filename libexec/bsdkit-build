@@ -285,13 +285,13 @@ build-staging() {
     message "Build staging started: $(date "+%Y-%m-%d %H:%M:%S")"
 
     if [ -d "${OS_RELDIR}/ftp" ]; then
-        message "[staging] Copying release files to ${_target}"
+        message "[staging] Copying release files to ${_target}/ftp"
         if [ -d "${_target}" ]; then
             rm -r -f ${_target}
         fi
 
-        mkdir -p ${_target}
-        cp ${OS_RELDIR}/ftp/* ${_target}
+        mkdir -p ${_target}/ftp
+        cp ${OS_RELDIR}/ftp/* ${_target}/ftp
     else
         message "[staging] No release files found at ${OS_RELDIR}/ftp"
     fi
@@ -301,7 +301,7 @@ build-staging() {
         ${BSDKIT_PATH}/bsdkit build-setup-staging \
             ${BSDKIT_DATA}/staging-${_version}-${_arch} \
             . \
-            ${BSDKIT_DATA}/release-${_version}-${_arch} \
+            ${BSDKIT_DATA}/release-${_version}-${_arch}/ftp \
             ${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
 
     message "Build staging completed: $(date "+%Y-%m-%d %H:%M:%S")"
@@ -316,7 +316,7 @@ build-iso() {
 
     if [ -n "${_with_packages}" ]; then
         _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.full.iso
-        _release=${BSDKIT_DATA}/release-${_version}-${_arch}
+        _release=${BSDKIT_DATA}/release-${_version}-${_arch}/ftp
         _packages=${BSDKIT_DATA}/packages-FreeBSD:${OS_MAJOR}:${_arch}-default-nox11
         message "[iso] Building full ISO with packages"
     else

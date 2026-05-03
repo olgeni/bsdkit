@@ -2812,7 +2812,8 @@ build-setup-iso() {
     ln -s -f $(realpath ${_staging}/*) ${_iso_path}
 
     if [ ${_relpath} != "none" ]; then
-        ln -s -f $(realpath ${_relpath}) ${_iso_path}/$(basename ${_relpath})
+        mkdir -p ${_iso_path}/usr
+        ln -s -f $(realpath ${_relpath}) ${_iso_path}/usr/freebsd-dist
     fi
 
     if [ ${_pkgpath} != "none" ]; then
