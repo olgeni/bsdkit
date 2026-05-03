@@ -10,6 +10,7 @@ source ${SCRIPT_PATH}/../lib/colors.inc.sh
 source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
 source ${SCRIPT_PATH}/../lib/yaml.inc.sh
+source ${SCRIPT_PATH}/../lib/run.inc.sh
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."
@@ -158,23 +159,6 @@ OS_MINOR=$(get-src-minor-version ${OS_SRCDIR})
 OS_PATCH=$(get-src-patch-version ${OS_SRCDIR})
 
 # ===
-
-_current_step=""
-
-run-step() {
-    local step_name="$1"
-    shift
-    _current_step="${step_name}"
-    message "[${step_name}] Starting: $(date "+%Y-%m-%d %H:%M:%S")"
-    if "$@"; then
-        message "[${step_name}] Completed: $(date "+%Y-%m-%d %H:%M:%S")"
-        return 0
-    else
-        local rc=$?
-        error "[${step_name}] FAILED (exit code ${rc}): $(date "+%Y-%m-%d %H:%M:%S")"
-        return ${rc}
-    fi
-}
 
 build-release() {
     local _make_conf=${BSDKIT_PATH}/etc/make.conf
