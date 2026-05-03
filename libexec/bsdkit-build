@@ -28,8 +28,6 @@ DEFAULT_ARCH=amd64
 
 BUILD_PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
-: ${BSDKIT_SKIP_OCI:=1}
-
 unset POSIXLY_CORRECT
 
 if [ $(whoami) != "root" ]; then
@@ -48,7 +46,7 @@ OPTIONS:
     -h                  Show this help message
 
   Build Targets:
-    -R                  Build release (world, kernel, packages, OCI, VM images)
+    -R                  Build release (world, kernel, packages, VM images)
     -S                  Build staging area
     -I                  Build ISO image
     -U                  Build USB image
@@ -244,15 +242,6 @@ build-release() {
     message "[prepare-reldir] Preparing ${OS_RELDIR}"
     rm -r -f ${OS_RELDIR}
     mkdir -p ${OS_RELDIR}
-
-    if [ -z "${BSDKIT_SKIP_OCI:-}" ]; then
-        run-step "oci-release" \
-            env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-                __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-                WITH_OCIIMAGES=yes oci-release
-    else
-        message "[oci-release] Skipped (BSDKIT_SKIP_OCI is set)"
-    fi
 
     run-step "install" \
         env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
