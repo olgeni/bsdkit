@@ -11,7 +11,6 @@ source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."
-    exit 1
 fi
 
 BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"

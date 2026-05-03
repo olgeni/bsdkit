@@ -13,7 +13,6 @@ source ${SCRIPT_PATH}/../lib/yaml.inc.sh
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
     error "Must be executed on FreeBSD."
-    exit 1
 fi
 
 BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
@@ -35,7 +34,6 @@ unset POSIXLY_CORRECT
 
 if [ $(whoami) != "root" ]; then
     error "Must be executed as root."
-    exit 1
 fi
 
 show_help() {
@@ -191,7 +189,6 @@ OS_SRCDIR=${BSDKIT_DATA}/src/${_version}/src
 
 if [ ! -d "${OS_SRCDIR}" ]; then
     error "Source directory not found: ${OS_SRCDIR}"
-    exit 1
 fi
 
 OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
