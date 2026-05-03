@@ -3354,6 +3354,10 @@ build() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-build "$@"
 }
 
+release() {
+    ${BSDKIT_SRCDIR}/libexec/bsdkit-release "$@"
+}
+
 relocate-venv() {
     ${BSDKIT_SRCDIR}/libexec/bsdkit-relocate-venv "$@"
 }

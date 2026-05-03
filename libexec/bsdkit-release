@@ -1,0 +1,199 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/system.inc.sh
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
+source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
+source ${SCRIPT_PATH}/../lib/yaml.inc.sh
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+if [ "$(whoami)" != "root" ]; then
+    error "Must be executed as root."
+fi
+
+# ===========================================================================
+
+DEFAULT_VERSION="15.0"
+
+VERSION="${DEFAULT_VERSION}"
+
+usage() {
+    echo "usage: ${SCRIPT_NAME} [-v VERSION] {build|extras|clear}" >&2
+    exit 2
+}
+
+OPTIND=1
+while getopts "v:" OPT; do
+    case ${OPT} in
+        v) VERSION="${OPTARG}" ;;
+        *) usage ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+SCRATCH="/scratch/${VERSION}"
+SRC_SRC="/storage/FreeBSD/src/${VERSION}/src"
+SRC_PORTS="/usr/ports"
+
+RELEASE_DIR="${SRC_SRC}/release"
+RELEASE_SAMPLE="${RELEASE_DIR}/release.conf.sample"
+RELEASE_CONF=""
+
+is-mounted() {
+    mount | grep -q " on $1 "
+}
+
+nullfs-mount() {
+    local _src=$1
+    local _dst=$2
+    if is-mounted "${_dst}"; then
+        message "Already mounted: ${_dst}"
+    else
+        message "Mounting ${_src} -> ${_dst}"
+        mount -t nullfs "${_src}" "${_dst}"
+    fi
+}
+
+unmount-if-mounted() {
+    if is-mounted "$1"; then
+        message "Unmounting $1"
+        umount "$1"
+    fi
+}
+
+mounts-under() {
+    mount | awk -v p="$1" '$3 == p || index($3, p"/") == 1'
+}
+
+generate-release-conf() {
+    RELEASE_CONF=$(mktemp -t "release-${VERSION}.conf")
+    message "Generating release conf at ${RELEASE_CONF}"
+    {
+        cat "${RELEASE_SAMPLE}"
+        cat <<EOF
+
+## --- overrides from ${SCRIPT_NAME} ---
+CHROOTDIR="${SCRATCH}"
+SRCBRANCH="releng/${VERSION}"
+SRC_UPDATE_SKIP=1
+NOGIT=1
+NOPORTS=1
+WITH_COMPRESSED_IMAGES=1
+WITH_VMIMAGES=1
+WITH_COMPRESSED_VMIMAGES=1
+WITH_CLOUDWARE=1
+CLOUDWARE="BASIC-CLOUDINIT VAGRANT-VIRTUALBOX"
+WITH_OCIIMAGES=1
+
+## Workaround for Makefile.vm:108 invariant. release.sh propagates both
+## NO_ROOT=1 and WITHOUT_QEMU=1 as MAKEOVERRIDES when NO_ROOT is set,
+## which keeps them in sync across deep sub-makes (e.g. usr.sbin/pkg's
+## \`make -C release -V BRANCH\` query during installworld).
+NO_ROOT=1
+EOF
+    } > "${RELEASE_CONF}"
+}
+
+setup() {
+    message "Updating ports tree"
+    gitup ports
+
+    message "Preparing scratch directories under ${SCRATCH}"
+    mkdir -p "${SCRATCH}/usr/src" "${SCRATCH}/usr/ports"
+
+    nullfs-mount "${SRC_SRC}"   "${SCRATCH}/usr/src"
+    nullfs-mount "${SRC_PORTS}" "${SCRATCH}/usr/ports"
+
+    generate-release-conf
+}
+
+teardown() {
+    message "Tearing down mounts"
+    unmount-if-mounted "${SCRATCH}/dev"
+    unmount-if-mounted "${SCRATCH}/usr/ports"
+    unmount-if-mounted "${SCRATCH}/usr/src"
+
+    if [ -n "${RELEASE_CONF}" ] && [ -f "${RELEASE_CONF}" ]; then
+        message "Removing generated conf ${RELEASE_CONF}"
+        rm -f "${RELEASE_CONF}"
+    fi
+}
+
+build-extras() {
+    message "Generating RELEASE file"
+    get-src-osrelease "${SRC_SRC}" > "${SCRATCH}/R/ftp/RELEASE"
+
+    message "Building etcupdate tarball"
+    etcupdate build -s "${SRC_SRC}" "${SCRATCH}/R/ftp/etcupdate.tar.bz2"
+
+    message "Generating OLDFILES list"
+    local _oldfiles="${SCRATCH}/R/ftp/OLDFILES"
+    : > "${_oldfiles}"
+    make -s -C "${SRC_SRC}" list-old-files | sed 's/^/old-files: /' >> "${_oldfiles}"
+    make -s -C "${SRC_SRC}" list-old-dirs  | sed 's/^/old-dirs: /'  >> "${_oldfiles}"
+    make -s -C "${SRC_SRC}" list-old-libs  | sed 's/^/old-libs: /'  >> "${_oldfiles}"
+}
+
+cmd-build() {
+    trap teardown EXIT INT TERM
+
+    setup
+
+    message "Running release build with ${RELEASE_CONF}"
+    "${RELEASE_DIR}/release.sh" -c "${RELEASE_CONF}"
+
+    build-extras
+
+    message "Release build complete"
+}
+
+cmd-extras() {
+    if [ ! -d "${SCRATCH}/R/ftp" ]; then
+        error "${SCRATCH}/R/ftp does not exist; run '${SCRIPT_NAME} build' first"
+    fi
+    build-extras
+}
+
+cmd-clear() {
+    message "Unmounting any stale build mounts under ${SCRATCH}"
+    unmount-if-mounted "${SCRATCH}/dev"
+    unmount-if-mounted "${SCRATCH}/usr/ports"
+    unmount-if-mounted "${SCRATCH}/usr/src"
+
+    local _found=$(mounts-under "${SCRATCH}")
+    if [ -n "${_found}" ]; then
+        warning "Unexpected mounts present under ${SCRATCH}:"
+        echo "${_found}" >&2
+        error "Refusing to clear"
+    fi
+
+    if [ ! -d "${SCRATCH}" ]; then
+        message "Nothing to clear: ${SCRATCH} does not exist"
+        return 0
+    fi
+
+    message "Clearing schg flags under ${SCRATCH} (preserving R/)"
+    find "${SCRATCH}" -mindepth 1 -maxdepth 1 ! -name R -exec chflags -R noschg {} +
+
+    message "Removing ${SCRATCH} contents (preserving R/)"
+    find "${SCRATCH}" -mindepth 1 -maxdepth 1 ! -name R -exec rm -rf {} +
+    message "Clear complete"
+}
+
+[ $# -eq 1 ] || usage
+case $1 in
+    build)  cmd-build ;;
+    extras) cmd-extras ;;
+    clear)  cmd-clear ;;
+    *)      usage ;;
+esac
