@@ -49,32 +49,6 @@ RELEASE_DIR="${SRC_SRC}/release"
 RELEASE_SAMPLE="${RELEASE_DIR}/release.conf.sample"
 RELEASE_CONF=""
 
-is-mounted() {
-    mount | grep -q " on $1 "
-}
-
-nullfs-mount() {
-    local _src=$1
-    local _dst=$2
-    if is-mounted "${_dst}"; then
-        message "Already mounted: ${_dst}"
-    else
-        message "Mounting ${_src} -> ${_dst}"
-        mount -t nullfs "${_src}" "${_dst}"
-    fi
-}
-
-unmount-if-mounted() {
-    if is-mounted "$1"; then
-        message "Unmounting $1"
-        umount "$1"
-    fi
-}
-
-mounts-under() {
-    mount | awk -v p="$1" '$3 == p || index($3, p"/") == 1'
-}
-
 generate-release-conf() {
     RELEASE_CONF=$(mktemp -t "release-${VERSION}.conf")
     message "Generating release conf at ${RELEASE_CONF}"

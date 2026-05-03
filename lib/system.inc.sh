@@ -59,6 +59,35 @@ is-mount-point() {
     mount -p | awk '{ print $2 }' | grep -q "^${_directory}\$"
 }
 
+is-mounted() {
+    # Return 0 if anything is mounted at the given path
+    mount | grep -q " on $1 "
+}
+
+nullfs-mount() {
+    local _src=$1
+    local _dst=$2
+
+    if is-mounted "${_dst}"; then
+        message "Already mounted: ${_dst}"
+    else
+        message "Mounting ${_src} -> ${_dst}"
+        mount -t nullfs "${_src}" "${_dst}"
+    fi
+}
+
+unmount-if-mounted() {
+    if is-mounted "$1"; then
+        message "Unmounting $1"
+        umount "$1"
+    fi
+}
+
+mounts-under() {
+    # Print mount entries whose mountpoint is at or beneath the given path
+    mount | awk -v p="$1" '$3 == p || index($3, p"/") == 1'
+}
+
 get-os-version() {
     # FreeBSD 14.1-RELEASE-p4 -> 14.1
     local _destdir=${1:-/}
