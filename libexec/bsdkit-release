@@ -42,7 +42,7 @@ done
 shift $((OPTIND - 1))
 
 SCRATCH="/scratch/${VERSION}"
-SRC_SRC="/storage/FreeBSD/src/${VERSION}/src"
+SRC_SRC="${BSDKIT_DATA}/src/${VERSION}/src"
 SRC_PORTS="/usr/ports"
 
 RELEASE_DIR="${SRC_SRC}/release"
