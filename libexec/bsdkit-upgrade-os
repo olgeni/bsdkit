@@ -188,11 +188,9 @@ fi
 
 _security_jail_jailed="no"
 
-if sysctl -n security.jail.jailed > /dev/null 2>&1; then
-    if [ "$(sysctl -n security.jail.jailed)" = "1" ]; then
-        _security_jail_jailed="yes"
-        BOOTENV_ENABLE="no"
-    fi
+if is-jailed; then
+    _security_jail_jailed="yes"
+    BOOTENV_ENABLE="no"
 fi
 
 if kenv -q zfs_be_root > /dev/null 2>&1; then

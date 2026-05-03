@@ -36,6 +36,11 @@ platform-is-cloud() {
     platform-is-digitalocean || platform-is-cloudsigma || platform-is-virtualbox || platform-is-vmware || platform-is-aws
 }
 
+is-jailed() {
+    # Return 0 if running inside a FreeBSD jail
+    sysctl -n security.jail.jailed 2>/dev/null | grep -q '^1$'
+}
+
 get-inet-address() {
     ifconfig $(get-gateway-interface) | awk '$1 == "inet" { print $2; exit }'
 }
