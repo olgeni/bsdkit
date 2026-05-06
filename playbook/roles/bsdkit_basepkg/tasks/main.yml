@@ -64,6 +64,7 @@
       - shells/bash
       - sysutils/direnv
       - sysutils/monit
+      - sysutils/rocinante
       - sysutils/runit
       - textproc/align
       - textproc/the_silver_searcher
