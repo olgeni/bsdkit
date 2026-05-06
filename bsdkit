@@ -1673,6 +1673,9 @@ __install-setup-runtime() {
 
         # uncategorized
         comms/kermit
+        filesystems/exfat
+        filesystems/ext2
+        filesystems/ntfs
         lang/python
         net/py-netaddr
         net/rclone
@@ -1682,9 +1685,6 @@ __install-setup-runtime() {
         sysutils/ansible
         sysutils/ddrescue
         sysutils/flashrom
-	filesystems/exfat
-	filesystems/ext2
-	filesystems/ntfs
         sysutils/hextools
         sysutils/hfsutils
         sysutils/ipmitool
