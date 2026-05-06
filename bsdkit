@@ -1628,10 +1628,12 @@ __install-setup-runtime() {
     __valid-bsdkit ${_bsdkit}
     __valid-pkgpath ${_pkgpath}
 
-    # Synchronize with 33c82d0f-f01e-4032-b489-3ecdad22ca16
+    # b7ee386b-491d-11f1-b886-4c526214c986
     local _runtime=(
         # required
         devel/git
+        net/py-netaddr
+        ports-mgmt/pkg
         security/ca_root_nss
         shells/zsh
         sysutils/pv
@@ -1642,58 +1644,69 @@ __install-setup-runtime() {
 
         # optional
         archivers/zip
+        comms/kermit
         devel/bsddialog
         devel/gum
         devel/uclcmd
         editors/bvi
         editors/nano
         editors/vim
+        filesystems/exfat
+        filesystems/ext2
+        filesystems/ntfs
         ftp/curl
         ftp/lftp
+        lang/python
         misc/delay
         misc/gnu-watch
+        misc/inplace
         misc/mbuffer
         misc/mc
         misc/retry
         net/croc
+        net/rclone
         net/rsync
         net/socat
+        net/zerotier
+        security/gnupg
+        security/openvpn
+        security/portacl-rc
+        shells/bash
+        sysutils/ansible
         sysutils/clone
         sysutils/cpdup
+        sysutils/ddrescue
+        sysutils/direnv
         sysutils/filemon
+        sysutils/flashrom
+        sysutils/hextools
+        sysutils/hfsutils
         sysutils/htop
-        sysutils/lsblk
+        sysutils/ipmitool
+        sysutils/memtester
+        sysutils/monit
         sysutils/ncdu
+        sysutils/podman-suite
         sysutils/renameutils
+        sysutils/rocinante
+        sysutils/runit
         sysutils/smenu
         sysutils/spiped
         sysutils/tmux
         sysutils/ts
+        textproc/align
         textproc/jo
-
-        # uncategorized
-        comms/kermit
-        filesystems/exfat
-        filesystems/ext2
-        filesystems/ntfs
-        lang/python
-        net/py-netaddr
-        net/rclone
-        net/zerotier
-        ports-mgmt/pkg
-        security/openvpn
-        sysutils/ansible
-        sysutils/ddrescue
-        sysutils/flashrom
-        sysutils/hextools
-        sysutils/hfsutils
-        sysutils/ipmitool
-        sysutils/memtester
-        sysutils/smartmontools
+        textproc/the_silver_searcher
         www/go-www
         www/tinyproxy
-        # disabled
-        # genisoimage
+
+        # host
+        sysutils/beadm
+        sysutils/checkrestart
+        sysutils/lsblk
+
+        # bare metal
+        sysutils/smartmontools
     )
 
     local _allpkg=${_pkgpath}/All

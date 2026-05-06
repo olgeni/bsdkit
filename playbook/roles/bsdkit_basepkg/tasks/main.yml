@@ -12,14 +12,16 @@
       - textproc/yq
     state: absent
 
+# b7ee386b-491d-11f1-b886-4c526214c986
 - name: Define list of base packages (common)
   set_fact:
     bsdkit_common_base_packages:
       # required
       - devel/git
+      - net/py-netaddr
+      - ports-mgmt/pkg
       - security/ca_root_nss
       - shells/zsh
-      - sysutils/podman-suite
       - sysutils/pv
       - textproc/fzf
       - textproc/go-yq
@@ -28,47 +30,63 @@
 
       # optional
       - archivers/zip
+      - comms/kermit
       - devel/bsddialog
       - devel/gum
       - devel/uclcmd
       - editors/bvi
       - editors/nano
       - editors/vim
+      - filesystems/exfat
+      - filesystems/ext2
+      - filesystems/ntfs
       - ftp/curl
       - ftp/lftp
+      - lang/python
       - misc/delay
       - misc/gnu-watch
+      - misc/inplace
       - misc/mbuffer
       - misc/mc
       - misc/retry
       - net/croc
+      - net/rclone
       - net/rsync
       - net/socat
+      - net/zerotier
+      - security/gnupg
+      - security/openvpn
+      - security/portacl-rc
+      - shells/bash
+      - sysutils/ansible
       - sysutils/clone
       - sysutils/cpdup
+      - sysutils/ddrescue
+      - sysutils/direnv
       - sysutils/filemon
+      - sysutils/flashrom
+      - sysutils/hextools
+      - sysutils/hfsutils
       - sysutils/htop
-      - sysutils/lsblk
+      - sysutils/ipmitool
+      - sysutils/memtester
+      - sysutils/monit
       - sysutils/ncdu
+      - sysutils/podman-suite
       - sysutils/renameutils
+      - sysutils/rocinante
+      - sysutils/runit
       - sysutils/smenu
       - sysutils/spiped
       - sysutils/tmux
       - sysutils/ts
-      - textproc/jo
-
-      # uncategorized
-      - misc/inplace
-      - security/gnupg
-      - security/portacl-rc
-      - shells/bash
-      - sysutils/direnv
-      - sysutils/monit
-      - sysutils/rocinante
-      - sysutils/runit
       - textproc/align
+      - textproc/jo
       - textproc/the_silver_searcher
+      - www/go-www
+      - www/tinyproxy
 
+# b7ee386b-491d-11f1-b886-4c526214c986
 - name: Define list of base packages (host)
   set_fact:
     bsdkit_host_packages:
@@ -76,6 +94,7 @@
       - sysutils/checkrestart
       - sysutils/lsblk
 
+# b7ee386b-491d-11f1-b886-4c526214c986
 - name: Define list of base packages (bare metal)
   set_fact:
     bsdkit_bare_metal_packages:
