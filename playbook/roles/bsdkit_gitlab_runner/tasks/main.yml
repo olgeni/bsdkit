@@ -57,7 +57,7 @@
       sudo --user=gitlab-runner zsh <<- "EOF"
       gitlab-runner register \
           --non-interactive \
-          --executor shell \
+          --executor {{ gitlab_runner_executor }} \
           --tag-list "{{ gitlab_runner_tag_list }}" \
           --config ~gitlab-runner/.gitlab-runner/config.toml \
           --name "{{ gitlab_runner_name }} ({{ ansible_hostname }})" \
