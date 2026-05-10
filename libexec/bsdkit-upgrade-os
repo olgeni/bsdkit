@@ -243,6 +243,10 @@ fetch -q ${_release}/OLDFILES || error "Failed to fetch OLDFILES file"
 
 message "Fetching RELEASE file"
 fetch -q ${_release}/RELEASE || error "Failed to fetch RELEASE file"
+if [ -x ${DESTDIR}/bin/freebsd-version ]; then
+    message "Current release is $(chroot ${DESTDIR:-/} /bin/freebsd-version -u)"
+fi
+message "Target release is $(cat ${_distdir}/RELEASE)"
 
 message "Fetching etcupdate.tar.bz2 file"
 fetch -q ${_release}/etcupdate.tar.bz2 || error "Failed to fetch etcupdate.tar.bz2 file"
