@@ -215,21 +215,7 @@ build-release() {
 }
 
 build-staging() {
-    local _target=${BSDKIT_DATA}/release-${_version}-${_arch}
-
     message "Build staging started: $(date "+%Y-%m-%d %H:%M:%S")"
-
-    if [ -d "${OS_RELDIR}/ftp" ]; then
-        message "[staging] Copying release files to ${_target}/ftp"
-        if [ -d "${_target}" ]; then
-            rm -r -f ${_target}
-        fi
-
-        mkdir -p ${_target}/ftp
-        cp ${OS_RELDIR}/ftp/* ${_target}/ftp
-    else
-        message "[staging] No release files found at ${OS_RELDIR}/ftp"
-    fi
 
     message "[staging] Running build-setup-staging"
     run-step "build-setup-staging" \
