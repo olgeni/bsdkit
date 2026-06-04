@@ -3260,7 +3260,8 @@ configure-jail() {
 
     __check-go-yq
 
-    local _jail_name=$(__find-jail $1)
+    local _jail_name
+    _jail_name=$(__find-jail $1) || exit 1
     local _jail_root=$(jls -j ${_jail_name} path)
 
     __build-facts ${_jail_root}
@@ -3281,7 +3282,8 @@ monit-setup-jail() {
 
     __check-go-yq
 
-    local _jail_name=$(__find-jail $1)
+    local _jail_name
+    _jail_name=$(__find-jail $1) || exit 1
     local _jail_root=$(jls -j ${_jail_name} path)
 
     __build-facts ${_jail_root}
@@ -3302,7 +3304,8 @@ configure-crontab-jail() {
 
     __check-go-yq
 
-    local _jail_name=$(__find-jail $1)
+    local _jail_name
+    _jail_name=$(__find-jail $1) || exit 1
     local _jail_root=$(jls -j ${_jail_name} path)
 
     __build-facts ${_jail_root}
