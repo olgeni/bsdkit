@@ -29,11 +29,13 @@ SERVER2=""
 
 # Usage information
 function usage {
-    echo "Usage: $0 [--help] --server1 server1 --server2 server2 [--all]"
+    echo "Usage: $0 [--help] --server1 server1 --server2 server2 [--all] [--sync server]"
     echo "  --help      Display this help message"
     echo "  --server1   Specify the first server"
     echo "  --server2   Specify the second server"
     echo "  --all       Query all packages (including automatic packages)"
+    echo "  --sync      Print pkg install/delete commands to make the given"
+    echo "              server (server1 or server2) match its peer"
 }
 
 # Parse command line options
@@ -44,7 +46,8 @@ zparseopts -D -E \
     h=help -help=help \
     -server1:=server1_opt \
     -server2:=server2_opt \
-    -all=all_opt
+    -all=all_opt \
+    -sync:=sync_opt
 
 if [[ -n "$help" ]]; then
     usage
@@ -64,11 +67,28 @@ if [[ -n "$all_opt" ]]; then
     QUERY_ALL=1
 fi
 
+SYNC_TARGET=""
+if [[ -n "$sync_opt" ]]; then
+    SYNC_TARGET="${sync_opt[2]}"
+fi
+
 # Check if both servers are specified
 if [ -z "$SERVER1" ] || [ -z "$SERVER2" ]; then
     echo "Error: both servers must be specified." >&2
     usage
     exit 1
+fi
+
+# Validate the sync target, if any
+if [[ -n "$SYNC_TARGET" ]]; then
+    case "$SYNC_TARGET" in
+        "$SERVER1"|server1) SYNC_TARGET="$SERVER1" ;;
+        "$SERVER2"|server2) SYNC_TARGET="$SERVER2" ;;
+        *)
+            echo "Error: --sync must be one of: $SERVER1, $SERVER2, server1, server2." >&2
+            exit 1
+            ;;
+    esac
 fi
 
 # Temporary files for storing package lists
@@ -91,6 +111,33 @@ else
         || { echo "Error: failed to fetch package list from $SERVER1." >&2; exit 1; }
     ssh -q -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$SERVER2" "pkg query -e '%a == 0' '%o'" | sort > "$TMPFILE2" \
         || { echo "Error: failed to fetch package list from $SERVER2." >&2; exit 1; }
+fi
+
+# Emit sync commands instead of a diff when requested
+if [[ -n "$SYNC_TARGET" ]]; then
+    if [[ "$SYNC_TARGET" == "$SERVER1" ]]; then
+        # Make SERVER1 match SERVER2
+        SELF="$TMPFILE1"
+        PEER="$TMPFILE2"
+    else
+        # Make SERVER2 match SERVER1
+        SELF="$TMPFILE2"
+        PEER="$TMPFILE1"
+    fi
+
+    # Packages present on the peer but missing on the target -> install
+    INSTALL=$(comm -13 "$SELF" "$PEER")
+    # Packages present on the target but missing on the peer -> delete
+    DELETE=$(comm -23 "$SELF" "$PEER")
+
+    echo "# Commands to make $SYNC_TARGET match its peer:"
+    if [[ -n "$INSTALL" ]]; then
+        echo "pkg install -y ${(f)INSTALL}"
+    fi
+    if [[ -n "$DELETE" ]]; then
+        echo "pkg delete -y ${(f)DELETE}"
+    fi
+    exit 0
 fi
 
 # Compare the package lists
