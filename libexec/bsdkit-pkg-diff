@@ -30,12 +30,12 @@ SERVER2=""
 # Usage information
 function usage {
     echo "Usage: $0 [--help] --server1 server1 --server2 server2 [--all] [--sync server]"
-    echo "  --help      Display this help message"
-    echo "  --server1   Specify the first server"
-    echo "  --server2   Specify the second server"
-    echo "  --all       Query all packages (including automatic packages)"
-    echo "  --sync      Print pkg install/delete commands to make the given"
-    echo "              server (server1 or server2) match its peer"
+    echo "  --help          Display this help message"
+    echo "  --server1, -1   Specify the first server"
+    echo "  --server2, -2   Specify the second server"
+    echo "  --all           Query all packages (including automatic packages)"
+    echo "  --sync          Print pkg install/delete commands to make the given"
+    echo "                  server (1 or 2) match its peer"
 }
 
 # Parse command line options
@@ -44,8 +44,8 @@ function usage {
 # -E: Stop at first unrecognized option (don't error on unknown options)
 zparseopts -D -E \
     h=help -help=help \
-    -server1:=server1_opt \
-    -server2:=server2_opt \
+    1:=server1_opt -server1:=server1_opt \
+    2:=server2_opt -server2:=server2_opt \
     -all=all_opt \
     -sync:=sync_opt
 
@@ -82,10 +82,10 @@ fi
 # Validate the sync target, if any
 if [[ -n "$SYNC_TARGET" ]]; then
     case "$SYNC_TARGET" in
-        "$SERVER1"|server1) SYNC_TARGET="$SERVER1" ;;
-        "$SERVER2"|server2) SYNC_TARGET="$SERVER2" ;;
+        "$SERVER1"|server1|1) SYNC_TARGET="$SERVER1" ;;
+        "$SERVER2"|server2|2) SYNC_TARGET="$SERVER2" ;;
         *)
-            echo "Error: --sync must be one of: $SERVER1, $SERVER2, server1, server2." >&2
+            echo "Error: --sync must be one of: $SERVER1, $SERVER2, 1, 2." >&2
             exit 1
             ;;
     esac
