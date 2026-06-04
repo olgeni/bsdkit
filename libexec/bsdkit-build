@@ -154,9 +154,9 @@ fi
 
 OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
 
-OS_MAJOR=$(get-src-major-version ${OS_SRCDIR})
-OS_MINOR=$(get-src-minor-version ${OS_SRCDIR})
-OS_PATCH=$(get-src-patch-version ${OS_SRCDIR})
+OS_MAJOR=$(get-src-major-version ${OS_SRCDIR}) || exit 1
+OS_MINOR=$(get-src-minor-version ${OS_SRCDIR}) || exit 1
+OS_PATCH=$(get-src-patch-version ${OS_SRCDIR}) || exit 1
 
 # ===
 
