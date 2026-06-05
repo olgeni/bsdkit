@@ -89,11 +89,11 @@
     bsdkit_defaultrouter: "{{ lookup('env', 'BSDKIT_DEFAULTROUTER') }}"
     bsdkit_ssh_public_key: "{{ lookup('env', 'BSDKIT_SSH_PUBLIC_KEY') }}"
     bsdkit_jail_proxy: "{{ lookup('env', 'BSDKIT_JAIL_PROXY') }}"
-    bsdkit_root_url: "{{ lookup('env', 'BSDKIT_ROOT_URL') | default(default_bsdkit_root_url, True) }}"
+    bsdkit_root_url: "{{ lookup('env', 'BSDKIT_ROOT_URL') | default(ansible_local.bsdkit.pkg.root_url | default(default_bsdkit_root_url, True), True) }}"
     bsdkit_version: "{{ lookup('env', 'BSDKIT_VERSION') | default(default_bsdkit_version, True) }}"
     bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
-    bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(default_bsdkit_tree, True) }}"
-    bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(default_bsdkit_pkgset, True) }}"
+    bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(ansible_local.bsdkit.pkg.tree | default(default_bsdkit_tree, True), True) }}"
+    bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(ansible_local.bsdkit.pkg.pkgset | default(default_bsdkit_pkgset, True), True) }}"
     bsdkit_chroot: "{{ (lookup('env', 'BSDKIT_CHROOT') | default(default_bsdkit_chroot, False)) | bool }}"
 
 - name: Set is_host_install

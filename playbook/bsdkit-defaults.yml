@@ -1,4 +1,9 @@
 ---
+pkg:
+  root_url: https://hub.olgeni.com/FreeBSD
+  tree: default
+  pkgset: nox11
+
 rc_conf: {}
 
 rc_conf_delete: {}

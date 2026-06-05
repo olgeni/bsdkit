@@ -46,6 +46,15 @@ setopt pushdsilent
 : ${ANSIBLE_DISPLAY_OK_HOSTS:="true"}
 : ${ANSIBLE_DISPLAY_SKIPPED_HOSTS:="true"}
 
+# Record which pkg coordinates were supplied explicitly via the environment,
+# before the defaults below mask the distinction. The ${VAR+yes} form is
+# nounset-safe and tells "set" from "unset" regardless of value. The -r/-p/-z
+# options set these too. __persist-pkg-config writes only the explicit ones back
+# to bsdkit.yml, so a defaulted run never clobbers a persisted choice.
+_BSDKIT_EXPLICIT_ROOT_URL=${BSDKIT_ROOT_URL+yes}
+_BSDKIT_EXPLICIT_TREE=${BSDKIT_TREE+yes}
+_BSDKIT_EXPLICIT_PKGSET=${BSDKIT_PKGSET+yes}
+
 # Default release and package URLs
 : ${BSDKIT_ROOT_URL:="https://hub.olgeni.com/FreeBSD"}
 : ${BSDKIT_VERSION:="14.3"}
@@ -349,6 +358,7 @@ __parse-options() {
         case ${_option} in
             -r)
                 BSDKIT_ROOT_URL=${_opts_args[-r]}
+                _BSDKIT_EXPLICIT_ROOT_URL=yes
                 ;;
             -v)
                 BSDKIT_VERSION=${_opts_args[-v]}
@@ -358,9 +368,11 @@ __parse-options() {
                 ;;
             -p)
                 BSDKIT_TREE=${_opts_args[-p]}
+                _BSDKIT_EXPLICIT_TREE=yes
                 ;;
             -z)
                 BSDKIT_PKGSET=${_opts_args[-z]}
+                _BSDKIT_EXPLICIT_PKGSET=yes
                 ;;
             *)
                 ;;
@@ -3195,6 +3207,26 @@ EOF
     rm -r ${_ansible_root}
 }
 
+__persist-pkg-config() {
+    local _destdir=${1:-""}
+
+    local _config=${_destdir}${BSDKIT_CONFIG}
+
+    # Persist only explicitly-supplied pkg coordinates, so an unspecified one
+    # keeps whatever was stored before instead of reverting to the default.
+    if [ -n "${_BSDKIT_EXPLICIT_ROOT_URL}" ]; then
+        yaml-set ${_config} pkg.root_url ${BSDKIT_ROOT_URL}
+    fi
+
+    if [ -n "${_BSDKIT_EXPLICIT_TREE}" ]; then
+        yaml-set ${_config} pkg.tree ${BSDKIT_TREE}
+    fi
+
+    if [ -n "${_BSDKIT_EXPLICIT_PKGSET}" ]; then
+        yaml-set ${_config} pkg.pkgset ${BSDKIT_PKGSET}
+    fi
+}
+
 __build-facts() {
     local _destdir=${1:-""}
 
@@ -3203,6 +3235,8 @@ __build-facts() {
     install -d -o root -g wheel -m 755 ${_destdir}/usr/local/etc/ansible/facts.d
 
     [ -f ${_destdir}${BSDKIT_CONFIG} ] || touch ${_destdir}${BSDKIT_CONFIG}
+
+    __persist-pkg-config ${_destdir}
 
     /usr/local/bin/yq -o=json ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
