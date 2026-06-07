@@ -1,6 +1,6 @@
 ---
 - name: Setup iocage
-  when: bsdkit.enable_iocage is defined and bsdkit.enable_iocage
+  when: bsdkit.enable_iocage is defined and bsdkit.enable_iocage | bool
   block:
     - name: Install sysutils/iocage
       community.general.pkgng:

@@ -120,7 +120,7 @@
         var: bsdkit.enable_update_dns
 
     - name: Configure /etc/resolv.conf for DigitalOcean
-      when: bsdkit.enable_update_dns
+      when: bsdkit.enable_update_dns | default(false) | bool
       copy:
         dest: /etc/resolv.conf
         content: |

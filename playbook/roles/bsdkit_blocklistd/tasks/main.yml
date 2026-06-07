@@ -1,6 +1,6 @@
 ---
 - name: Setup blocklistd/blacklistd
-  when: bsdkit.enable_blocklistd is defined and bsdkit.enable_blocklistd
+  when: bsdkit.enable_blocklistd is defined and bsdkit.enable_blocklistd | bool
   block:
     - name: Set blocklistd service name
       set_fact:
