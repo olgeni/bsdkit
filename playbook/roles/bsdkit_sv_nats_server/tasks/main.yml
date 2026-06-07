@@ -15,7 +15,7 @@
     path: /var/db/runit/{{ bsdkit_sv_nats_server_service_name }}
     state: directory
 
-- name: Create /var/db/runit/{{ bsdkit_sv_nats_server_service_name }}/data
+- name: Create runit data directory for {{ bsdkit_sv_nats_server_service_name }}
   file:
     mode: "0755"
     path: /var/db/runit/{{ bsdkit_sv_nats_server_service_name }}/data
@@ -31,7 +31,7 @@
   notify:
     - restart_sv_nats_server
 
-- name: Copy /var/db/runit/{{ bsdkit_sv_nats_server_service_name }}/run
+- name: Copy runit run script for {{ bsdkit_sv_nats_server_service_name }}
   copy:
     dest: /var/db/runit/{{ bsdkit_sv_nats_server_service_name }}/run
     group: wheel
@@ -40,7 +40,7 @@
   notify:
     - restart_sv_nats_server
 
-- name: Copy /var/db/runit/{{ bsdkit_sv_nats_server_service_name }}/nats.conf.sample
+- name: Copy nats.conf.sample for {{ bsdkit_sv_nats_server_service_name }}
   copy:
     dest: /var/db/runit/{{ bsdkit_sv_nats_server_service_name }}/nats.conf.sample
     group: wheel

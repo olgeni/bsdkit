@@ -142,6 +142,9 @@
     option: driver
     value: '"zfs"'
     backup: true
+    owner: root
+    group: wheel
+    mode: "0644"
 
 - name: Configure podman to use VFS storage driver (when ZFS is not available)
   when: not zfs_available
@@ -151,3 +154,6 @@
     option: driver
     value: '"vfs"'
     backup: true
+    owner: root
+    group: wheel
+    mode: "0644"

@@ -12,13 +12,13 @@
     path: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}
     state: directory
 
-- name: Create /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/data
+- name: Create runit data directory for {{ bsdkit_sv_redpanda_connect_service_name }}
   file:
     mode: "0755"
     path: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/data
     state: directory
 
-- name: Create /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/resources
+- name: Create runit resources directory for {{ bsdkit_sv_redpanda_connect_service_name }}
   file:
     mode: "0755"
     path: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/resources
@@ -44,7 +44,7 @@
   notify:
     - restart_sv_redpanda_connect
 
-- name: Copy /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/run
+- name: Copy runit run script for {{ bsdkit_sv_redpanda_connect_service_name }}
   copy:
     dest: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/run
     group: wheel
@@ -53,7 +53,7 @@
   notify:
     - restart_sv_redpanda_connect
 
-- name: Copy /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/redpanda-connect.yml.sample
+- name: Copy redpanda-connect.yml.sample for {{ bsdkit_sv_redpanda_connect_service_name }}
   copy:
     dest: /var/db/runit/{{ bsdkit_sv_redpanda_connect_service_name }}/redpanda-connect.yml.sample
     group: wheel

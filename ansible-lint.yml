@@ -1,6 +1,6 @@
 skip_list:
   - fqcn[action-core]
   - name[casing]
-  - name[template]
   - no-relative-paths
+  - var-naming[no-role-prefix]
   - yaml[line-length]

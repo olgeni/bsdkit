@@ -6,6 +6,9 @@
     line: 'ntp_leapfile_sources="{{ ntp_leapfile_sources }}"'
     state: present
     create: true
+    owner: root
+    group: wheel
+    mode: "0644"
 
 - name: Check if ntpd is enabled
   shell:

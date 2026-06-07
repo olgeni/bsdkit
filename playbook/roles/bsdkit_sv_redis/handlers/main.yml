@@ -3,3 +3,4 @@
   shell:
     cmd: |
       sv restart {{ bsdkit_sv_redis_service_name }} || :
+  changed_when: true

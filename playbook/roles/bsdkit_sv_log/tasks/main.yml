@@ -5,13 +5,13 @@
     path: /var/db/runit/{{ bsdkit_sv_log_service_name }}
     state: directory
 
-- name: Create /var/db/runit/{{ bsdkit_sv_log_service_name }}/log
+- name: Create runit log directory for {{ bsdkit_sv_log_service_name }}
   file:
     mode: "0755"
     path: /var/db/runit/{{ bsdkit_sv_log_service_name }}/log
     state: directory
 
-- name: Copy /var/db/runit/{{ bsdkit_sv_log_service_name }}/log/run
+- name: Copy runit log/run script for {{ bsdkit_sv_log_service_name }}
   copy:
     dest: /var/db/runit/{{ bsdkit_sv_log_service_name }}/log/run
     group: wheel

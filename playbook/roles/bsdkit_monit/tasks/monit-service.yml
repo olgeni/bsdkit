@@ -1,5 +1,6 @@
 - name: Retrieve rcvar value for {{ item.service }}
   shell: |
+    set -o pipefail
     rcvar="$(service {{ item.service }} rcvar | grep "enable=" | cut -d= -f1)"
     [ "$(sysrc -n ${rcvar})" = "YES" ]
   register: sysrc_item_enable

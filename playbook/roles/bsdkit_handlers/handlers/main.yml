@@ -2,6 +2,7 @@
 - name: pwd_mkdb
   command:
     cmd: pwd_mkdb -p /etc/master.passwd
+  changed_when: true
 
 - name: restart_syslogd
   service:
@@ -69,8 +70,9 @@
     state: restarted
 
 - name: reload_monit
-  shell:
+  command:
     cmd: monit reload
+  changed_when: true
 
 - name: reformat_rc_conf
   shell:
@@ -80,6 +82,7 @@
       sysrc -a -e > ${_rc_conf}
       cat ${_rc_conf} > /etc/rc.conf
       rm -f ${_rc_conf}
+  changed_when: true
 
 - name: reformat_loader_conf_local
   shell:
@@ -89,6 +92,7 @@
       sed -e '/^$/d' -e '/^[[:space:]]*#/d' /boot/loader.conf.local | sort > ${_loader_conf_local}
       cat ${_loader_conf_local} > /boot/loader.conf.local
       rm -f ${_loader_conf_local}
+  changed_when: true
 
 - name: reformat_sysctl_conf_local
   shell:
@@ -98,3 +102,4 @@
       sed -e '/^$/d' -e '/^[[:space:]]*#/d' /etc/sysctl.conf.local | sort > ${_sysctl_conf_local}
       cat ${_sysctl_conf_local} > /etc/sysctl.conf.local
       rm -f ${_sysctl_conf_local}
+  changed_when: true

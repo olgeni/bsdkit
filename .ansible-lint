@@ -2,3 +2,8 @@
 skip_list:
   - experimental
   - fqcn-builtins
+  - fqcn[action-core]
+  - name[casing]
+  - no-relative-paths
+  - var-naming[no-role-prefix]
+  - yaml[line-length]

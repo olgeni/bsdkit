@@ -1,4 +1,4 @@
 ---
 - name: Include tasks from tasks.yml
   include_tasks: tasks.yml
-  when: bsdkit_facts_present is not defined or bsdkit_facts_present == false
+  when: bsdkit_facts_present is not defined or not bsdkit_facts_present

@@ -115,8 +115,9 @@
   register: ssh_host_rsa_key_pub_stat
 
 - name: Generate SSH host keys
-  command:
+  command: # noqa: command-instead-of-module
     cmd: service sshd keygen
+  changed_when: true
   when: >
     (
       not ssh_host_ecdsa_key_pub_stat.stat.exists

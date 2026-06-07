@@ -2,3 +2,4 @@
 - name: certctl_rehash
   command:
     cmd: certctl rehash
+  changed_when: true
