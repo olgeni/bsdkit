@@ -19,13 +19,6 @@
 - name: Flush handlers
   meta: flush_handlers
 
-- name: Add FTP user (ftpusers)
-  lineinfile:
-    dest: /etc/ftpusers
-    line: ftp
-    regexp: ^ftp$
-    insertafter: ^man$
-
 - name: Create /var/ftp
   file:
     path: /var/ftp
