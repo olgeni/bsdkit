@@ -94,7 +94,7 @@
     bsdkit_arch: "{{ lookup('env', 'BSDKIT_ARCH') | default(default_bsdkit_arch, True) }}"
     bsdkit_tree: "{{ lookup('env', 'BSDKIT_TREE') | default(ansible_local.bsdkit.pkg.tree | default(default_bsdkit_tree, True), True) }}"
     bsdkit_pkgset: "{{ lookup('env', 'BSDKIT_PKGSET') | default(ansible_local.bsdkit.pkg.pkgset | default(default_bsdkit_pkgset, True), True) }}"
-    bsdkit_chroot: "{{ (lookup('env', 'BSDKIT_CHROOT') | default(default_bsdkit_chroot, False)) | bool }}"
+    bsdkit_chroot: "{{ (lookup('env', 'BSDKIT_CHROOT') | default(default_bsdkit_chroot, True)) | bool }}"
 
 - name: Set is_host_install
   set_fact:
