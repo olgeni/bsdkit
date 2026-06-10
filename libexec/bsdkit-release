@@ -81,6 +81,9 @@ setup() {
     message "Preparing scratch directories under ${SCRATCH}"
     mkdir -p "${SCRATCH}/usr/src" "${SCRATCH}/usr/ports"
 
+    [ -d "${SRC_SRC}" ]   || error "Source directory ${SRC_SRC} does not exist"
+    [ -d "${SRC_PORTS}" ] || error "Ports directory ${SRC_PORTS} does not exist"
+
     nullfs-mount "${SRC_SRC}"   "${SCRATCH}/usr/src"
     nullfs-mount "${SRC_PORTS}" "${SCRATCH}/usr/ports"
 
