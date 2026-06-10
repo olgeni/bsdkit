@@ -78,9 +78,6 @@ EOF
 }
 
 setup() {
-    message "Updating ports tree"
-    gitup ports
-
     message "Preparing scratch directories under ${SCRATCH}"
     mkdir -p "${SCRATCH}/usr/src" "${SCRATCH}/usr/ports"
 
