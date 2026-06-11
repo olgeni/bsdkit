@@ -88,6 +88,11 @@ mounts-under() {
     mount | awk -v p="$1" '$3 == p || index($3, p"/") == 1'
 }
 
+mounts-strictly-under() {
+    # Print mount entries strictly beneath the given path (excluding the path itself)
+    mount | awk -v p="$1" 'index($3, p"/") == 1'
+}
+
 get-os-version() {
     # FreeBSD 14.1-RELEASE-p4 -> 14.1
     local _destdir=${1:-/}

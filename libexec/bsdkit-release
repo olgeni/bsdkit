@@ -143,7 +143,7 @@ cmd-clear() {
     unmount-if-mounted "${SCRATCH}/usr/ports"
     unmount-if-mounted "${SCRATCH}/usr/src"
 
-    local _found=$(mounts-under "${SCRATCH}")
+    local _found=$(mounts-strictly-under "${SCRATCH}")
     if [ -n "${_found}" ]; then
         warning "Unexpected mounts present under ${SCRATCH}:"
         echo "${_found}" >&2
