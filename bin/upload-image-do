@@ -53,9 +53,9 @@ Examples:
 
     # With custom image name and description
     ${0:t} -r nyc3 \\
-        -i 'FreeBSD-15.0-BETA4-amd64-zfs' \\
-        -d 'FreeBSD 15.0 Beta 4 ZFS' \\
-        'https://download.freebsd.org/ftp/releases/VM-IMAGES/15.0-BETA4/amd64/Latest/FreeBSD-15.0-BETA4-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
+        -i 'FreeBSD-15.1-RELEASE-amd64-zfs' \\
+        -d 'FreeBSD 15.1 RELEASE ZFS' \\
+        'https://download.freebsd.org/ftp/releases/VM-IMAGES/15.1-RELEASE/amd64/Latest/FreeBSD-15.1-RELEASE-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
 
     # With image name only (description defaults to name)
     ${0:t} -r fra1 \\
@@ -64,8 +64,8 @@ Examples:
 
     # Using local file
     ${0:t} -r fra1 \\
-        -i 'FreeBSD-15.0-STABLE-amd64-zfs' \\
-        '/path/to/FreeBSD-15.0-STABLE-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
+        -i 'FreeBSD-15.1-STABLE-amd64-zfs' \\
+        '/path/to/FreeBSD-15.1-STABLE-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
 EOF
     exit 0
 fi

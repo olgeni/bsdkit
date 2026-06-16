@@ -24,7 +24,7 @@ fi
 
 # ===========================================================================
 
-DEFAULT_VERSION=15.0
+DEFAULT_VERSION=15.1
 DEFAULT_ARCH=amd64
 
 BUILD_PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
