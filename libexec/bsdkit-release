@@ -132,7 +132,7 @@ cmd-build() {
 
     build-extras
 
-    cmd-copy
+    copy-release
 
     message "Release build complete"
 }
@@ -144,15 +144,18 @@ cmd-extras() {
     build-extras
 }
 
-cmd-copy() {
-    if [ ! -d "${SCRATCH}/R" ]; then
-        error "${SCRATCH}/R does not exist; run '${SCRIPT_NAME} build' first"
-    fi
-
+copy-release() {
     message "Copying ${SCRATCH}/R/ to ${RELEASE_DEST}/"
     mkdir -p "${RELEASE_DEST}"
     rsync -av "${SCRATCH}/R/" "${RELEASE_DEST}/"
     message "Copy complete"
+}
+
+cmd-copy() {
+    if [ ! -d "${SCRATCH}/R" ]; then
+        error "${SCRATCH}/R does not exist; run '${SCRIPT_NAME} build' first"
+    fi
+    copy-release
 }
 
 cmd-clear() {
