@@ -24,18 +24,21 @@ fi
 # ===========================================================================
 
 DEFAULT_VERSION=15.1
+DEFAULT_ARCH=amd64
 
 VERSION="${DEFAULT_VERSION}"
+ARCH="${DEFAULT_ARCH}"
 
 usage() {
-    echo "usage: ${SCRIPT_NAME} [-v VERSION] {build|extras|clear}" >&2
+    echo "usage: ${SCRIPT_NAME} [-v VERSION] [-a ARCH] {build|extras|copy|clear}" >&2
     exit 2
 }
 
 OPTIND=1
-while getopts "v:" OPT; do
+while getopts "v:a:" OPT; do
     case ${OPT} in
         v) VERSION="${OPTARG}" ;;
+        a) ARCH="${OPTARG}" ;;
         *) usage ;;
     esac
 done
@@ -44,6 +47,8 @@ shift $((OPTIND - 1))
 SCRATCH="/scratch/${VERSION}"
 SRC_SRC="${BSDKIT_DATA}/src/${VERSION}/src"
 SRC_PORTS="/usr/ports"
+
+RELEASE_DEST="${BSDKIT_DATA}/release-${VERSION}-${ARCH}"
 
 RELEASE_DIR="${SRC_SRC}/release"
 RELEASE_SAMPLE="${RELEASE_DIR}/release.conf.sample"
@@ -127,6 +132,8 @@ cmd-build() {
 
     build-extras
 
+    cmd-copy
+
     message "Release build complete"
 }
 
@@ -135,6 +142,17 @@ cmd-extras() {
         error "${SCRATCH}/R/ftp does not exist; run '${SCRIPT_NAME} build' first"
     fi
     build-extras
+}
+
+cmd-copy() {
+    if [ ! -d "${SCRATCH}/R" ]; then
+        error "${SCRATCH}/R does not exist; run '${SCRIPT_NAME} build' first"
+    fi
+
+    message "Copying ${SCRATCH}/R/ to ${RELEASE_DEST}/"
+    mkdir -p "${RELEASE_DEST}"
+    rsync -av "${SCRATCH}/R/" "${RELEASE_DEST}/"
+    message "Copy complete"
 }
 
 cmd-clear() {
@@ -167,6 +185,7 @@ cmd-clear() {
 case $1 in
     build)  cmd-build ;;
     extras) cmd-extras ;;
+    copy)   cmd-copy ;;
     clear)  cmd-clear ;;
     *)      usage ;;
 esac
