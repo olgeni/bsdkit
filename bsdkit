@@ -23,6 +23,7 @@ setopt pushdsilent
 : ${BSDKIT_LABEL_TMP:="tmp"}
 : ${BSDKIT_LABEL_VAR:="var"}
 : ${BSDKIT_LABEL_USR:="usr"}
+: ${BSDKIT_LABEL_ZFS:="zfs"}
 
 # Default install flags
 : ${BSDKIT_INSTALL_KERNEL:="YES"}
@@ -288,6 +289,7 @@ __environment() {
         BSDKIT_LABEL_TMP=\"${BSDKIT_LABEL_TMP}\" \
         BSDKIT_LABEL_USR=\"${BSDKIT_LABEL_USR}\" \
         BSDKIT_LABEL_VAR=\"${BSDKIT_LABEL_VAR}\" \
+        BSDKIT_LABEL_ZFS=\"${BSDKIT_LABEL_ZFS}\" \
         BSDKIT_INSTALL_KERNEL=\"${BSDKIT_INSTALL_KERNEL}\" \
         BSDKIT_INSTALL_SRC=\"${BSDKIT_INSTALL_SRC}\" \
         BSDKIT_INSTALL_DEBUG=\"${BSDKIT_INSTALL_DEBUG}\" \
@@ -873,7 +875,7 @@ __zfs-create-gpt-pool() {
             swapon /dev/gpt/${BSDKIT_LABEL_SWAP}${_device_index}
         fi
 
-        gpart add -a 4k -i ${_p} -t freebsd-zfs -l pool${_device_index} ${_device}
+        gpart add -a 4k -i ${_p} -t freebsd-zfs -l ${BSDKIT_LABEL_ZFS}${_device_index} ${_device}
         gpart set -a bootme -i ${_p} ${_device}
         _pool_partition=${_p}
         _p=$((_p + 1))
