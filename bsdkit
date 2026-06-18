@@ -16,7 +16,7 @@ setopt pushdsilent
 : ${BSDKIT_PART_SIZE_VAR:="4G"}
 
 # Default partition labels
-: ${BSDKIT_LABEL_BOOT:="boot"}
+: ${BSDKIT_LABEL_BOOT:="gptboot"}
 : ${BSDKIT_LABEL_EFI:="efiboot"}
 : ${BSDKIT_LABEL_ROOT:="root"}
 : ${BSDKIT_LABEL_SWAP:="swap"}
