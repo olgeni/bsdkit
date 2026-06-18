@@ -853,8 +853,6 @@ __zfs-create-gpt-pool() {
 
     local _device_index=0
 
-    local _pool_partition=0
-
     for _device in ${_devices}; do
         gpart destroy -F ${_device} 2> /dev/null || :
         gpart create -s gpt ${_device}
@@ -877,7 +875,6 @@ __zfs-create-gpt-pool() {
 
         gpart add -a 4k -i ${_p} -t freebsd-zfs -l ${BSDKIT_LABEL_ZFS}${_device_index} ${_device}
         gpart set -a bootme -i ${_p} ${_device}
-        _pool_partition=${_p}
         _p=$((_p + 1))
 
         _device_index=$((_device_index + 1))
@@ -885,29 +882,36 @@ __zfs-create-gpt-pool() {
 
     local _options=(-f -m none -o altroot=${_destdir})
 
-    local _suffix="p${_pool_partition}"
+    local _members=()
 
-    local _device
+    local _index=0
 
-    for _device in ${_devices}; do
-        zpool labelclear -f ${_device}${_suffix} 2> /dev/null || :
+    while [ ${_index} -lt ${#_devices} ]; do
+        _members+=(/dev/gpt/${BSDKIT_LABEL_ZFS}${_index})
+        _index=$((_index + 1))
+    done
+
+    local _member
+
+    for _member in ${_members}; do
+        zpool labelclear -f ${_member} 2> /dev/null || :
     done
 
     case ${#_devices} in
         1)
             ${ZPOOL_CREATE_CMD} \
                 ${_options} ${BSDKIT_ZFS_POOL} \
-                ${_devices[1]}${_suffix}
+                ${_members[1]}
             ;;
         2)
             ${ZPOOL_CREATE_CMD} \
                 ${_options} ${BSDKIT_ZFS_POOL} \
-                mirror ${_devices[1]}${_suffix} ${_devices[2]}${_suffix}
+                mirror ${_members[1]} ${_members[2]}
             ;;
         3)
             ${ZPOOL_CREATE_CMD} \
                 ${_options} ${BSDKIT_ZFS_POOL} \
-                raidz1 ${_devices[1]}${_suffix} ${_devices[2]}${_suffix} ${_devices[3]}${_suffix}
+                raidz1 ${_members[1]} ${_members[2]} ${_members[3]}
             ;;
         *)
             error "unsupported number of devices in pool (__zfs-create-gpt-pool)."
