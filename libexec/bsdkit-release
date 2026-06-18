@@ -63,6 +63,11 @@ generate-release-conf() {
 
 ## --- overrides from ${SCRIPT_NAME} ---
 CHROOTDIR="${SCRATCH}"
+## TARGET is uname -m, TARGET_ARCH is uname -p; identical for amd64,
+## aarch64, riscv64. For split arches (arm/armv7, powerpc/powerpc64)
+## these differ, so -a's single value would be wrong -- handle then.
+TARGET="${ARCH}"
+TARGET_ARCH="${ARCH}"
 SRCBRANCH="releng/${VERSION}"
 SRC_UPDATE_SKIP=1
 NOGIT=1
