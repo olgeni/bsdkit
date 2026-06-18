@@ -2981,7 +2981,7 @@ build-setup-img() {
     mkimg -v \
           -s gpt \
           -b /boot/pmbr \
-          -p efi:=${_efi_img} \
+          -p efi/${BSDKIT_LABEL_EFI}:=${_efi_img} \
           -p freebsd-boot:=/boot/gptboot \
           -p freebsd-ufs/${BSDKIT_IMG_DATA_LABEL}:=${_ufs_img} \
           -o ${_img_file}
