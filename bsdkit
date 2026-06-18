@@ -2920,19 +2920,34 @@ build-setup-img() {
     local _efi_dir
     _efi_dir=$(mktemp -d /tmp/efi.XXXXXX)
 
-    tar -x -f ${_iso_file} -C ${_efi_dir} boot/loader_lua.efi boot/loader.efi
+    tar -x -f ${_iso_file} -C ${_efi_dir} boot/loader.efi
 
-    mkdir -p ${_efi_dir}/efi/boot
-    install ${_efi_dir}/boot/loader.efi ${_efi_dir}/efi/boot/bootx64.efi
-
-    rm -f ${_efi_dir}/boot/loader_lua.efi
-    rm -f ${_efi_dir}/boot/loader.efi
-    rmdir ${_efi_dir}/boot
+    # The ESP must be FAT so UEFI firmware can read it; mirror build-setup-iso.
 
     local _efi_img
-    _efi_img=$(mktemp /tmp/ufs.XXXXXX)
+    _efi_img=$(mktemp /tmp/efi.XXXXXX)
 
-    makefs -b 50% ${_efi_img} ${_efi_dir}
+    dd if=/dev/zero of=${_efi_img} bs=${BSDKIT_PART_SIZE_EFI} count=1
+
+    _efi_md_device=$(mdconfig -f ${_efi_img})
+
+    {
+        newfs_msdos -L efi -F 16 -c 2 /dev/${_efi_md_device}
+
+        _efi_root=$(mktemp -d /tmp/XXXXXX)
+
+        mount -t msdosfs /dev/${_efi_md_device} ${_efi_root}
+        {
+            mkdir -p ${_efi_root}/efi/boot
+            cp ${_efi_dir}/boot/loader.efi ${_efi_root}/efi/boot/bootx64.efi
+        } always {
+            umount ${_efi_root}
+        }
+
+        rmdir ${_efi_root}
+    } always {
+        mdconfig -d -u ${_efi_md_device}
+    }
 
     rm -r -f ${_efi_dir}
 
