@@ -178,6 +178,8 @@
   blockinfile:
     dest: /etc/ssh/sshd_config
     block: |
+      AcceptEnv LANG
+      AcceptEnv LC_*
       AcceptEnv GITHUB_*
       AcceptEnv GITLAB_*
       AcceptEnv NPM_*
