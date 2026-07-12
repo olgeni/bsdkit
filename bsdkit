@@ -2165,7 +2165,15 @@ create-iocage-jail() {
 
     unset IOCAGE_COLOR
 
-    _jail_path=/iocage/jails/${_jail_name}
+    iocage get -p > /dev/null 2>&1 || error "unable to retrieve iocage mount point (create-iocage-jail)."
+
+    local _iocage_root
+    _iocage_root=$(iocage get -p)
+
+    local _iocage_jails
+    _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
+
+    _jail_path=${_iocage_jails}/${_jail_name}
     _jail_root=${_jail_path}/root
 
     iocage create -e --name ${_jail_name} ip4=inherit allow_raw_sockets=1
