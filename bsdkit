@@ -3283,7 +3283,7 @@ __ansible-pre-cleanup() {
     for _dir in ${_path}; do
         if [ -d "${_dir}" ]; then
             find "${_dir}" -type d -name '__pycache__' | while read _directory; do
-                for _file in ${(N)"${_directory}"/*.pyc}; do
+                for _file in "${_directory}"/*.pyc(N); do
                     if ! pkg which "${_file}" > /dev/null 2>&1; then
                         rm -f "${_file}"
                         message "Removed file ${_file}"
