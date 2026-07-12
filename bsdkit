@@ -3292,9 +3292,7 @@ __find-jail() {
 }
 
 __ansible-pre-cleanup() {
-    local _path="/usr/local/lib/python*/site-packages/"
-
-    for _dir in ${_path}; do
+    for _dir in /usr/local/lib/python*/site-packages/(N); do
         if [ -d "${_dir}" ]; then
             find "${_dir}" -type d -name '__pycache__' | while read _directory; do
                 for _file in "${_directory}"/*.pyc(N); do
