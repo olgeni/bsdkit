@@ -1901,7 +1901,7 @@ install-mbr-ufs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    __mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
+    __mbr-ufs-partition-${_class} ${BSDKIT_DESTDIR} ${_device}
     __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap-setup ${BSDKIT_DESTDIR}
     __procfs-setup ${BSDKIT_DESTDIR}
@@ -1936,7 +1936,7 @@ install-mbr-ufs-gmirror() {
     mkdir -p ${BSDKIT_DESTDIR}
 
     __gmirror-configure ${_mirror} ${_devices}
-    __mbr_ufs_partition_${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
+    __mbr-ufs-partition-${_class} ${BSDKIT_DESTDIR} mirror/${_mirror}
     __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap-setup ${BSDKIT_DESTDIR}
     __procfs-setup ${BSDKIT_DESTDIR}
@@ -1961,7 +1961,7 @@ install-gpt-ufs() {
 
     mkdir -p ${BSDKIT_DESTDIR}
 
-    __gpt_ufs_partition_${_class} ${BSDKIT_DESTDIR} ${_device}
+    __gpt-ufs-partition-${_class} ${BSDKIT_DESTDIR} ${_device}
     __install-release ${FREEBSD_REL_URL} ${BSDKIT_DESTDIR}
     __swap-setup ${BSDKIT_DESTDIR}
     __procfs-setup ${BSDKIT_DESTDIR}
