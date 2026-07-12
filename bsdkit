@@ -2107,7 +2107,7 @@ create-iocage-thin() {
     local _iocage_jails
     _iocage_jails=$(zfs get -H -p -o value mountpoint ${_iocage_root}/iocage/jails)
 
-    iocage create --name ${_jail_name} $@
+    iocage create --name ${_jail_name} "$@"
     local _destdir=${_iocage_jails}/${_jail_name}/root
 
     [ -d ${_destdir} ] || error "iocage root does not exist (create-iocage)."
