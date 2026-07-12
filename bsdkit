@@ -3806,6 +3806,9 @@ purge-distdir() {
 start-local() {
     local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
 
+    # Drop the empty element that (@f) yields when no local services exist
+    _service_list=(${_service_list[@]:#})
+
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
             message "Skipping service: ${_blacklisted_service}"
@@ -3848,6 +3851,9 @@ start-local() {
 stop-local() {
     local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
 
+    # Drop the empty element that (@f) yields when no local services exist
+    _service_list=(${_service_list[@]:#})
+
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
             message "Skipping service: ${_blacklisted_service}"
@@ -3889,6 +3895,9 @@ stop-local() {
 
 restart-local() {
     local _service_list=("${(@f)$(service -e | grep "^/usr/local/etc/rc.d/" | sed -e "s@^/usr/local/etc/rc.d/@@g")}")
+
+    # Drop the empty element that (@f) yields when no local services exist
+    _service_list=(${_service_list[@]:#})
 
     for _blacklisted_service in "${SERVICE_RESTART_BLACKLIST[@]}"; do
         if [ -e "/usr/local/etc/rc.d/${_blacklisted_service}" ]; then
