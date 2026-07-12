@@ -3819,7 +3819,7 @@ start-local() {
     # Remove monit from the service list to start it last
     local _monit_service=""
 
-    if [[ "${_service_list[@]}" =~ "monit" ]]; then
+    if (( ${_service_list[(Ie)monit]} )); then
         _service_list=(${_service_list[@]:#monit})
         _monit_service="monit"
     fi
@@ -3864,7 +3864,7 @@ stop-local() {
     # Remove monit from the service list to stop it first
     local _monit_service=""
 
-    if [[ "${_service_list[@]}" =~ "monit" ]]; then
+    if (( ${_service_list[(Ie)monit]} )); then
         _service_list=(${_service_list[@]:#monit})
         _monit_service="monit"
     fi
@@ -3909,7 +3909,7 @@ restart-local() {
     # Remove monit from the service list to restart it last
     local _monit_service=""
 
-    if [[ "${_service_list[@]}" =~ "monit" ]]; then
+    if (( ${_service_list[(Ie)monit]} )); then
         _service_list=(${_service_list[@]:#monit})
         _monit_service="monit"
     fi
