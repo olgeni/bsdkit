@@ -3599,6 +3599,9 @@ shell() {
     local _private_key
     _private_key=$(mktemp /tmp/key.XXXXXX)
 
+    echo-bsdkit-private-key > ${_private_key}
+    chmod 600 ${_private_key}
+
     ssh -v -i ${_private_key} "$@" || :
 
     rm -f ${_private_key}
