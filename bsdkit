@@ -1200,7 +1200,15 @@ __fetch-release() {
                 _sha256_local="0"
             fi
 
+            local _attempts=0
+
             while [ ${_sha256} != ${_sha256_local} ]; do
+                if [ ${_attempts} -ge 3 ]; then
+                    error "checksum mismatch for ${_filename} after ${_attempts} attempts."
+                fi
+
+                _attempts=$((_attempts + 1))
+
                 fetch -o ${_local_relpath}/${_filename} ${_relpath}/${_filename}
                 message "Checking: ${_filename}"
                 _sha256_local=$(${CAT_CMD} ${_local_relpath}/${_filename} | sha256 -q)
