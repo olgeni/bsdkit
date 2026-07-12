@@ -1881,9 +1881,9 @@ reset-state() {
         cut -w -f 2 |
         grep /baseroot${BSDKIT_DESTDIR} |
         sort -r |
-        xargs umount -f
+        xargs umount -f || :
 
-    swapctl -l | grep "^/" | cut -f 1 -d' ' | xargs swapoff
+    swapctl -l | grep "^/" | cut -f 1 -d' ' | xargs swapoff || :
 
     # This is dangerous, and we do not do it here:
     #   zpool destroy ${BSDKIT_ZFS_POOL} || :
