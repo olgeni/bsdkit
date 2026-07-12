@@ -24,8 +24,14 @@ fi
 # ===========================================================================
 
 usage() {
-    echo "Usage: ${SCRIPT_NAME} -t <target version>"
+    echo "Usage: ${SCRIPT_NAME} -t <target version> [-s <source version>]"
     exit 0
+}
+
+# Detect the current default Python version from the python3 metaport's
+# dependency (e.g. python311 -> 311). Empty if python3 is not installed.
+detect_source_version() {
+    pkg query '%dn' python3 2>/dev/null | sed -nE 's/^python([0-9]+)$/\1/p'
 }
 
 # zparseopts flags:
@@ -36,34 +42,47 @@ usage() {
 # -a: Store options in array _opts
 # -A: Store options with arguments in associative array _opts_args
 zparseopts -F -D -E -K -a _opts -A _opts_args \
-    t:=TARGET_VERSION_OPTION
+    t:=TARGET_VERSION_OPTION \
+    s:=SOURCE_VERSION_OPTION
 
 TARGET_VERSION_RAW=${TARGET_VERSION_OPTION[2]:-311}
 TARGET_VERSION=$(echo ${TARGET_VERSION_RAW} | sed 's/\.//g')
 
-message "Upgrading Python to ${TARGET_VERSION}"
+SOURCE_VERSION_RAW=${SOURCE_VERSION_OPTION[2]:-$(detect_source_version)}
+SOURCE_VERSION=$(echo ${SOURCE_VERSION_RAW} | sed 's/\.//g')
 
-if [ "$(pkg info | grep py39 | wc -l)" -gt 0 ]; then
-    for i in $(pkg query -g %n 'py39-*'); do
+if [ -z "${SOURCE_VERSION}" ]; then
+    error "Could not detect the source Python version (python3 not installed?); specify it with -s."
+fi
+
+if [ "${SOURCE_VERSION}" = "${TARGET_VERSION}" ]; then
+    message "Python is already on ${TARGET_VERSION}; nothing to do."
+    exit 0
+fi
+
+message "Upgrading Python from ${SOURCE_VERSION} to ${TARGET_VERSION}"
+
+if [ "$(pkg query -g %n "py${SOURCE_VERSION}-*" | wc -l)" -gt 0 ]; then
+    for i in $(pkg query -g %n "py${SOURCE_VERSION}-*"); do
         echo Updating ${i}
-        pkg set -yn ${i}:$(echo ${i} | sed -e s@py39@py${TARGET_VERSION}@)
+        pkg set -yn ${i}:$(echo ${i} | sed -e s@py${SOURCE_VERSION}@py${TARGET_VERSION}@)
     done
 
-    for i in $(pkg query -g %n '*-py39-*'); do
+    for i in $(pkg query -g %n "*-py${SOURCE_VERSION}-*"); do
         echo Updating ${i}
-        pkg set -yn ${i}:$(echo ${i} | sed -e s@py39@py${TARGET_VERSION}@)
+        pkg set -yn ${i}:$(echo ${i} | sed -e s@py${SOURCE_VERSION}@py${TARGET_VERSION}@)
     done
 
     pkg upg -y
     pkg auto -y
     pkg clean -y -a
 
-    for i in $(pkg query -g %n 'py39-*'); do
+    for i in $(pkg query -g %n "py${SOURCE_VERSION}-*"); do
         echo Removing ${i}
         pkg delete -y ${i}
     done
 
-    for i in $(pkg query -g %n '*-py39-*'); do
+    for i in $(pkg query -g %n "*-py${SOURCE_VERSION}-*"); do
         echo Removing ${i}
         pkg delete -y ${i}
     done
