@@ -2846,17 +2846,18 @@ build-setup-iso() {
 
     local _iso_path=${_iso}.fs
 
+    rm -r -f ${_iso_path}
     mkdir -p ${_iso_path}
 
-    ln -s -f $(realpath ${_staging}/*) ${_iso_path}
+    ln -s -h -f $(realpath ${_staging}/*) ${_iso_path}
 
     if [ ${_relpath} != "none" ]; then
         mkdir -p ${_iso_path}/usr
-        ln -s -f $(realpath ${_relpath}) ${_iso_path}/usr/freebsd-dist
+        ln -s -h -f $(realpath ${_relpath}) ${_iso_path}/usr/freebsd-dist
     fi
 
     if [ ${_pkgpath} != "none" ]; then
-        ln -s -f $(realpath ${_pkgpath}) ${_iso_path}/$(basename ${_pkgpath})
+        ln -s -h -f $(realpath ${_pkgpath}) ${_iso_path}/$(basename ${_pkgpath})
     fi
 
     # From src/release/amd64/mkisoimages.sh
