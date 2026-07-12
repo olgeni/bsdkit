@@ -1809,7 +1809,7 @@ __echo-runtime-jail-conf() {
 
     __valid-destdir ${_destdir}
 
-    cat > ${_jail_conf} << EOF
+    cat << EOF
 exec.clean;
 
 mount.devfs;
