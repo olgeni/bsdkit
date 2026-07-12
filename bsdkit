@@ -1346,11 +1346,13 @@ __install-release() {
                 ;;
         esac
 
-        if ! is-yes ${BSDKIT_INSTALL_SRC}; then
+        # In thin mode usr/src and usr/tests are symlinked into .base
+        # below, so they must not be extracted into the thin tree.
+        if ! is-yes ${BSDKIT_INSTALL_SRC} || is-yes ${_thin}; then
             _options+="--exclude ./usr/src"
         fi
 
-        if ! is-yes ${BSDKIT_INSTALL_TESTS}; then
+        if ! is-yes ${BSDKIT_INSTALL_TESTS} || is-yes ${_thin}; then
             _options+="--exclude ./usr/tests"
         fi
 
