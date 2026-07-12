@@ -2829,7 +2829,7 @@ build-setup-iso() {
     local _pkgpath=$4
 
     if [ ! -x /usr/local/bin/mkisofs ]; then
-        error "required command missing (mkisofs)."
+        warning "required command missing (mkisofs)."
         # EX_UNAVAILABLE
         exit 69
     fi
