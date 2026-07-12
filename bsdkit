@@ -2386,11 +2386,6 @@ make-full-jail() {
         rm -r -f ${_destdir}/boot
     fi
 
-    if ! is-yes ${BSDKIT_INSTALL_KERNEL}; then
-        _directory_list=(${_directory_list[@]/boot/})
-        rm -r -f ${_destdir}/boot
-    fi
-
     if is-yes ${BSDKIT_INSTALL_SRC}; then
         if [ -d ${_destdir}/usr/src ]; then
             _directory_list+="usr/src"
