@@ -2228,7 +2228,10 @@ create-jail() {
 
     if [ -d /usr/local/etc/pkg/repos ]; then
         install -o root -g wheel -m 755 -d ${_destdir}/usr/local/etc/pkg/repos
-        install -o root -g wheel -m 644 /usr/local/etc/pkg/repos/* ${_destdir}/usr/local/etc/pkg/repos/
+
+        for _repo in /usr/local/etc/pkg/repos/*(N); do
+            install -o root -g wheel -m 644 ${_repo} ${_destdir}/usr/local/etc/pkg/repos/
+        done
     fi
 
     if is-yes ${_plain}; then
