@@ -3699,7 +3699,7 @@ purge-python-libdir() {
     for _lib_directory in /usr/local/lib/python*(N/); do
         message "Checking directory: ${_lib_directory}"
 
-        for _file in $(find ${_lib_directory} -type f -name '*.pkgsave'); do
+        for _file in ${_lib_directory}/**/*.pkgsave(N.); do
             message "Removing file: ${_file}"
             rm -f ${_file}
         done
@@ -3707,7 +3707,7 @@ purge-python-libdir() {
         for _site_directory in ${_lib_directory}/site-packages(N/); do
             find ${_site_directory} -name '.pkgtemp.*' -print0 | xargs -0 rm -r -f
 
-            for _pycache in $(find ${_site_directory} -type d -name '__pycache__'); do
+            for _pycache in ${_site_directory}/**/__pycache__(N/); do
                 for _file in ${_pycache}/*.pyc(N); do
                     _dirname=$(realpath $(dirname ${_file})/..)
                     _module=$(basename "${_file}" | cut -d '.' -f 1)
