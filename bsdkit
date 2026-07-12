@@ -166,7 +166,7 @@ reformat-rc-conf() {
         error "rc.conf file not found: ${_rc_conf}"
     fi
 
-    sysrc -a -e > ${_rc_conf}.0
+    sysrc -f ${_rc_conf} -a -e > ${_rc_conf}.0
     install -m 0644 -o root -g wheel ${_rc_conf}.0 ${_rc_conf}
     rm ${_rc_conf}.0
 }
