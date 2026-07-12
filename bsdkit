@@ -3544,15 +3544,17 @@ update() {
 
     cd ${BSDKIT_SRCDIR}
 
-    local _current_hash=$(/usr/local/bin/git rev-parse --short HEAD)
+    local _current_hash
+    _current_hash=$(/usr/local/bin/git rev-parse --short HEAD) || error "unable to resolve HEAD."
 
     /usr/local/bin/git fetch --no-tags || error "git fetch failed."
 
     /usr/local/bin/git tag --list | xargs /usr/local/bin/git tag -d > /dev/null 2>&1
 
-    local _remote_hash=$(/usr/local/bin/git rev-parse --short origin/master)
+    local _remote_hash
+    _remote_hash=$(/usr/local/bin/git rev-parse --short origin/master) || error "unable to resolve origin/master."
 
-    if [ ${_current_hash} = ${_remote_hash} ]; then
+    if [ "${_current_hash}" = "${_remote_hash}" ]; then
         message "Already up-to-date."
         return 0
     fi
