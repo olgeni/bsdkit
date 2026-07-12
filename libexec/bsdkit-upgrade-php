@@ -1,0 +1,133 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/system.inc.sh
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
+source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
+source ${SCRIPT_PATH}/../lib/yaml.inc.sh
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+if [ -x /usr/local/bin/vim ]; then
+    export EDITOR=/usr/local/bin/vim
+fi
+
+# ===========================================================================
+
+usage() {
+    echo "Usage: ${SCRIPT_NAME} -t <target version> [-s <source version>] [-f]"
+    exit 0
+}
+
+# Detect installed PHP versions. There is no php metaport to key off (unlike
+# python3), so scan the installed package names for the three PHP naming
+# patterns and report each distinct version, one per line:
+#
+#   phpXY          bare interpreter        (php84)
+#   phpXY-<name>   extension / tool prefix (php84-curl, php84-composer)
+#   <name>-phpXY   suffix form             (arcanist-php84, wp-cli-php84)
+detect_source_versions() {
+    pkg query %n 2>/dev/null | grep -oE '^php[0-9]+|-php[0-9]+$' | grep -oE '[0-9]+' | sort -u
+}
+
+# zparseopts flags:
+# -F: Fail if unrecognized options are found
+# -D: Remove recognized options from positional parameters
+# -E: Stop at first unrecognized option (don't error on unknown options)
+# -K: Keep existing array values if option not present (vs clearing array)
+# -a: Store options in array _opts
+# -A: Store options with arguments in associative array _opts_args
+zparseopts -F -D -E -K -a _opts -A _opts_args \
+    t:=TARGET_VERSION_OPTION \
+    s:=SOURCE_VERSION_OPTION \
+    f=FORCE_OPTION
+
+TARGET_VERSION_RAW=${TARGET_VERSION_OPTION[2]:-84}
+TARGET_VERSION=$(echo ${TARGET_VERSION_RAW} | sed 's/\.//g')
+
+if [ -n "${SOURCE_VERSION_OPTION[2]:-}" ]; then
+    SOURCE_VERSION=$(echo ${SOURCE_VERSION_OPTION[2]} | sed 's/\.//g')
+else
+    _detected=($(detect_source_versions))
+    if [ ${#_detected[@]} -eq 0 ]; then
+        error "No PHP packages installed; specify the source version with -s."
+    elif [ ${#_detected[@]} -gt 1 ]; then
+        error "Multiple PHP versions installed (${_detected}); specify which to upgrade with -s."
+    fi
+    SOURCE_VERSION=${_detected[1]}
+fi
+
+if [ "${SOURCE_VERSION}" = "${TARGET_VERSION}" ]; then
+    message "PHP is already on ${TARGET_VERSION}; nothing to do."
+    exit 0
+fi
+
+# Anchored regex matching every package that belongs to the source version:
+# the bare interpreter, the phpXY-* prefix form, and the *-phpXY suffix form.
+PACKAGE_PATTERN="^php${SOURCE_VERSION}(-|\$)|-php${SOURCE_VERSION}\$"
+
+message "Upgrading PHP from ${SOURCE_VERSION} to ${TARGET_VERSION}"
+
+# Partition the installed source packages into those whose target version is
+# available in the repository and those that are not (e.g. arcanist-php84 with
+# no arcanist-php85 build yet). MIGRATABLE holds "old:new" rename pairs.
+typeset -a MIGRATABLE MISSING
+for i in $(pkg query %n | grep -E "${PACKAGE_PATTERN}" || true); do
+    _new=$(echo ${i} | sed -e "s@php${SOURCE_VERSION}@php${TARGET_VERSION}@")
+    if [ -n "$(pkg rquery %n "${_new}" 2>/dev/null)" ]; then
+        MIGRATABLE+=("${i}:${_new}")
+    else
+        MISSING+=("${i} -> ${_new}")
+    fi
+done
+
+# Without -f, refuse to proceed while any package lacks a target build, so we
+# never rename-then-delete a package that cannot be reinstalled.
+if [ ${#MISSING[@]} -gt 0 ]; then
+    message "Missing target builds for php${TARGET_VERSION}:"
+    for m in ${MISSING[@]}; do
+        echo "  ${m}"
+    done
+    if (( ! ${+FORCE_OPTION} )); then
+        error "Aborting. Re-run with -f to migrate only the available packages."
+    fi
+    message "Continuing with -f; the packages above are left on php${SOURCE_VERSION}."
+fi
+
+if [ ${#MIGRATABLE[@]} -eq 0 ]; then
+    message "No PHP packages to migrate."
+    exit 0
+fi
+
+# Packages left on the source version (missing targets under -f) must survive
+# the cleanup pass below.
+typeset -A KEEP
+for m in ${MISSING[@]}; do
+    KEEP[${m%% *}]=1
+done
+
+for pair in ${MIGRATABLE[@]}; do
+    echo "Updating ${pair/:/ -> }"
+    pkg set -yn ${pair}
+done
+
+pkg upg -y
+pkg auto -y
+pkg clean -y -a
+
+for i in $(pkg query %n | grep -E "${PACKAGE_PATTERN}" || true); do
+    if [ -n "${KEEP[${i}]:-}" ]; then
+        continue
+    fi
+    echo "Removing ${i}"
+    pkg delete -y ${i}
+done
