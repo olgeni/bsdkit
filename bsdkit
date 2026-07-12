@@ -943,7 +943,7 @@ __zfs-create-mbr-pool() {
         gpart create -s BSD ${_device}s1
         gpart bootcode -b /boot/mbr ${_device}
 
-        local _autorootsize="$(($(diskinfo ${_device} | cut -f 3) / 1024 / 1024 - ${BSDKIT_PART_SIZE_SWAP%G} * 1024))"
+        local _autorootsize="$(($(diskinfo ${_device} | cut -f 3) / 1024 / 1024 - $(hr-to-bytes ${BSDKIT_PART_SIZE_SWAP}) / 1024 / 1024))"
 
         # do not align partitions here
         gpart add -a 4k -i 1 -s ${_autorootsize}M -t freebsd-zfs ${_device}s1 # a
