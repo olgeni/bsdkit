@@ -3177,7 +3177,7 @@ EOF
              BSDKIT_IFCONFIG=${(q)_bsdkit_ifconfig} \
              BSDKIT_DEFAULTROUTER=${(q)_bsdkit_defaultrouter} \
              BSDKIT_CHROOT=1 \
-             /usr/local/bin/ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
+             /usr/local/bin/ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
     } always {
         umount -f ${BSDKIT_DESTDIR}/dev
         rm -r ${_ansible_root}
@@ -3226,16 +3226,18 @@ EOF
 
     __install-facts ${_jail_root}
 
-    eval env \
-         ANSIBLE_CONFIG=${_ansible_cfg} \
-         SSH_AUTH_SOCK="" \
-         $(__environment) \
-         BSDKIT_INTERFACE=${(q)_bsdkit_interface} \
-         BSDKIT_IFCONFIG=${(q)_bsdkit_ifconfig} \
-         BSDKIT_DEFAULTROUTER=${(q)_bsdkit_defaultrouter} \
-         /usr/local/bin/ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $* || :
-
-    rm -r ${_ansible_root}
+    {
+        eval env \
+             ANSIBLE_CONFIG=${_ansible_cfg} \
+             SSH_AUTH_SOCK="" \
+             $(__environment) \
+             BSDKIT_INTERFACE=${(q)_bsdkit_interface} \
+             BSDKIT_IFCONFIG=${(q)_bsdkit_ifconfig} \
+             BSDKIT_DEFAULTROUTER=${(q)_bsdkit_defaultrouter} \
+             /usr/local/bin/ansible-playbook ${BSDKIT_SRCDIR}/playbook/playbook.yml $*
+    } always {
+        rm -r ${_ansible_root}
+    }
 }
 
 __persist-pkg-config() {
