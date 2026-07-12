@@ -2375,6 +2375,8 @@ make-full-jail() {
     [ -e ${_srcdir}/bin/sh ] || error "invalid source directory (missing /bin/sh)"
     [ -d ${_destdir}/.base ] || error "directory not found: ${_destdir}/.base"
 
+    _srcdir=$(realpath ${_srcdir})
+
     local _nullfs
 
     mount -p -t nullfs | cut -w -f 2 | while read _nullfs; do
@@ -2421,7 +2423,7 @@ make-full-jail() {
         rm -r -f ${_destdir}/usr/tests
     fi
 
-    pushd -q
+    pushd -q .
 
     local _directory
 
