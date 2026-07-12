@@ -392,8 +392,12 @@ BSDKIT_TREE='${BSDKIT_TREE}';
 BSDKIT_PKGSET='${BSDKIT_PKGSET}';
 FREEBSD_REL_URL='${FREEBSD_REL_URL}';
 FREEBSD_PKG_URL='${FREEBSD_PKG_URL}';
-set -- $*;
 EOF
+
+    # Emit the leftover positionals individually quoted so the caller's
+    # eval preserves arguments containing shell metacharacters (e.g. the
+    # '|' in iocage's ip4_addr=iface|address syntax).
+    print -r -- "set -- ${(@q)@};"
 }
 
 __valid-url() {
