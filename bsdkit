@@ -4026,7 +4026,7 @@ config-set() {
     local _key=$1
     local _value=$2
 
-    yaml-set ${BSDKIT_CONFIG} ${_key} ${_value}
+    yaml-set ${BSDKIT_CONFIG} "${_key}" "${_value}"
 }
 
 config-get() {
