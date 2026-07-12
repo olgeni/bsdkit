@@ -969,7 +969,7 @@ __zfs-create-mbr-pool() {
 
     local _device
 
-    for _device in ${_device}; do
+    for _device in ${_devices}; do
         zpool labelclear -f ${_device}${_suffix} 2> /dev/null || :
     done
 
