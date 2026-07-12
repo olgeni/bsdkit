@@ -2987,8 +2987,6 @@ build-setup-img() {
 
     makefs ${_ufs_img} ${_ufs_dir}
 
-    rm -r -f ${_ufs_dir}
-
     #
     # Image
     #
@@ -2997,12 +2995,13 @@ build-setup-img() {
 
     mkimg -v \
           -s gpt \
-          -b /boot/pmbr \
+          -b ${_ufs_dir}/boot/pmbr \
           -p efi/${BSDKIT_LABEL_EFI}:=${_efi_img} \
-          -p freebsd-boot:=/boot/gptboot \
+          -p freebsd-boot:=${_ufs_dir}/boot/gptboot \
           -p freebsd-ufs/${BSDKIT_IMG_DATA_LABEL}:=${_ufs_img} \
           -o ${_img_file}
 
+    rm -r -f ${_ufs_dir}
     rm -f ${_efi_img}
     rm -f ${_ufs_img}
 }
