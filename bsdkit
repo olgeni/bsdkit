@@ -3950,7 +3950,7 @@ __config-merge() {
     /usr/local/bin/yq ea '. as $item ireduce ({}; . * $item)' \
        ${BSDKIT_SRCDIR}/playbook/bsdkit-defaults.yml \
        ${BSDKIT_CONFIG} \
-       > ${_tmpfile}
+       > ${_file}
 }
 
 __config-upgrade-key() {
