@@ -426,10 +426,7 @@ __valid-relpath() {
 
     __valid-url ${_relpath} && return 0
 
-    [ -d ${_relpath} ]
-    [ -f ${_relpath}/base.txz ]
-
-    return 0
+    [ -d ${_relpath} ] && [ -f ${_relpath}/base.txz ]
 }
 
 __valid-pkgpath() {
@@ -437,16 +434,13 @@ __valid-pkgpath() {
 
     __valid-url ${_pkgpath} && return 0
 
-    [ -d ${_pkgpath} ]
-    [[ -f ${_pkgpath}/packagesite.txz || -f ${_pkgpath}/packagesite.pkg ]]
+    [ -d ${_pkgpath} ] && [[ -f ${_pkgpath}/packagesite.txz || -f ${_pkgpath}/packagesite.pkg ]]
 }
 
 __valid-staging() {
     local _staging=$1
 
-    [ -f ${_staging}/base.ufs.uzip ]
-    [ -d ${_staging}/boot ]
-    [ -f ${_staging}/memroot.ufs.gz ]
+    [ -f ${_staging}/base.ufs.uzip ] && [ -d ${_staging}/boot ] && [ -f ${_staging}/memroot.ufs.gz ]
 }
 
 __valid-destdir() {
