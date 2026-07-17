@@ -47,11 +47,10 @@ OPTIONS:
     -h                  Show this help message
 
   Build Targets:
-    -R                  Build release (world, kernel, packages)
     -S                  Build staging area
     -I                  Build ISO image
     -U                  Build USB image
-    -A                  Build all: release/staging/ISO/USB
+    -A                  Build all: staging/ISO/USB
 
   Build Configuration:
     -v VERSION          FreeBSD version (default: ${DEFAULT_VERSION})
@@ -68,7 +67,6 @@ EXAMPLES:
 
 DIRECTORIES:
     Source:             \$BSDKIT_DATA/src/\${version}/src
-    Release:            \$BSDKIT_DATA/src/\${version}/release-\${arch}
     Staging:            \$BSDKIT_DATA/staging-\${version}-\${arch}
     ISO/USB:            \$BSDKIT_DATA/iso/
 
@@ -93,13 +91,12 @@ _arch=${DEFAULT_ARCH}
 _jobs_option=""
 _with_packages=""
 
-_build_release=""
 _build_staging=""
 _build_iso=""
 _build_usb=""
 
 OPTIND=1
-while getopts "hv:a:j:PRSIUA" OPT; do
+while getopts "hv:a:j:PSIUA" OPT; do
     case ${OPT} in
         h)
             show_help
@@ -117,9 +114,6 @@ while getopts "hv:a:j:PRSIUA" OPT; do
         P)
             _with_packages="YES"
             ;;
-        R)
-            _build_release="YES"
-            ;;
         S)
             _build_staging="YES"
             ;;
@@ -130,7 +124,6 @@ while getopts "hv:a:j:PRSIUA" OPT; do
             _build_usb="YES"
             ;;
         A)
-            _build_release="YES"
             _build_staging="YES"
             _build_iso="YES"
             _build_usb="YES"
@@ -152,67 +145,9 @@ if [ ! -d "${OS_SRCDIR}" ]; then
     error "Source directory not found: ${OS_SRCDIR}"
 fi
 
-OS_RELDIR=${BSDKIT_DATA}/src/${_version}/release-${_arch}
-
 OS_MAJOR=$(get-src-major-version ${OS_SRCDIR}) || exit 1
-OS_MINOR=$(get-src-minor-version ${OS_SRCDIR}) || exit 1
-OS_PATCH=$(get-src-patch-version ${OS_SRCDIR}) || exit 1
 
 # ===
-
-build-release() {
-    local _make_conf=${BSDKIT_PATH}/etc/make.conf
-    local _src_conf=${BSDKIT_PATH}/etc/src.conf
-
-    KERNCONF="GENERIC"
-
-    message "Build release started: $(date "+%Y-%m-%d %H:%M:%S")"
-    message "Source: ${OS_SRCDIR}"
-    message "Target: ${_arch} / KERNCONF=${KERNCONF}"
-
-    run-step "buildworld+buildkernel" \
-        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            ${_jobs_option} buildworld buildkernel
-
-    run-step "packages" \
-        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            ${_jobs_option} packages
-
-    run-step "release" \
-        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            release NOPORTS="YES"
-
-    message "[prepare-reldir] Preparing ${OS_RELDIR}"
-    rm -r -f ${OS_RELDIR}
-    mkdir -p ${OS_RELDIR}
-
-    run-step "install" \
-        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            install DESTDIR=${OS_RELDIR}
-
-    message "[post-install] Generating RELEASE file"
-    get-src-osrelease ${OS_SRCDIR} > ${OS_RELDIR}/ftp/RELEASE
-
-    message "[post-install] Building etcupdate tarball"
-    etcupdate build -s ${OS_SRCDIR} ${OS_RELDIR}/ftp/etcupdate.tar.bz2
-
-    message "[post-install] Generating OLDFILES list"
-    echo -n > ${OS_RELDIR}/ftp/OLDFILES
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-files | sed 's/^/old-files: /' >> ${OS_RELDIR}/ftp/OLDFILES
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-dirs | sed 's/^/old-dirs: /' >> ${OS_RELDIR}/ftp/OLDFILES
-    env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR} list-old-libs | sed 's/^/old-libs: /' >> ${OS_RELDIR}/ftp/OLDFILES
-
-    run-step "clean" \
-        env -i PATH=${BUILD_PATH} make -s -C ${OS_SRCDIR}/release \
-            __MAKE_CONF=${_make_conf} SRCCONF=${_src_conf} TARGET=${_arch} TARGET_ARCH=${_arch} KERNCONF="${KERNCONF}" \
-            clean
-
-    message "Build release completed: $(date "+%Y-%m-%d %H:%M:%S")"
-}
 
 build-staging() {
     message "Build staging started: $(date "+%Y-%m-%d %H:%M:%S")"
@@ -276,10 +211,6 @@ build-usb() {
 
     message "Build USB completed: $(date "+%Y-%m-%d %H:%M:%S")"
 }
-
-if [ -n "${_build_release}" ]; then
-    build-release
-fi
 
 if [ -n "${_build_staging}" ]; then
     build-staging
