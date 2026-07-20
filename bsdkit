@@ -3295,7 +3295,7 @@ __find-jail() {
     echo ${_jail_name}
 }
 
-__ansible-pre-cleanup() {
+purge-pycache() {
     for _dir in /usr/local/lib/python*/site-packages/(N); do
         if [ -d "${_dir}" ]; then
             find "${_dir}" -type d -name '__pycache__' | while read _directory; do
@@ -3316,7 +3316,6 @@ __ansible-pre-cleanup() {
 }
 
 configure() {
-    __ansible-pre-cleanup
     __build-facts
 
     ansible-local-playbook -t configure
