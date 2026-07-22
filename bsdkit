@@ -246,6 +246,15 @@ __check-ansible() {
     # The controller runs under the python that the ansible package was
     # built for; migrate the host packages if it is below the minimum.
     if [ $(__ansible-controller-minor) -lt ${ANSIBLE_PYTHON_MIN_VERSION#*.} ]; then
+        local _target_prefix=py${ANSIBLE_PYTHON_MIN_VERSION//./}
+
+        # Refuse to migrate unless the repository actually provides the
+        # target flavor, or the renamed packages would have no upgrade
+        # candidates and the host would be left in a mixed state.
+        if ! pkg rquery %n ${_target_prefix}-ansible > /dev/null 2>&1; then
+            error "the package repository does not provide ${_target_prefix}-ansible; rebuild it with python ${ANSIBLE_PYTHON_MIN_VERSION} first"
+        fi
+
         message "ansible controller python is below ${ANSIBLE_PYTHON_MIN_VERSION}; upgrading packages"
 
         ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-python -t ${ANSIBLE_PYTHON_MIN_VERSION}
