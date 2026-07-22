@@ -83,7 +83,8 @@ ZFS_COMPRESSION_ALGORITHM=zstd
 BSDKIT_CONFIG=/usr/local/etc/bsdkit.yml
 BSDKIT_SRCDIR=$(dirname "$(realpath "$0")")
 BSDKIT_SCRIPT=$(realpath $0)
-ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python3
+ANSIBLE_PYTHON_MIN_VERSION=3.12
+ANSIBLE_PYTHON_INTERPRETER=/usr/local/bin/python${ANSIBLE_PYTHON_MIN_VERSION}
 
 RUBY_LIBDIR_LIST=(
     "/usr/local/lib/ruby"
@@ -204,8 +205,19 @@ reformat-sysctl-conf() {
 }
 
 __check-python3() {
-    if [ ! -x /usr/local/bin/python3 ]; then
-        pkg install -y lang/python3
+    # Pick the highest installed python3.x that satisfies the minimum
+    # version; install the minimum one if none qualifies.
+    local _minimum_minor=${ANSIBLE_PYTHON_MIN_VERSION#*.}
+    local _candidate
+
+    for _candidate in /usr/local/bin/python3.<->(Nn); do
+        if [ ${_candidate##*python3.} -ge ${_minimum_minor} ]; then
+            ANSIBLE_PYTHON_INTERPRETER=${_candidate}
+        fi
+    done
+
+    if [ ! -x ${ANSIBLE_PYTHON_INTERPRETER} ]; then
+        pkg install -y lang/python${ANSIBLE_PYTHON_MIN_VERSION//./}
     fi
 }
 
@@ -3090,7 +3102,7 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-install connection=ssh ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python ansible_ssh_host=${_remote_address} ansible_ssh_port=${_remote_port} ansible_ssh_private_key_file=${_ansible_key}
+install connection=ssh ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} ansible_ssh_host=${_remote_address} ansible_ssh_port=${_remote_port} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
     cat > ${_ansible_yml} << EOF
@@ -3161,7 +3173,7 @@ ansible_shell_type = sh
 EOF
 
     cat > ${_ansible_hosts} << EOF
-${BSDKIT_DESTDIR} ansible_connection=community.general.chroot ansible_shell_type=sh ansible_python_interpreter=/usr/local/bin/python
+${BSDKIT_DESTDIR} ansible_connection=community.general.chroot ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
 EOF
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
