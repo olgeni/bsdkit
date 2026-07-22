@@ -230,9 +230,29 @@ __check-python3() {
     fi
 }
 
+__ansible-controller-minor() {
+    # Minor version of the python that ansible-playbook runs under,
+    # taken from its shebang; 0 if it cannot be determined.
+    local _minor
+    _minor=$(sed -nE '1s@^#!/usr/local/bin/python3\.([0-9]+).*@\1@p' /usr/local/bin/ansible-playbook)
+    echo ${_minor:-0}
+}
+
 __check-ansible() {
     if [ ! -x /usr/local/bin/ansible-playbook ]; then
         pkg install -y sysutils/ansible
+    fi
+
+    # The controller runs under the python that the ansible package was
+    # built for; migrate the host packages if it is below the minimum.
+    if [ $(__ansible-controller-minor) -lt ${ANSIBLE_PYTHON_MIN_VERSION#*.} ]; then
+        message "ansible controller python is below ${ANSIBLE_PYTHON_MIN_VERSION}; upgrading packages"
+
+        ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-python -t ${ANSIBLE_PYTHON_MIN_VERSION}
+
+        if [ $(__ansible-controller-minor) -lt ${ANSIBLE_PYTHON_MIN_VERSION#*.} ]; then
+            error "ansible-playbook still runs under python 3.$(__ansible-controller-minor); does the repository provide a py${ANSIBLE_PYTHON_MIN_VERSION//./} ansible package?"
+        fi
     fi
 }
 
