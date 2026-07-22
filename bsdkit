@@ -204,17 +204,26 @@ reformat-sysctl-conf() {
     rm ${_sysctl_conf}.0
 }
 
-__check-python3() {
-    # Pick the highest installed python3.x that satisfies the minimum
-    # version; install the minimum one if none qualifies.
+__resolve-python-interpreter() {
+    # Print the in-target path of the highest python3.x under the given
+    # root (host if omitted) that satisfies the minimum version, falling
+    # back to the minimum version's path if none qualifies.
+    local _root=${1:-""}
     local _minimum_minor=${ANSIBLE_PYTHON_MIN_VERSION#*.}
+    local _interpreter=/usr/local/bin/python${ANSIBLE_PYTHON_MIN_VERSION}
     local _candidate
 
-    for _candidate in /usr/local/bin/python3.<->(Nn); do
+    for _candidate in ${_root}/usr/local/bin/python3.<->(Nn); do
         if [ ${_candidate##*python3.} -ge ${_minimum_minor} ]; then
-            ANSIBLE_PYTHON_INTERPRETER=${_candidate}
+            _interpreter=${_candidate#${_root}}
         fi
     done
+
+    echo ${_interpreter}
+}
+
+__check-python3() {
+    ANSIBLE_PYTHON_INTERPRETER=$(__resolve-python-interpreter)
 
     if [ ! -x ${ANSIBLE_PYTHON_INTERPRETER} ]; then
         pkg install -y lang/python${ANSIBLE_PYTHON_MIN_VERSION//./}
@@ -3102,7 +3111,7 @@ ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile
 EOF
 
     cat > ${_ansible_hosts} << EOF
-install connection=ssh ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER} ansible_ssh_host=${_remote_address} ansible_ssh_port=${_remote_port} ansible_ssh_private_key_file=${_ansible_key}
+install connection=ssh ansible_shell_type=sh ansible_python_interpreter=auto_silent ansible_ssh_host=${_remote_address} ansible_ssh_port=${_remote_port} ansible_ssh_private_key_file=${_ansible_key}
 EOF
 
     cat > ${_ansible_yml} << EOF
@@ -3173,7 +3182,7 @@ ansible_shell_type = sh
 EOF
 
     cat > ${_ansible_hosts} << EOF
-${BSDKIT_DESTDIR} ansible_connection=community.general.chroot ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
+${BSDKIT_DESTDIR} ansible_connection=community.general.chroot ansible_shell_type=sh ansible_python_interpreter=$(__resolve-python-interpreter ${BSDKIT_DESTDIR})
 EOF
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
@@ -3230,15 +3239,15 @@ pipelining = True
 ssh_args = -o ControlMaster=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
 EOF
 
+    _jail_root=$(jls -j ${_jail_name} path)
+
     cat > ${_ansible_hosts} << EOF
-${_jail_name} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=${ANSIBLE_PYTHON_INTERPRETER}
+${_jail_name} ansible_connection=jail ansible_shell_type=sh ansible_python_interpreter=$(__resolve-python-interpreter ${_jail_root})
 EOF
 
     _bsdkit_interface="$(ifconfig -l -u ether | awk '{ print $1 }')"
     _bsdkit_ifconfig="$(kenv bsdkit_ifconfig 2> /dev/null || :)"
     _bsdkit_defaultrouter="$(kenv bsdkit_defaultrouter 2> /dev/null || :)"
-
-    _jail_root=$(jls -j ${_jail_name} path)
 
     __install-facts ${_jail_root}
 
