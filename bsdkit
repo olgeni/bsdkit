@@ -239,28 +239,38 @@ __ansible-controller-minor() {
 }
 
 __check-ansible() {
+    local _target_prefix=py${ANSIBLE_PYTHON_MIN_VERSION//./}
+
     if [ ! -x /usr/local/bin/ansible-playbook ]; then
-        pkg install -y sysutils/ansible
+        pkg install -y ${_target_prefix}-ansible || pkg install -y sysutils/ansible
     fi
 
     # The controller runs under the python that the ansible package was
-    # built for; migrate the host packages if it is below the minimum.
+    # built for, regardless of the default python version. Switch to the
+    # target flavor of the ansible package only, leaving the default
+    # python and the rest of the packages alone.
     if [ $(__ansible-controller-minor) -lt ${ANSIBLE_PYTHON_MIN_VERSION#*.} ]; then
-        local _target_prefix=py${ANSIBLE_PYTHON_MIN_VERSION//./}
-
-        # Refuse to migrate unless the repository actually provides the
-        # target flavor, or the renamed packages would have no upgrade
-        # candidates and the host would be left in a mixed state.
         if ! pkg rquery %n ${_target_prefix}-ansible > /dev/null 2>&1; then
-            error "the package repository does not provide ${_target_prefix}-ansible; rebuild it with python ${ANSIBLE_PYTHON_MIN_VERSION} first"
+            error "the package repository does not provide ${_target_prefix}-ansible; build sysutils/ansible@${_target_prefix} first"
         fi
 
-        message "ansible controller python is below ${ANSIBLE_PYTHON_MIN_VERSION}; upgrading packages"
+        message "ansible controller python is below ${ANSIBLE_PYTHON_MIN_VERSION}; switching to ${_target_prefix}-ansible"
 
-        ${BSDKIT_SRCDIR}/libexec/bsdkit-upgrade-python -t ${ANSIBLE_PYTHON_MIN_VERSION}
+        local -a _stale_packages
+        _stale_packages=(
+            $(pkg query -g %n 'py3*-ansible' || :)
+            $(pkg query -g %n 'py3*-ansible-core' || :)
+        )
+        _stale_packages=(${_stale_packages:#${_target_prefix}-*})
+
+        if [ ${#_stale_packages} -gt 0 ]; then
+            pkg delete -y ${_stale_packages}
+        fi
+
+        pkg install -y ${_target_prefix}-ansible
 
         if [ $(__ansible-controller-minor) -lt ${ANSIBLE_PYTHON_MIN_VERSION#*.} ]; then
-            error "ansible-playbook still runs under python 3.$(__ansible-controller-minor); does the repository provide a py${ANSIBLE_PYTHON_MIN_VERSION//./} ansible package?"
+            error "ansible-playbook still runs under python 3.$(__ansible-controller-minor) after installing ${_target_prefix}-ansible"
         fi
     fi
 }
