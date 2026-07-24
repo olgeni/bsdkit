@@ -202,6 +202,33 @@ perform-pg-upgrade() {
     rm -f ~postgres/pg_upgrade_utility.log
 }
 
+fetch-package() {
+    local _package="$1"
+    local _output
+
+    if ! _output=$(pkg fetch -y -o /tmp/ "${_package}" 2>&1); then
+        [ -n "${_output}" ] && print -r -- "${_output}" >&2
+        error "Failed to fetch package ${_package}."
+    fi
+}
+
+extract-package() {
+    local _prefix="$1"
+    local _package="$2"
+    local _output
+
+    local _files=(/tmp/All/${_package}*(N))
+
+    if [ ${#_files} -eq 0 ]; then
+        error "No downloaded archive found for package ${_package}."
+    fi
+
+    if ! _output=$(tar -x -f ${_files[1]} -C ${_prefix} 2>&1); then
+        [ -n "${_output}" ] && print -r -- "${_output}" >&2
+        error "Failed to extract package ${_package}."
+    fi
+}
+
 perform-package-upgrade() {
     _is_source_contrib_installed=$(pkg query -g %n "postgresql${SOURCE_VERSION}-contrib" || :)
 
@@ -283,30 +310,30 @@ if [ -e ${TARGET_PGDATA} ]; then
 fi
 
 message "Fetching packages for version ${SOURCE_VERSION} (server)"
-pkg fetch -y -o /tmp/ postgresql${SOURCE_VERSION}-server > /dev/null 2>&1
+fetch-package postgresql${SOURCE_VERSION}-server
 message "Fetching packages for version ${SOURCE_VERSION} (contrib)"
-pkg fetch -y -o /tmp/ postgresql${SOURCE_VERSION}-contrib > /dev/null 2>&1
+fetch-package postgresql${SOURCE_VERSION}-contrib
 message "Fetching packages for version ${SOURCE_VERSION} (client)"
-pkg fetch -y -o /tmp/ postgresql${SOURCE_VERSION}-client > /dev/null 2>&1
+fetch-package postgresql${SOURCE_VERSION}-client
 
 message "Fetching packages for version ${TARGET_VERSION} (server)"
-pkg fetch -y -o /tmp/ postgresql${TARGET_VERSION}-server > /dev/null 2>&1
+fetch-package postgresql${TARGET_VERSION}-server
 message "Fetching packages for version ${TARGET_VERSION} (contrib)"
-pkg fetch -y -o /tmp/ postgresql${TARGET_VERSION}-contrib > /dev/null 2>&1
+fetch-package postgresql${TARGET_VERSION}-contrib
 message "Fetching packages for version ${TARGET_VERSION} (client)"
-pkg fetch -y -o /tmp/ postgresql${TARGET_VERSION}-client > /dev/null 2>&1
+fetch-package postgresql${TARGET_VERSION}-client
 
 message "Extracting packages for version ${SOURCE_VERSION}"
 mkdir -p ${PGPREFIX_SOURCE}
-tar -x -f /tmp/All/postgresql${SOURCE_VERSION}-server* -C ${PGPREFIX_SOURCE} > /dev/null 2>&1
-tar -x -f /tmp/All/postgresql${SOURCE_VERSION}-contrib* -C ${PGPREFIX_SOURCE} > /dev/null 2>&1
-tar -x -f /tmp/All/postgresql${SOURCE_VERSION}-client* -C ${PGPREFIX_SOURCE} > /dev/null 2>&1
+extract-package ${PGPREFIX_SOURCE} postgresql${SOURCE_VERSION}-server
+extract-package ${PGPREFIX_SOURCE} postgresql${SOURCE_VERSION}-contrib
+extract-package ${PGPREFIX_SOURCE} postgresql${SOURCE_VERSION}-client
 
 message "Extracting packages for version ${TARGET_VERSION}"
 mkdir -p ${PGPREFIX_TARGET}
-tar -x -f /tmp/All/postgresql${TARGET_VERSION}-server* -C ${PGPREFIX_TARGET} > /dev/null 2>&1
-tar -x -f /tmp/All/postgresql${TARGET_VERSION}-contrib* -C ${PGPREFIX_TARGET} > /dev/null 2>&1
-tar -x -f /tmp/All/postgresql${TARGET_VERSION}-client* -C ${PGPREFIX_TARGET} > /dev/null 2>&1
+extract-package ${PGPREFIX_TARGET} postgresql${TARGET_VERSION}-server
+extract-package ${PGPREFIX_TARGET} postgresql${TARGET_VERSION}-contrib
+extract-package ${PGPREFIX_TARGET} postgresql${TARGET_VERSION}-client
 
 message "Fetching remaining packages"
 pkg upgrade --yes --fetch-only --glob postgresql\*
