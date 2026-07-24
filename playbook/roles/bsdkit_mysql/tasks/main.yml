@@ -37,14 +37,14 @@
 
 - name: Check if legacy MySQL PID file exists
   stat:
-    path: /var/db/mysql/{{ ansible_nodename }}.pid
+    path: /var/db/mysql/{{ ansible_facts['nodename'] }}.pid
   register: stat_mysql_pidfile
   changed_when: false
   failed_when: false
 
 - name: Migrate legacy MySQL pidfile
   copy:
-    src: /var/db/mysql/{{ ansible_nodename }}.pid
+    src: /var/db/mysql/{{ ansible_facts['nodename'] }}.pid
     dest: /var/db/mysql/mysqld.pid
     owner: mysql
     group: mysql
@@ -74,7 +74,7 @@
     - name: Create SSH identity for MySQL
       community.crypto.openssh_keypair:
         path: /var/db/mysql/.ssh/id_ed25519
-        comment: mysql@{{ ansible_hostname }}
+        comment: mysql@{{ ansible_facts['hostname'] }}
         type: ed25519
         owner: mysql
         group: mysql

@@ -51,7 +51,7 @@
     (gitlab_runner_name is defined)
     and (gitlab_runner_token is defined)
     and (gitlab_runner_tag_list is defined)
-    and gitlab_runner_list.stdout.find(gitlab_runner_name + " (" + ansible_hostname + ")") == -1
+    and gitlab_runner_list.stdout.find(gitlab_runner_name + " (" + ansible_facts['hostname'] + ")") == -1
   shell:
     cmd: |
       sudo --user=gitlab-runner zsh <<- "EOF"
@@ -60,7 +60,7 @@
           --executor {{ gitlab_runner_executor }} \
           --tag-list "{{ gitlab_runner_tag_list }}" \
           --config ~gitlab-runner/.gitlab-runner/config.toml \
-          --name "{{ gitlab_runner_name }} ({{ ansible_hostname }})" \
+          --name "{{ gitlab_runner_name }} ({{ ansible_facts['hostname'] }})" \
           --url {{ gitlab_url }} \
           --registration-token "{{ gitlab_runner_token }}" \
           --run-untagged="{{ gitlab_runner_run_untagged }}" \

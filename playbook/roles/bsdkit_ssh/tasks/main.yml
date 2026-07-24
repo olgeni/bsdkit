@@ -168,7 +168,7 @@
       PermitRootLogin without-password
       PermitUserEnvironment yes
       {% if bsdkit.enable_blocklistd is defined and bsdkit.enable_blocklistd %}
-      {{ 'UseBlocklist yes' if ansible_distribution_version is version('15.0', '>=') else 'UseBlacklist yes' }}
+      {{ 'UseBlocklist yes' if ansible_facts['distribution_version'] is version('15.0', '>=') else 'UseBlacklist yes' }}
       {% endif %}
     marker: "# {mark} ANSIBLE MANAGED BLOCK (Settings)"
     validate: /usr/sbin/sshd -t -f %s
@@ -211,7 +211,7 @@
 - name: Create SSH identity for root
   community.crypto.openssh_keypair:
     path: /root/.ssh/id_ed25519
-    comment: root@{{ ansible_hostname }}
+    comment: root@{{ ansible_facts['hostname'] }}
     type: ed25519
     owner: root
     group: wheel

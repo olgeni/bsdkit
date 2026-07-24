@@ -11,7 +11,7 @@
 
 - name: Check if FreeBSD version is 14 or above
   set_fact:
-    is_freebsd_14_or_above: "{{ ansible_distribution_version is version('14.0', '>=') }}"
+    is_freebsd_14_or_above: "{{ ansible_facts['distribution_version'] is version('14.0', '>=') }}"
 
 - name: Check if /var/db/portsnap directory exists
   stat:

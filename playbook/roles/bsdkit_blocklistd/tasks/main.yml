@@ -4,7 +4,7 @@
   block:
     - name: Set blocklistd service name
       set_fact:
-        blocklistd_service: "{{ 'blocklistd' if ansible_distribution_version is version('15.0', '>=') else 'blacklistd' }}"
+        blocklistd_service: "{{ 'blocklistd' if ansible_facts['distribution_version'] is version('15.0', '>=') else 'blacklistd' }}"
 
     - name: Enable blocklistd service
       service:

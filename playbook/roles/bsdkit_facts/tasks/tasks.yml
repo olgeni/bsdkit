@@ -57,7 +57,7 @@
   shell:
     cmd: |
       set -o pipefail
-      echo "{{ ansible_distribution_release }}" | sed -E 's/([0-9]+).*/\1/;'
+      echo "{{ ansible_facts['distribution_release'] }}" | sed -E 's/([0-9]+).*/\1/;'
   register: freebsd_major
   changed_when: false
 
@@ -192,9 +192,9 @@
 
 - name: Retrieve gateway address
   set_fact:
-    gateway_address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['gateway'] }}"
-    public_interface: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] }}"
-  when: "'gateway' in hostvars[inventory_hostname]['ansible_default_ipv4']"
+    gateway_address: "{{ ansible_facts['default_ipv4']['gateway'] }}"
+    public_interface: "{{ ansible_facts['default_ipv4']['interface'] }}"
+  when: "'gateway' in ansible_facts['default_ipv4']"
 
 - name: Display gateway_address
   debug:
