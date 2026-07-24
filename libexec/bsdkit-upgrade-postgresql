@@ -153,10 +153,12 @@ perform-pg-upgrade() {
 
     # Match the source cluster's checksum setting. PostgreSQL 18 flipped the
     # initdb default to enabled, so the flag must be forced or pg_upgrade
-    # refuses a cluster whose checksum state differs from the source.
+    # refuses a cluster whose checksum state differs from the source. Both the
+    # new default and the --no-data-checksums option arrived in 18, so the
+    # opt-out is only passed to a target of 18 or later.
     if [ "${_data_checksums}" = "on" ]; then
         _initdb_flags+=("--data-checksums")
-    elif ${TARGET_BINDIR}/initdb --help 2>&1 | grep -q -- "--no-data-checksums"; then
+    elif [ ${TARGET_VERSION} -ge 18 ]; then
         _initdb_flags+=("--no-data-checksums")
     fi
 
