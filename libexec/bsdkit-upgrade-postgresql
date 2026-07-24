@@ -56,34 +56,54 @@ postgresql-is-main() {
     ! postgresql-has-standby-signal "${_directory}"
 }
 
+# Read a single field (host, port, user, ...) from the standby's
+# primary_conninfo in postgresql.auto.conf.
+primary-conninfo-field() {
+    local _field="$1"
+    local _conn_info
+    local _value
+
+    _conn_info=$(grep "primary_conninfo" "${SOURCE_PGDATA}/postgresql.auto.conf" | cut -d '=' -f2-)
+    _value=$(print -r -- "${_conn_info}" | grep -o -E "${_field}=[^ ]+" | head -1)
+    _value=${_value#${_field}=}
+    _value=${_value//\'/}
+
+    print -r -- "${_value}"
+}
+
+# Fail fast if the postgres user cannot reach the primary over SSH. Both the
+# base backup follow-up (SSL file copy) and any manual recovery depend on it, so
+# it is better to stop up front than partway through the upgrade. Also seeds
+# known_hosts so the later scp runs non-interactively.
+check-primary-ssh() {
+    local _host="$1"
+
+    message "Checking SSH connectivity to primary ${_host}"
+
+    if ! su ${POSTGRES_USER} -c "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i ~${POSTGRES_USER}/.ssh/id_ed25519 ${POSTGRES_USER}@${_host} true"; then
+        error "Cannot reach primary ${_host} over SSH as ${POSTGRES_USER}. Configure key-based auth (~${POSTGRES_USER}/.ssh/id_ed25519) before upgrading the replica."
+    fi
+}
+
 perform-pg-basebackup() {
     if postgresql-is-running; then
         error "PostgreSQL is running. Please stop it first."
     fi
 
-    local _postgresql_auto_conf="${SOURCE_PGDATA}/postgresql.auto.conf"
-    local _conn_info=$(grep "primary_conninfo" "$_postgresql_auto_conf" | cut -d '=' -f2-)
-
-    local _host=$(echo $_conn_info | sed -e "s/.*host=\([^ ]*\).*/\1/")
-    local _port=$(echo $_conn_info | sed -e "s/.*port=\([^ ]*\).*/\1/")
-    local _user=$(echo $_conn_info | sed -e "s/.*user=\([^ ]*\).*/\1/")
-
-    _host=${_host//\'/}
+    local _host=$(primary-conninfo-field host)
+    local _port=$(primary-conninfo-field port)
+    local _user=$(primary-conninfo-field user)
 
     if [ -z "${_host}" ]; then
-        error "No host defined in ${_postgresql_auto_conf}"
+        error "No host defined in ${SOURCE_PGDATA}/postgresql.auto.conf"
     fi
-
-    _port=${_port//\'/}
 
     if [ -z "${_port}" ]; then
-        error "No port defined in ${_postgresql_auto_conf}"
+        error "No port defined in ${SOURCE_PGDATA}/postgresql.auto.conf"
     fi
 
-    _user=${_user//\'/}
-
     if [ -z "${_user}" ]; then
-        error "No user defined in ${_postgresql_auto_conf}"
+        error "No user defined in ${SOURCE_PGDATA}/postgresql.auto.conf"
     fi
 
     message "Performing pg_basebackup with host=${_host}, port=${_port}, user=${_user}"
@@ -100,6 +120,49 @@ perform-pg-basebackup() {
     )
 
     su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && LD_LIBRARY_PATH=${TARGET_LIBDIR} ${TARGET_BINDIR}/pg_basebackup ${_options}"
+
+    sync-primary-ssl-files "${_host}"
+}
+
+# pg_basebackup copies the primary's configuration, which may enable SSL and
+# reference certificate files that live outside PGDATA (typically in ~postgres).
+# Those files are not part of the base backup, so copy the ones the new cluster
+# needs from the primary. Both hosts share the same postgres home directory and
+# mutual key-based SSH auth for the postgres user, so the absolute paths and the
+# identity file match on both sides.
+sync-primary-ssl-files() {
+    local _host="$1"
+
+    local _ssl_enabled
+    _ssl_enabled=$(su ${POSTGRES_USER} -c "LD_LIBRARY_PATH=${TARGET_LIBDIR} ${TARGET_BINDIR}/postgres -D ${TARGET_PGDATA} -C ssl")
+
+    if [ "${_ssl_enabled}" != "on" ]; then
+        return 0
+    fi
+
+    local _param _path _output
+
+    for _param in ssl_cert_file ssl_key_file ssl_ca_file ssl_crl_file; do
+        _path=$(su ${POSTGRES_USER} -c "LD_LIBRARY_PATH=${TARGET_LIBDIR} ${TARGET_BINDIR}/postgres -D ${TARGET_PGDATA} -C ${_param}")
+
+        # Skip unset parameters and relative paths: relative paths resolve inside
+        # PGDATA and were already copied by pg_basebackup.
+        [ -n "${_path}" ] || continue
+        case "${_path}" in
+            /*) ;;
+            *) continue ;;
+        esac
+
+        # Nothing to do if the file is already present locally.
+        [ -f "${_path}" ] && continue
+
+        message "Copying ${_param} (${_path}) from primary ${_host}"
+
+        if ! _output=$(su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && scp -p -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i ~${POSTGRES_USER}/.ssh/id_ed25519 ${POSTGRES_USER}@${_host}:${_path} ${_path}" 2>&1); then
+            [ -n "${_output}" ] && print -r -- "${_output}" >&2
+            error "Failed to copy ${_param} (${_path}) from primary ${_host}. Copy it manually and re-run."
+        fi
+    done
 }
 
 stop-old-cluster() {
@@ -340,6 +403,18 @@ fi
 
 if [ -e ${TARGET_PGDATA} ]; then
     error "Target data directory already exists"
+fi
+
+# For a standby, verify SSH to the primary works before doing any real work: the
+# base backup path relies on it to copy SSL material the backup cannot carry.
+if ! postgresql-is-main ${SOURCE_PGDATA}; then
+    _primary_host=$(primary-conninfo-field host)
+
+    if [ -z "${_primary_host}" ]; then
+        error "Source cluster is a standby but primary_conninfo defines no host."
+    fi
+
+    check-primary-ssh "${_primary_host}"
 fi
 
 message "Fetching packages for version ${SOURCE_VERSION} (server)"
