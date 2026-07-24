@@ -298,8 +298,28 @@ export TARGET_LIBDIR=${PGPREFIX_TARGET}/usr/local/lib
 
 export PGHOME=/var/db/postgres
 
-export SOURCE_PGDATA=${PGHOME}/data${SOURCE_VERSION}
-export TARGET_PGDATA=${PGHOME}/data${TARGET_VERSION}
+# Detect an explicit postgresql_data override in rc.conf. A non-empty value
+# means the admin pinned a custom data directory; the base rc.conf has no such
+# key and sysrc does not evaluate the rc script's built-in default.
+_rc_pgdata=$(sysrc -n postgresql_data 2>/dev/null || :)
+
+if [ -n "${_rc_pgdata}" ]; then
+    POSTGRES_DATA_CUSTOMIZED=1
+
+    if [[ ${_rc_pgdata:t} != data${SOURCE_VERSION} ]]; then
+        error "postgresql_data (${_rc_pgdata}) does not end in data${SOURCE_VERSION}; cannot derive target path."
+    fi
+
+    _rc_pgdata_target=${_rc_pgdata%data${SOURCE_VERSION}}data${TARGET_VERSION}
+
+    # Tilde-preserving raw forms for rc.conf; expanded forms for the filesystem.
+    export SOURCE_PGDATA=${~_rc_pgdata}
+    export TARGET_PGDATA=${~_rc_pgdata_target}
+else
+    POSTGRES_DATA_CUSTOMIZED=0
+    export SOURCE_PGDATA=${PGHOME}/data${SOURCE_VERSION}
+    export TARGET_PGDATA=${PGHOME}/data${TARGET_VERSION}
+fi
 
 if [ ! -d ${SOURCE_PGDATA} ]; then
     error "Source data directory does not exist"
@@ -349,6 +369,11 @@ else
 fi
 
 perform-package-upgrade
+
+if [ "${POSTGRES_DATA_CUSTOMIZED}" = "1" ]; then
+    message "Updating postgresql_data in rc.conf to ${_rc_pgdata_target}"
+    sysrc postgresql_data=${_rc_pgdata_target}
+fi
 
 message "Starting database"
 service postgresql onestart
