@@ -70,19 +70,19 @@ perform-pg-basebackup() {
 
     _host=${_host//\'/}
 
-    if [ -z "$_{host}" ]; then
+    if [ -z "${_host}" ]; then
         error "No host defined in ${_postgresql_auto_conf}"
     fi
 
     _port=${_port//\'/}
 
-    if [ -z "$_{port}" ]; then
+    if [ -z "${_port}" ]; then
         error "No port defined in ${_postgresql_auto_conf}"
     fi
 
     _user=${_user//\'/}
 
-    if [ -z "$_{user}" ]; then
+    if [ -z "${_user}" ]; then
         error "No user defined in ${_postgresql_auto_conf}"
     fi
 
