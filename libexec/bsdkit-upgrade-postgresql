@@ -138,16 +138,27 @@ perform-pg-upgrade() {
     _lc_collate=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_collate" ${TEMPLATE_DATABASE})
     _lc_ctype=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW lc_ctype" ${TEMPLATE_DATABASE})
     _encoding=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW server_encoding" ${TEMPLATE_DATABASE})
+    _data_checksums=$(${SOURCE_BINDIR}/psql --username=${POSTGRES_USER} --tuples-only --command "SHOW data_checksums" ${TEMPLATE_DATABASE})
 
     stop-old-cluster
 
     _lc_collate=${_lc_collate// /}
     _lc_ctype=${_lc_ctype// /}
     _encoding=${_encoding// /}
+    _data_checksums=${_data_checksums// /}
 
     _initdb_flags+=("--lc-collate=${_lc_collate}")
     _initdb_flags+=("--lc-ctype=${_lc_ctype}")
     _initdb_flags+=("--encoding=${_encoding}")
+
+    # Match the source cluster's checksum setting. PostgreSQL 18 flipped the
+    # initdb default to enabled, so the flag must be forced or pg_upgrade
+    # refuses a cluster whose checksum state differs from the source.
+    if [ "${_data_checksums}" = "on" ]; then
+        _initdb_flags+=("--data-checksums")
+    elif ${TARGET_BINDIR}/initdb --help 2>&1 | grep -q -- "--no-data-checksums"; then
+        _initdb_flags+=("--no-data-checksums")
+    fi
 
     message "Initializing new database"
     su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/initdb ${_initdb_flags} --pgdata ${TARGET_PGDATA} --username ${POSTGRES_USER}"
