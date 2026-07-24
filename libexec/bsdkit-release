@@ -30,7 +30,7 @@ VERSION="${DEFAULT_VERSION}"
 ARCH="${DEFAULT_ARCH}"
 
 usage() {
-    echo "usage: ${SCRIPT_NAME} [-v VERSION] [-a ARCH] {build|extras|copy|clear}" >&2
+    echo "usage: ${SCRIPT_NAME} [-v VERSION] [-a ARCH] {build|extras|copy|clean}" >&2
     exit 2
 }
 
@@ -163,7 +163,7 @@ cmd-copy() {
     copy-release
 }
 
-cmd-clear() {
+cmd-clean() {
     message "Unmounting any stale build mounts under ${SCRATCH}"
     unmount-if-mounted "${SCRATCH}/dev"
     unmount-if-mounted "${SCRATCH}/usr/ports"
@@ -173,11 +173,11 @@ cmd-clear() {
     if [ -n "${_found}" ]; then
         warning "Unexpected mounts present under ${SCRATCH}:"
         echo "${_found}" >&2
-        error "Refusing to clear"
+        error "Refusing to clean"
     fi
 
     if [ ! -d "${SCRATCH}" ]; then
-        message "Nothing to clear: ${SCRATCH} does not exist"
+        message "Nothing to clean: ${SCRATCH} does not exist"
         return 0
     fi
 
@@ -186,7 +186,7 @@ cmd-clear() {
 
     message "Removing ${SCRATCH} contents (preserving R/)"
     find "${SCRATCH}" -mindepth 1 -maxdepth 1 ! -name R -exec rm -rf {} +
-    message "Clear complete"
+    message "Clean complete"
 }
 
 [ $# -eq 1 ] || usage
@@ -194,6 +194,6 @@ case $1 in
     build)  cmd-build ;;
     extras) cmd-extras ;;
     copy)   cmd-copy ;;
-    clear)  cmd-clear ;;
+    clean)  cmd-clean ;;
     *)      usage ;;
 esac
