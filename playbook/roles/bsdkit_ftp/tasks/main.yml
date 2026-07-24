@@ -19,6 +19,12 @@
 - name: Flush handlers
   meta: flush_handlers
 
+- name: Remove obsolete /etc/ftpusers
+  file:
+    path: /etc/ftpusers
+    state: absent
+  when: ansible_facts['distribution_version'] is version('15.0', '>=')
+
 - name: Create /var/ftp
   file:
     path: /var/ftp
