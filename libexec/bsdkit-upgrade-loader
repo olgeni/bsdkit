@@ -60,6 +60,26 @@ check-partition() {
     done
 }
 
+# kern.geom.debugflags=0x10 lifts the protection against writing to disks that
+# are in use, which is needed to rewrite the last sector on a software RAID.
+# Leaving it raised arms that footgun for the whole system, so lower it from a
+# trap rather than only on the success path.
+GEOM_DEBUGFLAGS_RAISED=0
+
+raise-geom-debugflags() {
+    sysctl -q kern.geom.debugflags=0x10
+    GEOM_DEBUGFLAGS_RAISED=1
+}
+
+restore-geom-debugflags() {
+    if [ ${GEOM_DEBUGFLAGS_RAISED} -eq 1 ]; then
+        sysctl -q kern.geom.debugflags=0x00
+        GEOM_DEBUGFLAGS_RAISED=0
+    fi
+}
+
+trap restore-geom-debugflags EXIT INT TERM
+
 has-software-raid() {
     # Supported devices:
     # class=0x010400 vendor=0x8086 device=0x1c04: 6 Series/C200 Series Desktop SATA RAID Controller
@@ -90,7 +110,7 @@ update-loader() {
     # If we have software RAID, we need to handle the last sector (GPT) carefully
     if [ ${_has_software_raid} -eq 1 ]; then
         message "Software RAID detected - will preserve last sectors (GPT)"
-        sysctl -q kern.geom.debugflags=0x10
+        raise-geom-debugflags
     fi
 
     local _efi_partitions _freebsd_boot_partitions _freebsd_zfs_partitions
@@ -171,15 +191,16 @@ update-loader() {
         fi
     done
 
-    if [ ${_has_software_raid} -eq 1 ]; then
-        sysctl -q kern.geom.debugflags=0x00
-    fi
+    restore-geom-debugflags
 }
 
 if ! has-software-raid; then
     check-partition
 fi
 
-update-loader
+# errreturn only returns from the enclosing function, so without this check a
+# failed gpart bootcode or loader.efi install would still be followed by the
+# completion message and a zero exit status.
+update-loader || error "The boot loader upgrade failed."
 
 message "Upgrade complete."
