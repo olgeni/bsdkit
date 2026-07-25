@@ -35,6 +35,8 @@
       changed_when: false
       failed_when: false
 
+    # The socket path is the port default; a host that overrides "socket" in
+    # fail2ban.conf leaves a stale socket behind and the start below fails.
     - name: Remove the stale fail2ban socket
       when:
         - fail2ban_config_dir.stat.exists
