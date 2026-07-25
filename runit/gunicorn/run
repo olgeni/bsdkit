@@ -46,9 +46,14 @@ if [ "$(id -u)" = "0" ]; then
     CHPST_COMMAND="chpst -u ${GUNICORN_USER} ${CHPST_ARGS}"
 fi
 
+# --no-sync: starting a service must not rewrite its own venv. A bare `uv run`
+# reconciles .venv against uv.lock first, and this environment has neither a
+# wheelhouse index nor _PYTHON_HOST_PLATFORM, so anything it decides to
+# reinstall gets compiled from an sdist — under runit, inside a restart loop.
+# Build the venv at deploy time; here, just run what is already there.
 PYTHON_PREFIX=""
 if [ -n "${GUNICORN_UV}" ]; then
-    PYTHON_PREFIX="uv run "
+    PYTHON_PREFIX="uv run --no-sync "
 else
     . ${GUNICORN_VENV}/bin/activate
 fi
