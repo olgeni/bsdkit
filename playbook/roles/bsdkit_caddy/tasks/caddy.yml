@@ -15,11 +15,12 @@
 - name: Check if caddy service is enabled
   command: sysrc -n caddy_enable
   register: sysrc_caddy_enable
+  failed_when: false
   changed_when: false
 
 - name: Set caddy_enabled variable
   set_fact:
-    caddy_enabled: "{{ sysrc_caddy_enable.stdout == 'YES' }}"
+    caddy_enabled: "{{ sysrc_caddy_enable.stdout | trim | lower in ['yes', 'true', 'on', '1'] }}"
 
 - name: Display caddy_enabled
   debug:
@@ -62,13 +63,14 @@
 #
 
 - name: Get owner of /usr/local/etc/caddy/Caddyfile
-  command: stat -f '%Su' /usr/local/etc/caddy/Caddyfile
-  register: caddy_owner
+  stat:
+    path: /usr/local/etc/caddy/Caddyfile
+  register: caddyfile_stat
   changed_when: false
 
 - name: Set caddy_owner variable
   set_fact:
-    caddy_owner: "{{ caddy_owner.stdout }}"
+    caddy_owner: "{{ caddyfile_stat.stat.pw_name | default('') }}"
 
 - name: Display caddy_owner
   debug:
