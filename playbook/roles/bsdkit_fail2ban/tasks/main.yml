@@ -27,6 +27,28 @@
       service:
         name: fail2ban
         enabled: true
+
+    - name: Check if the fail2ban server is responding
+      command: fail2ban-client ping
+      when: fail2ban_config_dir.stat.exists
+      register: fail2ban_ping
+      changed_when: false
+      failed_when: false
+
+    - name: Remove the stale fail2ban socket
+      when:
+        - fail2ban_config_dir.stat.exists
+        - fail2ban_ping.rc | default(1) != 0
+      file:
+        path: /var/run/fail2ban/fail2ban.sock
+        state: absent
+
+    - name: Start fail2ban
+      when:
+        - fail2ban_config_dir.stat.exists
+        - fail2ban_ping.rc | default(1) != 0
+      service:
+        name: fail2ban
         state: started
 
     - name: Check if /etc/pf.conf exists
@@ -39,6 +61,7 @@
       copy:
         src: /etc/pf.conf
         dest: /etc/pf.conf.orig
+        remote_src: true
         owner: root
         group: wheel
         mode: "0600"
@@ -58,6 +81,7 @@
       command: pfctl -f /etc/pf.conf
       register: pfctl_result
       changed_when: pfctl_result.rc == 0
+      failed_when: false
 
     - name: Remove backup of pf.conf
       when: pfctl_result.rc == 0
@@ -66,13 +90,21 @@
         state: absent
 
     - name: Restore pf.conf if pfctl failed
-      when: pfctl_result.rc != 0
+      when:
+        - pfctl_result.rc != 0
+        - stat_pf_conf.stat.exists
       copy:
         src: /etc/pf.conf.orig
         dest: /etc/pf.conf
+        remote_src: true
         owner: root
         group: wheel
         mode: "0600"
+
+    - name: Report a failed pf.conf reload
+      when: pfctl_result.rc != 0
+      fail:
+        msg: "pfctl -f /etc/pf.conf failed, pf.conf restored: {{ pfctl_result.stderr | trim }}"
 
     - name: Check if fail2ban.d directory exists
       stat:
