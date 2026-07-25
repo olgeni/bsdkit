@@ -9,6 +9,7 @@ source ${SCRIPT_PATH}/../lib/system.inc.sh
 source ${SCRIPT_PATH}/../lib/colors.inc.sh
 source ${SCRIPT_PATH}/../lib/hr-to-bytes.inc.sh
 source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
+source ${SCRIPT_PATH}/../lib/postgresql.inc.sh
 source ${SCRIPT_PATH}/../lib/yaml.inc.sh
 
 if [ "$(uname -s)" != "FreeBSD" ]; then
@@ -28,48 +29,83 @@ usage() {
     exit 0
 }
 
-postgresql-is-running() {
-    local _is_running=$(psql -U ${POSTGRES_USER} -d ${TEMPLATE_DATABASE} -c "SELECT 1;" -t -A)
-
-    if [ "${_is_running}" = "1" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-postgresql-is-in-recovery() {
-    local _in_recovery=$(psql -U ${POSTGRES_USER} -d ${TEMPLATE_DATABASE} -c "SELECT pg_is_in_recovery();" -t -A)
-
-    [ "${_in_recovery}" = "t" ]
-}
-
-postgresql-has-standby-signal() {
-    local _directory="$1"
-
-    [ -f "${_directory}/standby.signal" ]
-}
-
-postgresql-is-main() {
-    local _directory="$1"
-
-    ! postgresql-has-standby-signal "${_directory}"
-}
-
-# Read a single field (host, port, user, ...) from the standby's
-# primary_conninfo in postgresql.auto.conf.
-primary-conninfo-field() {
-    local _field="$1"
-    local _conn_info
+# The standby's primary_conninfo is the authoritative description of how to
+# reach the primary, so read it whole and keep it, rather than rebuilding it
+# from the handful of fields this script happens to care about.
+# postgresql.auto.conf wraps the value in single quotes and doubles any quote
+# inside it.
+primary-conninfo() {
+    local _line
     local _value
 
-    _conn_info=$(grep "primary_conninfo" "${SOURCE_PGDATA}/postgresql.auto.conf" | cut -d '=' -f2-)
-    _value=$(print -r -- "${_conn_info}" | grep -o -E "${_field}=[^ ]+" | head -1)
-    _value=${_value#${_field}=}
-    _value=${_value//\'/}
+    _line=$(grep -E "^primary_conninfo[[:space:]]*=" "${SOURCE_PGDATA}/postgresql.auto.conf" | tail -1) || :
+
+    _value=$(print -r -- "${_line}" | sed -E 's/^primary_conninfo[[:space:]]*=[[:space:]]*//')
+
+    if [[ ${_value} == \'*\' ]]; then
+        _value=${_value[2,-2]}
+        _value=${_value//\'\'/\'}
+    fi
 
     print -r -- "${_value}"
 }
+
+# Pull a single field (host, port, user, password, ...) out of a conninfo
+# string. The leading space in the subject anchors the field name on a word
+# boundary, so a request for "password" cannot match "sslpassword". A value
+# holding spaces or quotes is wrapped in single quotes by libpq, which escapes
+# a quote or a backslash inside it with a backslash; this is a separate layer
+# from the quote doubling that primary-conninfo already undid.
+primary-conninfo-field() {
+    local _field="$1"
+    local _conn_info=" $2"
+    local _quote="'"
+    local _quoted="[[:space:]]${_field}=${_quote}((\\\\.|[^${_quote}\\\\])*)${_quote}"
+    local _bare="[[:space:]]${_field}=((\\\\.|[^[:space:]\\\\])+)"
+
+    if [[ ${_conn_info} =~ ${_quoted} ]]; then
+        print -r -- "${match[1]}" | sed -E 's/\\(.)/\1/g'
+    elif [[ ${_conn_info} =~ ${_bare} ]]; then
+        print -r -- "${match[1]}" | sed -E 's/\\(.)/\1/g'
+    fi
+}
+
+# A backslash or a colon inside any .pgpass field has to be escaped.
+pgpass-escape() {
+    local _value="$1"
+
+    _value=${_value//\\/\\\\}
+    _value=${_value//:/\\:}
+
+    print -r -- "${_value}"
+}
+
+# Hand the primary's password to pg_basebackup through a password file instead
+# of the command line or the connection string: process arguments are readable
+# by any local user through ps(1). Only the contents are sensitive, not the
+# path, so PGPASSFILE can be passed openly.
+PRIMARY_PASSFILE=""
+
+create-primary-passfile() {
+    local _host=$(pgpass-escape "$1")
+    local _port=$(pgpass-escape "$2")
+    local _user=$(pgpass-escape "$3")
+    local _password=$(pgpass-escape "$4")
+
+    PRIMARY_PASSFILE=$(mktemp -t bsdkit-pgpass)
+    chmod 600 "${PRIMARY_PASSFILE}"
+    print -r -- "${_host}:${_port}:*:${_user}:${_password}" > "${PRIMARY_PASSFILE}"
+    chown ${POSTGRES_USER} "${PRIMARY_PASSFILE}"
+}
+
+remove-primary-passfile() {
+    if [ -n "${PRIMARY_PASSFILE}" ]; then
+        rm -f "${PRIMARY_PASSFILE}"
+        PRIMARY_PASSFILE=""
+    fi
+}
+
+trap remove-primary-passfile EXIT INT TERM
 
 # Fail fast if the postgres user cannot reach the primary over SSH. Both the
 # base backup follow-up (SSL file copy) and any manual recovery depend on it, so
@@ -86,13 +122,16 @@ check-primary-ssh() {
 }
 
 perform-pg-basebackup() {
-    if postgresql-is-running; then
+    if postgresql-is-running ${SOURCE_BINDIR} ${SOURCE_LIBDIR} ${SOURCE_PGDATA}; then
         error "PostgreSQL is running. Please stop it first."
     fi
 
-    local _host=$(primary-conninfo-field host)
-    local _port=$(primary-conninfo-field port)
-    local _user=$(primary-conninfo-field user)
+    local _conn_info=$(primary-conninfo)
+
+    local _host=$(primary-conninfo-field host "${_conn_info}")
+    local _port=$(primary-conninfo-field port "${_conn_info}")
+    local _user=$(primary-conninfo-field user "${_conn_info}")
+    local _password=$(primary-conninfo-field password "${_conn_info}")
 
     if [ -z "${_host}" ]; then
         error "No host defined in ${SOURCE_PGDATA}/postgresql.auto.conf"
@@ -108,20 +147,65 @@ perform-pg-basebackup() {
 
     message "Performing pg_basebackup with host=${_host}, port=${_port}, user=${_user}"
 
+    local _environment="LD_LIBRARY_PATH=${TARGET_LIBDIR}"
+
+    if [ -n "${_password}" ]; then
+        create-primary-passfile "${_host}" "${_port}" "${_user}" "${_password}"
+        _environment="${_environment} PGPASSFILE=${PRIMARY_PASSFILE}"
+    fi
+
+    # --no-password turns a missing or rejected credential into an immediate
+    # failure instead of a password prompt that blocks the upgrade on a tty.
     _options=(
         "--pgdata=${TARGET_PGDATA}"
         "--wal-method=stream"
         "--progress"
         "--verbose"
         "--write-recovery-conf"
+        "--no-password"
         "--host=${_host}"
         "--username=${_user}"
         "--port=${_port}"
     )
 
-    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && LD_LIBRARY_PATH=${TARGET_LIBDIR} ${TARGET_BINDIR}/pg_basebackup ${_options}"
+    if ! su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${_environment} ${TARGET_BINDIR}/pg_basebackup ${_options}"; then
+        remove-primary-passfile
+        error "pg_basebackup failed. Remove the incomplete ${TARGET_PGDATA} before retrying."
+    fi
+
+    remove-primary-passfile
+
+    restore-primary-conninfo "${_conn_info}"
 
     sync-primary-ssl-files "${_host}"
+}
+
+# pg_basebackup --write-recovery-conf regenerates primary_conninfo from the
+# parameters it was handed, so everything the original connection string
+# carried beyond host, port and user is lost, including the password the new
+# standby needs to reconnect once the upgrade is over. Put the original line
+# back verbatim. The redirection into the existing file keeps the ownership and
+# the mode that pg_basebackup gave it.
+restore-primary-conninfo() {
+    local _conn_info="$1"
+    local _auto_conf="${TARGET_PGDATA}/postgresql.auto.conf"
+    local _quote="'"
+    local _temporary_file
+    local _quoted
+
+    message "Restoring the original primary_conninfo in the new cluster"
+
+    # Re-apply the quote doubling that primary-conninfo undid when it read the
+    # value out of the source postgresql.auto.conf.
+    _quoted=${_conn_info//${_quote}/${_quote}${_quote}}
+
+    _temporary_file=$(mktemp -t bsdkit-auto-conf)
+
+    { grep -v -E "^primary_conninfo[[:space:]]*=" "${_auto_conf}" || : ; } > "${_temporary_file}"
+    print -r -- "primary_conninfo = ${_quote}${_quoted}${_quote}" >> "${_temporary_file}"
+
+    cat "${_temporary_file}" > "${_auto_conf}"
+    rm -f "${_temporary_file}"
 }
 
 # pg_basebackup copies the primary's configuration, which may enable SSL and
@@ -186,11 +270,18 @@ start-new-cluster() {
 }
 
 perform-pg-upgrade() {
-    if postgresql-is-running; then
+    if postgresql-is-running ${SOURCE_BINDIR} ${SOURCE_LIBDIR} ${SOURCE_PGDATA}; then
         error "PostgreSQL is running. Please stop it first."
     fi
 
+    # start-old-cluster ignores the exit status of pg_ctl, so confirm the
+    # postmaster is really up before reading the settings that decide how the
+    # new cluster gets initialised.
     start-old-cluster
+
+    if ! postgresql-is-running ${SOURCE_BINDIR} ${SOURCE_LIBDIR} ${SOURCE_PGDATA}; then
+        error "The old cluster did not start; cannot read its settings."
+    fi
 
     # to restart the old cluster:
     # su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${SOURCE_BINDIR}/pg_ctl stop -D ${SOURCE_PGDATA}" || :
@@ -226,7 +317,10 @@ perform-pg-upgrade() {
     fi
 
     message "Initializing new database"
-    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/initdb ${_initdb_flags} --pgdata ${TARGET_PGDATA} --username ${POSTGRES_USER}"
+
+    if ! su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/initdb ${_initdb_flags} --pgdata ${TARGET_PGDATA} --username ${POSTGRES_USER}"; then
+        error "initdb failed. Remove the incomplete ${TARGET_PGDATA} before retrying."
+    fi
 
     if [ -f ${SOURCE_PGDATA}/pg_hba.conf ]; then
         message "Copying pg_hba.conf"
@@ -248,10 +342,18 @@ perform-pg-upgrade() {
     )
 
     message "Checking cluster compatibility"
-    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options} --check"
+
+    if ! su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options} --check"; then
+        error "pg_upgrade --check failed. The old cluster in ${SOURCE_PGDATA} is untouched."
+    fi
 
     message "Upgrading cluster"
-    su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options}"
+
+    # Past this point --link has hard-linked the old cluster's files into the
+    # new one, so a failure leaves ${SOURCE_PGDATA} unusable as well.
+    if ! su ${POSTGRES_USER} -c "cd ~${POSTGRES_USER} && ${TARGET_BINDIR}/pg_upgrade ${_options}"; then
+        error "pg_upgrade failed. Consult the logs in ~${POSTGRES_USER} before retrying; the old cluster can no longer be started."
+    fi
 
     rm -f -v /tmp/.s.PGSQL.*(N)
 
@@ -408,7 +510,7 @@ fi
 # For a standby, verify SSH to the primary works before doing any real work: the
 # base backup path relies on it to copy SSL material the backup cannot carry.
 if ! postgresql-is-main ${SOURCE_PGDATA}; then
-    _primary_host=$(primary-conninfo-field host)
+    _primary_host=$(primary-conninfo-field host "$(primary-conninfo)")
 
     if [ -z "${_primary_host}" ]; then
         error "Source cluster is a standby but primary_conninfo defines no host."
@@ -448,15 +550,18 @@ pkg upgrade --yes --fetch-only --glob postgresql\*
 
 # ===
 
+# errreturn only returns from the enclosing function, and there is no enclosing
+# function here, so an aborted step would otherwise fall through to the package
+# upgrade and to starting a cluster that was never built. Check each step.
 if postgresql-is-main ${SOURCE_PGDATA}; then
     message "Source cluster is in primary mode"
-    perform-pg-upgrade
+    perform-pg-upgrade || error "The upgrade of the primary cluster failed."
 else
     message "Source cluster is in standby mode"
-    perform-pg-basebackup
+    perform-pg-basebackup || error "The rebuild of the standby cluster failed."
 fi
 
-perform-package-upgrade
+perform-package-upgrade || error "The package upgrade failed."
 
 if [ "${POSTGRES_DATA_CUSTOMIZED}" = "1" ]; then
     message "Updating postgresql_data in rc.conf to ${_rc_pgdata_target}"
