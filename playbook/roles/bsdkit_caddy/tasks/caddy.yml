@@ -32,7 +32,7 @@
 - name: Check if caddy service is running
   command: service caddy status # noqa: command-instead-of-module
   register: caddy_status
-  ignore_errors: true
+  failed_when: false
   changed_when: false
 
 - name: Set caddy_running variable
@@ -50,7 +50,7 @@
 - name: Check if monit service is running
   command: service monit status # noqa: command-instead-of-module
   register: monit_status
-  ignore_errors: true
+  failed_when: false
   changed_when: false
 
 - name: Set monit_running variable
