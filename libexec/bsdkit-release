@@ -152,7 +152,9 @@ cmd-extras() {
 copy-release() {
     message "Copying ${SCRATCH}/R/ to ${RELEASE_DEST}/"
     mkdir -p "${RELEASE_DEST}"
-    rsync -av "${SCRATCH}/R/" "${RELEASE_DEST}/"
+    ## --delete drops leftovers from previous releases, so the target
+    ## always mirrors the current build exactly.
+    rsync -av --delete "${SCRATCH}/R/" "${RELEASE_DEST}/"
     message "Copy complete"
 }
 
