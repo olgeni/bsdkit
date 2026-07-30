@@ -190,6 +190,15 @@ build-iso() {
     message "Build ISO completed: $(date "+%Y-%m-%d %H:%M:%S")"
 }
 
+cleanup-staging() {
+    local _staging=${BSDKIT_DATA}/staging-${_version}-${_arch}
+
+    [ -d "${_staging}" ] || return 0
+
+    message "[cleanup] Removing staging area: ${_staging}"
+    rm -r -f ${_staging}
+}
+
 build-usb() {
     local _iso=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.iso
     local _usb=${BSDKIT_DATA}/iso/release-${_version}-${_arch}.img
@@ -222,4 +231,10 @@ fi
 
 if [ -n "${_build_usb}" ]; then
     build-usb
+fi
+
+# The staging area is only an intermediate step for the ISO image; drop it
+# when we both built and consumed it in this run.
+if [ -n "${_build_staging}" ] && [ -n "${_build_iso}" ]; then
+    cleanup-staging
 fi
