@@ -120,12 +120,14 @@ WORK_COMPRESSED="${WORK_DIR}/${REMOTE_FILENAME}"
 if [[ -z "${DO_IMAGE_NAME}" ]]; then
     # Remove common extensions to get the base image name
     AUTO_IMAGE_NAME="${REMOTE_FILENAME}"
-    # Strip extensions: .qcow2.xz, .qcow2.bz2, .qcow2, .xz, .bz2
+    # Strip extensions: .qcow2.xz, .qcow2.bz2, .qcow2.gz, .qcow2, .xz, .bz2, .gz
     AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.qcow2.xz}"
     AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.qcow2.bz2}"
+    AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.qcow2.gz}"
     AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.qcow2}"
     AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.xz}"
     AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.bz2}"
+    AUTO_IMAGE_NAME="${AUTO_IMAGE_NAME%.gz}"
     DO_IMAGE_NAME="${AUTO_IMAGE_NAME}"
     echo "Auto-detected image name: ${DO_IMAGE_NAME}" >&2
 fi
@@ -135,6 +137,8 @@ if [[ "${REMOTE_FILENAME}" == *.xz ]]; then
     DECOMPRESSED="${WORK_COMPRESSED%.xz}"
 elif [[ "${REMOTE_FILENAME}" == *.bz2 ]]; then
     DECOMPRESSED="${WORK_COMPRESSED%.bz2}"
+elif [[ "${REMOTE_FILENAME}" == *.gz ]]; then
+    DECOMPRESSED="${WORK_COMPRESSED%.gz}"
 else
     DECOMPRESSED="${WORK_COMPRESSED}"
 fi
@@ -188,15 +192,17 @@ else
 fi
 
 # Decompress if needed
-if [[ "${REMOTE_FILENAME}" == *.xz || "${REMOTE_FILENAME}" == *.bz2 ]]; then
+if [[ "${REMOTE_FILENAME}" == *.xz || "${REMOTE_FILENAME}" == *.bz2 || "${REMOTE_FILENAME}" == *.gz ]]; then
     if [[ "${DRY_RUN}" == "true" ]]; then
         echo "[DRY-RUN] Would decompress: ${WORK_COMPRESSED}" >&2
     else
         echo "Decompressing ${REMOTE_FILENAME}..." >&2
         if [[ "${REMOTE_FILENAME}" == *.xz ]]; then
             xz -d "${WORK_COMPRESSED}"
-        else
+        elif [[ "${REMOTE_FILENAME}" == *.bz2 ]]; then
             bzip2 -d "${WORK_COMPRESSED}"
+        else
+            gzip -d "${WORK_COMPRESSED}"
         fi
         echo "Decompression complete." >&2
     fi
