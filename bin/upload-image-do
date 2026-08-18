@@ -39,14 +39,14 @@ Options:
     -h, --help              Show this help message
 
 Environment variables required:
-    DIGITALOCEAN_ACCESS_TOKEN   DigitalOcean API token (or use -k/--token)
-    STORAGE_BUCKET              Google Cloud Storage bucket (e.g., gs:bucket/path)
-    STORAGE_URL                 Public URL for storage (e.g., https://storage.googleapis.com/bucket/path)
+    DIGITALOCEAN_ACCESS_TOKEN     DigitalOcean API token (or use -k/--token)
+    BSDKIT_IMAGE_STORAGE_BUCKET   Google Cloud Storage bucket (e.g., gs:bucket/path)
+    BSDKIT_IMAGE_STORAGE_URL      Public URL for storage (e.g., https://storage.googleapis.com/bucket/path)
 
 Examples:
     export DIGITALOCEAN_ACCESS_TOKEN=token
-    export STORAGE_BUCKET=gs:mybucket/FreeBSD/images
-    export STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/images
+    export BSDKIT_IMAGE_STORAGE_BUCKET=gs:mybucket/FreeBSD/images
+    export BSDKIT_IMAGE_STORAGE_URL=https://mybucket.storage.googleapis.com/FreeBSD/images
 
     # Auto-detect image name from filename
     ${0:t} 'https://download.freebsd.org/ftp/snapshots/VM-IMAGES/14.3-STABLE/amd64/20251120/FreeBSD-14.3-STABLE-amd64-20251120-fa1337393b84-272914.qcow2.xz'
@@ -94,13 +94,13 @@ if [[ -z "${DIGITALOCEAN_ACCESS_TOKEN:-}" ]]; then
     exit 1
 fi
 
-if [[ -z "${STORAGE_BUCKET:-}" ]]; then
-    echo "Error: STORAGE_BUCKET environment variable is not set" >&2
+if [[ -z "${BSDKIT_IMAGE_STORAGE_BUCKET:-}" ]]; then
+    echo "Error: BSDKIT_IMAGE_STORAGE_BUCKET environment variable is not set" >&2
     exit 1
 fi
 
-if [[ -z "${STORAGE_URL:-}" ]]; then
-    echo "Error: STORAGE_URL environment variable is not set" >&2
+if [[ -z "${BSDKIT_IMAGE_STORAGE_URL:-}" ]]; then
+    echo "Error: BSDKIT_IMAGE_STORAGE_URL environment variable is not set" >&2
     exit 1
 fi
 
@@ -216,15 +216,15 @@ fi
 # Upload to Google Cloud Storage
 UPLOAD_SOURCE="${WORK_DIR}/${FINAL_FILENAME}"
 if [[ "${DRY_RUN}" == "true" ]]; then
-    echo "[DRY-RUN] Would upload to GCS: ${FINAL_FILENAME} -> ${STORAGE_BUCKET}/${FINAL_FILENAME}" >&2
+    echo "[DRY-RUN] Would upload to GCS: ${FINAL_FILENAME} -> ${BSDKIT_IMAGE_STORAGE_BUCKET}/${FINAL_FILENAME}" >&2
 else
     echo "Uploading to GCS as ${FINAL_FILENAME}..." >&2
-    rclone --progress copyto "${UPLOAD_SOURCE}" "${STORAGE_BUCKET}/${FINAL_FILENAME}" >&2 2>&1
+    rclone --progress copyto "${UPLOAD_SOURCE}" "${BSDKIT_IMAGE_STORAGE_BUCKET}/${FINAL_FILENAME}" >&2 2>&1
     echo "Upload complete." >&2
 fi
 
 # Generate GCS URL
-GCS_URL="${STORAGE_URL}/${FINAL_FILENAME}"
+GCS_URL="${BSDKIT_IMAGE_STORAGE_URL}/${FINAL_FILENAME}"
 echo "GCS URL: ${GCS_URL}" >&2
 
 # Create DigitalOcean image
