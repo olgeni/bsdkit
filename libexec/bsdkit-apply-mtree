@@ -27,7 +27,7 @@ fi
 : ${DESTDIR:=""}
 
 OPTIND=1
-while getopts "a:b:d:eEFn:p:r:v:" OPT; do
+while getopts "d:" OPT; do
     case ${OPT} in
         d)
             DESTDIR=${OPTARG%/}
