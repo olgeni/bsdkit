@@ -172,12 +172,32 @@ if is-yes ${BOOTENV_ENABLE}; then
 
     DESTDIR=${BOOTENV_MOUNT}
 
-    # The package database must live inside the boot environment. On layouts
-    # where /var/db is a separate dataset it is shared between environments,
-    # and upgrading here would rewrite the running system's database while
-    # installing files into the clone.
-    _root_dataset=$(df ${BOOTENV_MOUNT} | awk 'NR == 2 { print $1 }')
-    _pkgdb_dataset=$(df ${BOOTENV_MOUNT}/var/db | awk 'NR == 2 { print $1 }')
+    # The package database must live inside the boot environment, or the
+    # upgrade would rewrite the running system's database while installing
+    # files into the clone.
+    #
+    # Resolve it the way pkg will. pkg -r prepends the root directory but does
+    # not chroot, so a symlink such as /var/db/pkg -> /usr/local/pkg escapes
+    # the boot environment entirely and lands on the host. Comparing datasets
+    # alone would not notice: the symlink itself sits on the clone.
+    _real_mount=$(realpath ${BOOTENV_MOUNT})
+
+    _pkg_dbdir=$(pkg config PKG_DBDIR 2> /dev/null) || _pkg_dbdir="/var/db/pkg"
+
+    _real_dbdir=$(realpath -q ${BOOTENV_MOUNT}${_pkg_dbdir}) \
+        || error "package database ${BOOTENV_MOUNT}${_pkg_dbdir} cannot be resolved"
+
+    case ${_real_dbdir} in
+        ${_real_mount}/*)
+            ;;
+
+        *)
+            error "package database resolves to ${_real_dbdir}, outside the boot environment"
+            ;;
+    esac
+
+    _root_dataset=$(df ${_real_mount} | awk 'NR == 2 { print $1 }')
+    _pkgdb_dataset=$(df ${_real_dbdir} | awk 'NR == 2 { print $1 }')
 
     if [ "${_root_dataset}" != "${_pkgdb_dataset}" ]; then
         error "package database (${_pkgdb_dataset}) is outside the boot environment (${_root_dataset})"
