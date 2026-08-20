@@ -31,9 +31,33 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 
 : ${_bootenv_created:="no"}
 : ${_bootenv_mounted:="no"}
+: ${_devfs_mounted:="no"}
 : ${_upgrade_done:="no"}
+: ${_no_updates:="no"}
+
+# Root the mounts are made under. Kept separate from DESTDIR so cleanup can
+# still find them after DESTDIR has been reassigned.
+_mount_root=""
+
+_mountpoint_list=()
 
 cleanup() {
+    if [ -n "${_mount_root}" ]; then
+        for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
+            if ${BSDKIT_PATH}/bsdkit is-mount-point ${_mount_root}${_mountpoint_list[i]}; then
+                umount -f ${_mount_root}${_mountpoint_list[i]}
+            fi
+        done
+
+        if is-yes ${_devfs_mounted}; then
+            if ${BSDKIT_PATH}/bsdkit is-mount-point ${_mount_root}/dev; then
+                umount -f ${_mount_root}/dev
+            fi
+
+            _devfs_mounted="no"
+        fi
+    fi
+
     if is-yes ${_bootenv_mounted}; then
         if ${BSDKIT_PATH}/bsdkit is-mount-point ${BOOTENV_MOUNT}; then
             bectl umount -f ${BOOTENV_NAME} > /dev/null 2>&1 || true
@@ -42,10 +66,16 @@ cleanup() {
         _bootenv_mounted="no"
     fi
 
-    # A boot environment left behind by a failed run is worse than no boot
-    # environment: it is a half-upgraded root that bectl will happily boot.
     if is-yes ${_bootenv_created} && ! is-yes ${_upgrade_done}; then
-        warning "Destroying incomplete boot environment ${BOOTENV_NAME}"
+        # A boot environment left behind by a failed run is worse than no boot
+        # environment: it is a half-upgraded root that bectl will happily boot.
+        # One left by a run that found nothing to do is merely clutter.
+        if is-yes ${_no_updates}; then
+            message "Removing unused boot environment ${BOOTENV_NAME}"
+        else
+            warning "Destroying incomplete boot environment ${BOOTENV_NAME}"
+        fi
+
         bectl destroy -F ${BOOTENV_NAME} > /dev/null 2>&1 || true
     fi
 }
@@ -171,43 +201,61 @@ if is-yes ${BOOTENV_ENABLE}; then
     _bootenv_mounted="yes"
 
     DESTDIR=${BOOTENV_MOUNT}
+else
+    _destdir_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }")
 
-    # The package database must live inside the boot environment, or the
-    # upgrade would rewrite the running system's database while installing
-    # files into the clone.
-    #
-    # Resolve it the way pkg will. pkg -r prepends the root directory but does
-    # not chroot, so a symlink such as /var/db/pkg -> /usr/local/pkg escapes
-    # the boot environment entirely and lands on the host. Comparing datasets
-    # alone would not notice: the symlink itself sits on the clone.
-    _real_mount=$(realpath ${BOOTENV_MOUNT})
+    if [ -n "${_destdir_fs}" ]; then
+        zfs snapshot "${_destdir_fs}@$(date +%F.%H%M)"
+    fi
+fi
 
+# ---------------------------------------------------------------------------
+# The environment is upgraded through a chroot, so it needs the same
+# filesystems the running system has: the directories package scripts expect,
+# and devfs for anything that opens /dev.
+
+if [ -n "${DESTDIR}" ]; then
+    _mount_root=${DESTDIR}
+
+    if mount | cut -w -f 3 | fgrep -q "/usr/src"; then
+        _mountpoint_list+=("/usr/src")
+    fi
+
+    if mount | cut -w -f 3 | fgrep -q "/usr/ports"; then
+        _mountpoint_list+=("/usr/ports")
+    fi
+
+    mount -p | awk '$2 ~ "^/var(/|$)" { print $2 }' | while read _mountpoint; do
+        _mountpoint_list+=(${_mountpoint})
+    done
+
+    for ((i=1; i<=${#_mountpoint_list[@]}; i++)); do
+        mount -t nullfs ${_mountpoint_list[i]} ${_mount_root}${_mountpoint_list[i]}
+    done
+
+    mount -t devfs devfs ${_mount_root}/dev
+    _devfs_mounted="yes"
+
+    # Checked after the mounts, because a nullfs mount of a separate /var is
+    # exactly what would drag the running system's package database in here.
+    # Resolution happens inside the chroot so that an absolute symlink such as
+    # /var/db/pkg -> /usr/local/pkg is followed the way pkg will follow it.
     _pkg_dbdir=$(pkg config PKG_DBDIR 2> /dev/null) || _pkg_dbdir="/var/db/pkg"
 
-    _real_dbdir=$(realpath -q ${BOOTENV_MOUNT}${_pkg_dbdir}) \
-        || error "package database ${BOOTENV_MOUNT}${_pkg_dbdir} cannot be resolved"
+    _real_dbdir=$(chroot ${DESTDIR} realpath -q ${_pkg_dbdir}) \
+        || error "package database ${_pkg_dbdir} cannot be resolved under ${DESTDIR}"
 
-    case ${_real_dbdir} in
-        ${_real_mount}/*)
-            ;;
-
-        *)
-            error "package database resolves to ${_real_dbdir}, outside the boot environment"
-            ;;
-    esac
-
-    _root_dataset=$(df ${_real_mount} | awk 'NR == 2 { print $1 }')
-    _pkgdb_dataset=$(df ${_real_dbdir} | awk 'NR == 2 { print $1 }')
+    _root_dataset=$(df ${DESTDIR} | awk 'NR == 2 { print $1 }')
+    _pkgdb_dataset=$(df ${DESTDIR}${_real_dbdir} | awk 'NR == 2 { print $1 }')
 
     if [ "${_root_dataset}" != "${_pkgdb_dataset}" ]; then
-        error "package database (${_pkgdb_dataset}) is outside the boot environment (${_root_dataset})"
+        error "package database ${_real_dbdir} (${_pkgdb_dataset}) is outside ${DESTDIR} (${_root_dataset})"
     fi
 fi
 
 # ---------------------------------------------------------------------------
 
-_repo_dir=${DESTDIR}/usr/local/etc/pkg/repos
-_repo_file=${_repo_dir}/FreeBSD.conf
+_repo_file=${DESTDIR}/usr/local/etc/pkg/repos/FreeBSD.conf
 
 _repo_url=$(get-pkgbase-repo-url ${BSDKIT_VERSION} ${DESTDIR})
 
@@ -219,9 +267,10 @@ local -a _pkg
 _pkg=(pkg)
 
 if [ -n "${DESTDIR}" ]; then
-    # pkg -r reads the *host* repository configuration, so the rewritten file
-    # inside the target root only takes effect when it is named with -R.
-    _pkg=(pkg -r ${DESTDIR} -R ${_repo_dir})
+    # -c rather than -r: pkg -r prepends a root but does not chroot, so it
+    # reads the host's repository configuration and follows absolute symlinks
+    # out of the target. Chrooting makes both resolve inside the environment.
+    _pkg=(pkg -c ${DESTDIR})
 fi
 
 # The repository URL changed, so the cached catalogue is stale. Without -f pkg
@@ -240,7 +289,7 @@ fi
 if ! is-yes ${FORCE_UPGRADE}; then
     if ${_pkg[@]} upgrade -n -r FreeBSD-base 2>&1 | fgrep -q "Your packages are up to date"; then
         message "No updates available for ${BSDKIT_VERSION}"
-        _upgrade_done="yes"
+        _no_updates="yes"
         exit 0
     fi
 fi
@@ -251,8 +300,7 @@ ${_pkg[@]} upgrade -y -r FreeBSD-base
 _upgrade_done="yes"
 
 if is-yes ${BOOTENV_ENABLE}; then
-    bectl umount -f ${BOOTENV_NAME} > /dev/null 2>&1
-    _bootenv_mounted="no"
+    cleanup
 
     bectl activate ${BOOTENV_NAME}
     bectl list
