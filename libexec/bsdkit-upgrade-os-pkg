@@ -1,0 +1,243 @@
+#!/usr/bin/env zsh
+
+setopt errreturn nounset pipefail
+
+SCRIPT_PATH="$(dirname $(realpath $0))"
+SCRIPT_NAME="$(basename $0)"
+
+source ${SCRIPT_PATH}/../lib/system.inc.sh
+source ${SCRIPT_PATH}/../lib/colors.inc.sh
+source ${SCRIPT_PATH}/../lib/is-yes.inc.sh
+source ${SCRIPT_PATH}/../lib/pkgbase.inc.sh
+
+if [ "$(uname -s)" != "FreeBSD" ]; then
+    error "Must be executed on FreeBSD."
+fi
+
+BSDKIT_PATH="$(realpath ${SCRIPT_PATH}/../)"
+
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
+
+# ===========================================================================
+
+: ${BSDKIT_VERSION:=""}
+
+: ${DESTDIR:=""}
+: ${BOOTENV_ENABLE:="default"}
+: ${BOOTENV_NAME:="$(date +%F.%H%M)"}
+: ${BOOTENV_MOUNT:="/mnt"}
+: ${FETCH_ONLY:="no"}
+: ${FORCE_UPGRADE:="no"}
+
+: ${_bootenv_created:="no"}
+: ${_bootenv_mounted:="no"}
+: ${_upgrade_done:="no"}
+
+cleanup() {
+    if is-yes ${_bootenv_mounted}; then
+        if ${BSDKIT_PATH}/bsdkit is-mount-point ${BOOTENV_MOUNT}; then
+            bectl umount -f ${BOOTENV_NAME} > /dev/null 2>&1 || true
+        fi
+
+        _bootenv_mounted="no"
+    fi
+
+    # A boot environment left behind by a failed run is worse than no boot
+    # environment: it is a half-upgraded root that bectl will happily boot.
+    if is-yes ${_bootenv_created} && ! is-yes ${_upgrade_done}; then
+        warning "Destroying incomplete boot environment ${BOOTENV_NAME}"
+        bectl destroy -F ${BOOTENV_NAME} > /dev/null 2>&1 || true
+    fi
+}
+
+trap cleanup EXIT
+
+OPTIND=1
+while getopts "d:eEfFn:v:" OPT; do
+    case ${OPT} in
+        d)
+            DESTDIR=${OPTARG%/}
+            ;;
+        e)
+            BOOTENV_ENABLE="yes"
+            ;;
+        E)
+            BOOTENV_ENABLE="no"
+            ;;
+        f)
+            FORCE_UPGRADE="yes"
+            ;;
+        F)
+            FETCH_ONLY="yes"
+            ;;
+        n)
+            BOOTENV_NAME=${OPTARG}
+            ;;
+        v)
+            BSDKIT_VERSION=${OPTARG}
+            ;;
+        *)
+            exit 64 # EX_USAGE
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [ -d ${DESTDIR}/.base ]; then
+    error "Destination directory is thin jail"
+fi
+
+if is-jailed; then
+    BOOTENV_ENABLE="no"
+fi
+
+if kenv -q zfs_be_root > /dev/null 2>&1; then
+    if [ "${BOOTENV_ENABLE}" = "default" ]; then
+        if [ -z "${DESTDIR}" ]; then
+            BOOTENV_ENABLE="yes"
+        else
+            BOOTENV_ENABLE="no"
+        fi
+    fi
+else
+    BOOTENV_ENABLE="no"
+fi
+
+if [ -n "${DESTDIR}" ] && is-yes ${BOOTENV_ENABLE}; then
+    error "incompatible BOOTENV_ENABLE and DESTDIR"
+fi
+
+if is-yes ${BOOTENV_ENABLE}; then
+    which bectl > /dev/null 2>&1 || error "missing requirement: bectl"
+fi
+
+# ---------------------------------------------------------------------------
+# The base system must already be under package management. Running this on a
+# tarball system would install a parallel set of base packages over unmanaged
+# files; running it on a partially converted one would advance only half the
+# system.
+
+_install_type=$(get-install-type ${DESTDIR})
+
+case ${_install_type} in
+    pkgbase)
+        ;;
+
+    tarball)
+        error "Base system is tarball-based, use 'bsdkit upgrade-os' instead"
+        ;;
+
+    *)
+        error "Base system is '${_install_type}', refusing to upgrade"
+        ;;
+esac
+
+if [ -z "${BSDKIT_VERSION}" ]; then
+    BSDKIT_VERSION="$(get-os-version ${DESTDIR:-/})"
+    message "Using current version: ${BSDKIT_VERSION}"
+fi
+
+if [ "${BSDKIT_VERSION}" = "${BSDKIT_VERSION#*.}" ]; then
+    error "Version must be major.minor, e.g. 15.1 (got '${BSDKIT_VERSION}')"
+fi
+
+_current_version="$(get-os-version ${DESTDIR:-/})"
+_current_major=${_current_version%%.*}
+_target_major=${BSDKIT_VERSION%%.*}
+
+# pkg derives ABI from the running system and the pkgbase signing keys are
+# per-major, so a major jump cannot be driven from the running root.
+if [ "${_current_major}" != "${_target_major}" ]; then
+    error "Cannot cross major versions (${_current_version} -> ${BSDKIT_VERSION})"
+fi
+
+message "Current release is $(get-osrelease ${DESTDIR:-/})"
+message "Target release is ${BSDKIT_VERSION}"
+
+# ---------------------------------------------------------------------------
+
+if is-yes ${BOOTENV_ENABLE}; then
+    if mount | cut -w -f 3 | fgrep -q "${BOOTENV_MOUNT}"; then
+        error "mount point '${BOOTENV_MOUNT}' already in use"
+    fi
+
+    message "Creating boot environment ${BOOTENV_NAME}"
+
+    bectl create ${BOOTENV_NAME}
+    _bootenv_created="yes"
+
+    bectl mount ${BOOTENV_NAME} ${BOOTENV_MOUNT} > /dev/null 2>&1
+    _bootenv_mounted="yes"
+
+    DESTDIR=${BOOTENV_MOUNT}
+
+    # The package database must live inside the boot environment. On layouts
+    # where /var/db is a separate dataset it is shared between environments,
+    # and upgrading here would rewrite the running system's database while
+    # installing files into the clone.
+    _root_dataset=$(df ${BOOTENV_MOUNT} | awk 'NR == 2 { print $1 }')
+    _pkgdb_dataset=$(df ${BOOTENV_MOUNT}/var/db | awk 'NR == 2 { print $1 }')
+
+    if [ "${_root_dataset}" != "${_pkgdb_dataset}" ]; then
+        error "package database (${_pkgdb_dataset}) is outside the boot environment (${_root_dataset})"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+
+_repo_dir=${DESTDIR}/usr/local/etc/pkg/repos
+_repo_file=${_repo_dir}/FreeBSD.conf
+
+_repo_url=$(get-pkgbase-repo-url ${BSDKIT_VERSION} ${DESTDIR})
+
+message "Pointing FreeBSD-base at ${_repo_url}"
+
+set-pkgbase-repo-url ${_repo_file} ${_repo_url} ${_target_major}
+
+local -a _pkg
+_pkg=(pkg)
+
+if [ -n "${DESTDIR}" ]; then
+    # pkg -r reads the *host* repository configuration, so the rewritten file
+    # inside the target root only takes effect when it is named with -R.
+    _pkg=(pkg -r ${DESTDIR} -R ${_repo_dir})
+fi
+
+# The repository URL changed, so the cached catalogue is stale. Without -f pkg
+# reports "up to date" against the previous catalogue and upgrades nothing.
+message "Updating FreeBSD-base catalogue"
+${_pkg[@]} update -f -r FreeBSD-base
+
+if is-yes ${FETCH_ONLY}; then
+    message "Fetching packages"
+    ${_pkg[@]} fetch -y -u -r FreeBSD-base
+    message "Packages downloaded successfully"
+    _upgrade_done="yes"
+    exit 0
+fi
+
+if ! is-yes ${FORCE_UPGRADE}; then
+    if ${_pkg[@]} upgrade -n -r FreeBSD-base 2>&1 | fgrep -q "Your packages are up to date"; then
+        message "No updates available for ${BSDKIT_VERSION}"
+        _upgrade_done="yes"
+        exit 0
+    fi
+fi
+
+message "Upgrading base packages"
+${_pkg[@]} upgrade -y -r FreeBSD-base
+
+_upgrade_done="yes"
+
+if is-yes ${BOOTENV_ENABLE}; then
+    bectl umount -f ${BOOTENV_NAME} > /dev/null 2>&1
+    _bootenv_mounted="no"
+
+    bectl activate ${BOOTENV_NAME}
+    bectl list
+
+    message "Upgrade complete, reboot into ${BOOTENV_NAME} to apply."
+else
+    message "Upgrade complete."
+fi
