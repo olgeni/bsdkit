@@ -181,6 +181,54 @@ if [ -d ${DESTDIR}/.base ]; then
     error "Destination directory is thin jail"
 fi
 
+# ---------------------------------------------------------------------------
+# This script installs the base system from distribution tarballs. On a system
+# whose base is under package management that would extract files over ones
+# pkg believes it owns, leaving the database describing a system that no
+# longer exists, so hand those over to the package-based upgrade instead.
+
+_install_type=$(get-install-type ${DESTDIR})
+
+if [ "${_install_type}" = "pkgbase" ]; then
+    message "Base system is package-based, using ${SCRIPT_NAME}-pkg"
+
+    _forward_args=()
+
+    if [ -n "${DESTDIR}" ]; then
+        _forward_args+=(-d ${DESTDIR})
+    fi
+
+    if [ "${BOOTENV_ENABLE}" = "yes" ]; then
+        _forward_args+=(-e)
+    fi
+
+    if [ "${BOOTENV_ENABLE}" = "no" ]; then
+        _forward_args+=(-E)
+    fi
+
+    _forward_args+=(-n ${BOOTENV_NAME})
+
+    if is-yes ${FETCH_ONLY}; then
+        _forward_args+=(-F)
+    fi
+
+    if is-yes ${FORCE_UPGRADE}; then
+        _forward_args+=(-f)
+    fi
+
+    if [ -n "${BSDKIT_VERSION}" ]; then
+        _forward_args+=(-v ${BSDKIT_VERSION})
+    fi
+
+    exec ${SCRIPT_PATH}/${SCRIPT_NAME}-pkg ${_forward_args[@]}
+fi
+
+# A partially converted system belongs to neither path: the tarballs would
+# overwrite packaged files, and pkg would advance only the packaged half.
+if [ "${_install_type}" != "tarball" ]; then
+    error "Base system is '${_install_type}', refusing to upgrade"
+fi
+
 if [ -z "${BSDKIT_VERSION}" ]; then
     BSDKIT_VERSION="$(get-os-version)"
     message "Using current version: ${BSDKIT_VERSION}"
