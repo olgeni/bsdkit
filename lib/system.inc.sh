@@ -305,3 +305,68 @@ get-perl-version() {
         perl -e 'print(sprintf("%d.%d\n", $^V->{version}[0], $^V->{version}[1]))'
     fi
 }
+
+get-install-type() {
+    # Report how the base system under destdir was installed:
+    #   pkgbase - base files are owned by FreeBSD-base packages
+    #   tarball - base files are not owned by any package
+    #   mixed   - only some base files are owned (partial conversion)
+    #   unknown - no base system found under destdir
+    #
+    # /bin/sh and /boot/kernel/kernel are present on every FreeBSD system and
+    # belong to different base packages (FreeBSD-runtime, FreeBSD-kernel-generic),
+    # so disagreement between them is a meaningful signal rather than noise.
+
+    local _destdir=${1:-}
+    _destdir=${_destdir%/}
+
+    local -a _pkg
+    _pkg=(pkg)
+
+    if [ -n "${_destdir}" ]; then
+        _pkg=(pkg -r ${_destdir})
+    fi
+
+    local _file
+    local _present=0
+
+    for _file in /bin/sh /boot/kernel/kernel; do
+        if [ -e "${_destdir}${_file}" ]; then
+            _present=$(( _present + 1 ))
+        fi
+    done
+
+    if [ ${_present} -eq 0 ]; then
+        echo "unknown"
+        return 0
+    fi
+
+    # A base system exists, but nothing can own it without a package database.
+    if ! ${_pkg[@]} -N > /dev/null 2>&1; then
+        echo "tarball"
+        return 0
+    fi
+
+    local _owned=0
+    local _total=0
+
+    for _file in /bin/sh /boot/kernel/kernel; do
+        if [ ! -e "${_destdir}${_file}" ]; then
+            continue
+        fi
+
+        _total=$(( _total + 1 ))
+
+        if ${_pkg[@]} which -q "${_file}" > /dev/null 2>&1; then
+            _owned=$(( _owned + 1 ))
+        fi
+    done
+
+    if [ ${_owned} -eq ${_total} ]; then
+        echo "pkgbase"
+    elif [ ${_owned} -eq 0 ]; then
+        echo "tarball"
+    else
+        echo "mixed"
+    fi
+}
