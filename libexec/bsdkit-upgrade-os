@@ -140,7 +140,7 @@ if mount | cut -w -f 3 | fgrep -q "/proc"; then
 fi
 
 OPTIND=1
-while getopts "a:b:d:eEfFn:p:r:v:" OPT; do
+while getopts "a:d:eEfFn:r:v:" OPT; do
     case ${OPT} in
         a)
             BSDKIT_ARCH=${OPTARG}
