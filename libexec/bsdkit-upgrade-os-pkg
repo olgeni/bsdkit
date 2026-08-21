@@ -118,20 +118,35 @@ if [ -d ${DESTDIR}/.base ]; then
     error "Destination directory is thin jail"
 fi
 
+# A jail has no boot environments: it has no loader to select one, and the
+# dataset holding its root belongs to the host. A root that was not itself
+# booted from a boot environment has none to clone either.
+
+_bootenv_reason=""
+
 if is-jailed; then
+    _bootenv_reason="running in a jail"
+elif ! kenv -q zfs_be_root > /dev/null 2>&1; then
+    _bootenv_reason="root filesystem is not a ZFS boot environment"
+fi
+
+if [ -n "${_bootenv_reason}" ]; then
+    # Silently falling back would upgrade the live root when the caller asked
+    # for the isolation of a boot environment, which is the opposite of what
+    # they asked for.
+    if is-yes ${BOOTENV_ENABLE}; then
+        error "cannot use a boot environment: ${_bootenv_reason}"
+    fi
+
     BOOTENV_ENABLE="no"
 fi
 
-if kenv -q zfs_be_root > /dev/null 2>&1; then
-    if [ "${BOOTENV_ENABLE}" = "default" ]; then
-        if [ -z "${DESTDIR}" ]; then
-            BOOTENV_ENABLE="yes"
-        else
-            BOOTENV_ENABLE="no"
-        fi
+if [ "${BOOTENV_ENABLE}" = "default" ]; then
+    if [ -z "${DESTDIR}" ]; then
+        BOOTENV_ENABLE="yes"
+    else
+        BOOTENV_ENABLE="no"
     fi
-else
-    BOOTENV_ENABLE="no"
 fi
 
 if [ -n "${DESTDIR}" ] && is-yes ${BOOTENV_ENABLE}; then
@@ -201,12 +216,17 @@ if is-yes ${BOOTENV_ENABLE}; then
     _bootenv_mounted="yes"
 
     DESTDIR=${BOOTENV_MOUNT}
-else
-    _destdir_fs=$(zfs list -H -o mounted,mountpoint,name | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }")
+elif [ -n "${DESTDIR}" ]; then
+    # Only meaningful for a directory that is a mounted dataset in its own
+    # right; zfs is allowed to be unavailable, as it is in a jail.
+    _destdir_fs=$(zfs list -H -o mounted,mountpoint,name 2> /dev/null \
+        | awk "\$1 == \"yes\" && \$2 == \"${DESTDIR}\" { print \$3; }") || _destdir_fs=""
 
     if [ -n "${_destdir_fs}" ]; then
         zfs snapshot "${_destdir_fs}@$(date +%F.%H%M)"
     fi
+else
+    warning "Upgrading the running system in place${_bootenv_reason:+ (${_bootenv_reason})}"
 fi
 
 # ---------------------------------------------------------------------------
