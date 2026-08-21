@@ -234,23 +234,35 @@ if [ -z "${BSDKIT_VERSION}" ]; then
     message "Using current version: ${BSDKIT_VERSION}"
 fi
 
-_security_jail_jailed="no"
+# A jail has no boot environments: it has no loader to select one, and the
+# dataset holding its root belongs to the host. A root that was not itself
+# booted from a boot environment has none to clone either.
+
+_bootenv_reason=""
 
 if is-jailed; then
-    _security_jail_jailed="yes"
+    _bootenv_reason="running in a jail"
+elif ! kenv -q zfs_be_root > /dev/null 2>&1; then
+    _bootenv_reason="root filesystem is not a ZFS boot environment"
+fi
+
+if [ -n "${_bootenv_reason}" ]; then
+    # Silently falling back would extract over the live root when the caller
+    # asked for the isolation of a boot environment, which is the opposite of
+    # what they asked for. Fetching touches no root, so it does not care.
+    if is-yes ${BOOTENV_ENABLE} && ! is-yes ${FETCH_ONLY}; then
+        error "cannot use a boot environment: ${_bootenv_reason}"
+    fi
+
     BOOTENV_ENABLE="no"
 fi
 
-if kenv -q zfs_be_root > /dev/null 2>&1; then
-    if [ "${BOOTENV_ENABLE}" = "default" ]; then
-        if [ -z "${DESTDIR}" ]; then
-            BOOTENV_ENABLE="yes"
-        else
-            BOOTENV_ENABLE="no"
-        fi
+if [ "${BOOTENV_ENABLE}" = "default" ]; then
+    if [ -z "${DESTDIR}" ]; then
+        BOOTENV_ENABLE="yes"
+    else
+        BOOTENV_ENABLE="no"
     fi
-else
-    BOOTENV_ENABLE="no"
 fi
 
 if ! is-yes ${FETCH_ONLY}; then

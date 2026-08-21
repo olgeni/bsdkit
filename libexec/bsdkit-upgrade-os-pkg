@@ -33,7 +33,7 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 : ${_bootenv_mounted:="no"}
 : ${_devfs_mounted:="no"}
 : ${_upgrade_done:="no"}
-: ${_no_updates:="no"}
+: ${_bootenv_unused:="no"}
 
 # Root the mounts are made under. Kept separate from DESTDIR so cleanup can
 # still find them after DESTDIR has been reassigned.
@@ -69,8 +69,8 @@ cleanup() {
     if is-yes ${_bootenv_created} && ! is-yes ${_upgrade_done}; then
         # A boot environment left behind by a failed run is worse than no boot
         # environment: it is a half-upgraded root that bectl will happily boot.
-        # One left by a run that found nothing to do is merely clutter.
-        if is-yes ${_no_updates}; then
+        # One left by a run that changed nothing in it is merely clutter.
+        if is-yes ${_bootenv_unused}; then
             message "Removing unused boot environment ${BOOTENV_NAME}"
         else
             warning "Destroying incomplete boot environment ${BOOTENV_NAME}"
@@ -134,7 +134,7 @@ if [ -n "${_bootenv_reason}" ]; then
     # Silently falling back would upgrade the live root when the caller asked
     # for the isolation of a boot environment, which is the opposite of what
     # they asked for.
-    if is-yes ${BOOTENV_ENABLE}; then
+    if is-yes ${BOOTENV_ENABLE} && ! is-yes ${FETCH_ONLY}; then
         error "cannot use a boot environment: ${_bootenv_reason}"
     fi
 
@@ -302,14 +302,16 @@ if is-yes ${FETCH_ONLY}; then
     message "Fetching packages"
     ${_pkg[@]} fetch -y -u -r FreeBSD-base
     message "Packages downloaded successfully"
-    _upgrade_done="yes"
+    # Fetching fills the package cache and changes nothing in the environment,
+    # so keeping it would leave a boot environment behind on every run.
+    _bootenv_unused="yes"
     exit 0
 fi
 
 if ! is-yes ${FORCE_UPGRADE}; then
     if ${_pkg[@]} upgrade -n -r FreeBSD-base 2>&1 | fgrep -q "Your packages are up to date"; then
         message "No updates available for ${BSDKIT_VERSION}"
-        _no_updates="yes"
+        _bootenv_unused="yes"
         exit 0
     fi
 fi
