@@ -9,14 +9,18 @@ filter-properties() {
 BEGIN {
   read_only["available"] = 1;
   read_only["casesensitivity"] = 1;
+  read_only["clones"] = 1;
   read_only["compressratio"] = 1;
   read_only["createtxg"] = 1;
   read_only["creation"] = 1;
+  read_only["defer_destroy"] = 1;
   read_only["encryption"] = 1;
+  read_only["encryptionroot"] = 1;
   read_only["filesystem_count"] = 1;
   read_only["guid"] = 1;
   read_only["keyformat"] = 1;
   read_only["keylocation"] = 1;
+  read_only["keystatus"] = 1;
   read_only["logicalreferenced"] = 1;
   read_only["logicalused"] = 1;
   read_only["mlslabel"] = 1;
@@ -25,17 +29,22 @@ BEGIN {
   read_only["objsetid"] = 1;
   read_only["origin"] = 1;
   read_only["pbkdf2iters"] = 1;
+  read_only["receive_resume_token"] = 1;
+  read_only["redact_snaps"] = 1;
   read_only["refcompressratio"] = 1;
   read_only["referenced"] = 1;
   read_only["snapshot_count"] = 1;
+  read_only["snapshots_changed"] = 1;
   read_only["type"] = 1;
   read_only["used"] = 1;
   read_only["usedbychildren"] = 1;
   read_only["usedbydataset"] = 1;
   read_only["usedbyrefreservation"] = 1;
   read_only["usedbysnapshots"] = 1;
+  read_only["userrefs"] = 1;
   read_only["utf8only"] = 1;
   read_only["version"] = 1;
+  read_only["volblocksize"] = 1;
   read_only["written"] = 1;
 }
 
