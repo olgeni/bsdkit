@@ -106,14 +106,16 @@ chpwd() {
 
 local _file
 
+# Must come before sourcing ~/.zsh/*.sh: gcloud.sh runs compinit, which
+# builds ~/.zcompdump from the fpath it sees at that moment.
+if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
+    fpath=(~/.zsh/completion $fpath)
+fi
+
 if [ -d ~/.zsh ]; then
     for _file in ~/.zsh/*.sh(N); do
         source ${_file}
     done
-fi
-
-if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
-    fpath=(~/.zsh/completion $fpath)
 fi
 
 autoload -Uz compinit && compinit -C -d ~/.zcompdump
