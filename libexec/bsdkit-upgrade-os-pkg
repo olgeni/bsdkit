@@ -35,6 +35,8 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 : ${_upgrade_done:="no"}
 : ${_bootenv_unused:="no"}
 
+_fetch_repo_dir=""
+
 # Root the mounts are made under. Kept separate from DESTDIR so cleanup can
 # still find them after DESTDIR has been reassigned.
 _mount_root=""
@@ -42,6 +44,10 @@ _mount_root=""
 _mountpoint_list=()
 
 cleanup() {
+    if [ -n "${_fetch_repo_dir}" ]; then
+        rm -r -f ${_fetch_repo_dir}
+    fi
+
     if [ -n "${_mount_root}" ]; then
         for ((i=${#_mountpoint_list[@]}; i>=1; i--)); do
             if ${BSDKIT_PATH}/bsdkit is-mount-point ${_mount_root}${_mountpoint_list[i]}; then
@@ -149,6 +155,12 @@ if [ "${BOOTENV_ENABLE}" = "default" ]; then
     fi
 fi
 
+# Fetching only fills the package cache: nothing to isolate, nothing to roll
+# back.
+if is-yes ${FETCH_ONLY}; then
+    BOOTENV_ENABLE="no"
+fi
+
 if [ -n "${DESTDIR}" ] && is-yes ${BOOTENV_ENABLE}; then
     error "incompatible BOOTENV_ENABLE and DESTDIR"
 fi
@@ -216,6 +228,9 @@ if is-yes ${BOOTENV_ENABLE}; then
     _bootenv_mounted="yes"
 
     DESTDIR=${BOOTENV_MOUNT}
+elif is-yes ${FETCH_ONLY}; then
+    # Nothing will be modified, so there is nothing to snapshot or warn about.
+    :
 elif [ -n "${DESTDIR}" ]; then
     # Only meaningful for a directory that is a mounted dataset in its own
     # right; zfs is allowed to be unavailable, as it is in a jail.
@@ -281,8 +296,6 @@ _repo_url=$(get-pkgbase-repo-url ${BSDKIT_VERSION} ${DESTDIR})
 
 message "Pointing FreeBSD-base at ${_repo_url}"
 
-set-pkgbase-repo-url ${_repo_file} ${_repo_url} ${_target_major}
-
 local -a _pkg
 _pkg=(pkg)
 
@@ -291,6 +304,25 @@ if [ -n "${DESTDIR}" ]; then
     # reads the host's repository configuration and follows absolute symlinks
     # out of the target. Chrooting makes both resolve inside the environment.
     _pkg=(pkg -c ${DESTDIR})
+fi
+
+if is-yes ${FETCH_ONLY}; then
+    # Retargeting the persistent configuration for a fetch would leave the
+    # system pointing at a release it is not running, where the next plain
+    # pkg upgrade would pull the base system in place. Retarget a throwaway
+    # copy instead, placed under the target so the chroot can see it, and
+    # hand it to pkg with -R.
+    _fetch_repo_dir=$(mktemp -d ${DESTDIR}/tmp/${SCRIPT_NAME}.XXXXXX)
+
+    if [ -f ${_repo_file} ]; then
+        cp ${_repo_file} ${_fetch_repo_dir}/FreeBSD.conf
+    fi
+
+    set-pkgbase-repo-url ${_fetch_repo_dir}/FreeBSD.conf ${_repo_url} ${_target_major}
+
+    _pkg+=(-R ${_fetch_repo_dir#${DESTDIR}})
+else
+    set-pkgbase-repo-url ${_repo_file} ${_repo_url} ${_target_major}
 fi
 
 # The repository URL changed, so the cached catalogue is stale. Without -f pkg
@@ -302,9 +334,6 @@ if is-yes ${FETCH_ONLY}; then
     message "Fetching packages"
     ${_pkg[@]} fetch -y -u -r FreeBSD-base
     message "Packages downloaded successfully"
-    # Fetching fills the package cache and changes nothing in the environment,
-    # so keeping it would leave a boot environment behind on every run.
-    _bootenv_unused="yes"
     exit 0
 fi
 
