@@ -30,7 +30,7 @@ VERSION="${DEFAULT_VERSION}"
 ARCH="${DEFAULT_ARCH}"
 
 usage() {
-    echo "usage: ${SCRIPT_NAME} [-v VERSION] [-a ARCH] {build|extras|copy|clean}" >&2
+    echo "usage: ${SCRIPT_NAME} [-v VERSION] [-a ARCH] {build|extras|copy|verify|clean}" >&2
     exit 2
 }
 
@@ -87,6 +87,109 @@ EOF
     } > "${RELEASE_CONF}"
 }
 
+## release/Makefile targets (base.txz, src.txz, disc1.iso, ...) are plain
+## file targets with no dependencies: if they already exist in the obj
+## tree from an earlier build they are silently reused, while OSRELEASE
+## (image names), RELEASE, OLDFILES and etcupdate.tar.bz2 are taken from
+## the current source tree. Building on top of a previous build therefore
+## produces old bits under new names, so refuse unless the scratch is clean.
+check-scratch-clean() {
+    local _stale=""
+    local _path
+    for _path in usr/obj tmp/obj bin/sh; do
+        if [ -e "${SCRATCH}/${_path}" ]; then
+            _stale="${_stale} ${SCRATCH}/${_path}"
+        fi
+    done
+    if [ -n "${_stale}" ]; then
+        warning "Leftovers from a previous build found:${_stale}"
+        error "Refusing to build on top of a previous build; run '${SCRIPT_NAME} clean' first"
+    fi
+
+    ## 'make install DESTDIR=/R' copies into an existing R/ without
+    ## removing anything, so images from a previous patch level would
+    ## survive next to the new ones. Start from an empty R/.
+    if [ -e "${SCRATCH}/R" ]; then
+        message "Removing previous build output ${SCRATCH}/R"
+        chflags -R noschg "${SCRATCH}/R"
+        rm -rf "${SCRATCH}/R"
+    fi
+}
+
+## 15.1-RELEASE-p2 from a newvers.sh read on stdin.
+osrelease-from-newvers() {
+    local _contents=$(cat)
+    local _revision=$(echo "${_contents}" | grep -oE '^REVISION="([^"]+)"' | cut -d'"' -f2)
+    local _branch=$(echo "${_contents}" | grep -oE '^BRANCH="([^"]+)"' | cut -d'"' -f2)
+    [ -n "${_revision}" ] && [ -n "${_branch}" ] || return 1
+    echo "${_revision}-${_branch}"
+}
+
+## 15.1-RELEASE-p2 from the bin/freebsd-version inside a tarball or ISO.
+osrelease-from-archive() {
+    local _archive=$1
+    local _member=$2
+    tar -xOf "${_archive}" "${_member}" 2>/dev/null |
+        sed -n 's/^USERLAND_VERSION="\([^"]*\)"$/\1/p'
+}
+
+## Make sure everything in the release tree carries the version the
+## source tree claims, i.e. nothing was reused from an older build.
+verify-release() {
+    local _dir=$1
+    local _expected=$(get-src-osrelease "${SRC_SRC}")
+    local _failed=0
+    local _actual
+
+    message "Verifying ${_dir} against source tree version ${_expected}"
+
+    check-one() {
+        local _what=$1
+        local _actual=$2
+        if [ "${_actual}" = "${_expected}" ]; then
+            message "  ${_what}: ${_actual}"
+        else
+            warning "  ${_what}: ${_actual:-unknown} (expected ${_expected})"
+            _failed=1
+        fi
+    }
+
+    local _base="${_dir}/ftp/base.txz"
+    if [ -f "${_base}" ]; then
+        check-one "ftp/base.txz" "$(osrelease-from-archive "${_base}" ./bin/freebsd-version)"
+    else
+        warning "  ftp/base.txz: missing"
+        _failed=1
+    fi
+
+    local _src="${_dir}/ftp/src.txz"
+    if [ -f "${_src}" ]; then
+        _actual=$(tar -xOf "${_src}" usr/src/sys/conf/newvers.sh 2>/dev/null | osrelease-from-newvers || true)
+        check-one "ftp/src.txz" "${_actual}"
+    fi
+
+    local _image
+    for _image in disc1.iso bootonly.iso; do
+        local _iso="${_dir}/FreeBSD-${_expected}-${ARCH}-${_image}"
+        if [ -f "${_iso}" ]; then
+            check-one "${_iso:t}" "$(osrelease-from-archive "${_iso}" bin/freebsd-version)"
+        else
+            warning "  ${_iso:t}: missing"
+            _failed=1
+        fi
+    done
+
+    local _release_file="${_dir}/ftp/RELEASE"
+    if [ -f "${_release_file}" ]; then
+        check-one "ftp/RELEASE" "$(<"${_release_file}")"
+    fi
+
+    if [ ${_failed} -ne 0 ]; then
+        error "Release tree ${_dir} does not match source tree version ${_expected}"
+    fi
+    message "Release tree ${_dir} verified as ${_expected}"
+}
+
 setup() {
     message "Preparing scratch directories under ${SCRATCH}"
     mkdir -p "${SCRATCH}/usr/src" "${SCRATCH}/usr/ports"
@@ -130,12 +233,16 @@ build-extras() {
 cmd-build() {
     trap teardown EXIT INT TERM
 
+    check-scratch-clean
+
     setup
 
     message "Running release build with ${RELEASE_CONF}"
     "${RELEASE_DIR}/release.sh" -c "${RELEASE_CONF}"
 
     build-extras
+
+    verify-release "${SCRATCH}/R"
 
     copy-release
 
@@ -162,7 +269,15 @@ cmd-copy() {
     if [ ! -d "${SCRATCH}/R" ]; then
         error "${SCRATCH}/R does not exist; run '${SCRIPT_NAME} build' first"
     fi
+    verify-release "${SCRATCH}/R"
     copy-release
+}
+
+cmd-verify() {
+    if [ ! -d "${RELEASE_DEST}" ]; then
+        error "${RELEASE_DEST} does not exist"
+    fi
+    verify-release "${RELEASE_DEST}"
 }
 
 cmd-clean() {
@@ -196,6 +311,7 @@ case $1 in
     build)  cmd-build ;;
     extras) cmd-extras ;;
     copy)   cmd-copy ;;
+    verify) cmd-verify ;;
     clean)  cmd-clean ;;
     *)      usage ;;
 esac
