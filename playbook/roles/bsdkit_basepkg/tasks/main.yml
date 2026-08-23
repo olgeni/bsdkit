@@ -63,6 +63,7 @@
       - sysutils/cpdup
       - sysutils/ddrescue
       - sysutils/direnv
+      - sysutils/facl
       - sysutils/filemon
       - sysutils/flashrom
       - sysutils/hextools
@@ -80,6 +81,9 @@
       - sysutils/spiped
       - sysutils/tmux
       - sysutils/ts
+      - sysutils/zfs-allow
+      - sysutils/zfs-set
+      - sysutils/zpool-set
       - textproc/align
       - textproc/jo
       - textproc/the_silver_searcher
