@@ -106,21 +106,22 @@ chpwd() {
 
 local _file
 
-# Must come before sourcing ~/.zsh/*.sh: gcloud.sh runs compinit, which
-# builds ~/.zcompdump from the fpath it sees at that moment.
+# Completion must be fully set up before sourcing ~/.zsh/*.sh: those files
+# register completers with compdef/complete, and a compinit running after
+# them would rebuild the table and discard the registrations.
 if [ ${UID} != 0 -a -d ~/.zsh/completion ]; then
     fpath=(~/.zsh/completion $fpath)
 fi
+
+autoload -Uz compinit && compinit -C -d ~/.zcompdump
+
+autoload -Uz bashcompinit && bashcompinit
 
 if [ -d ~/.zsh ]; then
     for _file in ~/.zsh/*.sh(N); do
         source ${_file}
     done
 fi
-
-autoload -Uz compinit && compinit -C -d ~/.zcompdump
-
-autoload -Uz bashcompinit && bashcompinit
 
 if [ -f /usr/local/bin/aws_completer ]; then
     complete -C /usr/local/bin/aws_completer aws
