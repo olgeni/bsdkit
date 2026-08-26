@@ -28,17 +28,19 @@ DEFAULT_ARCH=amd64
 
 VERSION="${DEFAULT_VERSION}"
 ARCH="${DEFAULT_ARCH}"
+KEEP_SCRATCH=no
 
 usage() {
-    echo "usage: ${SCRIPT_NAME} [-v VERSION] [-a ARCH] {build|extras|copy|verify|clean}" >&2
+    echo "usage: ${SCRIPT_NAME} [-v VERSION] [-a ARCH] [-k] {build|extras|copy|verify|clean}" >&2
     exit 2
 }
 
 OPTIND=1
-while getopts "v:a:" OPT; do
+while getopts "v:a:k" OPT; do
     case ${OPT} in
         v) VERSION="${OPTARG}" ;;
         a) ARCH="${OPTARG}" ;;
+        k) KEEP_SCRATCH=yes ;;
         *) usage ;;
     esac
 done
@@ -233,7 +235,11 @@ build-extras() {
 cmd-build() {
     trap teardown EXIT INT TERM
 
-    check-scratch-clean
+    if [ "${KEEP_SCRATCH}" = "yes" ]; then
+        warning "Keeping ${SCRATCH} as-is; reusing whatever a previous build left behind"
+    else
+        check-scratch-clean
+    fi
 
     setup
 
