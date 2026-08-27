@@ -260,11 +260,30 @@ if [ -n "${DESTDIR}" ]; then
         _mountpoint_list+=("/usr/ports")
     fi
 
+    # A filesystem mounted from inside a jail is listed here with its
+    # jail-relative path, which resolves to nothing out here: skip any mount
+    # point that is not a directory in this namespace.
+    _skipped_count=0
+
     mount -p | awk '$2 ~ "^/var(/|$)" { print $2 }' | while read _mountpoint; do
+        if [ ! -d ${_mountpoint} ]; then
+            _skipped_count=$((_skipped_count + 1))
+            continue
+        fi
+
         _mountpoint_list+=(${_mountpoint})
     done
 
+    if [ ${_skipped_count} -gt 0 ]; then
+        message "Skipping ${_skipped_count} mount points that belong to a jail"
+    fi
+
     for ((i=1; i<=${#_mountpoint_list[@]}; i++)); do
+        if [ ! -d ${_mount_root}${_mountpoint_list[i]} ]; then
+            warning "Skipping mount point '${_mountpoint_list[i]}' (missing in destination)"
+            continue
+        fi
+
         mount -t nullfs ${_mountpoint_list[i]} ${_mount_root}${_mountpoint_list[i]}
     done
 
