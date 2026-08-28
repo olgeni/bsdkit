@@ -139,6 +139,15 @@
       pid_file: /var/run/inetd.pid
       host_only: false
 
+    # local_unbound is the FreeBSD base resolver: its pidfile is set by
+    # /var/unbound/unbound.conf, not the dns/unbound port default.
+    - service: local_unbound
+      process: local_unbound
+      pid_file: /var/run/local_unbound.pid
+      host_only: false
+      tests:
+        - if failed port 53 use type udp protocol dns then restart
+
     - service: milter-opendkim
       process: opendkim
       pid_file: /var/run/milteropendkim/pid

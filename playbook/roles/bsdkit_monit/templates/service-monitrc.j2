@@ -7,4 +7,7 @@ check process {{ item.service }} matching "{{ item.matching }}"
     start program "/usr/sbin/service {{ item.service }} start"
     stop program "/usr/sbin/service {{ item.service }} stop"
     restart program "/usr/sbin/service {{ item.service }} restart"
+{% for test in item.tests | default([]) %}
+    {{ test }}
+{% endfor %}
 {% endif %}
