@@ -1,8 +1,7 @@
 - name: Retrieve rcvar value for {{ item.service }}
-  shell: |
-    set -o pipefail
-    rcvar="$(service {{ item.service }} rcvar | grep "enable=" | cut -d= -f1)"
-    [ "$(sysrc -n ${rcvar})" = "YES" ]
+  # rc.subr's "enabled" reads every rc.conf location, including
+  # /etc/rc.conf.d/<service>, which sysrc does not.
+  command: service {{ item.service }} enabled
   register: sysrc_item_enable
   changed_when: false
   failed_when: false
