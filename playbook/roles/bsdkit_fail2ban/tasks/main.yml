@@ -28,27 +28,19 @@
         name: fail2ban
         enabled: true
 
-    - name: Check if the fail2ban server is responding
-      command: fail2ban-client ping
+    # A crashed server leaves its socket behind, and a plain start refuses
+    # to run while it exists. "-x" removes it, but fail2ban-client pings
+    # the server first and never touches the socket of a running one. The
+    # rc script passes the flags to every command; only start uses -x.
+    - name: Set fail2ban_flags
       when: fail2ban_config_dir.stat.exists
-      register: fail2ban_ping
-      changed_when: false
-      failed_when: false
-
-    # The socket path is the port default; a host that overrides "socket" in
-    # fail2ban.conf leaves a stale socket behind and the start below fails.
-    - name: Remove the stale fail2ban socket
-      when:
-        - fail2ban_config_dir.stat.exists
-        - fail2ban_ping.rc | default(1) != 0
-      file:
-        path: /var/run/fail2ban/fail2ban.sock
-        state: absent
+      community.general.sysrc:
+        name: fail2ban_flags
+        value: "-x"
+      notify: restart_fail2ban
 
     - name: Start fail2ban
-      when:
-        - fail2ban_config_dir.stat.exists
-        - fail2ban_ping.rc | default(1) != 0
+      when: fail2ban_config_dir.stat.exists
       service:
         name: fail2ban
         state: started
