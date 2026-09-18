@@ -24,6 +24,7 @@
       }
     dest: /usr/local/etc/pkg/repos/FreeBSD.conf
     mode: "0644"
+  register: freebsd_repo_conf
 
 - name: Enable bsdkit repository
   copy:
@@ -33,3 +34,10 @@
       }
     dest: /usr/local/etc/pkg/repos/bsdkit.conf
     mode: "0644"
+  register: bsdkit_repo_conf
+
+- name: Refresh package catalogues after a repository change
+  when: freebsd_repo_conf is changed or bsdkit_repo_conf is changed
+  command:
+    cmd: pkg update -f
+  changed_when: true
