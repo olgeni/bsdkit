@@ -7,6 +7,8 @@
     group: wheel
     mode: "0755"
 
+# "bsdkit install-dotfiles" reads this directory when the bsdkit source tree
+# is not available; see USER_DOTFILE_LIST in the bsdkit script.
 - name: Install dotfiles in /usr/local/share/skel
   copy:
     src: ../ansible/dotfiles/dot.{{ item }}
@@ -27,6 +29,9 @@
     - vimrc
     - zshrc
 
+# Keep in sync with USER_DOTFILE_LIST in the bsdkit script, used by the
+# "bsdkit install-dotfiles" command to install the same files in the home
+# directory of a user created before this role ran.
 - name: Set dotfile_list
   set_fact:
     dotfile_list: "{{ dotfile_list | default([]) + [item] }}"

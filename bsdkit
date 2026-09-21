@@ -110,6 +110,21 @@ SERVICE_RESTART_BLACKLIST=(
     "xdm"
 )
 
+# Dotfiles installed in a user home directory by install-dotfiles, from
+# ansible/dotfiles (or /usr/local/share/skel as a fallback). Keep in sync
+# with dotfile_list in playbook/roles/bsdkit_dotfiles/tasks/main.yml, which
+# installs the same files for root and ec2-user.
+USER_DOTFILE_LIST=(
+    "inputrc"
+    "kermrc"
+    "login"
+    "login_conf"
+    "mail_aliases"
+    "mailrc"
+    "vimrc"
+    "zshrc"
+)
+
 SCRIPT_PATH="$(dirname $(realpath $0))"
 SCRIPT_NAME="$(basename $0)"
 
@@ -3443,6 +3458,70 @@ configure-crontab-jail() {
     __build-facts ${_jail_root}
 
     ansible-jail-playbook ${_jail_name} -t crontab
+}
+
+install-dotfiles() {
+    local _dry_run=false
+
+    while getopts ":n" opt; do
+        case ${opt} in
+            n)
+                _dry_run=true
+                ;;
+            *)
+                usage "install-dotfiles [-n]"
+                ;;
+        esac
+    done
+
+    shift $((OPTIND - 1))
+
+    if [ $# -ne 0 ]; then
+        usage "install-dotfiles [-n]"
+    fi
+
+    local _home=${HOME:-}
+
+    if [ -z "${_home}" ]; then
+        error "HOME is not set."
+    fi
+
+    if [ ! -d "${_home}" ]; then
+        error "Home directory not found: ${_home}"
+    fi
+
+    local _source_directory
+
+    if [ -d ${BSDKIT_SRCDIR}/ansible/dotfiles ]; then
+        _source_directory=${BSDKIT_SRCDIR}/ansible/dotfiles
+    elif [ -d /usr/local/share/skel ]; then
+        _source_directory=/usr/local/share/skel
+    else
+        error "No dotfile directory found."
+    fi
+
+    local _dotfile _source _target
+
+    for _dotfile in ${USER_DOTFILE_LIST[@]}; do
+        _source=${_source_directory}/dot.${_dotfile}
+        _target=${_home}/.${_dotfile}
+
+        if [ ! -f ${_source} ]; then
+            warning "Skipping missing dotfile: ${_source}"
+            continue
+        fi
+
+        if cmp -s ${_source} ${_target} && [ "$(stat -f '%Lp' ${_target})" = "644" ]; then
+            continue
+        fi
+
+        if ${_dry_run}; then
+            message "Would install: ${_target}"
+        else
+            message "Installing: ${_target}"
+            install -m 0644 ${_source} ${_target}
+        fi
+    done
 }
 
 status() {
