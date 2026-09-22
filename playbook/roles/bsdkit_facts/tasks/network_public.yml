@@ -5,6 +5,7 @@
       set -o pipefail
       ifconfig -f inet:dotted {{ public_interface }} | awk '/inet / { print $2; exit }'
   register: ifconfig_public_ip_address_output
+  check_mode: false
   changed_when: false
   failed_when: false
   when: public_interface is defined
@@ -15,6 +16,7 @@
       set -o pipefail
       ifconfig -f inet:dotted {{ public_interface }} | awk '/inet / { print $4; exit }'
   register: ifconfig_public_ip_netmask_output
+  check_mode: false
   changed_when: false
   failed_when: false
   when: public_interface is defined

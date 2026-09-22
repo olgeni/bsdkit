@@ -4,6 +4,7 @@
     url: "https://myexternalip.com/raw"
     return_content: true
   register: myexternalip_response
+  check_mode: false
   ignore_errors: true
 
 - name: Set internet_address from 'myexternalip.com'
@@ -19,6 +20,7 @@
         url: "https://api.ipify.org/"
         return_content: true
       register: ipify_response
+      check_mode: false
 
     - name: Set internet_address from 'ipyfy.org' (failover)
       set_fact:
