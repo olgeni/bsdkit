@@ -15,6 +15,7 @@ set -o errexit -o nounset -o pipefail
 zparseopts -D -E -F -- \
     r:=region_arg -region:=region_arg \
     k:=token_arg -token:=token_arg \
+    c:=context_arg -context:=context_arg \
     i:=image_name_arg -image-name:=image_name_arg \
     d:=description_arg -description:=description_arg \
     n=dry_run_arg -dry-run=dry_run_arg \
@@ -35,11 +36,14 @@ Options:
     -i, --image-name NAME   DigitalOcean image name (optional, auto-detected from filename if not provided)
     -d, --description DESC  DigitalOcean image description (defaults to image name if not provided)
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
+    -c, --context NAME      doctl authentication context (overrides DIGITALOCEAN_CONTEXT)
     -n, --dry-run           Show operations without executing them
     -h, --help              Show this help message
 
 Environment variables required:
     DIGITALOCEAN_ACCESS_TOKEN     DigitalOcean API token (or use -k/--token)
+    DIGITALOCEAN_CONTEXT          doctl auth context (or use -c/--context),
+                                  alternative to the access token
     BSDKIT_IMAGE_STORAGE_BUCKET   Google Cloud Storage bucket (e.g., gs:bucket/path)
     BSDKIT_IMAGE_STORAGE_URL      Public URL for storage (e.g., https://storage.googleapis.com/bucket/path)
 
@@ -60,6 +64,10 @@ Examples:
     # With image name only (description defaults to name)
     ${0:t} -r fra1 \\
         -i 'FreeBSD-14.3-RELEASE-amd64-zfs' \\
+        'https://download.freebsd.org/ftp/releases/VM-IMAGES/14.3-RELEASE/amd64/Latest/FreeBSD-14.3-RELEASE-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
+
+    # Using a doctl auth context instead of an access token
+    ${0:t} -c work \\
         'https://download.freebsd.org/ftp/releases/VM-IMAGES/14.3-RELEASE/amd64/Latest/FreeBSD-14.3-RELEASE-amd64-BASIC-CLOUDINIT-zfs.qcow2.xz'
 
     # Using local file
@@ -88,10 +96,24 @@ if [[ -n "${token_arg[2]:-}" ]]; then
     DIGITALOCEAN_ACCESS_TOKEN="${token_arg[2]}"
 fi
 
+# Set doctl context from command line or environment
+if [[ -n "${context_arg[2]:-}" ]]; then
+    DIGITALOCEAN_CONTEXT="${context_arg[2]}"
+fi
+
 # Check for required environment variables
-if [[ -z "${DIGITALOCEAN_ACCESS_TOKEN:-}" ]]; then
-    echo "Error: DIGITALOCEAN_ACCESS_TOKEN environment variable is not set (use -k/--token or set the environment variable)" >&2
+if [[ -z "${DIGITALOCEAN_ACCESS_TOKEN:-}" && -z "${DIGITALOCEAN_CONTEXT:-}" ]]; then
+    echo "Error: neither DIGITALOCEAN_ACCESS_TOKEN nor DIGITALOCEAN_CONTEXT is set (use -k/--token, -c/--context or set the environment variable)" >&2
     exit 1
+fi
+
+# Build doctl authentication options
+DOCTL_AUTH=()
+if [[ -n "${DIGITALOCEAN_CONTEXT:-}" ]]; then
+    DOCTL_AUTH+=(--context "${DIGITALOCEAN_CONTEXT}")
+fi
+if [[ -n "${DIGITALOCEAN_ACCESS_TOKEN:-}" ]]; then
+    DOCTL_AUTH+=(--access-token "${DIGITALOCEAN_ACCESS_TOKEN}")
 fi
 
 if [[ -z "${BSDKIT_IMAGE_STORAGE_BUCKET:-}" ]]; then
@@ -245,12 +267,13 @@ if [[ "${DRY_RUN}" == "true" ]]; then
     echo "[DRY-RUN] Would create DigitalOcean image:"
     echo "  Name: ${IMAGE_NAME}"
     echo "  Region: ${REGION}"
+    echo "  Context: ${DIGITALOCEAN_CONTEXT:-(none)}"
     echo "  Description: ${DESCRIPTION}"
     echo "  URL: ${GCS_URL}"
 else
     echo "Creating DigitalOcean image..." >&2
     doctl compute image create "${IMAGE_NAME}" \
-        --access-token "${DIGITALOCEAN_ACCESS_TOKEN}" \
+        "${DOCTL_AUTH[@]}" \
         --region "${REGION}" \
         --tag-names "FreeBSD" \
         --image-description "${DESCRIPTION}" \
