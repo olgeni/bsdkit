@@ -137,6 +137,9 @@ if [[ "${DRY_RUN}" == "true" ]]; then
     echo "[DRY-RUN] Would create unique work directory" >&2
 else
     WORK_DIR=$(mktemp -d /tmp/freebsd-image-upload.XXXXXX)
+    # Remove the work directory on any exit, including errors and signals
+    trap 'rm -rf "${WORK_DIR}"' EXIT
+    trap 'exit 1' INT TERM HUP
 fi
 
 # Extract filename from URL
@@ -286,11 +289,9 @@ else
     echo "Image creation initiated." >&2
 fi
 
-# Cleanup
+# Cleanup happens in the EXIT trap
 if [[ "${DRY_RUN}" == "true" ]]; then
     echo "[DRY-RUN] Would clean up temporary files in: ${WORK_DIR}"
 else
-    echo "Cleaning up temporary files..." >&2
-    rm -rf "${WORK_DIR}"
     echo "Done!" >&2
 fi
