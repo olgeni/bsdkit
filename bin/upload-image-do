@@ -85,6 +85,11 @@ if [[ $# -lt 1 ]]; then
 fi
 URL="$1"
 
+# Make a local path absolute, since we cd to the work directory later
+if [[ ! "${URL}" =~ ^https?:// ]]; then
+    URL="${URL:A}"
+fi
+
 # Define variables
 REGION="${region_arg[2]:-fra1}"
 DRY_RUN="${dry_run_arg[1]:+true}"
