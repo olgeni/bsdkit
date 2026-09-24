@@ -18,6 +18,7 @@ zparseopts -D -E -F -- \
     c:=context_arg -context:=context_arg \
     i:=image_name_arg -image-name:=image_name_arg \
     d:=description_arg -description:=description_arg \
+    f=force_arg -force=force_arg \
     n=dry_run_arg -dry-run=dry_run_arg \
     h=help_arg -help=help_arg || exit 1
 
@@ -37,6 +38,7 @@ Options:
     -d, --description DESC  DigitalOcean image description (defaults to image name if not provided)
     -k, --token TOKEN       DigitalOcean API token (overrides DIGITALOCEAN_ACCESS_TOKEN)
     -c, --context NAME      doctl authentication context (overrides DIGITALOCEAN_CONTEXT)
+    -f, --force             Upload even if the image already exists in storage
     -n, --dry-run           Show operations without executing them
     -h, --help              Show this help message
 
@@ -93,6 +95,7 @@ fi
 # Define variables
 REGION="${region_arg[2]:-fra1}"
 DRY_RUN="${dry_run_arg[1]:+true}"
+FORCE="${force_arg[1]:+true}"
 DO_IMAGE_NAME="${image_name_arg[2]:-}"
 DO_DESCRIPTION="${description_arg[2]:-}"
 
@@ -182,81 +185,94 @@ echo "Remote filename: ${REMOTE_FILENAME}" >&2
 echo "Work directory: ${WORK_DIR}" >&2
 echo "Final upload name: ${FINAL_FILENAME}" >&2
 
-# Change to work directory
-if [[ "${DRY_RUN}" != "true" ]]; then
-    cd "${WORK_DIR}"
-fi
-
-# Download or copy image
-# Detect if URL is a local file path or remote URL
-if [[ "${URL}" =~ ^https?:// ]]; then
-    # Remote URL - download with curl
-    if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would download: ${URL}" >&2
-    else
-        echo "Downloading image..." >&2
-        if ! curl -L -f -o "${WORK_COMPRESSED}" "${URL}"; then
-            rm -f "${WORK_COMPRESSED}"
-            echo "Download failed, file removed" >&2
-            exit 1
-        fi
-        echo "Download complete." >&2
-    fi
-else
-    # Local file path - copy it
-    if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would copy local file: ${URL}" >&2
-    else
-        if [[ ! -f "${URL}" ]]; then
-            echo "Error: Local file not found: ${URL}" >&2
-            exit 1
-        fi
-        echo "Copying local file..." >&2
-        if ! cp "${URL}" "${WORK_COMPRESSED}"; then
-            rm -f "${WORK_COMPRESSED}"
-            echo "Copy failed, file removed" >&2
-            exit 1
-        fi
-        echo "Copy complete." >&2
+# Skip the transfer if the image is already in storage, unless forced
+ALREADY_UPLOADED=""
+if [[ "${FORCE}" != "true" ]]; then
+    echo "Checking for ${FINAL_FILENAME} in storage..." >&2
+    EXISTING=$(rclone lsf --files-only --max-depth 1 --include "/${FINAL_FILENAME}" "${BSDKIT_IMAGE_STORAGE_BUCKET}")
+    if [[ -n "${EXISTING}" ]]; then
+        ALREADY_UPLOADED="true"
+        echo "Already in storage, skipping download and upload (use -f to force)." >&2
     fi
 fi
 
-# Decompress if needed
-if [[ "${REMOTE_FILENAME}" == *.xz || "${REMOTE_FILENAME}" == *.bz2 || "${REMOTE_FILENAME}" == *.gz ]]; then
-    if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would decompress: ${WORK_COMPRESSED}" >&2
-    else
-        echo "Decompressing ${REMOTE_FILENAME}..." >&2
-        if [[ "${REMOTE_FILENAME}" == *.xz ]]; then
-            xz -d "${WORK_COMPRESSED}"
-        elif [[ "${REMOTE_FILENAME}" == *.bz2 ]]; then
-            bzip2 -d "${WORK_COMPRESSED}"
+if [[ "${ALREADY_UPLOADED}" != "true" ]]; then
+    # Change to work directory
+    if [[ "${DRY_RUN}" != "true" ]]; then
+        cd "${WORK_DIR}"
+    fi
+
+    # Download or copy image
+    # Detect if URL is a local file path or remote URL
+    if [[ "${URL}" =~ ^https?:// ]]; then
+        # Remote URL - download with curl
+        if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "[DRY-RUN] Would download: ${URL}" >&2
         else
-            gzip -d "${WORK_COMPRESSED}"
+            echo "Downloading image..." >&2
+            if ! curl -L -f -o "${WORK_COMPRESSED}" "${URL}"; then
+                rm -f "${WORK_COMPRESSED}"
+                echo "Download failed, file removed" >&2
+                exit 1
+            fi
+            echo "Download complete." >&2
         fi
-        echo "Decompression complete." >&2
-    fi
-fi
-
-# Recompress with bzip2 if needed (if original wasn't bzip2)
-if [[ "${REMOTE_FILENAME}" != *.bz2 ]]; then
-    if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "[DRY-RUN] Would compress with bzip2: ${BASENAME} -> ${FINAL_FILENAME}" >&2
     else
-        echo "Compressing with bzip2..." >&2
-        bzip2 -1 -v "${DECOMPRESSED}" >&2
-        echo "Compression complete." >&2
+        # Local file path - copy it
+        if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "[DRY-RUN] Would copy local file: ${URL}" >&2
+        else
+            if [[ ! -f "${URL}" ]]; then
+                echo "Error: Local file not found: ${URL}" >&2
+                exit 1
+            fi
+            echo "Copying local file..." >&2
+            if ! cp "${URL}" "${WORK_COMPRESSED}"; then
+                rm -f "${WORK_COMPRESSED}"
+                echo "Copy failed, file removed" >&2
+                exit 1
+            fi
+            echo "Copy complete." >&2
+        fi
     fi
-fi
 
-# Upload to Google Cloud Storage
-UPLOAD_SOURCE="${WORK_DIR}/${FINAL_FILENAME}"
-if [[ "${DRY_RUN}" == "true" ]]; then
-    echo "[DRY-RUN] Would upload to GCS: ${FINAL_FILENAME} -> ${BSDKIT_IMAGE_STORAGE_BUCKET}/${FINAL_FILENAME}" >&2
-else
-    echo "Uploading to GCS as ${FINAL_FILENAME}..." >&2
-    rclone --progress copyto "${UPLOAD_SOURCE}" "${BSDKIT_IMAGE_STORAGE_BUCKET}/${FINAL_FILENAME}" >&2 2>&1
-    echo "Upload complete." >&2
+    # Decompress if needed
+    if [[ "${REMOTE_FILENAME}" == *.xz || "${REMOTE_FILENAME}" == *.bz2 || "${REMOTE_FILENAME}" == *.gz ]]; then
+        if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "[DRY-RUN] Would decompress: ${WORK_COMPRESSED}" >&2
+        else
+            echo "Decompressing ${REMOTE_FILENAME}..." >&2
+            if [[ "${REMOTE_FILENAME}" == *.xz ]]; then
+                xz -d "${WORK_COMPRESSED}"
+            elif [[ "${REMOTE_FILENAME}" == *.bz2 ]]; then
+                bzip2 -d "${WORK_COMPRESSED}"
+            else
+                gzip -d "${WORK_COMPRESSED}"
+            fi
+            echo "Decompression complete." >&2
+        fi
+    fi
+
+    # Recompress with bzip2 if needed (if original wasn't bzip2)
+    if [[ "${REMOTE_FILENAME}" != *.bz2 ]]; then
+        if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "[DRY-RUN] Would compress with bzip2: ${BASENAME} -> ${FINAL_FILENAME}" >&2
+        else
+            echo "Compressing with bzip2..." >&2
+            bzip2 -1 -v "${DECOMPRESSED}" >&2
+            echo "Compression complete." >&2
+        fi
+    fi
+
+    # Upload to Google Cloud Storage
+    UPLOAD_SOURCE="${WORK_DIR}/${FINAL_FILENAME}"
+    if [[ "${DRY_RUN}" == "true" ]]; then
+        echo "[DRY-RUN] Would upload to GCS: ${FINAL_FILENAME} -> ${BSDKIT_IMAGE_STORAGE_BUCKET}/${FINAL_FILENAME}" >&2
+    else
+        echo "Uploading to GCS as ${FINAL_FILENAME}..." >&2
+        rclone --progress copyto "${UPLOAD_SOURCE}" "${BSDKIT_IMAGE_STORAGE_BUCKET}/${FINAL_FILENAME}" >&2 2>&1
+        echo "Upload complete." >&2
+    fi
 fi
 
 # Generate GCS URL
