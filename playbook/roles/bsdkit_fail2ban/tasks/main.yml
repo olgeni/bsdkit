@@ -39,9 +39,9 @@
         value: "-x"
       notify: restart_fail2ban
 
-    # rc starts it later in the first boot; see firstboot_in_progress.
+    # rc starts it later in the first boot; see firstboot_rc_services.
     - name: Start fail2ban
-      when: fail2ban_config_dir.stat.exists and not (firstboot_in_progress | default(false))
+      when: fail2ban_config_dir.stat.exists and 'fail2ban' not in (firstboot_rc_services | default([]))
       service:
         name: fail2ban
         state: started

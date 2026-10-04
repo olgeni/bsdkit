@@ -229,9 +229,9 @@
       host_only: false
 
 - name: Enable monit service
-  # Enabled now, started by rc later in the first boot; see
-  # firstboot_in_progress.
+  # Not started here when rc starts it later in the first boot; see
+  # firstboot_rc_services.
   service:
     name: monit
-    state: "{{ omit if (firstboot_in_progress | default(false)) else 'started' }}"
+    state: "{{ omit if ('monit' in (firstboot_rc_services | default([]))) else 'started' }}"
     enabled: true

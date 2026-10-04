@@ -51,11 +51,11 @@
   changed_when: false
 
 - name: Enable service
-  # Enabled now, started by rc later in the first boot; see
-  # firstboot_in_progress.
+  # Not started here when rc starts it later in the first boot; see
+  # firstboot_rc_services.
   service:
     name: runsvdir
     enabled: true
-    state: "{{ omit if (firstboot_in_progress | default(false)) else 'started' }}"
+    state: "{{ omit if ('runsvdir' in (firstboot_rc_services | default([]))) else 'started' }}"
   notify:
     - reformat_rc_conf

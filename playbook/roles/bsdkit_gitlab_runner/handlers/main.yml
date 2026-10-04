@@ -1,7 +1,7 @@
 ---
 - name: restart_gitlab_runner
-  # rc starts it later in the first boot; see firstboot_in_progress.
-  when: not (firstboot_in_progress | default(false))
+  # rc starts it later in the first boot; see firstboot_rc_services.
+  when: "'gitlab_runner' not in (firstboot_rc_services | default([]))"
   service:
     name: gitlab_runner
     state: restarted

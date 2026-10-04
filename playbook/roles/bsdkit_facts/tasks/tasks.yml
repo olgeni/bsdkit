@@ -116,13 +116,20 @@
 
 # /etc/rc keeps the firstboot sentinel (/firstboot) until the end of the first
 # boot, and runs the "firstboot" rc scripts while it is there: that is how
-# bsdkit gets run from user data (nuageinit, ec2_configinit). rc then starts
-# the later services with "faststart", which skips the pidfile check, so a
-# service bsdkit has already started gets a second instance: it overwrites
-# the pidfile and exits on the busy port, and the pidfile names a dead
-# process from then on (monit reports "Execution failed" for ntpd). While
-# this is true, bsdkit leaves starting those services to rc, which uses the
-# configuration bsdkit has just written.
+# bsdkit gets run from user data (nuageinit, ec2_configinit). rc has already
+# listed the rc scripts it will start (rcorder) and starts them later with
+# "faststart", which skips the pidfile check. So a service bsdkit starts
+# first gets a second instance from rc: it overwrites the pidfile and exits
+# on the busy port, and the pidfile names a dead process from then on (monit
+# reported "Execution failed" for ntpd).
+#
+# firstboot_rc_services names the services rc will start later in this boot:
+# those whose rc script was on disk before the boot began. bsdkit leaves
+# starting them to rc, which reads the configuration bsdkit has just written.
+# A service installed during the run, such as monit or runit from packages,
+# is not in rc's list, so bsdkit still starts it. The script's ctime is the
+# test, so a base rc script replaced during the run (a FreeBSD-base upgrade)
+# counts as new and gets started by bsdkit as before.
 - name: Check for the firstboot sentinel
   shell:
     cmd: |
@@ -136,6 +143,25 @@
 - name: Set firstboot_in_progress
   set_fact:
     firstboot_in_progress: "{{ (not is_chroot_install) and (firstboot_sentinel_check.rc | default(1)) == 0 }}"
+
+- name: List the rc scripts that were on disk before this boot
+  shell:
+    cmd: |
+      set -o pipefail
+      _boot=$(sysctl -n kern.boottime | sed -E 's/^\{ sec = ([0-9]+),.*/\1/')
+      for _script in /etc/rc.d/* /usr/local/etc/rc.d/*; do
+          if [ -f "${_script}" ] && [ "$(stat -f %c "${_script}")" -lt "${_boot}" ]; then
+              basename "${_script}"
+          fi
+      done
+  register: firstboot_rc_scripts
+  changed_when: false
+  check_mode: false
+  when: firstboot_in_progress
+
+- name: Set firstboot_rc_services
+  set_fact:
+    firstboot_rc_services: "{{ (firstboot_rc_scripts.stdout_lines | default([])) if firstboot_in_progress else [] }}"
 
 - name: Register uname -K
   command:
