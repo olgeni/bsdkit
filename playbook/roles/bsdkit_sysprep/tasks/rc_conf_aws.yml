@@ -1,28 +1,49 @@
 ---
+# Mirrors the /etc/rc.conf settings of FreeBSD src release, last compared
+# with releng/15.1:
+# - VM_RC_LIST in release/tools/ec2.conf and release/tools/ec2-base.conf
+# - ec2_common() and ec2_base_networking() in release/tools/ec2.conf
+# https://cgit.freebsd.org/src/tree/release/tools/ec2.conf?h=releng/15.1
+# https://cgit.freebsd.org/src/tree/release/tools/ec2-base.conf?h=releng/15.1
+
 - name: Set values in /etc/rc.conf for AWS
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^{{ item }}="
-    line: "{{ item }}=\"YES\""
+    regexp: "^{{ item.name }}="
+    line: "{{ item.name }}=\"{{ item.value }}\""
     state: present
-  with_items:
-    - amazon_ssm_agent_enable
-    - dev_aws_disk_enable
-    - ec2_configinit_enable
-    - ec2_ephemeral_swap
-    - ec2_fetchkey_enable
-    - ec2_loghostkey_enable
-    - growfs_enable
-    - ipv6_activate_all_interfaces
-    - rtsold_enable
+  loop:
+    # VM_RC_LIST (ec2.conf, ec2-base.conf). ntpd and sshd are already
+    # enabled by ansible/vendor.conf. firstboot_pkgs and
+    # firstboot_pkg_upgrade are left out: bsdkit_provision does that job.
+    - { name: dev_aws_disk_enable, value: "YES" }
+    - { name: ec2_configinit_enable, value: "YES" }
+    - { name: ec2_ephemeral_swap_enable, value: "YES" }
+    - { name: ec2_fetchkey_enable, value: "YES" }
+    - { name: ec2_loghostkey_enable, value: "YES" }
+    - { name: growfs_enable, value: "YES" }
+    # bsdkit: ec2-base.conf installs amazon-ssm-agent but leaves it
+    # disabled. We enable it, and bsdkit_aws puts ssm-user in wheel.
+    - { name: amazon_ssm_agent_enable, value: "YES" }
+    # ec2_common: RSA host keys are obsolete and slow to generate.
+    - { name: sshd_rsa_enable, value: "NO" }
+    # ec2_base_networking: DHCP for IPv4, DHCPv6 through rtsold.
+    - { name: ifconfig_DEFAULT, value: "SYNCDHCP accept_rtadv" }
+    - { name: dhclient_arpwait, value: "NO" }
+    - { name: ipv6_activate_all_interfaces, value: "YES" }
+    - { name: rtsold_enable, value: "YES" }
+    - { name: rtsold_flags, value: "-M /usr/local/libexec/rtsold-M -a" }
+  loop_control:
+    label: "{{ item.name }}"
   notify:
     - reformat_rc_conf
 
-- name: Set ifconfig_DEFAULT in /etc/rc.conf
+- name: Remove ec2_ephemeral_swap from /etc/rc.conf
+  # Earlier bsdkit images set the variable without the _enable suffix,
+  # which the ec2_ephemeral_swap rc.d script ignores.
   lineinfile:
     path: /etc/rc.conf
-    regexp: "^ifconfig_DEFAULT="
-    line: "ifconfig_DEFAULT=\"SYNCDHCP accept_rtadv\""
-    state: present
+    regexp: "^ec2_ephemeral_swap="
+    state: absent
   notify:
     - reformat_rc_conf

@@ -1,4 +1,14 @@
 ---
+# Mirrors FreeBSD src release/tools/ec2.conf (ec2_common,
+# ec2_base_networking) and release/tools/ec2-base.conf
+# (vm_extra_pre_umount), last compared with releng/15.1:
+# https://cgit.freebsd.org/src/tree/release/tools/ec2.conf?h=releng/15.1
+# https://cgit.freebsd.org/src/tree/release/tools/ec2-base.conf?h=releng/15.1
+#
+# Deliberate differences from upstream are called out in the task
+# comments below; rc.conf, loader.conf and sysctl.conf live in the
+# included files.
+
 - name: Include boot_loader_conf_aws.yml
   include_tasks: boot_loader_conf_aws.yml
 
@@ -8,32 +18,49 @@
 - name: Include sysctl_conf_aws.yml
   include_tasks: sysctl_conf_aws.yml
 
-# This file was created using 'src/release/tools/ec2.conf' as reference.
 - name: Install packages for AWS platform
   community.general.pkgng:
     name: "{{ item }}"
     state: present
   loop:
-    - devel/py-awscli
-    - net/aws-ec2-imdsv2-get
+    # VM_EXTRA_PACKAGES in ec2.conf and ec2-base.conf.
     - net/isc-dhcp44-client
-    - security/ca_root_nss
     - sysutils/amazon-ssm-agent
     - sysutils/ebsnvme-id
     - sysutils/ec2-scripts
+    # bsdkit: ec2-base.conf pulls py-awscli in at first boot through
+    # firstboot_pkgs_list, and gets ca_root_nss as a dependency. bsdkit
+    # has no firstboot-pkgs (bsdkit_provision covers that), so both are
+    # baked into the image instead.
+    - devel/py-awscli
+    - security/ca_root_nss
+    # bsdkit: not part of any ec2*.conf, kept for IMDSv2 token handling
+    # from shell scripts.
+    - net/aws-ec2-imdsv2-get
 
 - name: Set KbdInteractiveAuthentication in /etc/ssh/sshd_config
+  # ec2_common: "Disable KbdInteractiveAuthentication according to EC2
+  # requirements."
   lineinfile:
     path: /etc/ssh/sshd_config
     regexp: "^KbdInteractiveAuthentication"
     line: "KbdInteractiveAuthentication no"
     state: present
 
+- name: Use the AWS-hosted FreeBSD Update mirror
+  # ec2_common: "Use FreeBSD Update mirrors hosted in AWS."
+  replace:
+    path: /etc/freebsd-update.conf
+    regexp: '(?<!aws\.)update\.FreeBSD\.org'
+    replace: "aws.update.FreeBSD.org"
+
 - name: Create script /usr/local/libexec/rtsold-M
-  # This file is used in /etc/rc.conf (rtsold_flags)
+  # ec2_base_networking: "Provide a script which rtsold can use to launch
+  # DHCPv6." Referenced by rtsold_flags in rc_conf_aws.yml.
   copy:
     content: |
       #!/bin/sh
+
       /usr/local/sbin/dhclient -6 -nw -N -cf /dev/null $1
     dest: /usr/local/libexec/rtsold-M
     owner: root
@@ -41,6 +68,7 @@
     mode: "0755"
 
 - name: Create /etc/autofs/special_efs
+  # ec2_common: "Provide a map for accessing Elastic File System mounts."
   copy:
     content: |
       #!/bin/sh
@@ -60,7 +88,19 @@
     group: wheel
     mode: "0755"
 
+- name: Touch /var/db/ec2_ephemeral_diskseen
+  # ec2-base.conf vm_extra_pre_umount: "Any EC2 ephemeral disks seen when
+  # the system first boots will be 'new' disks; there is no 'previous
+  # boot' when they might have been seen and used already."
+  file:
+    path: /var/db/ec2_ephemeral_diskseen
+    state: touch
+    owner: root
+    group: wheel
+    mode: "0644"
+
 - name: Update /etc/ntp.conf
+  # ec2_common: "Use the NTP service provided by Amazon."
   shell:
     cmd: |
       if grep -q '^server 169.254.169.123 iburst' /etc/ntp.conf; then

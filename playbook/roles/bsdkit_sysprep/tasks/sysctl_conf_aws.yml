@@ -1,4 +1,11 @@
 ---
+# Mirrors the sysctl settings of ec2_common() in FreeBSD src
+# release/tools/ec2.conf, last compared with releng/15.1:
+# https://cgit.freebsd.org/src/tree/release/tools/ec2.conf?h=releng/15.1
+#
+# ec2_common appends to /etc/sysctl.conf; bsdkit keeps /etc/sysctl.conf as
+# the vendor file and puts local overrides in /etc/sysctl.conf.local.
+
 - name: Remove net.inet6.ip6.dad_count from /etc/sysctl.conf
   lineinfile:
     path: /etc/sysctl.conf
@@ -6,6 +13,8 @@
     state: absent
 
 - name: Set net.inet6.ip6.dad_count in /etc/sysctl.conf.local
+  # ec2_common: "Turn off IPv6 Duplicate Address Detection; the EC2
+  # networking configuration makes it unnecessary."
   lineinfile:
     path: /etc/sysctl.conf.local
     regexp: "^net.inet6.ip6.dad_count="

@@ -1,77 +1,65 @@
 ---
-- name: Set debug.trace_on_panic in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^debug.trace_on_panic="
-    line: "debug.trace_on_panic=\"1\""
-    state: present
+# Mirrors the /boot/loader.conf and /boot.config settings of ec2_common()
+# in FreeBSD src release/tools/ec2.conf, last compared with releng/15.1:
+# https://cgit.freebsd.org/src/tree/release/tools/ec2.conf?h=releng/15.1
 
-- name: Set debug.debugger_on_panic in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^debug.debugger_on_panic="
-    line: "debug.debugger_on_panic=\"0\""
-    state: present
+- name: Disable the gptboot keypress wait in /boot.config
+  # ec2_common: "Tell gptboot not to wait 3 seconds for a keypress which
+  # will never arrive."
+  copy:
+    content: |
+      -n
+    dest: /boot.config
+    owner: root
+    group: wheel
+    mode: "0644"
 
-- name: Set kern.panic_reboot_wait_time in /boot/loader.conf
+- name: Set values in /boot/loader.conf for AWS
   lineinfile:
     path: /boot/loader.conf
-    regexp: "^kern.panic_reboot_wait_time="
-    line: "kern.panic_reboot_wait_time=\"0\""
+    regexp: "^{{ item.name | regex_escape }}="
+    line: "{{ item.name }}=\"{{ item.value }}\""
     state: present
+  loop:
+    # ec2_common: boot quickly, and avoid unicode in the loader menu since
+    # it breaks the EC2 web console.
+    - { name: autoboot_delay, value: "-1" }
+    - { name: beastie_disable, value: "YES" }
+    - { name: loader_menu_frame, value: "ascii" }
+    # ec2_common: the EFI RNG on Graviton 2 is slow with the default 2048
+    # bytes of entropy.
+    - { name: entropy_efi_seed_size, value: "64" }
+    # ec2_common: the emulated keyboard is inaccessible and there is no
+    # mouse, floppy drive or parallel port.
+    - { name: hint.atkbd.0.disabled, value: "1" }
+    - { name: hint.atkbdc.0.disabled, value: "1" }
+    - { name: hint.fd.0.disabled, value: "1" }
+    - { name: hint.fdc.0.disabled, value: "1" }
+    - { name: hint.ppc.0.disabled, value: "1" }
+    # ec2_common: serial "system log" console plus VGA "instance
+    # screenshot" console.
+    - { name: boot_multicons, value: "YES" }
+    # ec2_common: Graviton ACPI and PCI hotplug quirks.
+    - { name: debug.acpi.quirks, value: "56" }
+    - { name: hw.pci.intx_reroute, value: "0" }
+    # ec2_common: Elastic Network Adapter driver.
+    - { name: if_ena_load, value: "YES" }
+    # ec2_common: use nda(4) rather than nvd(4) for NVMe disks.
+    - { name: hw.nvme.use_nvd, value: "0" }
+    # ec2_common: no "Attention button" to cancel a PCIe eject on EC2.
+    - { name: hw.pci.pcie_hp_detach_timeout, value: "0" }
+    # bsdkit: reboot straight away on panic instead of waiting at a
+    # console nobody is watching. Not part of ec2.conf.
+    - { name: debug.trace_on_panic, value: "1" }
+    - { name: debug.debugger_on_panic, value: "0" }
+    - { name: kern.panic_reboot_wait_time, value: "0" }
+  loop_control:
+    label: "{{ item.name }}"
 
-- name: Set autoboot_delay in /boot/loader.conf
+- name: Remove obsolete values from /boot/loader.conf
+  # hw.broken_txfifo was a workaround for the Xen-era EC2 UART and is no
+  # longer set by ec2.conf.
   lineinfile:
     path: /boot/loader.conf
-    regexp: "^autoboot_delay="
-    line: "autoboot_delay=\"-1\""
-    state: present
-
-- name: Set beastie_disable in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^beastie_disable="
-    line: "beastie_disable=\"YES\""
-    state: present
-
-- name: Set hint.atkbd.0.disabled in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^hint.atkbd.0.disabled="
-    line: "hint.atkbd.0.disabled=\"1\""
-    state: present
-
-- name: Set hint.atkbdc.0.disabled in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^hint.atkbdc.0.disabled="
-    line: "hint.atkbdc.0.disabled=\"1\""
-    state: present
-
-- name: Set boot_multicons in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^boot_multicons="
-    line: "boot_multicons=\"YES\""
-    state: present
-
-- name: Set hw.broken_txfifo in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^hw.broken_txfifo="
-    line: "hw.broken_txfifo=\"1\""
-    state: present
-
-- name: Set if_ena_load in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^if_ena_load="
-    line: "if_ena_load=\"YES\""
-    state: present
-
-- name: Set hw.nvme.use_nvd in /boot/loader.conf
-  lineinfile:
-    path: /boot/loader.conf
-    regexp: "^hw.nvme.use_nvd="
-    line: "hw.nvme.use_nvd=\"0\""
-    state: present
+    regexp: "^hw\\.broken_txfifo="
+    state: absent
