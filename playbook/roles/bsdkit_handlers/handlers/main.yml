@@ -10,16 +10,22 @@
     state: restarted
 
 - name: restart_cron
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: cron
     state: restarted
 
 - name: restart_sshd
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: sshd
     state: restarted
 
 - name: restart_ntpd
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: ntpd
     state: restarted
@@ -45,31 +51,43 @@
     state: restarted
 
 - name: restart_postgresql
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: postgresql
     state: restarted
 
 - name: restart_caddy
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: caddy
     state: restarted
 
 - name: reload_caddy
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: caddy
     state: reloaded
 
 - name: restart_fail2ban
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: fail2ban
     state: restarted
 
 - name: restart_monit
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: monit
     state: restarted
 
 - name: reload_monit
+  # rc starts it later in the first boot; see firstboot_in_progress.
+  when: not (firstboot_in_progress | default(false))
   command:
     cmd: monit reload
   changed_when: true

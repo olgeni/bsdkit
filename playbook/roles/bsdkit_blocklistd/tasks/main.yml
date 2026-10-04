@@ -7,10 +7,12 @@
         blocklistd_service: "{{ 'blocklistd' if ansible_facts['distribution_version'] is version('15.0', '>=') else 'blacklistd' }}"
 
     - name: Enable blocklistd service
+      # Enabled now, started by rc later in the first boot; see
+      # firstboot_in_progress.
       service:
         name: "{{ blocklistd_service }}"
         enabled: true
-        state: started
+        state: "{{ omit if (firstboot_in_progress | default(false)) else 'started' }}"
 
     - name: Check if /etc/pf.conf exists
       stat:

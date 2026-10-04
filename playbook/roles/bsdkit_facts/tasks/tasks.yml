@@ -114,6 +114,29 @@
   set_fact:
     is_chroot_install: "{{ bsdkit_chroot }}"
 
+# /etc/rc keeps the firstboot sentinel (/firstboot) until the end of the first
+# boot, and runs the "firstboot" rc scripts while it is there: that is how
+# bsdkit gets run from user data (nuageinit, ec2_configinit). rc then starts
+# the later services with "faststart", which skips the pidfile check, so a
+# service bsdkit has already started gets a second instance: it overwrites
+# the pidfile and exits on the busy port, and the pidfile names a dead
+# process from then on (monit reports "Execution failed" for ntpd). While
+# this is true, bsdkit leaves starting those services to rc, which uses the
+# configuration bsdkit has just written.
+- name: Check for the firstboot sentinel
+  shell:
+    cmd: |
+      test -e "$(sysrc -n firstboot_sentinel 2>/dev/null || echo /firstboot)"
+  register: firstboot_sentinel_check
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: not is_chroot_install
+
+- name: Set firstboot_in_progress
+  set_fact:
+    firstboot_in_progress: "{{ (not is_chroot_install) and (firstboot_sentinel_check.rc | default(1)) == 0 }}"
+
 - name: Register uname -K
   command:
     cmd: |

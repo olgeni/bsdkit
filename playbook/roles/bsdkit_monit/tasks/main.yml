@@ -229,7 +229,9 @@
       host_only: false
 
 - name: Enable monit service
+  # Enabled now, started by rc later in the first boot; see
+  # firstboot_in_progress.
   service:
     name: monit
-    state: started
+    state: "{{ omit if (firstboot_in_progress | default(false)) else 'started' }}"
     enabled: true
