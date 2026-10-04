@@ -130,19 +130,28 @@
 # is not in rc's list, so bsdkit still starts it. The script's ctime is the
 # test, so a base rc script replaced during the run (a FreeBSD-base upgrade)
 # counts as new and gets started by bsdkit as before.
-- name: Check for the firstboot sentinel
-  shell:
-    cmd: |
-      test -e "$(sysrc -n firstboot_sentinel 2>/dev/null || echo /firstboot)"
-  register: firstboot_sentinel_check
+- name: Read the firstboot sentinel path
+  command:
+    cmd: sysrc -n firstboot_sentinel
+  register: firstboot_sentinel_sysrc
   changed_when: false
   failed_when: false
   check_mode: false
+
+- name: Set firstboot_sentinel_path
+  set_fact:
+    firstboot_sentinel_path: "{{ firstboot_sentinel_sysrc.stdout | default('', true) or '/firstboot' }}"
+
+- name: Check for the firstboot sentinel
+  stat:
+    path: "{{ firstboot_sentinel_path }}"
+    get_checksum: false
+  register: firstboot_sentinel_stat
   when: not is_chroot_install
 
 - name: Set firstboot_in_progress
   set_fact:
-    firstboot_in_progress: "{{ (not is_chroot_install) and (firstboot_sentinel_check.rc | default(1)) == 0 }}"
+    firstboot_in_progress: "{{ (not is_chroot_install) and (firstboot_sentinel_stat.stat.exists | default(false)) }}"
 
 - name: List the rc scripts that were on disk before this boot
   shell:

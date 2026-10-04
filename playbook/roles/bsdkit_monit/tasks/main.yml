@@ -228,10 +228,24 @@
       pid_file: /var/run/znapzend.pid
       host_only: false
 
+# monit starts any monitored service it finds down, so during the first boot
+# it must not run before rc has started the late services: it would start
+# ntpd, sshd or cron first, rc would fast-start them again, and the pidfile
+# would name the instance that exited (see firstboot_rc_services). Started
+# here outside the first boot only.
 - name: Enable monit service
-  # Not started here when rc starts it later in the first boot; see
-  # firstboot_rc_services.
   service:
     name: monit
-    state: "{{ omit if ('monit' in (firstboot_rc_services | default([]))) else 'started' }}"
+    state: "{{ omit if (firstboot_in_progress | default(false)) else 'started' }}"
     enabled: true
+
+# rc does not start monit later in this boot when its package was installed
+# during the run, so it starts once /etc/rc has removed the sentinel at the
+# end of the boot. If rc reboots instead, this goes down with it and rc
+# starts monit on the next boot like any other service.
+- name: Start monit once the first boot is over
+  when: (firstboot_in_progress | default(false)) and 'monit' not in (firstboot_rc_services | default([]))
+  command:
+    cmd: >-
+      daemon -f sh -c 'while [ -e {{ firstboot_sentinel_path }} ]; do sleep 5; done; service monit start'
+  changed_when: true

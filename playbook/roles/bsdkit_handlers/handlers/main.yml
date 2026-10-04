@@ -79,15 +79,17 @@
     state: restarted
 
 - name: restart_monit
-  # rc starts it later in the first boot; see firstboot_rc_services.
-  when: "'monit' not in (firstboot_rc_services | default([]))"
+  # Not running during the first boot; it reads its configuration when it
+  # starts. See the monit role.
+  when: not (firstboot_in_progress | default(false))
   service:
     name: monit
     state: restarted
 
 - name: reload_monit
-  # rc starts it later in the first boot; see firstboot_rc_services.
-  when: "'monit' not in (firstboot_rc_services | default([]))"
+  # Not running during the first boot; it reads its configuration when it
+  # starts. See the monit role.
+  when: not (firstboot_in_progress | default(false))
   command:
     cmd: monit reload
   changed_when: true
